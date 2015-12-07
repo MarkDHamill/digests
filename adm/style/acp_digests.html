@@ -1,0 +1,396 @@
+<!-- INCLUDE overall_header.html -->
+<!-- IF S_EDIT_SUBSCRIBERS -->
+<script language="javascript">
+// <![CDATA[
+function toggle(id)
+{
+	// Grab the ID
+	thisId = document.getElementById(id);
+	
+	// Get info needed to swap the expand/collapse image
+	temp = id.substr(id.indexOf('-') + 1);
+	user_id = temp.substr(0,temp.indexOf('-'));
+	imageId = document.getElementById('plusminus-' + user_id);
+
+	// Toggle the display between hid and shown
+	display = thisId.style.display;
+	if (display == 'none')
+	{
+		thisId.style.display = 'table-row';
+		imageId.src = '{IMAGE_PATH}collapse.png';
+		imageId.alt = '{L_DIGEST_COLLAPSE}';
+		imageId.title = '{L_DIGEST_COLLAPSE}';
+	}
+	else
+	{
+		thisId.style.display = 'none';
+		imageId.src = '{IMAGE_PATH}expand.png';
+		imageId.alt = '{L_DIGEST_EXPAND}';
+		imageId.title = '{L_DIGEST_EXPAND}';
+	}
+	
+}
+
+function unCheckSubscribedForums (checkbox, id_match) {
+	is_checked = checkbox.checked;
+ 
+	var element_name = new String();
+	
+	// Assume a HTML 4.0 compatible browser
+	var x = document.getElementsByTagName('input');
+	for(i=0;i<x.length;i++) {
+		thisobject = x[i];
+		if (thisobject.id.search(id_match + 'elt_') == 0)
+		{
+			thisobject.checked = is_checked;
+		}
+	}
+	return true;
+}
+
+function unCheckAllForums (id_match,all_forums) {
+	// Unchecks or checks the all forums checkbox for a particular user
+	any_unchecked = false;
+	
+	// Assume a HTML 4.0 compatible browser
+	var all_forums = document.getElementById(all_forums);
+	var inputs = document.getElementsByTagName('input');
+	for(i=0;i<inputs.length;i++) 
+	{
+		thisobject = inputs[i];
+		if (thisobject.id.search(id_match + 'elt_') == 0)
+		{
+			if (thisobject.checked == false)
+			{
+				all_forums.checked = false;
+				any_unchecked = true;
+			}
+		}
+	}
+	if (any_unchecked == false)
+	{
+		all_forums.checked = true;
+	}
+
+	return;
+}
+// ]]>  
+</script>
+<!-- ENDIF -->
+
+<a id="maincontent"></a>
+
+<h1>{L_TITLE}</h1>
+
+<p>{L_TITLE_EXPLAIN}</p>
+
+<!-- IF S_ERROR -->
+	<div class="errorbox">
+		<h3>{L_WARNING}</h3>
+		<p>{ERROR_MSG}</p>
+	</div>
+<!-- ENDIF -->
+
+<form id="acp_digests" method="post" action="{U_ACTION}">
+
+<!-- BEGIN options -->
+	<!-- IF options.S_LEGEND -->
+		<!-- IF not options.S_FIRST_ROW -->
+			</fieldset>
+		<!-- ENDIF -->
+		<fieldset>
+			<legend>{options.LEGEND}</legend>
+	<!-- ELSE -->
+
+		<dl>
+			<dt><label for="{options.KEY}">{options.TITLE}{L_COLON}</label><!-- IF options.S_EXPLAIN --><br /><span>{options.TITLE_EXPLAIN}</span><!-- ENDIF --></dt>
+			<dd>{options.CONTENT}</dd>
+		</dl>
+
+	<!-- ENDIF -->
+<!-- END options -->
+
+<!-- IF S_AUTH -->
+	</fieldset>
+	<!-- BEGIN auth_tpl -->
+		<!-- INCLUDE {auth_tpl.TEMPLATE_FILE} -->
+	<!-- END auth_tpl -->
+	<fieldset>
+		<legend>{L_ACP_SUBMIT_CHANGES}</legend>
+<!-- ENDIF -->
+
+<!-- IF S_EDIT_SUBSCRIBERS -->
+	<fieldset id="digests">
+    	<dl>
+        	<dt style="border-right-style:none"><label for="member">{L_DIGESTS_SEARCH_FOR_MEMBER}:</label><br />{L_DIGESTS_SEARCH_FOR_MEMBER_EXPLAIN}</dt>
+        	<dd style="text-align:left;"><input type="text" id="member" name="member" size="30" maxlength="255" value="{MEMBER}" /></dd>
+        </dl>
+        <hr />
+		<div style="text-align:right; padding-bottom: 5px;"><span style="font-size:.85em;">&bull; {TOTAL_USERS}</span>
+			<ul class="pagination" style="display:inline;">
+				<!-- IF .pagination -->
+					<!-- INCLUDE pagination.html -->
+				<!-- ENDIF -->
+			</ul>
+		</div>
+	        <table cellspacing="1" id="down">
+        <thead>
+            <tr>
+                <th style="text-align:center;"><input type="checkbox" class="radio" name="mark-all" id="mark-all" onclick="marklist('acp_digests', 'mark-', (this.checked) ? true : false);" /></th>
+                <th>{L_USERNAME}</th>
+                <th>{L_EMAIL_ADDRESS}</th>
+                <th style="text-align:center;">{L_DIGESTS_FREQUENCY_SHORT}</th>
+                <th style="text-align:center;">{L_DIGESTS_FORMAT_STYLING}</th>
+                <th style="text-align:center;">{L_DIGESTS_HOUR_SENT}</th>
+                <th style="text-align:center;">{L_DIGESTS_HAS_UNSUBSCRIBED}</th>
+                <th style="text-align:center;">{L_LAST_VISIT}<br />{L_DIGESTS_BASED_ON}</th>
+                <th style="text-align:center;">{L_DIGESTS_LAST_SENT}<br />{L_DIGESTS_BASED_ON}</th>
+            </tr>
+        </thead>
+        <tbody>
+        <!-- BEGIN digests_edit_subscribers -->
+            <!-- IF digests_edit_subscribers.S_ROW_COUNT is even --><tr class="row1"><!-- ELSE --><tr class="row2"><!-- ENDIF -->
+                <td style="text-align:center;"><input type="checkbox" class="radio" name="mark-{digests_edit_subscribers.USER_ID}" id="mark-{digests_edit_subscribers.USER_ID}" /></td>
+                <td><a href="#" onclick="toggle('user-{digests_edit_subscribers.S_ROW_COUNT}-detail');"><img id="plusminus-{digests_edit_subscribers.S_ROW_COUNT}" src="{IMAGE_PATH}expand.png" title="{L_DIGESTS_EXPAND}" alt={L_DIGESTS_EXPAND} /></a>&nbsp;<a href="#" onclick="toggle('user-{digests_edit_subscribers.S_ROW_COUNT}-detail');">{digests_edit_subscribers.USERNAME}</a></td>
+                <td>{digests_edit_subscribers.USER_EMAIL}</td>
+                <td style="text-align:center;"><select name="user-{digests_edit_subscribers.USER_ID}-digest_type">
+                	<option value="NONE"<!-- IF digests_edit_subscribers.S_DIGEST_NONE_CHECKED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_NONE}</option>
+                	<option value="DFLT">{L_DIGESTS_DEFAULT}</option>
+                	<option value="DAY"<!-- IF digests_edit_subscribers.S_DIGEST_DAY_CHECKED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_DAILY}</option>
+                	<option value="WEEK"<!-- IF digests_edit_subscribers.S_DIGEST_WEEK_CHECKED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_WEEKLY}</option>
+                	<option value="MNTH"<!-- IF digests_edit_subscribers.S_DIGEST_MONTH_CHECKED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_MONTHLY}</option>
+                </select></td>
+                <td style="text-align:center;"><select name="user-{digests_edit_subscribers.USER_ID}-style">
+                	<option value="{DIGESTS_HTML_VALUE}"<!-- IF digests_edit_subscribers.S_DIGEST_HTML_CHECKED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_FORMAT_HTML}</option>
+                	<option value="{DIGESTS_HTML_CLASSIC_VALUE}"<!-- IF digests_edit_subscribers.S_DIGEST_HTML_CLASSIC_CHECKED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_FORMAT_HTML_CLASSIC}</option>
+                	<option value="{DIGESTS_PLAIN_VALUE}"<!-- IF digests_edit_subscribers.S_DIGEST_PLAIN_CHECKED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_FORMAT_PLAIN}</option>
+                	<option value="{DIGESTS_PLAIN_CLASSIC_VALUE}"<!-- IF digests_edit_subscribers.S_DIGEST_PLAIN_CLASSIC_CHECKED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_FORMAT_PLAIN_CLASSIC}</option>
+                	<option value="{DIGESTS_FORMAT_TEXT_VALUE}"<!-- IF digests_edit_subscribers.S_DIGEST_TEXT_CHECKED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_FORMAT_TEXT}</option>
+                </select></td>
+                <td style="text-align:center;"><select name="user-{digests_edit_subscribers.USER_ID}-send_hour">
+                	<option value="{digests_edit_subscribers.BOARD_TO_GMT_0}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_0_CHECKED --> selected="selected"<!-- ENDIF -->>0</option>
+                 	<option value="{digests_edit_subscribers.BOARD_TO_GMT_1}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_1_CHECKED --> selected="selected"<!-- ENDIF -->>1</option>
+                	<option value="{digests_edit_subscribers.BOARD_TO_GMT_2}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_2_CHECKED --> selected="selected"<!-- ENDIF -->>2</option>
+                	<option value="{digests_edit_subscribers.BOARD_TO_GMT_3}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_3_CHECKED --> selected="selected"<!-- ENDIF -->>3</option>
+                	<option value="{digests_edit_subscribers.BOARD_TO_GMT_4}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_4_CHECKED --> selected="selected"<!-- ENDIF -->>4</option>
+                	<option value="{digests_edit_subscribers.BOARD_TO_GMT_5}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_5_CHECKED --> selected="selected"<!-- ENDIF -->>5</option>
+                	<option value="{digests_edit_subscribers.BOARD_TO_GMT_6}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_6_CHECKED --> selected="selected"<!-- ENDIF -->>6</option>
+                	<option value="{digests_edit_subscribers.BOARD_TO_GMT_7}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_7_CHECKED --> selected="selected"<!-- ENDIF -->>7</option>
+                	<option value="{digests_edit_subscribers.BOARD_TO_GMT_8}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_8_CHECKED --> selected="selected"<!-- ENDIF -->>8</option>
+                	<option value="{digests_edit_subscribers.BOARD_TO_GMT_9}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_9_CHECKED --> selected="selected"<!-- ENDIF -->>9</option>
+                	<option value="{digests_edit_subscribers.BOARD_TO_GMT_10}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_10_CHECKED --> selected="selected"<!-- ENDIF -->>10</option>
+                	<option value="{digests_edit_subscribers.BOARD_TO_GMT_11}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_11_CHECKED --> selected="selected"<!-- ENDIF -->>11</option>
+                	<option value="{digests_edit_subscribers.BOARD_TO_GMT_12}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_12_CHECKED --> selected="selected"<!-- ENDIF -->>12</option>
+                	<option value="{digests_edit_subscribers.BOARD_TO_GMT_13}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_13_CHECKED --> selected="selected"<!-- ENDIF -->>13</option>
+                	<option value="{digests_edit_subscribers.BOARD_TO_GMT_14}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_14_CHECKED --> selected="selected"<!-- ENDIF -->>14</option>
+                	<option value="{digests_edit_subscribers.BOARD_TO_GMT_15}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_15_CHECKED --> selected="selected"<!-- ENDIF -->>15</option>
+                	<option value="{digests_edit_subscribers.BOARD_TO_GMT_16}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_16_CHECKED --> selected="selected"<!-- ENDIF -->>16</option>
+                	<option value="{digests_edit_subscribers.BOARD_TO_GMT_17}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_17_CHECKED --> selected="selected"<!-- ENDIF -->>17</option>
+                	<option value="{digests_edit_subscribers.BOARD_TO_GMT_18}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_18_CHECKED --> selected="selected"<!-- ENDIF -->>18</option>
+                	<option value="{digests_edit_subscribers.BOARD_TO_GMT_19}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_19_CHECKED --> selected="selected"<!-- ENDIF -->>19</option>
+                	<option value="{digests_edit_subscribers.BOARD_TO_GMT_20}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_20_CHECKED --> selected="selected"<!-- ENDIF -->>20</option>
+                	<option value="{digests_edit_subscribers.BOARD_TO_GMT_21}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_21_CHECKED --> selected="selected"<!-- ENDIF -->>21</option>
+                	<option value="{digests_edit_subscribers.BOARD_TO_GMT_22}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_22_CHECKED --> selected="selected"<!-- ENDIF -->>22</option>
+                	<option value="{digests_edit_subscribers.BOARD_TO_GMT_23}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_23_CHECKED --> selected="selected"<!-- ENDIF -->>23</option>
+               </select></td>
+                <td style="text-align:center;">{digests_edit_subscribers.USER_DIGEST_HAS_UNSUBSCRIBED}</td>
+                <td style="text-align:center;">{digests_edit_subscribers.USER_LAST_VISIT}</td>
+                <td style="text-align:center;">{digests_edit_subscribers.USER_DIGEST_LAST_SENT}</td>
+            </tr>
+            <!-- IF digests_edit_subscribers.S_ROW_COUNT is even --><tr class="row1"<!-- ELSE --><tr class="row2"<!-- ENDIF --> id="user-{digests_edit_subscribers.S_ROW_COUNT}-detail" style="display:none;">
+            	<td colspan="9">
+                    <fieldset>
+                        <legend>{L_UCP_DIGESTS_FORUMS_SELECTION}</legend>
+                        <dl>
+                        	<dt><label for="user-{digests_edit_subscribers.USER_ID}-filter_type">{L_DIGESTS_FILTER_TYPE}:</label></dt>
+                            <dd><select id="user-{digests_edit_subscribers.USER_ID}-filter_type" name="user-{digests_edit_subscribers.USER_ID}-filter_type">
+                                <option value="ALL" <!-- IF digests_edit_subscribers.S_DIGEST_POST_ANY -->selected="selected"<!-- ENDIF -->>{L_DIGESTS_POSTS_TYPE_ANY}</option>
+                                <option value="1ST" <!-- IF digests_edit_subscribers.S_DIGEST_POST_FIRST -->selected="selected"<!-- ENDIF -->>{L_DIGESTS_POSTS_TYPE_FIRST}</option>
+                                <option value="BM" <!-- IF digests_edit_subscribers.S_DIGEST_POST_BM -->selected="selected"<!-- ENDIF -->>{L_DIGESTS_USE_BOOKMARKS}</option>
+                            </select></dd>
+                        </dl>
+                        <dl>
+                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-all_forums">{L_DIGESTS_SELECT_FORUMS}:</label><br />{L_DIGESTS_SELECT_FORUMS_ADMIN_EXPLAIN}</dt>
+                            <dd>
+                                <input type="checkbox" name="user-{digests_edit_subscribers.USER_ID}-all_forums" id="user-{digests_edit_subscribers.USER_ID}-all_forums" <!-- IF digests_edit_subscribers.S_ALL_BY_DEFAULT --> checked="checked"<!-- ENDIF --> onclick="unCheckSubscribedForums(this,'user-{digests_edit_subscribers.USER_ID}-');" /> <label for="user-{digests_edit_subscribers.USER_ID}-all_forums"><b>{L_DIGESTS_ALL_ALLOWED_FORUMS}</b></label><br /><br />
+                                <div id="user-{digests_edit_subscribers.USER_ID}-div_0">
+                                    <!-- BEGIN forums -->
+                                    <!-- IF digests_edit_subscribers.forums.S_DIV_OPEN -->
+                                    <div id="user-{digests_edit_subscribers.USER_ID}-{digests_edit_subscribers.forums.CAT_ID}" style="position:relative; left:20px;">
+                                    <!-- ENDIF -->
+                                    <!-- IF digests_edit_subscribers.forums.S_PRINT -->
+                                        <!-- IF digests_edit_subscribers.forums.S_IS_FORUM -->
+                                        <input type="checkbox" name="user-{digests_edit_subscribers.USER_ID}-{digests_edit_subscribers.forums.FORUM_NAME}" id="user-{digests_edit_subscribers.USER_ID}-{digests_edit_subscribers.forums.FORUM_NAME}"<!-- IF digests_edit_subscribers.forums.S_FORUM_SUBSCRIBED --> checked="checked"<!-- ENDIF --> onclick="unCheckAllForums('user-{digests_edit_subscribers.USER_ID}-','user-{digests_edit_subscribers.USER_ID}-all_forums');"/> <label for="user-{digests_edit_subscribers.USER_ID}-{digests_edit_subscribers.forums.FORUM_NAME}"<span style="font-size:.8em;">{digests_edit_subscribers.forums.FORUM_LABEL}</span></label><br />
+                                        <!-- ENDIF -->
+                                        <!-- IF not digests_edit_subscribers.forums.S_IS_FORUM -->
+                                        <span style="font-size:.8em;"><i>{digests_edit_subscribers.forums.FORUM_LABEL}</i></span><br />
+                                        <!-- ENDIF -->
+                                    <!-- ENDIF -->
+                                    <!-- IF digests_edit_subscribers.forums.S_DIV_CLOSE -->
+                                    </div>
+                                    <!-- ENDIF -->
+                                    <!-- END forums -->
+                                </div>
+                            </dd>
+                        </dl>
+                    </fieldset>
+                    <fieldset>
+                        <legend>{L_UCP_DIGESTS_POST_FILTERS}</legend>
+                        <dl>
+                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-max_posts">{L_DIGESTS_COUNT_LIMIT}</label></dt>
+                            <dd><input type="text" size="5" maxlength="5" id="user-{digests_edit_subscribers.USER_ID}-max_posts" name="user-{digests_edit_subscribers.USER_ID}-max_posts" value="{digests_edit_subscribers.USER_DIGEST_MAX_POSTS}" /></dd>
+                       	</dl>
+                        <dl>
+                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-min_words">{L_DIGESTS_MIN_SIZE}</label></dt>
+                            <dd><input type="text" size="4" maxlength="4" id="user-{digests_edit_subscribers.USER_ID}-min_words" name="user-{digests_edit_subscribers.USER_ID}-min_words" value="{digests_edit_subscribers.USER_DIGEST_MIN_WORDS}" /></dd>
+                       	</dl>
+                        <dl>
+                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-new_posts_only1">{L_DIGESTS_NEW_POSTS_ONLY}</label></dt>
+                            <dd><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-new_posts_only" id="user-{digests_edit_subscribers.USER_ID}-new_posts_only1" value="1"<!-- IF digests_edit_subscribers.S_DIGEST_NEW_POSTS_ONLY_CHECKED_YES --> checked="checked"<!-- ENDIF --> /> <label for="user-{digests_edit_subscribers.USER_ID}-new_posts_only1">{L_YES}</label>&nbsp;<input type="radio" name="user-{digests_edit_subscribers.USER_ID}-new_posts_only" id="user-{digests_edit_subscribers.USER_ID}-new_posts_only2" value="0"<!-- IF digests_edit_subscribers.S_DIGEST_NEW_POSTS_ONLY_CHECKED_NO --> checked="checked"<!-- ENDIF --> /> <label for="user-{digests_edit_subscribers.USER_ID}-new_posts_only2">{L_NO}</label></dd>
+                       	</dl>
+                        <dl>
+                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-show_mine1">{L_DIGESTS_REMOVE_YOURS}</label></dt>
+                            <dd><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-show_mine" id="user-{digests_edit_subscribers.USER_ID}-show_mine1" value="1"<!-- IF digests_edit_subscribers.S_DIGEST_SHOW_MINE_CHECKED_NO --> checked="checked"<!-- ENDIF --> /> <label for="user-{digests_edit_subscribers.USER_ID}-show_mine1">{L_YES}</label>&nbsp;<input type="radio" name="user-{digests_edit_subscribers.USER_ID}-show_mine" id="user-{digests_edit_subscribers.USER_ID}-show_mine2" value="0"<!-- IF digests_edit_subscribers.S_DIGEST_SHOW_MINE_CHECKED_YES --> checked="checked"<!-- ENDIF --> /> <label for="user-{digests_edit_subscribers.USER_ID}-show_mine2">{L_NO}</label></dd>
+                       	</dl>
+                        <dl>
+                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-filter_foes1">{L_DIGESTS_FILTER_FOES}</label></dt>
+                            <dd><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-filter_foes" id="user-{digests_edit_subscribers.USER_ID}-filter_foes1" value="1"<!-- IF digests_edit_subscribers.S_DIGEST_FILTER_FOES_CHECKED_YES --> checked="checked"<!-- ENDIF --> /> <label for="user-{digests_edit_subscribers.USER_ID}-filter_foes1">{L_YES}</label>&nbsp;<input type="radio" name="user-{digests_edit_subscribers.USER_ID}-filter_foes" id="user-{digests_edit_subscribers.USER_ID}-filter_foes2" value="0"<!-- IF digests_edit_subscribers.S_DIGEST_FILTER_FOES_CHECKED_NO --> checked="checked"<!-- ENDIF --> /> <label for="user-{digests_edit_subscribers.USER_ID}-filter_foes2">{L_NO}</label></dd>
+                       	</dl>
+                        <dl>
+                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-pms1">{L_DIGESTS_PRIVATE_MESSAGES_IN_DIGEST}</label></dt>
+                            <dd><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-pms" id="user-{digests_edit_subscribers.USER_ID}-pms1" value="1"<!-- IF digests_edit_subscribers.S_DIGEST_PRIVATE_MESSAGES_IN_DIGEST_YES --> checked="checked"<!-- ENDIF --> /> <label for="user-{digests_edit_subscribers.USER_ID}-pms1">{L_YES}</label>&nbsp;<input type="radio" name="user-{digests_edit_subscribers.USER_ID}-pms" id="user-{digests_edit_subscribers.USER_ID}-pms2" value="0"<!-- IF digests_edit_subscribers.S_DIGEST_PRIVATE_MESSAGES_IN_DIGEST_NO --> checked="checked"<!-- ENDIF --> /> <label for="user-{digests_edit_subscribers.USER_ID}-pms2">{L_NO}</label></dd>
+                       	</dl>
+                        <dl>
+                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-mark_read1">{L_DIGESTS_MARK_READ}</label></dt>
+                            <dd><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-mark_read" id="user-{digests_edit_subscribers.USER_ID}-mark_read1" value="1"<!-- IF digests_edit_subscribers.S_DIGEST_PM_MARK_READ_CHECKED_YES --> checked="checked"<!-- ENDIF --> /> <label for="user-{digests_edit_subscribers.USER_ID}-mark_read1">{L_YES}</label>&nbsp;<input type="radio" name="user-{digests_edit_subscribers.USER_ID}-mark_read" id="user-{digests_edit_subscribers.USER_ID}-mark_read2" value="0"<!-- IF digests_edit_subscribers.S_DIGEST_PM_MARK_READ_CHECKED_NO --> checked="checked"<!-- ENDIF --> /> <label for="user-{digests_edit_subscribers.USER_ID}-mark_read2">{L_NO}</label></dd>
+                        </dl>
+                   	</fieldset>
+                    <fieldset>
+                        <legend>{L_UCP_DIGESTS_ADDITIONAL_CRITERIA}</legend>
+                        <dl>
+                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-sortby">{L_DIGESTS_SORT_BY}</label></dt>
+                            <dd>
+                                <select name="user-{digests_edit_subscribers.USER_ID}-sortby" id="user-{digests_edit_subscribers.USER_ID}-sort_by">
+                                    <option value="board"<!-- IF digests_edit_subscribers.S_BOARD_SELECTED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_SORT_USER_ORDER}</option>
+                                    <option value="standard"<!-- IF digests_edit_subscribers.S_STANDARD_SELECTED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_SORT_FORUM_TOPIC}</option>
+                                    <option value="standard_desc"<!-- IF digests_edit_subscribers.S_STANDARD_DESC_SELECTED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_SORT_FORUM_TOPIC_DESC}</option>
+                                    <option value="postdate"<!-- IF digests_edit_subscribers.S_POSTDATE_SELECTED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_SORT_POST_DATE}</option>
+                                    <option value="postdate_desc"<!-- IF digests_edit_subscribers.S_POSTDATE_DESC_SELECTED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_SORT_POST_DATE_DESC}</option>
+                                </select>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-max_display_words">{L_DIGESTS_MAX_DISPLAY_WORDS}</label></dt>
+                            <dd><input type="text" size="4" maxlength="4" name="user-{digests_edit_subscribers.USER_ID}-max_display_words" id="user-{digests_edit_subscribers.USER_ID}-max_display_words" value="{digests_edit_subscribers.USER_DIGEST_MAX_DISPLAY_WORDS}" />
+                            </dd>
+                        </dl>
+                        <dl>
+                        	<dt><label for="user-{digests_edit_subscribers.USER_ID}-no_post_text1">{L_DIGESTS_NO_POST_TEXT}</label></dt>
+                            <dd><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-no_post_text" id="user-{digests_edit_subscribers.USER_ID}-no_post_text1" value="1"<!-- IF digests_edit_subscribers.S_DIGEST_NO_POST_TEXT_CHECKED_YES --> checked="checked"<!-- ENDIF --> /><label for="user-{digests_edit_subscribers.USER_ID}-no_post_text1"> {L_YES}</label>&nbsp;<input type="radio" name="user-{digests_edit_subscribers.USER_ID}-no_post_text" id="user-{digests_edit_subscribers.USER_ID}-no_post_text2" value="0"<!-- IF digests_edit_subscribers.S_DIGEST_NO_POST_TEXT_CHECKED_NO --> checked="checked"<!-- ENDIF --> /> <label for="user-{digests_edit_subscribers.USER_ID}-no_post_text2"> {L_NO}</label></dd>
+                        </dl>                       
+                        <dl>
+                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-send_on_no_posts1">{L_DIGESTS_SEND_ON_NO_POSTS}</label></dt>
+                            <dd><label for="user-{digests_edit_subscribers.USER_ID}-send_on_no_posts1"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-send_on_no_posts" id="user-{digests_edit_subscribers.USER_ID}-send_on_no_posts1"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_ON_NO_POSTS_YES_CHECKED --> checked="checked"<!-- ENDIF --> value="1" /> {L_YES}</label>&nbsp;<label for="user-{digests_edit_subscribers.USER_ID}-send_on_no_posts2"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-send_on_no_posts" id="user-{digests_edit_subscribers.USER_ID}-send_on_no_posts2"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_ON_NO_POSTS_NO_CHECKED --> checked="checked"<!-- ENDIF --> value="0" /> {L_NO}</label></dd>
+                        </dl>
+                        <dl>
+                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-lastvisit1">{L_DIGESTS_LASTVISIT_RESET}</label></dt>
+                            <dd><label for="user-{digests_edit_subscribers.USER_ID}-lastvisit1"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-lastvisit" id="user-{digests_edit_subscribers.USER_ID}-lastvisit1" value="1"<!-- IF digests_edit_subscribers.S_LASTVISIT_YES_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_YES}</label>&nbsp;<label for="user-{digests_edit_subscribers.USER_ID}-lastvisit2"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-lastvisit" id="user-{digests_edit_subscribers.USER_ID}-lastvisit2" value="0"<!-- IF digests_edit_subscribers.S_LASTVISIT_NO_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_NO}</label></dd>
+                        </dl>
+                        <dl>
+                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-attachments1">{L_DIGESTS_SHOW_ATTACHMENTS}</label></dt>
+                            <dd><label for="user-{digests_edit_subscribers.USER_ID}-attachments1"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-attachments" id="user-{digests_edit_subscribers.USER_ID}-attachments1" value="1"<!-- IF digests_edit_subscribers.S_ATTACHMENTS_YES_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_YES}</label>&nbsp;<label for="user-{digests_edit_subscribers.USER_ID}-attachments2"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-attachments" id="user-{digests_edit_subscribers.USER_ID}-attachments2" value="0"<!-- IF digests_edit_subscribers.S_ATTACHMENTS_NO_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_NO}</label></dd>
+                        </dl>
+                        <dl>
+                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-blockimages1">{L_DIGESTS_BLOCK_IMAGES}</label></dt>
+                            <dd><label for="user-{digests_edit_subscribers.USER_ID}-blockimages1"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-blockimages" id="user-{digests_edit_subscribers.USER_ID}-blockimages1" value="1"<!-- IF digests_edit_subscribers.S_BLOCK_IMAGES_YES_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_YES}</label>&nbsp;<label for="user-{digests_edit_subscribers.USER_ID}-blockimages2"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-blockimages" id="user-{digests_edit_subscribers.USER_ID}-blockimages2" value="0"<!-- IF digests_edit_subscribers.S_BLOCK_IMAGES_NO_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_NO}</label></dd>
+                        </dl>
+                        <dl>
+                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-toc1">{L_DIGESTS_TOC}:</label></dt>
+                            <dd><label for="user-{digests_edit_subscribers.USER_ID}-toc1"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-toc" id="user-{digests_edit_subscribers.USER_ID}-toc1" value="1"<!-- IF digests_edit_subscribers.S_TOC_YES_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_YES}</label>&nbsp;<label for="user-{digests_edit_subscribers.USER_ID}-toc2"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-toc" id="user-{digests_edit_subscribers.USER_ID}-toc2" value="0"<!-- IF digests_edit_subscribers.S_TOC_NO_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_NO}</label></dd>
+                        </dl>
+                    </fieldset>
+               </td>
+            </tr>
+        <!-- END digests_edit_subscribers -->
+        </tbody>
+        </table>
+        <p class="quick">
+            <label for="selected">{L_DIGESTS_WITH_SELECTED}:</label>
+            <select id="selected" name="selected">
+                <option value="IGNORE" selected="selected">{L_DIGESTS_IGNORE}</option>
+                <option value="NONE">{L_DIGESTS_UNSUBSCRIBE}</option>
+                <option value="DFLT">{L_DIGESTS_DEFAULT}</option>
+            </select>&nbsp;
+            <label for="subscribe">{L_DIGESTS_SHOW}:</label>
+            <select id="subscribe" name="subscribe">
+                <option value="a"{ALL_SELECTED}>{L_DIGESTS_ALL}</option>
+                <option value="s"{SUBSCRIBE_SELECTED}>{L_DIGESTS_SUBSCRIBED}</option>
+                <option value="u"{UNSUBSCRIBE_SELECTED}>{L_DIGESTS_UNSUBSCRIBED}</option>
+                <option value="t"{STOPPED_SUBSCRIBING_SELECTED}>{L_DIGESTS_STOPPED_SUBSCRIBING}</option>
+            </select>&nbsp;
+            <label for="sortby">{L_SORT_BY}:</label>
+            <select id="sortby" name="sortby">
+                <option value="u"{USERNAME_SELECTED}>{L_USERNAME}</option>
+                <option value="e"{EMAIL_SELECTED}>{L_EMAIL_ADDRESS}</option>
+                <option value="f"{FREQUENCY_SELECTED}>{L_DIGESTS_FREQUENCY_SHORT}</option>
+                <option value="s"{FORMAT_SELECTED}>{L_DIGESTS_FORMAT_STYLING}</option>
+                <option value="h"{HOUR_SELECTED}>{L_DIGESTS_HOUR_SENT}</option>
+                <option value="b"{HAS_UNSUBSCRIBED_SELECTED}>{L_DIGESTS_HAS_UNSUBSCRIBED}</option>
+                <option value="l"{LASTVISIT_SELECTED}>{L_LAST_VISIT}</option>
+                <option value="t"{LAST_SENT_SELECTED}>{L_DIGESTS_LAST_SENT}</option>
+            </select>&nbsp;
+            <label for="sortorder">{L_DIGESTS_SORT_ORDER}:</label>
+            <select id="sortorder" name="sortorder">
+                <option value="a"{ASCENDING_SELECTED}>{L_ASCENDING}</option>
+                <option value="d"{DESCENDING_SELECTED}>{L_DESCENDING}</option>
+            </select>&nbsp;
+            <input class="button2" type="submit" name="sort" id="sort" value="{L_DIGESTS_REFRESH}" />
+        </p>
+		<div style="text-align:right;"><span style="font-size:.85em;">&bull; {TOTAL_USERS}</span>
+			<ul class="pagination" style="display:inline;">
+				<!-- IF .pagination -->
+					<!-- INCLUDE pagination.html -->
+				<!-- ENDIF -->
+			</ul>
+		</div>
+        <fieldset class="quick">
+            <p class="small"><a href="#" onclick="marklist('acp_digests', 'mark-', true);">{L_MARK_ALL}</a> &bull; <a href="#" onclick="marklist('acp_digests', 'mark-', false);">{L_UNMARK_ALL}</a></p>
+            {S_FORM_TOKEN}
+        </fieldset>
+<!-- ENDIF -->
+
+<!-- IF S_BALANCE_LOAD -->
+        <table cellspacing="1" id="down" style="table-layout: fixed; width: 250px;">
+            <colgroup>
+                <col class="col1" />
+                <col class="col2" />
+            </colgroup>
+            <thead>
+                <tr>
+                    <th style="text-align:center;">{L_DIGESTS_HOUR_SENT}</th>
+                    <th style="text-align:center; text-transform:uppercase;">{L_DIGESTS_SUBSCRIBERS}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- BEGIN digests_balance_load -->
+                <tr>
+                    <td style="text-align:center;">{digests_balance_load.HOUR}</td>
+                    <td style="text-align:center;">{digests_balance_load.HOUR_COUNT}</td>
+                </tr>
+                <!-- END digests_balance_load -->
+            </tbody>
+        </table>
+	<p class="submit-buttons">
+        <input class="button1" type="submit" id="submit" name="submit" value="{L_DIGESTS_BALANCE_LOAD}" />
+	</p>
+<!-- ELSE -->
+	<p class="submit-buttons">
+        <input class="button1" type="submit" id="submit" name="submit" value="{L_SUBMIT}" />&nbsp;
+		<input class="button2" type="reset" id="reset" name="reset" value="{L_RESET}" />
+	</p>
+<!-- ENDIF -->
+	{S_FORM_TOKEN}
+</fieldset>
+</form>
+
+<!-- INCLUDE overall_footer.html -->

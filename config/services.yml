@@ -1,0 +1,21 @@
+services:
+    phpbbservices.digests.controller:
+        class: phpbbservices\digests\controller\main
+        arguments:
+            - @config
+            - @controller.helper
+            - @template
+            - @user
+            - %core.php_ext%
+            - @dbal.conn
+            - @auth
+            - %core.root_path%
+            - @request
+    phpbbservices.digests.listener:
+        class: phpbbservices\digests\event\main_listener
+        arguments:
+            - @config
+            - @controller.helper
+            - @template
+        tags:
+            - { name: event.listener }

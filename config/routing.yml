@@ -1,0 +1,3 @@
+phpbbservices_digests_controller:
+    path: /digests/{name}
+    defaults: { _controller: phpbbservices.digests.controller:handle }

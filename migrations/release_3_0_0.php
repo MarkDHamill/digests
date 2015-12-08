@@ -79,12 +79,13 @@ class release_3_0_0 extends \phpbb\db\migration\migration
 			array('config.add',	array('phpbbservices_digests_users_per_page', 20)),
 			array('config.add',	array('phpbbservices_digests_weekly_digest_day', 0)),
 			
-			// Add the four ACP digest modules
+			// Add the ACP digests category under the extensions tab
 			array('module.add', array(
 				'acp',
 				'ACP_CAT_DOT_MODS',
 				'ACP_CAT_DIGESTS'
 			)),
+			// Add the four ACP digest modules
 			array('module.add', array(
 				'acp',
 				'ACP_CAT_DIGESTS',
@@ -94,54 +95,22 @@ class release_3_0_0 extends \phpbb\db\migration\migration
 				),
 			)),
 
-			// Add a category for the UCP
+			// Add the UCP digests category, a top level category
 			array('module.add', array(
 				'ucp',
-				false,
+				0,
 				'UCP_DIGESTS'
 			)),
-			// add the modules for our new category
+			// Add the four UCP digest modules
 			array('module.add', array(
 				'ucp', 
 				'UCP_DIGESTS', 
 				array(
-					'module_basename'   => 'digests',
-					'module_langname'   => 'UCP_DIGESTS_BASICS',
-					'module_mode'       => 'basics',
-					'module_auth'       => '',
+					'module_basename'   => '\phpbbservices\digests\ucp\main_module',
+				   	'modes' => array('basics', 'forums_selection', 'post_filters', 'additional_criteria'),
 				),
 			)),
-			array('module.add', array(
-				'ucp', 
-				'UCP_DIGESTS', 
-				array(
-					'module_basename'   => 'digests',
-					'module_langname'   => 'UCP_DIGESTS_FORUMS_SELECTION',
-					'module_mode'       => 'forums_selection',
-					'module_auth'       => '',
-				),
-			)),
-			array('module.add', array(
-				'ucp', 
-				'UCP_DIGESTS', 
-				array(
-					'module_basename'   => 'digests',
-					'module_langname'   => 'UCP_DIGESTS_POST_FILTERS',
-					'module_mode'       => 'post_filters',
-					'module_auth'       => '',
-				),
-			)),
-			array('module.add', array(
-				'ucp',
-				'UCP_DIGESTS', 
-				array(
-					'module_basename'   => 'digests',
-					'module_langname'   => 'UCP_DIGESTS_ADDITIONAL_CRITERIA',
-					'module_mode'       => 'additional_criteria',
-					'module_auth'       => '',
-				),
-			)),
-			
+			 			
 		);
 	}
 	

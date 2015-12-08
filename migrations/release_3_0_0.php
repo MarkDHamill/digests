@@ -83,12 +83,12 @@ class release_3_0_0 extends \phpbb\db\migration\migration
 			array('module.add', array(
 				'acp',
 				'ACP_CAT_DOT_MODS',
-				'ACP_CAT_DIGESTS'
+				'ACP_DIGESTS'
 			)),
 			// Add the four ACP digest modules
 			array('module.add', array(
 				'acp',
-				'ACP_CAT_DIGESTS',
+				'ACP_DIGESTS',
 				array(
 					'module_basename'	=> '\phpbbservices\digests\acp\main_module',
 					'modes'				=> array('digests_general', 'digests_user_defaults', 'digests_edit_subscribers', 'digests_balance_load', 'digests_mass_subscribe_unsubscribe'),
@@ -98,7 +98,7 @@ class release_3_0_0 extends \phpbb\db\migration\migration
 			// Add the UCP digests category, a top level category
 			array('module.add', array(
 				'ucp',
-				0,
+				false,
 				'UCP_DIGESTS'
 			)),
 			// Add the four UCP digest modules
@@ -107,7 +107,7 @@ class release_3_0_0 extends \phpbb\db\migration\migration
 				'UCP_DIGESTS', 
 				array(
 					'module_basename'   => '\phpbbservices\digests\ucp\main_module',
-				   	'modes' => array('basics', 'forums_selection', 'post_filters', 'additional_criteria'),
+				   	'modes'				=> array('digests_general', 'digests_user_defaults', 'digests_edit_subscribers', 'digests_balance_load', 'digests_mass_subscribe_unsubscribe'),
 				),
 			)),
 			 			

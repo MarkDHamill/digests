@@ -1,0 +1,67 @@
+<div class="post">
+	<div class="postbody">
+		<!-- IF S_SHOW_PMS -->
+			<h2 style="color:#000000">{L_YOU_HAVE_PRIVATE_MESSAGES}</h2>
+
+			<!-- BEGIN pm -->
+				<h3>{pm.NEW_UNREAD}{L_PRIVATE_MESSAGE}</h3>
+				<!-- IF pm.S_USE_CLASSIC_TEMPLATE -->
+					<table border="1">
+						<tr>
+							<th>{L_DIGEST_LINK}</th><th>{L_DIGEST_POST_TIME}</th><th>{L_DIGEST_AUTHOR}</th><th>{L_PRIVATE_MESSAGE_2}</th>
+						</tr>
+				<!-- ENDIF -->
+				<!-- IF not pm.S_USE_CLASSIC_TEMPLATE -->
+				{pm.ANCHOR}<h4>{L_SUBJECT}: {pm.PRIVATE_MESSAGE_SUBJECT}</h4>
+				<p class="author">{L_FROM}: {pm.FROM} {L_DIGEST_ON} {pm.DATE}</p>
+				<div class="content">{pm.CONTENT}</div>
+				<!-- ELSE -->
+						<tr>
+							<td>{pm.ANCHOR}{pm.PRIVATE_MESSAGE_LINK}</td><td>{pm.DATE}</td><td>{pm.FROM}</td><td>{pm.CONTENT}</td>
+						</tr>
+						<!-- IF pm.S_LAST_ROW -->
+					</table>
+						<!-- ENDIF -->
+				<!-- ENDIF -->
+				<hr />
+			<!-- BEGINELSE -->
+				<div class="content">{L_DIGEST_NO_PRIVATE_MESSAGES}</div>
+				<hr />
+			<!-- END pm -->
+		<!-- ENDIF -->
+		
+		<!-- BEGIN forum -->
+			<h3 style="color:#000000">{L_FORUM}: {forum.FORUM}</h3>
+			<!-- BEGIN topic -->
+				<h3>{L_TOPIC}: {forum.topic.TOPIC}</h3>
+				<!-- IF forum.topic.S_USE_CLASSIC_TEMPLATE -->
+					<table border="1">
+						<tr>
+							<th>{L_DIGEST_LINK}</th><th>{L_DIGEST_POST_TIME}</th><th>{L_AUTHOR}</th><!-- IF S_SHOW_POST_TEXT --><th>{L_DIGEST_POST_TEXT}</th><!-- ENDIF -->
+						</tr>
+				<!-- ENDIF -->
+				<!-- BEGIN post -->
+					<!-- IF not forum.topic.S_USE_CLASSIC_TEMPLATE -->
+						<!-- IF forum.topic.post.S_FIRST_POST -->
+						<h4>{L_DIGEST_REPLY}: {forum.topic.post.SUBJECT}</h4>
+						<!-- ENDIF -->
+						<!-- IF S_SHOW_POST_TEXT --><br /><!-- ENDIF -->
+						<p class="author">{forum.topic.post.ANCHOR}{L_DIGEST_BY}: {forum.topic.post.FROM} {L_DIGEST_ON} {forum.topic.post.DATE}</p>
+						<!-- IF S_SHOW_POST_TEXT -->
+						<div class="content">{forum.topic.post.CONTENT}</div>
+						<!-- ENDIF -->
+					<!-- ELSE -->
+						<tr>
+							<td>{forum.topic.post.ANCHOR}{forum.topic.post.POST_LINK}</td><td>{forum.topic.post.DATE}</td><td>{forum.topic.post.FROM}</td><!-- IF S_SHOW_POST_TEXT --><td>{forum.topic.post.CONTENT}</td><!-- ENDIF -->
+						</tr>
+						<!-- IF forum.topic.post.S_LAST_ROW -->
+					</table>
+						<!-- ENDIF -->
+					<!-- ENDIF -->
+				<!-- END post -->
+			<!-- END topic -->
+		<!-- BEGINELSE -->
+		<div class="content">{L_DIGEST_NO_POSTS}</div>
+		<!-- END forum -->
+	</div>
+</div>

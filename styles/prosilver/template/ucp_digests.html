@@ -1,0 +1,407 @@
+<!-- INCLUDE ucp_header.html -->
+				
+<script type="text/javascript">
+// <![CDATA[
+function check_word_size_min (field) 
+{
+	size = field.value;
+	if (size == '')
+	{
+		return;
+	}
+	if ((size < 0) || (isNaN(size))) 
+	{
+		alert("{LA_DIGESTS_SIZE_ERROR_MIN}");
+		field.focus();
+	}
+	else
+	{
+		field.value = parseInt(size);
+	}
+}
+
+<!-- IF S_DIGESTS_FORUMS_SELECTION -->
+function check_uncheck(checkbox_id, radio_button)
+{
+	var checkbox = document.getElementById(checkbox_id);
+	if (radio_button.checked)
+	{
+		checkbox.disabled = (radio_button.id == 'pms1') ? false : true;
+	}
+	else
+	{
+		checkbox.disabled = (radio_button.id == 'pms1') ? true : false;
+	}
+}
+
+function disable_forums(disabled)
+{
+	var element_name = new String();
+	var digests_id = document.getElementById('digests');
+	
+	// Assume a HTML 4.0 compatible browser
+	var x = document.getElementById('div_0').getElementsByTagName("input");
+	for(i=0;i<x.length;i++) {
+		thisobject = x[i];
+		element_name = thisobject.id;
+		if(element_name != null) 
+		{
+			if(element_name.substr(0,4) == "elt_")
+			{
+				thisobject.disabled = disabled;
+			}
+		}
+	}
+	
+	// Also, enable/disable the All Forums checkbox
+	var all_forums = document.getElementById('all_forums');
+	all_forums.disabled = disabled;
+	
+	return true;
+}
+
+function unCheckSubscribedForums (checkbox) {
+	is_checked = checkbox.checked;
+ 
+	var element_name = new String();
+	
+	// Assume a HTML 4.0 compatible browser
+	var x = document.getElementById('div_0').getElementsByTagName("input");
+	for(i=0;i<x.length;i++) {
+		thisobject = x[i];
+		element_name = thisobject.id;
+		if(element_name != null) 
+		{
+			if(element_name.substr(0,4) == "elt_")
+			{
+				thisobject.checked = is_checked;
+			}
+		}
+	}
+	return true;
+}
+
+function unCheckAllForums () {
+
+	// Unchecks or checks the all forums checkbox
+	var digests_id = document.getElementById('digests');
+	any_unchecked = false;
+	
+	// Assume a HTML 4.0 compatible browser
+	var x = document.getElementById('div_0');
+	var y = x.getElementsByTagName("input");
+	for(i=0;((i<y.length) && (any_unchecked == false));i++) 
+	{
+		thisobject = y[i];
+		element_name = thisobject.name;
+		if(element_name != null) {
+			if(element_name.substr(0,4) == "elt_")
+			{
+				if (thisobject.checked == false)
+				{
+					digests_id.all_forums.checked = false;
+					any_unchecked = true;
+				}
+			}
+		}
+	}
+	if (any_unchecked == false)
+	{
+		digests_id.all_forums.checked = true;
+	}
+
+	return;
+}
+
+function show_warning()
+{
+	<!-- IF S_DIGESTS_FORUMS_SELECTION -->
+	// If All Forums is unchecked and there are no checked forums, do not allow the form 
+	// to submit and display a message
+	var all_forums = document.getElementById('all_forums');
+	if (all_forums.checked == true)
+	{
+		return true;
+	}
+	
+	var x = document.getElementById('div_0').getElementsByTagName("input");
+	var element_name = new String();
+	var none_checked = true;
+	
+	for(i=0;i<x.length;i++) {
+		thisobject = x[i];
+		element_name = thisobject.id;
+		if(element_name != null) 
+		{
+			if(element_name.substr(0,4) == "elt_")
+			{
+				if (thisobject.checked == true)
+				{
+					none_checked = false;
+					break;
+				}
+			}
+		}					
+	}
+	
+	if (none_checked)
+	{
+		alert('{LA_DIGESTS_NO_FORUMS_CHECKED}');
+		return false;
+	}
+
+	return true;
+	<!-- ELSE -->
+	return true;
+	<!-- ENDIF -->
+}
+
+// ]]> 
+<!-- ENDIF -->
+
+<!-- IF S_DIGESTS_POST_FILTERS -->
+function trim(stringToTrim) {
+	return stringToTrim.replace(/^\s+|\s+$/g,"");
+}
+
+function check_word_size (field)
+{
+	if (isNaN(field.value))
+	{
+		alert("{LA_DIGESTS_SIZE_ERROR}");
+		field.focus();
+		return;
+	}
+	size = parseInt(field.value);
+	if (field.defaultValue != '')
+	{
+		max_items = parseInt(field.defaultValue);
+	}
+	else
+	{
+		max_items = 0;
+	}
+	if (size <= 0)
+	{
+		alert("{LA_DIGESTS_SIZE_ERROR}");
+		field.focus();
+		return;
+	}
+	if (field.defaultValue != '0')
+	{
+		if (size > max_items) 
+		{
+			alert("{LA_DIGESTS_SIZE_ERROR}");
+			field.focus();
+		}
+	}
+}
+<!-- ENDIF -->
+
+// ]]> 
+</script>
+
+<h2>{L_DIGESTS_MODE}</h2>
+
+<form name="phpbbservices_digests" id="phpbbservices_digests" method="post" action="{U_DIGESTS_ACTION}" onsubmit="return show_warning();">
+{S_HIDDEN_FIELDS}
+<div class="panel">
+
+	<div class="inner"><span class="corners-top"><span></span></span>
+									
+		<!-- IF S_DIGESTS_BASICS -->
+		<p>{L_DIGESTS_EXPLANATION}</p>
+		<!-- ENDIF -->
+		<fieldset>
+			<!-- IF S_DIGESTS_BASICS -->
+			<dl>
+				<dt><label>{L_DIGESTS_FREQUENCY}:</label><br /><span>{L_DIGESTS_FREQUENCY_EXPLAIN}</span></dt>
+				<dd>
+					<label for="none"><input type="radio" name="digest_type" id="none" style="margin-top: 3px;" value="NONE"<!-- IF S_DIGESTS_NONE_CHECKED --> checked="checked"<!-- ENDIF --> />{L_DIGESTS_NONE}</label><br />  
+					<label for="daily"><input type="radio" name="digest_type" id="daily" style="margin-top: 3px;" value="DAY"<!-- IF S_DIGESTS_DAY_CHECKED --> checked="checked"<!-- ENDIF --> />{L_DIGESTS_DAILY}</label><br />  
+					<label for="week"><input type="radio" name="digest_type" id="week" style="margin-top: 3px;" value="WEEK"<!-- IF S_DIGESTS_WEEK_CHECKED --> checked="checked"<!-- ENDIF --> />{L_DIGESTS_WEEKLY}</label><br />  
+					<label for="month"><input type="radio" name="digest_type" id="month" style="margin-top: 3px;" value="MNTH"<!-- IF S_DIGESTS_MONTH_CHECKED --> checked="checked"<!-- ENDIF --> />{L_DIGESTS_MONTHLY}</label>  
+				</dd>
+			</dl>
+			<dl>
+				<dt><label>{L_DIGESTS_FORMAT_STYLING}:</label><br /><span>{L_DIGESTS_FORMAT_STYLING_EXPLAIN}</span></dt>
+				<dd>
+					<label for="style1" title="{L_DIGESTS_FORMAT_HTML_EXPLAIN}"><input type="radio" name="style" id="style1" style="margin-top: 3px;" value="{L_DIGESTS_HTML_VALUE}"<!-- IF S_DIGESTS_HTML_CHECKED --> checked="checked"<!-- ENDIF --> />{L_DIGESTS_FORMAT_HTML}</label><br />
+					<label for="style4" title="{L_DIGESTS_FORMAT_HTML_CLASSIC_EXPLAIN}"><input type="radio" name="style" id="style4" style="margin-top: 3px;" value="{L_DIGESTS_HTML_CLASSIC_VALUE}"<!-- IF S_DIGESTS_HTML_CLASSIC_CHECKED --> checked="checked"<!-- ENDIF --> />{L_DIGESTS_FORMAT_HTML_CLASSIC}</label><br />
+					<label for="style2" title="{L_DIGESTS_FORMAT_PLAIN_EXPLAIN}"><input type="radio" name="style" id="style2" style="margin-top: 3px;" value="{L_DIGESTS_PLAIN_VALUE}"<!-- IF S_DIGESTS_PLAIN_CHECKED --> checked="checked"<!-- ENDIF --> />{L_DIGESTS_FORMAT_PLAIN}</label><br />
+					<label for="style5" title="{L_DIGESTS_FORMAT_PLAIN_CLASSIC_EXPLAIN}"><input type="radio" name="style" id="style5" style="margin-top: 3px;" value="{L_DIGESTS_PLAIN_CLASSIC_VALUE}"<!-- IF S_DIGESTS_PLAIN_CLASSIC_CHECKED --> checked="checked"<!-- ENDIF --> />{L_DIGESTS_FORMAT_PLAIN_CLASSIC}</label><br />
+					<label for="style3" title="{L_DIGESTS_FORMAT_TEXT_EXPLAIN}"><input type="radio" name="style" id="style3" style="margin-top: 3px;" value="{L_DIGESTS_TEXT_VALUE}"<!-- IF S_DIGESTS_TEXT_CHECKED --> checked="checked"<!-- ENDIF --> />{L_DIGESTS_FORMAT_TEXT}</label>
+				</dd>
+			</dl>
+			<dl>
+				<dt><label for="send_hour">{L_DIGESTS_SEND_HOUR}:</label><br /><span>{L_DIGESTS_SEND_HOUR_EXPLAIN}</span></dt>
+				<dd>
+					<select name="send_hour" id="send_hour">
+						<!-- BEGIN hour_loop -->
+						<option value="{hour_loop.COUNT}"{hour_loop.SELECTED}>{hour_loop.DISPLAY_HOUR}</option>
+						<!-- END hour_loop -->
+					</select> 
+				</dd>
+			</dl>
+			<!-- ENDIF -->
+			<!-- IF S_DIGESTS_FORUMS_SELECTION -->
+			{L_DIGESTS_DISABLED_MESSAGE}
+			<!-- IF S_DIGESTS_NO_FORUMS -->
+			<p>{L_DIGESTS_NO_FORUMS_AVAILABLE}</p>
+			<!-- ENDIF -->
+			<!-- IF not S_DIGESTS_NO_FORUMS -->
+			<dl>
+			<dt><label>{L_DIGESTS_FILTER_TYPE}:</label></dt>
+			<dd>
+				<input type="radio" name="filtertype" id="all" value="ALL" onclick="disable_forums(0);" <!-- IF S_DIGESTS_POST_ANY --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_ALL_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /><label for="all">{L_DIGESTS_POSTS_TYPE_ANY}</label>
+				<input type="radio" name="filtertype" id="first" value="1ST" onclick="disable_forums(0);" <!-- IF S_DIGESTS_POST_FIRST --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_FIRST_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /><label for="first">{L_DIGESTS_POSTS_TYPE_FIRST}</label> 
+				<input type="radio" name="filtertype" id="bookmarks" value="BM" onclick="disable_forums(1);" <!-- IF S_DIGESTS_POST_BM --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_BM_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /><label for="bookmarks">{L_DIGESTS_USE_BOOKMARKS}</label> 
+			</dd>
+			</dl>
+			<dl>
+				<dt><label for="all_forums">{L_DIGESTS_SELECT_FORUMS}:</label><br /><span>{L_DIGESTS_SELECT_FORUMS_EXPLAIN}</span></dt>
+				<dd>
+					<input type="checkbox" name="all_forums" id="all_forums" <!-- IF S_DIGESTS_ALL_BY_DEFAULT --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_ALL_DISABLED --> disabled="disabled"<!-- ENDIF --> onclick="unCheckSubscribedForums(this);"/> <label for="all_forums"><b>{L_DIGESTS_ALL_FORUMS}</b></label><br /><br />
+					<div id="div_0">
+						<!-- BEGIN forums -->
+						<!-- IF forums.S_DIGESTS_DIV_OPEN -->
+						<div id="{forums.CAT_ID}" style="position:relative; left:20px;">
+						<!-- ENDIF -->
+						<!-- IF forums.S_DIGESTS_PRINT -->
+							<!-- IF forums.S_DIGESTS_IS_FORUM -->
+							<input type="checkbox" name="{forums.FORUM_NAME}" id="{forums.FORUM_NAME}"<!-- IF forums.S_DIGESTS_FORUM_SUBSCRIBED --> checked="checked"<!-- ENDIF --><!-- IF forums.S_DIGESTS_FORUM_DISABLED --> disabled="disabled"<!-- ENDIF --> onclick="unCheckAllForums();"/> <label for="{forums.FORUM_NAME}">{forums.FORUM_PREFIX}{forums.FORUM_LABEL}{forums.FORUM_SUFFIX}</label><br />
+							<!-- ENDIF -->
+							<!-- IF not forums.S_DIGESTS_IS_FORUM -->
+							<i>{forums.FORUM_LABEL}</i><br />
+							<!-- ENDIF -->
+						<!-- ENDIF -->
+						<!-- IF forums.S_DIGESTS_DIV_CLOSE -->
+						</div>
+						<!-- ENDIF -->
+						<!-- END forums -->
+					</div>
+				</dd>
+			</dl>
+			<!-- ENDIF -->
+			<!-- ENDIF -->
+			<!-- IF S_DIGESTS_POST_FILTERS -->
+			{DISABLED_MESSAGE}
+			<dl>
+				<dt><label for="count_limit">{L_DIGESTS_COUNT_LIMIT}:</label><br /><span>{L_DIGESTS_COUNT_LIMIT_EXPLAIN}</span></dt>
+					<dd><input type="text" class="inputbox autowidth" size="5" maxlength="5" name="count_limit" id="count_limit" value="{S_DIGESTS_MAX_ITEMS}"<!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> onblur="check_word_size(this);" />
+				</dd>
+			</dl>
+			<dl>
+				<dt><label for="min_word_size">{L_DIGESTS_MIN_SIZE}:</label><br /><span>{L_DIGESTS_MIN_SIZE_EXPLAIN}</span></dt>
+					<dd><input type="text" class="inputbox autowidth" size="4" maxlength="4" name="min_word_size" id="min_word_size" value="{S_DIGESTS_MIN_SIZE}"<!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> onblur="check_word_size_min(this);" />
+				</dd>
+			</dl>
+			<dl>
+				<dt><label>{L_DIGESTS_NEW_POSTS_ONLY}:</label><br /><span>{L_DIGESTS_NEW_POSTS_ONLY_EXPLAIN}</span></dt>
+				<dd>
+					<label for="new_posts1"><input type="radio" name="new_posts" id="new_posts1" value="1"<!-- IF S_DIGESTS_NEW_POSTS_ONLY_CHECKED_YES --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> {L_YES}</label> 
+					<label for="new_posts2"><input type="radio" name="new_posts" id="new_posts2" value="0"<!-- IF S_DIGESTS_NEW_POSTS_ONLY_CHECKED_NO --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> {L_NO}</label>
+				</dd>
+			</dl>
+			<dl>
+				<dt><label>{L_DIGESTS_REMOVE_YOURS}:</label></dt>
+				<dd>
+					<label for="remove_yours1"><input type="radio" name="show_mine" id="remove_yours1" value="0"<!-- IF S_DIGESTS_REMOVE_YOURS_CHECKED_YES --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> {L_YES}</label> 
+					<label for="remove_yours2"><input type="radio" name="show_mine" id="remove_yours2" value="1"<!-- IF S_DIGESTS_REMOVE_YOURS_CHECKED_NO --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> {L_NO}</label>
+				</dd>
+			</dl>
+			<dl>
+				<dt><label>{L_DIGESTS_FILTER_FOES}:</label></dt>
+				<dd>
+					<label for="filter_foes1"><input type="radio" name="filter_foes" id="filter_foes1" value="1"<!-- IF S_DIGESTS_FILTER_FOES_CHECKED_YES --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> {L_YES}</label> 
+					<label for="filter_foes2"><input type="radio" name="filter_foes" id="filter_foes2" value="0"<!-- IF S_DIGESTS_FILTER_FOES_CHECKED_NO --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> {L_NO}</label>
+				</dd>
+			</dl>
+			<dl>
+				<dt><label>{L_DIGESTS_PRIVATE_MESSAGES_IN_DIGEST}:</label></dt>
+				<dd>
+					<label for="pms1"><input type="radio" name="pms" id="pms1" value="1"<!-- IF S_DIGESTS_PRIVATE_MESSAGES_IN_DIGEST_YES --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> onclick="check_uncheck('mark_read', this);" /> {L_YES}</label> 
+					<label for="pms2"><input type="radio" name="pms" id="pms2" value="0"<!-- IF S_DIGESTS_PRIVATE_MESSAGES_IN_DIGEST_NO --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> onclick="check_uncheck('mark_read', this);" /> {L_NO}</label>	&nbsp;<input type="checkbox" name="mark_read" id="mark_read"<!-- IF S_DIGESTS_MARK_READ_CHECKED --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> <label for="mark_read">{L_DIGESTS_MARK_READ}</label>
+				</dd>
+			</dl>
+			<!-- ENDIF -->
+			<!-- IF S_DIGESTS_ADDITIONAL_CRITERIA -->
+			{DISABLED_MESSAGE}
+			<dl>
+				<dt><label for="sort_by">{L_DIGESTS_SORT_BY}:</label><br /><span>{L_DIGESTS_SORT_BY_EXPLAIN}</span></dt>
+				<dd>
+					<select name="sort_by" id="sort_by"<!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF -->>
+						<option value="board"<!-- IF S_DIGESTS_BOARD_SELECTED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_SORT_USER_ORDER}</option>
+						<option value="standard"<!-- IF S_DIGESTS_STANDARD_SELECTED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_SORT_FORUM_TOPIC}</option>
+						<option value="standard_desc"<!-- IF S_DIGESTS_STANDARD_DESC_SELECTED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_SORT_FORUM_TOPIC_DESC}</option>
+						<option value="postdate"<!-- IF S_DIGESTS_POSTDATE_SELECTED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_SORT_POST_DATE}</option>
+						<option value="postdate_desc"<!-- IF S_DIGESTS_POSTDATE_DESC_SELECTED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_SORT_POST_DATE_DESC}</option>
+					</select>
+				</dd>
+			</dl>
+			<dl>
+				<dt><label for="max_word_size">{L_DIGESTS_MAX_DISPLAY_WORDS}:</label><br /><span>{L_DIGESTS_MAX_DISPLAY_WORDS}</span></dt>
+					<dd><input type="text" class="inputbox autowidth" size="4" maxlength="4" name="max_word_size" id="max_word_size" value="{DIGESTS_MAX_SIZE}"<!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> onblur="check_word_size_min(this);" /> &nbsp;<input type="checkbox" name="no_post_text" id="no_post_text"<!-- IF S_DIGESTS_NO_POST_TEXT_CHECKED --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> <label for="no_post_text">{L_DIGESTS_NO_POST_TEXT}</label>
+				</dd>
+			</dl>
+			<dl>
+				<dt><label>{L_DIGESTS_SEND_ON_NO_POSTS}:</label></dt>
+				<dd>
+					<label for="send_on_no_posts1"><input type="radio" name="send_on_no_posts" id="send_on_no_posts1"<!-- IF S_DIGESTS_SEND_ON_NO_POSTS_YES_CHECKED --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> value="1" /> {L_YES}</label> 
+					<label for="send_on_no_posts2"><input type="radio" name="send_on_no_posts" id="send_on_no_posts2"<!-- IF S_DIGESTS_SEND_ON_NO_POSTS_NO_CHECKED --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> value="0" /> {L_NO}</label>
+				</dd>
+			</dl>
+			<dl>
+				<dt><label>{L_DIGESTS_LASTVISIT_RESET}:</label></dt>
+				<dd>
+					<label for="lastvisit1"><input type="radio" name="lastvisit" id="lastvisit1" value="1"<!-- IF S_DIGESTS_LASTVISIT_YES_CHECKED --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> {L_YES}</label> 
+					<label for="lastvisit2"><input type="radio" name="lastvisit" id="lastvisit2" value="0"<!-- IF S_DIGESTS_LASTVISIT_NO_CHECKED --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> {L_NO}</label>
+				</dd>
+			</dl>
+			<dl>
+				<dt><label>{L_DIGESTS_SHOW_ATTACHMENTS}:</label><br /><span>{L_DIGESTS_SHOW_ATTACHMENTS_EXPLAIN}</span></dt>
+				<dd>
+					<label for="attachments1"><input type="radio" name="attachments" id="attachments1" value="1"<!-- IF S_DIGESTS_ATTACHMENTS_YES_CHECKED --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> {L_YES}</label> 
+					<label for="attachments2"><input type="radio" name="attachments" id="attachments2" value="0"<!-- IF S_DIGESTS_ATTACHMENTS_NO_CHECKED --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> {L_NO}</label>
+				</dd>
+			</dl>
+			<!-- IF not S_DIGESTS_BLOCK_IMAGES -->
+			<dl>
+				<dt><label>{L_DIGESTS_BLOCK_IMAGES}:</label><br /><span>{L_DIGESTS_BLOCK_IMAGES_EXPLAIN}</span></dt>
+				<dd>
+					<label for="blockimages1"><input type="radio" name="blockimages" id="blockimages1" value="1"<!-- IF S_DIGESTS_BLOCK_IMAGES_YES_CHECKED --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> {L_YES}</label> 
+					<label for="blockimages2"><input type="radio" name="blockimages" id="blockimages2" value="0"<!-- IF S_DIGESTS_BLOCK_IMAGES_NO_CHECKED --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> {L_NO}</label>
+				</dd>
+			</dl>
+			<!-- ENDIF -->
+			<dl>
+				<dt><label>{L_DIGESTS_TOC}:</label><br /><span>{L_DIGESTS_TOC_EXPLAIN}</span></dt>
+				<dd>
+					<label for="toc1"><input type="radio" name="toc" id="toc1" value="1"<!-- IF S_DIGESTS_TOC_YES_CHECKED --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> {L_YES}</label> 
+					<label for="toc2"><input type="radio" name="toc" id="toc2" value="0"<!-- IF S_DIGESTS_TOC_NO_CHECKED --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> {L_NO}</label>
+				</dd>
+			</dl>
+			<!-- ENDIF -->
+											
+		</fieldset>
+		<span class="corners-bottom"><span></span></span></div>
+
+</div>
+
+<!-- IF S_DIGESTS_SHOW_BUTTONS -->
+<fieldset class="submit-buttons">
+    <input class="button2" type="reset" id="reset" name="reset" value="{L_RESET}" />&nbsp;
+    <input class="button1" type="submit" id="submit" name="submit" value="{L_SUBMIT}" />
+    {S_DIGESTS_FORM_TOKEN}
+</fieldset>
+<!-- ENDIF -->
+
+<div class="copyright">
+	Powered by <a href="{U_DIGESTS_PAGE_URL}" class="postlink" onClick="window.open(this.href);return false;">{L_DIGESTS_POWERED_BY}</a>
+</div>
+
+</form>
+	
+
+				
+<!-- INCLUDE ucp_footer.html -->

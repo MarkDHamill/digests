@@ -19,3 +19,17 @@ services:
             - @template
         tags:
             - { name: event.listener }
+    phpbbservices.digests.cron.task.cron_task:
+        class: phpbbservices\digests\cron\task\mailer
+        arguments:
+            - @config
+            - @request
+            - @user
+            - @dbal.conn
+            - %core.php_ext%
+            - %core.root_path%
+            - @template
+        calls:
+            - [set_name, [cron.task.cron_task]]
+        tags:
+            - { name: cron.task }

@@ -1380,7 +1380,7 @@ class main
 				
 			break;
 			
-			case 'digests':	// The basic user interface, used to generate a syntactically valid URI for a feed
+			case 'digests':
 			default:
 			
 				$display_name = $this->user->lang['DIGESTS_TITLE'];

@@ -11,6 +11,7 @@ namespace phpbbservices\digests\migrations;
 
 class release_3_0_0 extends \phpbb\db\migration\migration
 {
+	
 	public function effectively_installed()
 	{
 		return false;
@@ -23,12 +24,70 @@ class release_3_0_0 extends \phpbb\db\migration\migration
 
 	public function update_data()
 	{
+		
 		return array(
+
+			// Remove old digest configuration variables from the 3.0 mod if they exist
+         	array('config.remove', array(
+				'digests_block_images',
+				'digests_custom_stylesheet_path',
+				'digests_digests_title',
+				'digests_enable_auto_subscriptions',
+				'digests_enable_custom_stylesheets',
+				'digests_enable_log',
+				'digests_enable_subscribe_unsubscribe',
+				'digests_enabled',
+				'digests_exclude_forums',
+				'digests_from_email_address',
+				'digests_from_email_name',
+				'digests_host',
+				'digests_include_admins',
+				'digests_include_forums',
+				'digests_include_inactive',
+				'digests_key_value',
+				'digests_max_items',
+				'digests_notify_on_mass_subscribe',
+				'digests_override_queue',
+				'digests_page_url',
+				'digests_registration_field',
+				'digests_reply_to_email_address',
+				'digests_require_key',
+				'digests_show_email',
+				'digests_show_output',
+				'digests_subscribe_all',
+				'digests_time_zone',
+				'digests_user_check_all_forums',
+				'digests_user_digest_attachments',
+				'digests_user_digest_block_images',
+				'digests_user_digest_filter_type',
+				'digests_user_digest_format',
+				'digests_user_digest_max_display_words',
+				'digests_user_digest_max_posts',
+				'digests_user_digest_min_words',
+				'digests_user_digest_new_posts_only',
+				'digests_user_digest_no_post_text',
+				'digests_user_digest_pm_mark_read',
+				'digests_user_digest_registration',
+				'digests_user_digest_remove_foes',
+				'digests_user_digest_reset_lastvisit',
+				'digests_user_digest_send_hour_gmt',
+				'digests_user_digest_send_on_no_posts',
+				'digests_user_digest_show_mine',
+				'digests_user_digest_show_pms',
+				'digests_user_digest_sortby',
+				'digests_user_digest_toc',
+				'digests_user_digest_type',
+				'digests_users_per_page',
+				'digests_version',
+				'digests_weekly_digest_day')
+			),
 		
 			// Add Digest extension configuration variables
 			array('config.add',	array('phpbbservices_digests_block_images', 0)),
+			array('config.add', array('phpbbservices_digests_cron_task_last_gc', 0)), // timestamp when the digests mailer was last run
+			array('config.add', array('phpbbservices_digests_cron_task_gc', (60 * 60))), // seconds between run; digests are sent hourly		
 			array('config.add',	array('phpbbservices_digests_custom_stylesheet_path', 'prosilver/theme/digest_stylesheet.css')),
-			array('config.add',	array('phpbbservices_digests_digests_title','Digests')),	// Probably not needed
+			//array('config.add',	array('phpbbservices_digests_digests_title','Digests')),	// Probably not needed
 			array('config.add',	array('phpbbservices_digests_enable_auto_subscriptions', 0)),
 			array('config.add',	array('phpbbservices_digests_enable_custom_stylesheets', 0)),
 			array('config.add',	array('phpbbservices_digests_enable_log', 0)),
@@ -41,7 +100,7 @@ class release_3_0_0 extends \phpbb\db\migration\migration
 			array('config.add',	array('phpbbservices_digests_include_admins', '0')),
 			array('config.add',	array('phpbbservices_digests_include_forums', '0')),
 			//array('config.add',	array('phpbbservices_digests_include_inactive', '0')), 
-			array('config.add',	array('phpbbservices_digests_key_value', '')),
+			//array('config.add',	array('phpbbservices_digests_key_value', '')),
 			array('config.add',	array('phpbbservices_digests_mailed_date', 0)),
 			array('config.add',	array('phpbbservices_digests_mailed_successfully', 1)),
 			array('config.add',	array('phpbbservices_digests_max_items', 0)),
@@ -50,10 +109,20 @@ class release_3_0_0 extends \phpbb\db\migration\migration
 			array('config.add',	array('phpbbservices_digests_page_url', 'https://phpbbservices.com/digests_wp/')),
 			array('config.add',	array('phpbbservices_digests_registration_field', 0)),
 			array('config.add',	array('phpbbservices_digests_reply_to_email_address', '')),
-			array('config.add',	array('phpbbservices_digests_require_key', 0)),
+			//array('config.add',	array('phpbbservices_digests_require_key', 0)),
 			array('config.add',	array('phpbbservices_digests_show_email', 0)),
 			array('config.add',	array('phpbbservices_digests_show_output', 1)),
 			array('config.add',	array('phpbbservices_digests_subscribe_all', '1')), 
+			array('config.add',	array('phpbbservices_digests_test', 0)),
+			array('config.add',	array('phpbbservices_digests_test_clear_spool', 1)),
+			array('config.add',	array('phpbbservices_digests_test_email_address', '')),
+			array('config.add',	array('phpbbservices_digests_test_send_to_admin', 0)),
+			array('config.add',	array('phpbbservices_digests_test_spool', 0)),
+			array('config.add',	array('phpbbservices_digests_test_day', 1)),
+			array('config.add',	array('phpbbservices_digests_test_hour', 0)),
+			array('config.add',	array('phpbbservices_digests_test_month', 1)),
+			array('config.add',	array('phpbbservices_digests_test_time_use', 0)),
+			array('config.add',	array('phpbbservices_digests_test_year', 2016)),
 			array('config.add',	array('phpbbservices_digests_time_zone', $this->config['board_timezone'])),
 			array('config.add',	array('phpbbservices_digests_user_check_all_forums', 1)),
 			array('config.add',	array('phpbbservices_digests_user_digest_attachments', 1)),
@@ -78,7 +147,8 @@ class release_3_0_0 extends \phpbb\db\migration\migration
 			array('config.add',	array('phpbbservices_digests_user_digest_type', 'DAY')),
 			array('config.add',	array('phpbbservices_digests_users_per_page', 20)),
 			array('config.add',	array('phpbbservices_digests_weekly_digest_day', 0)),
-			
+			array('config.add', array('phpbbservices_digests_cron_task_last_gc', 0)), // last run
+			array('config.add', array('phpbbservices_digests_cron_task_gc', (60 * 60))), // seconds between run; 1 hour			
 			// Add the ACP digests category under the extensions tab
 			array('module.add', array(
 				'acp',
@@ -91,7 +161,7 @@ class release_3_0_0 extends \phpbb\db\migration\migration
 				'ACP_CAT_DIGESTS',
 				array(
 					'module_basename'	=> '\phpbbservices\digests\acp\main_module',
-					'modes'				=> array('digests_general', 'digests_user_defaults', 'digests_edit_subscribers', 'digests_balance_load', 'digests_mass_subscribe_unsubscribe'),
+					'modes'				=> array('digests_general', 'digests_user_defaults', 'digests_edit_subscribers', 'digests_balance_load', 'digests_mass_subscribe_unsubscribe', 'digests_test'),
 				),
 			)),
 

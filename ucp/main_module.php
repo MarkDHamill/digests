@@ -23,30 +23,167 @@ class main_module
 
 	function main($id, $mode)
 	{
-		global $config, $db, $user, $auth, $template, $phpbb_dispatcher, $phpbb_root_path, $phpEx, $table_prefix;
+		global $config, $db, $user, $auth, $template, $table_prefix, $request;
 
-		$user->add_lang_ext('phpbbservices/digests', array('info_acp_common','common'));
+		$user->add_lang_ext('phpbbservices/digests', array('info_acp_common', 'common'));
 
-		$action	= request_var('action', '');
+		$form_key = 'phpbbservices/digests';
+		$action	= $request->variable('action', '');
 		$submit = (isset($_POST['submit'])) ? true : false;
+
+		if ($submit && !check_form_key($form_key))
+		{
+			$message = $user->lang['FORM_INVALID'] . '<br /><br />' . sprintf($user->lang['RETURN_UCP'], '<a href="' . $this->u_action . '">', '</a>');
+			trigger_error($message);	// Program exits
+		}
+		
+		if ($submit)
+		{
+
+			// Save settings for each mode
+			switch ($mode)
+			{
+
+				case constants::DIGESTS_MODE_BASICS:
+				
+					// If no subscription is desired, remove any individual forum subscriptions and save some disk space!
+					if ($request->variable('digest_type', constants::DIGESTS_DAILY_VALUE) == constants::DIGESTS_NONE_VALUE)
+					{
+						
+						$sql = 'DELETE FROM ' . $table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' 
+								WHERE user_id = ' . (int) $user->data['user_id'];
+						$result = $db->sql_query($sql);
+						
+						// If a user chooses to unsubscribe, keep track of this so the admin cannot automatically resubscribe him or her
+						// in the Administration Control Panel at some other date. That would be counterproductive.
+						$sql_ary['user_digest_has_unsubscribed'] = 1;
+						
+					}
+			
+					// Note: user_digest_send_hour_gmt is stored in UTC and translated to local time (as set in the profile). 
+					// This is different than in phpBB 2, when all times were stored in server time.
+					$local_send_hour = $request->variable('send_hour', (int) $user->data['user_digest_send_hour_gmt']) - ((int) make_tz_offset($user->data['user_timezone']));
+					if ($local_send_hour >= 24)
+					{
+						$local_send_hour = $local_send_hour - 24;
+					}
+					else if ($local_send_hour < 0)
+					{
+						$local_send_hour = $local_send_hour + 24;
+					}
+					
+					$sql_ary['user_digest_type']			= $request->variable('digest_type', $user->data['user_digest_type']);
+					$sql_ary['user_digest_format']			= $request->variable('style', $user->data['user_digest_format']);
+					$sql_ary['user_digest_send_hour_gmt']	= $local_send_hour;
+					
+				break;
+					
+				case constants::DIGESTS_MODE_FORUMS_SELECTION:
+				
+					// If there are any individual forum subscriptions, remove the old ones and create the new ones
+					$sql = 'DELETE FROM ' . $table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' 
+							WHERE user_id = ' . (int) $user->data['user_id'];
+					$result = $db->sql_query($sql);
+	
+					// Note that if "all_forums" is unchecked and bookmarks is unchecked, there are individual forum subscriptions, so they must be saved.
+					$all_forums = $request->variable('all_forums', $user->data['user_digest_filter_type']);
+					$digest_type = $request->variable('digest_type', $user->data['user_digest_type']);
+					
+					// Get the POST variables as an array the phpBB approved way so they can be parse to find individual digest subscriptions
+					$request_vars = $request->get_super_global(\phpbb\request\request_interface::POST);
+
+					if (($all_forums !== 'on') && (trim($digest_type) !== constants::DIGESTS_BOOKMARKS)) 
+					{
+						foreach ($request_vars as $key => $value) 
+						{
+							if (substr(htmlspecialchars($key), 0, 4) == 'elt_') 
+							{
+								$forum_id = intval(substr(htmlspecialchars($key), 4, strpos($key, '_', 4) - 4));
+	
+								$sql_ary = array(
+									'user_id'		=> (int) $user->data['user_id'],
+									'forum_id'		=> $forum_id);
+								$sql = 'INSERT INTO ' . $table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' ' . $db->sql_build_array('INSERT', $sql_ary);
+	
+								$result = $db->sql_query($sql);
+							}
+						}
+					}
+					unset($sql_ary);
+					
+					$sql_ary = array(
+						'user_digest_filter_type'	=> $request->variable('filtertype', $user->data['user_digest_filter_type']));
+						
+				break;
+
+				case constants::DIGESTS_MODE_POST_FILTERS:
+				
+					$mark_read = ($request->variable('mark_read', '') == 'on') ? 1 : 0;
+					$sql_ary = array(
+						'user_digest_max_posts'			=> $request->variable('count_limit', 0),
+						'user_digest_min_words'			=> $request->variable('min_word_size', 0),
+						'user_digest_new_posts_only'	=> $request->variable('new_posts', (int) $user->data['user_digest_new_posts_only']),
+						'user_digest_show_mine'			=> $request->variable('show_mine', (int) $user->data['user_digest_show_mine']),
+						'user_digest_remove_foes'		=> $request->variable('filter_foes', (int) $user->data['user_digest_remove_foes']),
+						'user_digest_show_pms'			=> $request->variable('pms', (int) $user->data['user_digest_show_pms']),
+						'user_digest_pm_mark_read'		=> $mark_read);
+						
+				break;
+					
+				case constants::DIGESTS_MODE_ADDITIONAL_CRITERIA:
+				
+					$no_post_text = ($request->variable('no_post_text', '') == 'on') ? 1 : 0;
+					$sql_ary = array(
+						'user_digest_sortby'			=> $request->variable('sort_by', $user->data['user_digest_sortby']),
+						'user_digest_max_display_words'	=> $request->variable('max_word_size', 0),
+						'user_digest_no_post_text'		=> $no_post_text,
+						'user_digest_send_on_no_posts'	=> $request->variable('send_on_no_posts', (int) $user->data['user_digest_send_on_no_posts']),
+						'user_digest_reset_lastvisit'	=> $request->variable('lastvisit', (int) $user->data['user_digest_reset_lastvisit']),
+						'user_digest_attachments'		=> $request->variable('attachments', (int) $user->data['user_digest_attachments']),
+						'user_digest_block_images'		=> $request->variable('blockimages', (int) $user->data['user_digest_block_images']),
+						'user_digest_toc'				=> $request->variable('toc', (int) $user->data['user_digest_toc']));
+
+				break;
+					
+				default:
+					trigger_error(sprintf($user->lang['UCP_DIGESTS_MODE_ERROR'], $mode) . '<br /><br />' . sprintf($user->lang['RETURN_UCP'], '<a href="' . $this->u_action . '">', '</a>'));
+				break;
+				
+			}
+			
+			// Update the user's digest settings
+			if (sizeof($sql_ary) > 0)
+			{
+				$sql = 'UPDATE ' . USERS_TABLE . '
+					SET ' . $db->sql_build_array('UPDATE', $sql_ary) . '
+					WHERE user_id = ' . (int) $user->data['user_id'];
+				$db->sql_query($sql);
+				$result = $db->sql_query($sql);
+			}
+			
+			// Send a confirmation message
+			meta_refresh(3, $this->u_action);
+			$message = $user->lang['DIGESTS_UPDATED'] . '<br /><br />' . sprintf($user->lang['RETURN_UCP'], '<a href="' . $this->u_action . '">', '</a>');
+			trigger_error($message);	// Program exits
+			
+		}
+
+		// Present the form for the appropriate digests mode
 		
 		$this->tpl_name = 'ucp_digests';
 			
-		$form_key = 'phpbbservices/digests';
 		add_form_key($form_key);
 		
-		//$error = $data = array();
-		//$s_hidden_fields = '';
+		// Don't show submit or reset buttons if there is no digest subscription, but it can be placed on the Basics page so it can be changed.
+		$show_buttons = ($user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE) ? false : true;
+		if ($mode == constants::DIGESTS_MODE_BASICS)
+		{
+			$show_buttons = true; // Buttons must appear in basics mode otherwise there is no way to resubscribe
+		}
 
-		/**
-		*	Validation types are:
-		*		string, int, bool,
-		*		script_path (absolute path in url - beginning with / and no trailing slash),
-		*		rpath (relative), rwpath (realtive, writable), path (relative path, but able to escape the root), wpath (writable)
-		*/
-		
 		switch ($mode)
 		{
+			
 			case constants::DIGESTS_MODE_BASICS:
 				$display_vars = array(
 					'title'	=> 'UCP_DIGESTS_BASICS',
@@ -69,8 +206,8 @@ class main_module
 				}
 				else
 				{
-					// Transform user_digest_send_hour_gmt to local time
-					$local_send_hour = (int) $user->data['user_digests_send_hour_gmt'] + (int) $user->data['user_timezone'];
+					// Translate the digests send hour (in GMT) to the local timezone, based on the timezone set in the user's profile.
+					$local_send_hour = (int) $user->data['user_digest_send_hour_gmt'] + (int) make_tz_offset($user->data['user_timezone']);
 				}
 				
 				// Adjust time if outside of hour range
@@ -388,7 +525,6 @@ class main_module
 					}
 					
 					$template->assign_vars(array(
-						//'DIGESTS_NO_FORUMS_CHECKED'		=> $user->lang['DIGESTS_NO_FORUMS_CHECKED'],
 						'S_DIGESTS_ALL_BY_DEFAULT'		=> $all_by_default,
 						'S_DIGESTS_ALL_DISABLED'		=> ($disabled || $user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE),
 						'S_DIGESTS_ALL_CONTROL_DISABLED' 	=> $disabled_all,
@@ -438,11 +574,10 @@ class main_module
 				}
 				
 				$template->assign_vars(array(
-					//'DIGEST_TITLE'								=> $user->lang['UCP_DIGESTS_POST_FILTERS'],
 					'L_DIGEST_COUNT_LIMIT_EXPLAIN'				=> sprintf($user->lang['DIGEST_SIZE_ERROR'],$config['digests_max_items']),
 					'LA_DIGEST_SIZE_ERROR'						=> sprintf($user->lang['DIGEST_SIZE_ERROR'],$config['digests_max_items']),
 					'S_DIGESTS_FILTER_FOES_CHECKED_NO' 			=> ($user->data['user_digest_remove_foes'] == 0),
-					'S_DIGESTS_FILTER_FOES_CHECKED_YES' 			=> ($user->data['user_digest_remove_foes'] == 1),
+					'S_DIGESTS_FILTER_FOES_CHECKED_YES' 		=> ($user->data['user_digest_remove_foes'] == 1),
 					'S_DIGESTS_MARK_READ_CHECKED' 				=> ($user->data['user_digest_pm_mark_read'] == 1),
 					'S_DIGESTS_MAX_ITEMS' 						=> $max_posts,
 					'S_DIGESTS_MIN_SIZE' 						=> ($user->data['user_digest_min_words'] == 0) ? '' : (int) $user->data['user_digest_min_words'],
@@ -450,7 +585,7 @@ class main_module
 					'S_DIGESTS_NEW_POSTS_ONLY_CHECKED_YES' 		=> ($user->data['user_digest_new_posts_only'] == 1),
 					'S_DIGESTS_PRIVATE_MESSAGES_IN_DIGEST_NO' 	=> ($user->data['user_digest_show_pms'] == 0),
 					'S_DIGESTS_PRIVATE_MESSAGES_IN_DIGEST_YES' 	=> ($user->data['user_digest_show_pms'] == 1),
-					'S_DIGESTS_REMOVE_YOURS_CHECKED_NO' 			=> ($user->data['user_digest_show_mine'] == 1),
+					'S_DIGESTS_REMOVE_YOURS_CHECKED_NO' 		=> ($user->data['user_digest_show_mine'] == 1),
 					'S_DIGESTS_REMOVE_YOURS_CHECKED_YES' 		=> ($user->data['user_digest_show_mine'] == 0),
 					'S_DIGESTS_POST_FILTERS'					=> true,
 					)
@@ -492,31 +627,13 @@ class main_module
 			
 		}
 
-		if ($submit && !check_form_key($form_key))
-		{
-			$error[] = $user->lang['FORM_INVALID'];
-		}
-		
-		// Do not write values if there is an error
-		if (sizeof($error))
-		{
-			$submit = false;
-		}
-		
 		// These template variables are used on all the pages
 		$template->assign_vars(array(
-			//'ERROR_MSG'			=> implode('<br />', $error),
 			'L_DIGESTS_DISABLED_MESSAGE' 	=> ($user->data['user_digests_type'] == constants::DIGESTS_NONE_VALUE) ? '<p><em>' . $user->lang['DIGESTS_DISABLED_MESSAGE'] . '</em></p>' : '',
 			'L_DIGESTS_MODE'				=> $user->lang['UCP_DIGESTS_' . strtoupper($mode)],
-			//'L_TITLE'						=> $user->lang[$display_vars['title']],
-			'L_TITLE_EXPLAIN'				=> $user->lang[$display_vars['title'] . '_EXPLAIN'],
 			'S_DIGESTS_CONTROL_DISABLED' 	=> ($user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE),
 			'S_DIGESTS_HOME'				=> $config['phpbbservices_digests_digests_title'],
-			//'S_DIGESTS_PAGE_URL'			=> $config['phpbbservices_digests_page_url'],
 			'S_DIGESTS_SHOW_BUTTONS'		=> $show_buttons,
-			//'S_ERROR'						=> (sizeof($error)) ? true : false,
-			'S_HIDDEN_FIELDS'				=> $s_hidden_fields,
-			//'U_ACTION'						=> $this->u_action,
 			'U_DIGESTS_ACTION'  			=> $this->u_action,
 			'U_DIGESTS_PAGE_URL'			=> $config['phpbbservices_digests_page_url'],
 			)
@@ -559,4 +676,13 @@ function make_hour_string($hour, $user_dateformat)
 	
 	return $display_hour . $suffix;
 	
+}
+
+function make_tz_offset ($tz_text)
+{
+	// This function translates a text timezone (like America/New York) to an hour offset from GMT, doing magic like figuring out DST
+	$tz = new \DateTimeZone($tz_text);
+	$datetime_tz = new \DateTime('now', $tz);
+	$timeOffset = $tz->getOffset($datetime_tz) / 3600;
+	return $timeOffset;
 }

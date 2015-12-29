@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="{S_CONTENT_ENCODING}"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" dir="{S_CONTENT_DIRECTION}" lang="{S_USER_LANG}" xml:lang="{S_USER_LANG}">
+<head>
+	<title>{L_DIGESTS_TITLE}</title>
+	<link href="{T_THEME_PATH}/print.css" rel="stylesheet" type="text/css" media="print" title="printonly" />
+	<link href="{T_STYLESHEET_LINK}" rel="stylesheet" type="text/css" media="screen, projection" />
+	<style type="text/css">
+		h1,h3,p,div { margin-top:0px; margin-bottom:0px; }
+		.box { margin:5px; padding:5px; border-style:dashed; border-width:1px; }
+		.copyright { padding:0px; }
+		table { border-collapse: collapse; }
+		th { border: 1px solid black; padding: 3px; }
+		td { border: 1px solid black; padding: 3px; }
+	</style>
+</head>
+<body dir="{S_CONTENT_DIRECTION}">
+<div id="wrap">
+	<div id="page-body">
+
+		<a id="top" name="top" accesskey="t"></a>
+		
+		<h1 style="color:#000000">{L_DIGESTS_TITLE}</h1>
+	
+		<p>{L_DIGESTS_SALUTATION} {DIGESTS_SALUTATION},</p>
+		
+		<p>{L_DIGESTS_INTRODUCTION}</p>
+		
+		{DIGESTS_TOC}
+		
+		<br />
+		<hr />
+		
+		<a name="skip"></a>{DIGESTS_CONTENT}
+		<br />
+		<hr />
+		<h3>{L_DIGESTS_YOUR_DIGEST_OPTIONS}</h3>
+		<h4>{L_UCP_DIGESTS_BASICS} {L_OPTIONS}:</h4>
+		<blockquote><div>
+			{L_DIGESTS_MAIL_FREQUENCY}: {DIGESTS_MAIL_FREQUENCY}<br />
+			{L_DIGESTS_FORMAT_FOOTER} {DIGESTS_FORMAT_FOOTER}<br />
+			{L_DIGESTS_SEND_HOUR}: {DIGESTS_SEND_HOUR}<br />
+		</div></blockquote>
+		<h4>{L_UCP_DIGESTS_FORUMS_SELECTION} {L_OPTIONS}:</h4>
+		<blockquote><div>
+			{L_DIGESTS_FILTER_TYPE}: {DIGESTS_FILTER_TYPE}<br />
+		</div></blockquote>
+		<h4>{L_UCP_DIGESTS_POST_FILTERS} {L_OPTIONS}:</h4>
+		<blockquote><div>
+			{L_DIGESTS_COUNT_LIMIT}: {DIGESTS_COUNT_LIMIT}<br />
+			{L_DIGESTS_MIN_SIZE}: {DIGESTS_MIN_SIZE} <br />
+			{L_DIGESTS_SHOW_NEW_POSTS_ONLY}: {DIGESTS_SHOW_NEW_POSTS_ONLY}<br />
+			{L_DIGESTS_REMOVE_YOURS}: {DIGESTS_REMOVE_YOURS}<br />
+			{L_DIGESTS_FILTER_FOES}: {DIGESTS_FILTER_FOES}<br />
+			{L_DIGESTS_SHOW_PMS}: {DIGESTS_SHOW_PMS}<br />
+		</div></blockquote>
+		<h4>{L_UCP_DIGESTS_ADDITIONAL_CRITERIA} {L_OPTIONS}:</h4>
+		<blockquote><div>
+			{L_DIGESTS_SORT_BY}: {DIGESTS_SORT_BY}<br />
+			{L_DIGESTS_MAX_SIZE}: {DIGESTS_MAX_SIZE}<br />
+			{L_DIGESTS_SEND_IF_NO_NEW_MESSAGES} {DIGESTS_SEND_IF_NO_NEW_MESSAGES}<br />
+			{L_DIGESTS_LASTVISIT_RESET}: {DIGESTS_LASTVISIT_RESET}<br />
+			{L_DIGESTS_SHOW_ATTACHMENTS}: {DIGESTS_SHOW_ATTACHMENTS}<br />
+			{L_DIGESTS_BLOCK_IMAGES}: {DIGESTS_BLOCK_IMAGES}<br />
+			{L_DIGESTS_TOC}: {DIGESTS_TOC_YES_NO}
+		</div></blockquote>
+		<hr />
+		<p><span class="copyright"><em>{L_DIGESTS_PUBLISH_DATE}</em></span></p>
+		<p>{DIGESTS_DISCLAIMER}</p>
+		<p><span class="copyright">{L_DIGESTS_POWERED_BY} {DIGESTS_POWERED_BY} {DIGESTS_VERSION}</span></p>
+		
+	</div>
+</div>
+</body>
+</html>

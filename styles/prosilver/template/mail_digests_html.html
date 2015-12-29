@@ -8,12 +8,12 @@
 				<!-- IF pm.S_USE_CLASSIC_TEMPLATE -->
 					<table border="1">
 						<tr>
-							<th>{L_DIGEST_LINK}</th><th>{L_DIGEST_POST_TIME}</th><th>{L_DIGEST_AUTHOR}</th><th>{L_PRIVATE_MESSAGE_2}</th>
+							<th>{L_DIGESTS_LINK}</th><th>{L_DIGESTS_POST_TIME}</th><th>{L_DIGESTS_AUTHOR}</th><th>{L_PRIVATE_MESSAGE_2}</th>
 						</tr>
 				<!-- ENDIF -->
 				<!-- IF not pm.S_USE_CLASSIC_TEMPLATE -->
 				{pm.ANCHOR}<h4>{L_SUBJECT}: {pm.PRIVATE_MESSAGE_SUBJECT}</h4>
-				<p class="author">{L_FROM}: {pm.FROM} {L_DIGEST_ON} {pm.DATE}</p>
+				<p class="author">{L_FROM}: {pm.FROM} {L_DIGESTS_ON} {pm.DATE}</p>
 				<div class="content">{pm.CONTENT}</div>
 				<!-- ELSE -->
 						<tr>
@@ -25,7 +25,7 @@
 				<!-- ENDIF -->
 				<hr />
 			<!-- BEGINELSE -->
-				<div class="content">{L_DIGEST_NO_PRIVATE_MESSAGES}</div>
+				<div class="content">{L_DIGESTS_NO_PRIVATE_MESSAGES}</div>
 				<hr />
 			<!-- END pm -->
 		<!-- ENDIF -->
@@ -37,16 +37,16 @@
 				<!-- IF forum.topic.S_USE_CLASSIC_TEMPLATE -->
 					<table border="1">
 						<tr>
-							<th>{L_DIGEST_LINK}</th><th>{L_DIGEST_POST_TIME}</th><th>{L_AUTHOR}</th><!-- IF S_SHOW_POST_TEXT --><th>{L_DIGEST_POST_TEXT}</th><!-- ENDIF -->
+							<th>{L_DIGESTS_LINK}</th><th>{L_DIGESTS_POST_TIME}</th><th>{L_AUTHOR}</th><!-- IF S_SHOW_POST_TEXT --><th>{L_DIGESTS_POST_TEXT}</th><!-- ENDIF -->
 						</tr>
 				<!-- ENDIF -->
 				<!-- BEGIN post -->
 					<!-- IF not forum.topic.S_USE_CLASSIC_TEMPLATE -->
 						<!-- IF forum.topic.post.S_FIRST_POST -->
-						<h4>{L_DIGEST_REPLY}: {forum.topic.post.SUBJECT}</h4>
+						<h4>{L_DIGESTS_REPLY}: {forum.topic.post.SUBJECT}</h4>
 						<!-- ENDIF -->
 						<!-- IF S_SHOW_POST_TEXT --><br /><!-- ENDIF -->
-						<p class="author">{forum.topic.post.ANCHOR}{L_DIGEST_BY}: {forum.topic.post.FROM} {L_DIGEST_ON} {forum.topic.post.DATE}</p>
+						<p class="author">{forum.topic.post.ANCHOR}{L_DIGESTS_BY}: {forum.topic.post.FROM} {L_DIGESTS_ON} {forum.topic.post.DATE}</p>
 						<!-- IF S_SHOW_POST_TEXT -->
 						<div class="content">{forum.topic.post.CONTENT}</div>
 						<!-- ENDIF -->
@@ -61,7 +61,7 @@
 				<!-- END post -->
 			<!-- END topic -->
 		<!-- BEGINELSE -->
-		<div class="content">{L_DIGEST_NO_POSTS}</div>
+		<div class="content">{L_DIGESTS_NO_POSTS}</div>
 		<!-- END forum -->
 	</div>
 </div>

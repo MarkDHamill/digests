@@ -59,8 +59,8 @@ class main_module
 						'phpbbservices_digests_max_items'					=> array('lang' => 'DIGESTS_MAX_ITEMS',							'validate' => 'int:0',	'type' => 'text:5:5', 'explain' => true),
 						'phpbbservices_digests_enable_custom_stylesheets'	=> array('lang' => 'DIGESTS_ENABLE_CUSTOM_STYLESHEET',			'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_custom_stylesheet_path'		=> array('lang' => 'DIGESTS_CUSTOM_STYLESHEET_PATH',				'validate' => 'string',	'type' => 'text:40:255', 'explain' => true),
-						'phpbbservices_digests_require_key'					=> array('lang' => 'DIGESTS_REQUIRE_KEY',						'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
-						'phpbbservices_digests_key_value'					=> array('lang' => 'DIGESTS_KEY_VALUE',							'validate' => 'string',	'type' => 'text:40:255', 'explain' => true),
+						//'phpbbservices_digests_require_key'					=> array('lang' => 'DIGESTS_REQUIRE_KEY',						'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
+						//'phpbbservices_digests_key_value'					=> array('lang' => 'DIGESTS_KEY_VALUE',							'validate' => 'string',	'type' => 'text:40:255', 'explain' => true),
 						'phpbbservices_digests_override_queue'				=> array('lang' => 'DIGESTS_OVERRIDE_QUEUE',						'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_from_email_address'			=> array('lang' => 'DIGESTS_FROM_EMAIL_ADDRESS',					'validate' => 'string',	'type' => 'text:40:255', 'explain' => true),
 						'phpbbservices_digests_from_email_name'				=> array('lang' => 'DIGESTS_FROM_EMAIL_NAME',					'validate' => 'string',	'type' => 'text:40:255', 'explain' => true),
@@ -278,12 +278,14 @@ class main_module
 					'USERNAME_SELECTED'			=> $username_selected,
 				));
 	
+				$gmt_offset = make_tz_offset($config['board_timezone']);	// Returns offset in hours from GMT for a timezone
+				
 				$sql = 'SELECT *, CASE
-					WHEN user_digest_send_hour_gmt + ' . ($config['board_timezone'] + $config['board_dst']) . ' >= 24 THEN
-						 user_digest_send_hour_gmt + ' . ($config['board_timezone'] + $config['board_dst']) . ' - 24  
-					WHEN user_digest_send_hour_gmt + ' . ($config['board_timezone'] + $config['board_dst']) . ' < 0 THEN
-						 user_digest_send_hour_gmt + ' . ($config['board_timezone'] + $config['board_dst']) . ' + 24 
-					ELSE user_digest_send_hour_gmt + ' . ($config['board_timezone'] + $config['board_dst']) . '
+					WHEN user_digest_send_hour_gmt + ' . $gmt_offset . ' >= 24 THEN
+						 user_digest_send_hour_gmt + ' . $gmt_offset . ' - 24  
+					WHEN user_digest_send_hour_gmt + ' . $gmt_offset . ' < 0 THEN
+						 user_digest_send_hour_gmt + ' . $gmt_offset . ' + 24 
+					ELSE user_digest_send_hour_gmt + ' . $gmt_offset . '
 					END AS send_hour_board
 					FROM ' . USERS_TABLE . "
 					WHERE $subscribe_sql $member_sql user_type <> " . USER_IGNORE . "
@@ -333,7 +335,7 @@ class main_module
 					}
 					
 					// Calculate a digest send hour in board time
-					$send_hour_board = str_replace('.',':', floor($row['user_digest_send_hour_gmt']) + $config['board_timezone'] + $config['board_dst']);
+					$send_hour_board = str_replace('.',':', floor($row['user_digest_send_hour_gmt']) + $gmt_offset);
 					if ($send_hour_board >= 24)
 					{
 						$send_hour_board = $send_hour_board - 24;
@@ -344,7 +346,6 @@ class main_module
 					}
 					
 					// Create an array of GMT offsets from board time zone
-					$gmt_offset = $config['board_timezone'] + $config['board_dst'];
 					for($i=0;$i<24;$i++)
 					{
 						if (($i - $gmt_offset) < 0)
@@ -687,6 +688,27 @@ class main_module
 				);
 			break;
 
+			case 'digests_test':
+				$display_vars = array(
+					'title'	=> 'ACP_DIGESTS_TEST',
+					'vars'	=> array(
+						'legend1'									=> 'GENERAL_OPTIONS',
+						'phpbbservices_digests_test'				=> array('lang' => 'DIGESTS_RUN_TEST', 'validate' => 'bool', 'type' => 'radio:yes_no', 'explain' => false),
+						'phpbbservices_digests_test_spool'			=> array('lang' => 'DIGESTS_RUN_TEST_SPOOL', 'validate' => 'bool', 'type' => 'radio:yes_no', 'explain' => true),
+						'phpbbservices_digests_test_clear_spool'	=> array('lang' => 'DIGESTS_RUN_TEST_CLEAR_SPOOL', 'validate' => 'bool', 'type' => 'radio:yes_no', 'explain' => true),
+						'phpbbservices_digests_test_send_to_admin'	=> array('lang' => 'DIGESTS_RUN_TEST_SEND_TO_ADMIN', 'validate' => 'bool', 'type' => 'radio:yes_no', 'explain' => true),
+						'phpbbservices_digests_test_email_address'	=> array('lang' => 'DIGESTS_RUN_TEST_EMAIL_ADDRESS', 'validate' => 'string',	'type' => 'email:25:100', 'explain' => true),
+						'legend2'									=> 'DIGESTS_RUN_TEST_OPTIONS',
+						'phpbbservices_digests_test_time_use'		=> array('lang' => 'DIGESTS_RUN_TEST_TIME_USE', 'validate' => 'bool', 'type' => 'radio:yes_no', 'explain' => true),
+						'phpbbservices_digests_test_year'			=> array('lang' => 'DIGESTS_RUN_TEST_YEAR', 'validate' => 'int:2000:2030', 'type' => 'text:4:4', 'explain' => true),
+						'phpbbservices_digests_test_month'			=> array('lang' => 'DIGESTS_RUN_TEST_MONTH', 'validate' => 'int:1:12', 'type' => 'text:2:2', 'explain' => true),
+						'phpbbservices_digests_test_day'			=> array('lang' => 'DIGESTS_RUN_TEST_DAY', 'validate' => 'int:1:31', 'type' => 'text:2:2', 'explain' => true),
+						'phpbbservices_digests_test_hour'			=> array('lang' => 'DIGESTS_RUN_TEST_HOUR',	'validate' => 'int:0:23',	'type' => 'text:2:2', 'explain' => true),
+				)
+				);
+								
+			break;
+				
 			default:
 				trigger_error('NO_MODE', E_USER_ERROR);
 			break;
@@ -1267,23 +1289,104 @@ class main_module
 
 		}
 
+		if ($submit && $mode == 'digests_test')
+		{
+			
+			// Create an instance of the digest mailer
+			$mailer = new \phpbbservices\digests\cron\task\mailer($config, $request, $user, $db, $phpEx, $phpbb_root_path, $template);
+			
+			// Clear the digests cache folder, if so instructed
+			$all_cleared = true;
+			if ($config['phpbbservices_digests_test_clear_spool'])
+			{
+				
+				$files = glob('../ext/phpbbservices/digests/cache/*'); // get all file names in the extension's cache folder
+				
+				if ($files)
+				{
+					foreach ($files as $file)
+					{
+						// iterate files
+						if (is_file($file))
+						{
+							$deleted = unlink($file); // delete file
+							if (!$deleted)
+							{
+								$all_cleared = false;
+							}
+						}
+					}
+				}
+				else if ($files === false)	// An actual error occurred with the glob command
+				{
+					$all_cleared = false;
+				}
+				
+			}
+			
+			// Call the mailer's run method. The logic for sending a digest is embedded in this method, which is normally run as a cron task.
+			if ($all_cleared)
+			{
+				//$saved_style = $template->get_user_style();	// Running the mailer will set a custom style, so save the current style
+				$success = $mailer->run();
+			}
+		}
+	
 		if ($submit)
 		{
-			add_log('admin', 'LOG_CONFIG_' . strtoupper($mode));
-
-			if (!isset($message))
-			{
-				$message = $user->lang('CONFIG_UPDATED');
-			}
+			
 			$message_type = E_USER_NOTICE;
-			trigger_error($message . adm_back_link($this->u_action), $message_type);
+			if ($mode == 'digests_test')
+			{
+				if (isset($all_cleared) && !$all_cleared)
+				{
+					$message_type = E_USER_WARNING;
+					add_log('admin', 'LOG_CONFIG_DIGESTS_CLEAR_SPOOL_ERROR');
+					$message = $user->lang['LOG_CONFIG_DIGESTS_CLEAR_SPOOL_ERROR'];
+					trigger_error($message . adm_back_link($this->u_action), $message_type);
+				}
+				else if (isset($good_date) && !$good_date)
+				{
+					$message_type = E_USER_WARNING;
+					$message = $user->lang['DIGESTS_ILLOGICAL_DATE'];
+					trigger_error($message . adm_back_link($this->u_action), $message_type);
+				}
+				else if (!$config['phpbbservices_digests_test'])
+				{
+					$message = $user->lang['DIGESTS_MAILER_NOT_RUN'];
+					trigger_error($message . adm_back_link($this->u_action), $message_type);
+				}
+				else if (!$success)
+				{
+					$message_type = E_USER_WARNING;
+					add_log('admin', 'LOG_CONFIG_DIGESTS_MAILER_RAN_WITH_ERROR');
+					$message = $user->lang['LOG_CONFIG_DIGESTS_MAILER_RAN_WITH_ERROR'];
+					trigger_error($message . adm_back_link($this->u_action), $message_type);	// Error here
+				}
+				else
+				{
+					$message = $user->lang['DIGESTS_MAILER_RAN_SUCCESSFULLY'];
+					trigger_error($message . adm_back_link($this->u_action), $message_type);
+				}
+			}
+			else
+			{
+				add_log('admin', 'LOG_CONFIG_' . strtoupper($mode));
+				if (!isset($message))
+				{
+					$message = $user->lang('CONFIG_UPDATED');
+				}
+				$message_type = E_USER_NOTICE;
+				trigger_error($message . adm_back_link($this->u_action), $message_type);
+			}
 		}
 
 		$this->tpl_name = 'acp_digests';
 		$this->page_title = $display_vars['title'];
 
 		$template->assign_vars(array(
-			'ERROR_MSG'			=> implode('<br />', $error),
+			'ERROR_MSG'			=> (is_array($error) ? implode('<br />', $error) : $error),
+			'L_MESSAGE'			=> $error,
 			'L_TITLE'			=> $user->lang[$display_vars['title']],
 			'L_TITLE_EXPLAIN'	=> $user->lang[$display_vars['title'] . '_EXPLAIN'],
 			'S_ERROR'			=> (sizeof($error)) ? true : false,
@@ -1437,6 +1540,21 @@ class main_module
 		$digest_sort_order .= '<option value="' . constants::DIGESTS_SORTBY_POSTDATE_DESC . '"' . $selected. '>' . $user->lang['DIGESTS_SORT_POST_DATE_DESC'] . '</option>';
 		
 		return $digest_sort_order;
-	} 
+	}
 
+	function validateDate($date, $format = 'Y-m-d')
+	{
+		$dt = DateTime::createFromFormat($format, $date);
+		return $dt && $dt->format($format) == $date;
+	}	
+	
+}
+
+function make_tz_offset ($tz_text)
+{
+	// This function translates a text timezone (like America/New York) to an hour offset from GMT, doing magic like figuring out DST
+	$tz = new \DateTimeZone($tz_text);
+	$datetime_tz = new \DateTime('now', $tz);
+	$timeOffset = $tz->getOffset($datetime_tz) / 3600;
+	return $timeOffset;
 }

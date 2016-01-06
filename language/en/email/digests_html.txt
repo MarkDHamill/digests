@@ -1,24 +1,28 @@
-<?xml version="1.0" encoding="{S_CONTENT_ENCODING}"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" dir="{S_CONTENT_DIRECTION}" lang="{S_USER_LANG}" xml:lang="{S_USER_LANG}">
-<head>
+<!DOCTYPE html>
+<head dir="{S_CONTENT_DIRECTION}" lang="{S_USER_LANG}">
+	<meta charset="utf-8">
 	<title>{L_DIGESTS_TITLE}</title>
 	<link href="{T_THEME_PATH}/print.css" rel="stylesheet" type="text/css" media="print" title="printonly" />
-	<link href="{T_STYLESHEET_LINK}" rel="stylesheet" type="text/css" media="screen, projection" />
+	<link href="{T_STYLESHEET_LINK}" rel="stylesheet" type="text/css" media="screen" />
 	<style type="text/css">
-		h1,h3,p,div { margin-top:0px; margin-bottom:0px; }
+		blockquote { background-image: none; }
+		h1,h3,p,div { margin-top:5px; margin-bottom:5px; }
+		ol,ul { list-style-position: inside; }
+		table { border-collapse: collapse; border: 1px solid black}
+		td,th { border: 1px solid black; padding: 3px; }
+		th { font-weight:800; }
 		.box { margin:5px; padding:5px; border-style:dashed; border-width:1px; }
 		.copyright { padding:0px; }
-		table { border-collapse: collapse; }
-		th { border: 1px solid black; padding: 3px; }
-		td { border: 1px solid black; padding: 3px; }
+		.post { padding: 0px; }
+		.postbody { width: 100%; }
+		.postbody h3 { float: none; }
 	</style>
 </head>
 <body dir="{S_CONTENT_DIRECTION}">
 <div id="wrap">
 	<div id="page-body">
 
-		<a id="top" name="top" accesskey="t"></a>
+		<a id="top" accesskey="t"></a>
 		
 		<h1 style="color:#000000">{L_DIGESTS_TITLE}</h1>
 	
@@ -31,7 +35,7 @@
 		<br />
 		<hr />
 		
-		<a name="skip"></a>{DIGESTS_CONTENT}
+		{DIGESTS_CONTENT}
 		<br />
 		<hr />
 		<h3>{L_DIGESTS_YOUR_DIGEST_OPTIONS}</h3>
@@ -44,6 +48,7 @@
 		<h4>{L_UCP_DIGESTS_FORUMS_SELECTION} {L_OPTIONS}:</h4>
 		<blockquote><div>
 			{L_DIGESTS_FILTER_TYPE}: {DIGESTS_FILTER_TYPE}<br />
+			{L_DIGESTS_FORUMS_WANTED}: {DIGESTS_FORUMS_WANTED}<br />
 		</div></blockquote>
 		<h4>{L_UCP_DIGESTS_POST_FILTERS} {L_OPTIONS}:</h4>
 		<blockquote><div>
@@ -67,7 +72,7 @@
 		<hr />
 		<p><span class="copyright"><em>{L_DIGESTS_PUBLISH_DATE}</em></span></p>
 		<p>{DIGESTS_DISCLAIMER}</p>
-		<p><span class="copyright">{L_DIGESTS_POWERED_BY} {DIGESTS_POWERED_BY} {DIGESTS_VERSION}</span></p>
+		<p><span class="copyright">{L_DIGESTS_POWERED_BY_TEXT} {DIGESTS_POWERED_BY}</span></p>
 		
 	</div>
 </div>

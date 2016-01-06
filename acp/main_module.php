@@ -49,9 +49,9 @@ class main_module
 					'vars'	=> array(
 						'legend1'								=> '',
 						//'phpbbservices_digests_enabled'					=> array('lang' => 'DIGESTS_ENABLED',							'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
-						'phpbbservices_digests_show_output'					=> array('lang' => 'DIGESTS_SHOW_OUTPUT',						'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
-						'phpbbservices_digests_show_email'					=> array('lang' => 'DIGESTS_SHOW_EMAIL',						'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
+						//'phpbbservices_digests_show_output'					=> array('lang' => 'DIGESTS_SHOW_OUTPUT',						'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_enable_log'					=> array('lang' => 'DIGESTS_ENABLE_LOG',							'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
+						'phpbbservices_digests_show_email'					=> array('lang' => 'DIGESTS_SHOW_EMAIL',						'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_enable_auto_subscriptions'	=> array('lang' => 'DIGESTS_ENABLE_AUTO_SUBSCRIPTIONS',			'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_registration_field'			=> array('lang' => 'DIGESTS_REGISTRATION_FIELD',			'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_block_images'				=> array('lang' => 'DIGESTS_BLOCK_IMAGES',						'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
@@ -1292,15 +1292,19 @@ class main_module
 		if ($submit && $mode == 'digests_test')
 		{
 			
-			// Create an instance of the digest mailer
-			$mailer = new \phpbbservices\digests\cron\task\mailer($config, $request, $user, $db, $phpEx, $phpbb_root_path, $template);
+			// Make sure run date is valid, if a run date was requested.
+			$good_date = true;
+			if ($config['phpbbservices_digests_test_time_use'])
+			{
+				$good_date = checkdate($config['phpbbservices_digests_test_month'], $config['phpbbservices_digests_test_day'], $config['phpbbservices_digests_test_year']);
+			}
 			
 			// Clear the digests cache folder, if so instructed
 			$all_cleared = true;
 			if ($config['phpbbservices_digests_test_clear_spool'])
 			{
 				
-				$files = glob('../ext/phpbbservices/digests/cache/*'); // get all file names in the extension's cache folder
+				$files = glob('./../ext/phpbbservices/digests/cache/*'); // get all file names in the extension's cache folder
 				
 				if ($files)
 				{
@@ -1321,15 +1325,28 @@ class main_module
 				{
 					$all_cleared = false;
 				}
-				
+			
+				if ($config['phpbbservices_digests_enable_log'])
+				{
+					if ($all_cleared)
+					{
+						add_log('admin', 'LOG_CONFIG_DIGESTS_CACHE_CLEARED');
+					}
+					else
+					{
+						add_log('admin', 'LOG_CONFIG_DIGESTS_CLEAR_SPOOL_ERROR');
+					}
+				}
+			
 			}
 			
-			// Call the mailer's run method. The logic for sending a digest is embedded in this method, which is normally run as a cron task.
-			if ($all_cleared)
+			// Create a mailer object and call its run method. The logic for sending a digest is embedded in this method, which is normally run as a cron task.
+			if ($good_date && $config['phpbbservices_digests_test'])
 			{
-				//$saved_style = $template->get_user_style();	// Running the mailer will set a custom style, so save the current style
+				$mailer = new \phpbbservices\digests\cron\task\mailer($config, $request, $user, $db, $phpEx, $phpbb_root_path, $template, $auth, $table_prefix);
 				$success = $mailer->run();
 			}
+			
 		}
 	
 		if ($submit)
@@ -1338,47 +1355,51 @@ class main_module
 			$message_type = E_USER_NOTICE;
 			if ($mode == 'digests_test')
 			{
-				if (isset($all_cleared) && !$all_cleared)
+				if ($config['board_disable'])
 				{
 					$message_type = E_USER_WARNING;
-					add_log('admin', 'LOG_CONFIG_DIGESTS_CLEAR_SPOOL_ERROR');
-					$message = $user->lang['LOG_CONFIG_DIGESTS_CLEAR_SPOOL_ERROR'];
-					trigger_error($message . adm_back_link($this->u_action), $message_type);
+					$message = strip_tags($user->lang['LOG_CONFIG_DIGESTS_BOARD_DISABLED']);
+				}
+				else if (isset($all_cleared) && !$all_cleared)
+				{
+					$message_type = E_USER_WARNING;
+					$message = strip_tags($user->lang['LOG_CONFIG_DIGESTS_CLEAR_SPOOL_ERROR']);
 				}
 				else if (isset($good_date) && !$good_date)
 				{
 					$message_type = E_USER_WARNING;
 					$message = $user->lang['DIGESTS_ILLOGICAL_DATE'];
-					trigger_error($message . adm_back_link($this->u_action), $message_type);
 				}
-				else if (!$config['phpbbservices_digests_test'])
+				else if (!$config['phpbbservices_digests_test'] && !$config['phpbbservices_digests_test_spool'])
 				{
 					$message = $user->lang['DIGESTS_MAILER_NOT_RUN'];
-					trigger_error($message . adm_back_link($this->u_action), $message_type);
+				}
+				else if (!$config['phpbbservices_digests_test'] || $config['phpbbservices_digests_test_spool'])
+				{
+					$message = $user->lang['DIGESTS_MAILER_SPOOLED'];
 				}
 				else if (!$success)
 				{
 					$message_type = E_USER_WARNING;
 					add_log('admin', 'LOG_CONFIG_DIGESTS_MAILER_RAN_WITH_ERROR');
-					$message = $user->lang['LOG_CONFIG_DIGESTS_MAILER_RAN_WITH_ERROR'];
-					trigger_error($message . adm_back_link($this->u_action), $message_type);	// Error here
+					$message = strip_tags($user->lang['LOG_CONFIG_DIGESTS_MAILER_RAN_WITH_ERROR']);
 				}
 				else
 				{
 					$message = $user->lang['DIGESTS_MAILER_RAN_SUCCESSFULLY'];
-					trigger_error($message . adm_back_link($this->u_action), $message_type);
 				}
 			}
 			else
 			{
 				add_log('admin', 'LOG_CONFIG_' . strtoupper($mode));
-				if (!isset($message))
-				{
-					$message = $user->lang('CONFIG_UPDATED');
-				}
-				$message_type = E_USER_NOTICE;
-				trigger_error($message . adm_back_link($this->u_action), $message_type);
 			}
+			
+			if (!isset($message))
+			{
+				$message = $user->lang('CONFIG_UPDATED');
+			}
+			trigger_error($message . adm_back_link($this->u_action), $message_type);
+				
 		}
 
 		$this->tpl_name = 'acp_digests';
@@ -1542,12 +1563,6 @@ class main_module
 		return $digest_sort_order;
 	}
 
-	function validateDate($date, $format = 'Y-m-d')
-	{
-		$dt = DateTime::createFromFormat($format, $date);
-		return $dt && $dt->format($format) == $date;
-	}	
-	
 }
 
 function make_tz_offset ($tz_text)

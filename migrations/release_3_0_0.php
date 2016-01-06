@@ -111,7 +111,7 @@ class release_3_0_0 extends \phpbb\db\migration\migration
 			array('config.add',	array('phpbbservices_digests_reply_to_email_address', '')),
 			//array('config.add',	array('phpbbservices_digests_require_key', 0)),
 			array('config.add',	array('phpbbservices_digests_show_email', 0)),
-			array('config.add',	array('phpbbservices_digests_show_output', 1)),
+			//array('config.add',	array('phpbbservices_digests_show_output', 1)),
 			array('config.add',	array('phpbbservices_digests_subscribe_all', '1')), 
 			array('config.add',	array('phpbbservices_digests_test', 0)),
 			array('config.add',	array('phpbbservices_digests_test_clear_spool', 1)),
@@ -147,8 +147,6 @@ class release_3_0_0 extends \phpbb\db\migration\migration
 			array('config.add',	array('phpbbservices_digests_user_digest_type', 'DAY')),
 			array('config.add',	array('phpbbservices_digests_users_per_page', 20)),
 			array('config.add',	array('phpbbservices_digests_weekly_digest_day', 0)),
-			array('config.add', array('phpbbservices_digests_cron_task_last_gc', 0)), // last run
-			array('config.add', array('phpbbservices_digests_cron_task_gc', (60 * 60))), // seconds between run; 1 hour			
 			// Add the ACP digests category under the extensions tab
 			array('module.add', array(
 				'acp',
@@ -262,6 +260,5 @@ class release_3_0_0 extends \phpbb\db\migration\migration
 
 		);
 	}
-	
 	
 }

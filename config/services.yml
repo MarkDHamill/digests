@@ -29,6 +29,8 @@ services:
             - %core.php_ext%
             - %core.root_path%
             - @template
+            - @auth
+            - %core.table_prefix
         calls:
             - [set_name, [cron.task.cron_task]]
         tags:

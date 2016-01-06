@@ -1,0 +1,38 @@
+
+<!-- IF S_SHOW_PMS -->
+{L_YOU_HAVE_PRIVATE_MESSAGES}
+<!-- BEGIN pm -->
+{pm.NEW_UNREAD}{L_PRIVATE_MESSAGE}
+{L_SUBJECT}: {pm.PRIVATE_MESSAGE_SUBJECT}
+{L_FROM}: {pm.FROM} {L_DIGESTS_ON} {pm.DATE}
+{pm.CONTENT}
+<!-- BEGINELSE -->
+{L_DIGESTS_NO_PRIVATE_MESSAGES}
+<!-- END pm -->
+____________________________________________________________
+<!-- ENDIF -->
+
+<!-- BEGIN forum -->
+
+
+{L_FORUM}: {forum.FORUM}
+
+<!-- BEGIN topic -->
+
+
+{L_TOPIC}: {forum.topic.TOPIC}
+
+<!-- BEGIN post -->
+<!-- IF not forum.topic.post.S_FIRST_POST -->
+
+{L_DIGESTS_REPLY}: {forum.topic.post.SUBJECT}
+<!-- ENDIF -->
+{L_DIGESTS_BY}: {forum.topic.post.FROM} {L_DIGESTS_ON} {forum.topic.post.DATE}
+<!-- IF S_SHOW_POST_TEXT -->{forum.topic.post.CONTENT}<!-- ENDIF -->
+<!-- END post -->
+<!-- END topic -->
+
+<!-- BEGINELSE -->
+
+{L_DIGESTS_NO_POSTS}
+<!-- END forum -->

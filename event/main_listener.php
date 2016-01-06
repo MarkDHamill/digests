@@ -48,6 +48,7 @@ class main_listener implements EventSubscriberInterface
 	{
 		return array(
 			'core.user_setup'						=> 'load_language_on_setup',
+			'ucp_register_profile_fields_before'		=> 'ucp_register_profile_fields_before',
 		);
 	}
 
@@ -61,4 +62,18 @@ class main_listener implements EventSubscriberInterface
 		$event['lang_set_ext'] = $lang_set_ext;
 	}
    	
+	public function ucp_register_profile_fields_before($event)
+	{
+
+		$this->template->assign_vars(array(
+			// Begin Digest Mod
+			'S_DIGESTS'							=> (!$this->config['phpbbservices_digests_enable_auto_subscriptions'] && $this->config['phpbbservices_digests_registration_field']) ? true : false,
+			'S_DIGESTS_REGISTER_CHECKED_YES' 	=> ($this->config['phpbbservices_digests_user_digest_registration']) ? true : false,
+			'S_DIGESTS_REGISTER_CHECKED_NO' 	=> ($this->config['phpbbservices_digests_user_digest_registration']) ? false : true,
+			// End Digest Mod
+			)
+		);
+		
+	}
+
 }

@@ -340,7 +340,7 @@ function check_word_size (field)
 				</dd>
 			</dl>
 			<dl>
-				<dt><label for="max_word_size">{L_DIGESTS_MAX_DISPLAY_WORDS}:</label><br /><span>{L_DIGESTS_MAX_DISPLAY_WORDS}</span></dt>
+				<dt><label for="max_word_size">{L_DIGESTS_MAX_DISPLAY_WORDS}:</label><br /><span>{L_DIGESTS_MAX_DISPLAY_WORDS_EXPLAIN}</span></dt>
 					<dd><input type="text" class="inputbox autowidth" size="4" maxlength="4" name="max_word_size" id="max_word_size" value="{DIGESTS_MAX_SIZE}"<!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> onblur="check_word_size_min(this);" /> &nbsp;<input type="checkbox" name="no_post_text" id="no_post_text"<!-- IF S_DIGESTS_NO_POST_TEXT_CHECKED --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> <label for="no_post_text">{L_DIGESTS_NO_POST_TEXT}</label>
 				</dd>
 			</dl>
@@ -352,7 +352,7 @@ function check_word_size (field)
 				</dd>
 			</dl>
 			<dl>
-				<dt><label>{L_DIGESTS_LASTVISIT_RESET}:</label></dt>
+				<dt><label>{L_DIGESTS_LASTVISIT_RESET}:</label><br /><span>{L_DIGESTS_LASTVISIT_RESET_EXPLAIN}</span></dt>
 				<dd>
 					<label for="lastvisit1"><input type="radio" name="lastvisit" id="lastvisit1" value="1"<!-- IF S_DIGESTS_LASTVISIT_YES_CHECKED --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> {L_YES}</label> 
 					<label for="lastvisit2"><input type="radio" name="lastvisit" id="lastvisit2" value="0"<!-- IF S_DIGESTS_LASTVISIT_NO_CHECKED --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> {L_NO}</label>
@@ -397,7 +397,7 @@ function check_word_size (field)
 <!-- ENDIF -->
 
 <div class="copyright">
-	Powered by <a href="{U_DIGESTS_PAGE_URL}" class="postlink" onClick="window.open(this.href);return false;">{L_DIGESTS_POWERED_BY}</a>
+	{L_DIGESTS_POWERED_BY_TEXT} <a href="{U_DIGESTS_PAGE_URL}" class="postlink" onClick="window.open(this.href);return false;">{L_DIGESTS_POWERED_BY}</a>
 </div>
 
 </form>

@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Digests
-* @copyright (c) 2015 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2016 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -11,11 +11,9 @@ namespace phpbbservices\digests\cron\task;
 
 use phpbbservices\digests\constants\constants;
 
-use includes\functions\functions_messenger;
+use phpbbservices\digests\includes\html_messenger;
 
-//use phpbb\template\template;
-
-class mailer extends \phpbb\cron\task\base
+class digests extends \phpbb\cron\task\base
 {
 	
 	protected $config;
@@ -66,6 +64,16 @@ class mailer extends \phpbb\cron\task\base
 	}
 	
 	/**
+	* Indicates to phpBB's cron utility if this task should be run. Yes, if it's been more than an hour since it was last run.
+	*
+	* @return true if it should be run, false if it should not be run.
+	*/
+    public function should_run()
+    {
+        return $this->config['phpbbservices_digests_cron_task_last_gc'] + $this->config['phpbbservices_digests_cron_task_gc'] < time();
+    }
+	
+	/**
 	* Runs this cron task.
 	*
 	* @return true if successful, false if an error occurred
@@ -81,9 +89,8 @@ class mailer extends \phpbb\cron\task\base
 		//                                                                                                                  //
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		
-		include($this->phpbb_root_path . 'includes/functions_messenger.' . $this->phpEx); // Messenger class sends the emails
-		
 		$run_successful = true;	// Assume a successful run
+		$cache_path = $extension_path . './../ext/phpbbservices/digests/cache/';
 
 		// We need to distinguish if the request is being made from a system cron (typical) or by the ACP's manual mailer (atypical). We can do this
 		// by looking at the referer and verifying the call was from the ACP for the correct extension and module mode.
@@ -91,9 +98,14 @@ class mailer extends \phpbb\cron\task\base
 		$referer = $this->request->server('HTTP_REFERER');
 		$this->manual_mode = (strstr($referer, 'adm/index.php') && strstr($referer, 'i=-phpbbservices-digests-acp-main_module') && strstr($referer, 'mode=digests_test')) ? true : false;
 
-		if (!$this->manual_mode)
+		if ($this->manual_mode)
+		{
+			$email_templates_path = './../ext/phpbbservices/digests/language/en/email/';
+		}
+		else
 		{
 			$this->user->add_lang_ext('phpbbservices/digests', array('info_acp_common', 'common'));	// Language strings are already loaded if in manual mode
+			$email_templates_path = './ext/phpbbservices/digests/language/en/email/';
 		}
 		
 		// If the board is currently disabled, digests should also be disabled too, don't ya think?
@@ -226,16 +238,9 @@ class mailer extends \phpbb\cron\task\base
 					"' ORDER BY user_lang";
 		}
 		
-		if ($this->config['phpbbservices_digests_override_queue'])
-		{
-			$use_mail_queue = false;
-		}
-		else
-		{
-			$use_mail_queue = ($this->config['email_package_size'] > 0) ? true : false;
-		}
+		$use_mail_queue = ($this->config['email_package_size'] > 0) ? true : false;
 
-		$messenger = new \messenger($use_mail_queue);
+		$html_messenger = new \phpbbservices\digests\includes\html_messenger($use_mail_queue);
 
 		$result = $this->db->sql_query($sql);
 		$rowset = $this->db->sql_fetchrowset($result);	// Gets users and their metadata that are receiving digests for this hour
@@ -338,7 +343,7 @@ class mailer extends \phpbb\cron\task\base
 			
 				case constants::DIGESTS_TEXT_VALUE:
 					$format = $this->user->lang['DIGESTS_FORMAT_TEXT'];
-					$messenger->template('digests_text', '', './../ext/phpbbservices/digests/language/en/email/');
+					$html_messenger->template('digests_text', '', $email_templates_path);
 					$is_html = false;
 					$disclaimer = str_replace('&apos;', "'", html_entity_decode(strip_tags(sprintf($this->user->lang['DIGESTS_DISCLAIMER'], $this->board_url, $this->config['sitename'], $this->board_url, $this->phpEx, $this->config['board_contact'], $this->config['sitename']))));
 					$powered_by = $this->config['phpbbservices_digests_host'];
@@ -347,7 +352,7 @@ class mailer extends \phpbb\cron\task\base
 				
 				case constants::DIGESTS_PLAIN_VALUE:
 					$format = $this->user->lang['DIGESTS_FORMAT_PLAIN'];
-					$messenger->template('digests_plain_html', '', './../ext/phpbbservices/digests/language/en/email/');
+					$html_messenger->template('digests_plain_html', '', $email_templates_path);
 					$is_html = true;
 					$disclaimer = sprintf($this->user->lang['DIGESTS_DISCLAIMER'], $this->board_url, $this->config['sitename'], $this->board_url, $this->phpEx, $this->config['board_contact'], $this->config['sitename']);
 					$powered_by = sprintf("<a href=\"%s\">%s</a>", $this->config['phpbbservices_digests_page_url'], $this->config['phpbbservices_digests_host']);
@@ -356,7 +361,7 @@ class mailer extends \phpbb\cron\task\base
 				
 				case constants::DIGESTS_PLAIN_CLASSIC_VALUE:
 					$format = $this->user->lang['DIGESTS_FORMAT_PLAIN_CLASSIC'];
-					$messenger->template('digests_plain_html', '', './../ext/phpbbservices/digests/language/en/email/');
+					$html_messenger->template('digests_plain_html', '', $email_templates_path);
 					$is_html = true;
 					$disclaimer = sprintf($this->user->lang['DIGESTS_DISCLAIMER'], $this->board_url, $this->config['sitename'], $this->board_url, $this->phpEx, $this->config['board_contact'], $this->config['sitename']);
 					$powered_by = sprintf("<a href=\"%s\">%s</a>", $this->config['phpbbservices_digests_page_url'], $this->config['phpbbservices_digests_host']);
@@ -365,7 +370,7 @@ class mailer extends \phpbb\cron\task\base
 				
 				case constants::DIGESTS_HTML_VALUE:
 					$format = $this->user->lang['DIGESTS_FORMAT_HTML'];
-					$messenger->template('digests_html', '', './../ext/phpbbservices/digests/language/en/email/');
+					$html_messenger->template('digests_html', '', $email_templates_path);
 					$is_html = true;
 					$disclaimer = sprintf($this->user->lang['DIGESTS_DISCLAIMER'], $this->board_url, $this->config['sitename'], $this->board_url, $this->phpEx, $this->config['board_contact'], $this->config['sitename']);
 					$powered_by = sprintf("<a href=\"%s\">%s</a>", $this->config['phpbbservices_digests_page_url'], $this->config['phpbbservices_digests_host']);
@@ -374,7 +379,7 @@ class mailer extends \phpbb\cron\task\base
 				
 				case constants::DIGESTS_HTML_CLASSIC_VALUE:
 					$format = $this->user->lang['DIGESTS_FORMAT_HTML_CLASSIC'];
-					$messenger->template('digests_html', '', './../ext/phpbbservices/digests/language/en/email/');
+					$html_messenger->template('digests_html', '', $email_templates_path);
 					$is_html = true;
 					$disclaimer = sprintf($this->user->lang['DIGESTS_DISCLAIMER'], $this->board_url, $this->config['sitename'], $this->board_url, $this->phpEx, $this->config['board_contact'], $this->config['sitename']);
 					$powered_by = sprintf("<a href=\"%s\">%s</a>", $this->config['phpbbservices_digests_page_url'], $this->config['phpbbservices_digests_host']);
@@ -396,26 +401,26 @@ class mailer extends \phpbb\cron\task\base
 			$reply_to_field_email = (isset($this->config['phpbbservices_digests_reply_to_email_address']) && (strlen($this->config['phpbbservices_digests_reply_to_email_address']) > 0)) ? $this->config['phpbbservices_digests_reply_to_email_address'] : $this->config['board_email'];
 		
 			// Admin may override where email is sent in manual mode. This won't apply if digests are stored to cache instead.
-			if ($manual_mode && $this->config['phpbbservices_digests_test_send_to_admin'])
+			if ($this->manual_mode && $this->config['phpbbservices_digests_test_send_to_admin'])
 			{
-				$messenger->to($email_address_override);
+				$html_messenger->to($email_address_override);
 			}
 			else
 			{
-				$messenger->to($row['user_email']);
+				$html_messenger->to($row['user_email']);
 			}
 			
 			// SMTP delivery must strip text names due to likely bug in messenger class
 			if ($this->config['smtp_delivery'])
 			{
-				$messenger->from($from_field_email);
+				$html_messenger->from($from_field_email);
 			}
 			else
 			{	
-				$messenger->from($from_field_name . ' <' . $from_field_email . '>');
+				$html_messenger->from($from_field_name . ' <' . $from_field_email . '>');
 			}
-			$messenger->replyto($reply_to_field_email);
-			$messenger->subject($email_subject);
+			$html_messenger->replyto($reply_to_field_email);
+			$html_messenger->subject($email_subject);
 				
 			// Transform user_digest_send_hour_gmt to the subscriber's local time
 			$local_send_hour = $row['user_digest_send_hour_gmt'] + $this->make_tz_offset($row['user_timezone']);
@@ -524,7 +529,7 @@ class mailer extends \phpbb\cron\task\base
 			// because the messenger class is too dumb to do more than basic templating. Note: most language variables are handled automatically by the templating
 			// system.
 			
-			$messenger->assign_vars(array(
+			$html_messenger->assign_vars(array(
 				'DIGESTS_BLOCK_IMAGES'				=> ($row['user_digest_block_images'] == 0) ? $this->user->lang['NO'] : $this->user->lang['YES'],
 				'DIGESTS_COUNT_LIMIT'				=> $max_posts_msg,
 				'DIGESTS_DISCLAIMER'				=> $disclaimer,
@@ -604,7 +609,7 @@ class mailer extends \phpbb\cron\task\base
 			// Construct the body of the digest. We use the templating system because of the advanced features missing in the 
 			// email templating system, e.g. loops and switches. Note: create_content may set the flag $this->digest_exception.
 			$digest_content = $this->create_content($rowset_posts, $pm_rowset, $row, $is_html);
-
+			
 			// List the subscribed forums, if any
 			if ($row['user_digest_filter_type'] == constants::DIGESTS_BOOKMARKS)
 			{
@@ -619,8 +624,6 @@ class mailer extends \phpbb\cron\task\base
 				// Show that all forums were selected
 				$subscribed_forums = $this->user->lang['DIGESTS_ALL_FORUMS'];
 			}
-			//echo $subscribed_forums;
-			//exit;
 			
 			// Assemble a digest table of contents
 			if ($row['user_digest_toc'] == 1)
@@ -710,7 +713,7 @@ class mailer extends \phpbb\cron\task\base
 				$digest_toc .= ($is_html) ? "</tbody>\n</table></div>\n<br />" : ''; 
 			
 				// Publish the table of contents
-				$messenger->assign_vars(array(
+				$html_messenger->assign_vars(array(
 					'DIGESTS_TOC'			=> $digest_toc,	
 				));
 			
@@ -728,7 +731,7 @@ class mailer extends \phpbb\cron\task\base
 			}
 		
 			// Publish the digest content, marshaled elsewhere and a list of the forums subscribed to.
-			$messenger->assign_vars(array(
+			$html_messenger->assign_vars(array(
 				'DIGESTS_CONTENT'			=> $digest_content,	
 				'DIGESTS_FORUMS_WANTED'		=> $subscribed_forums,	
 			));
@@ -756,158 +759,161 @@ class mailer extends \phpbb\cron\task\base
 			$this->db->sql_freeresult($result_posts);
 			$this->db->sql_freeresult($pm_result);
 
-			if ($this->manual_mode)
+			if (($this->manual_mode) && ($this->config['phpbbservices_digests_test_spool']))
 			{
 				
-				if ($this->config['phpbbservices_digests_test_spool'])
+				// To grab the content of the email (less mail headers) first run the mailer with the $break parameter set to true. This will keep 
+				// the mail from being sent out. The function won't fail since nothing is being sent out.
+				$html_messenger->send(NOTIFY_EMAIL, true, $is_html, true);
+				$email_content = $html_messenger->msg;
+		
+				// Save digests as file in the digests cache area instead of emailing.
+				$suffix = ($is_html) ? '.html' : '.txt';
+				$file_name = $row['username'] . '-' . $gmt_year . '-' . str_pad($gmt_month, 2, '0', STR_PAD_LEFT) . '-' . str_pad($gmt_day, 2, '0', STR_PAD_LEFT) . '-' . str_pad($gmt_hour, 2, '0', STR_PAD_LEFT) . $suffix;
+				
+				$handle = @fopen($cache_path . $file_name, "w");
+				if ($handle === false)
 				{
-					// To grab the content of the email (less mail headers) first run the mailer with the $break parameter set to true. This will keep 
-					// the mail from being sent out. The function won't fail since nothing is being sent out.
-					$messenger->send(NOTIFY_EMAIL, true);
-					$email_content = $messenger->msg;
-			
-					// Save digests as file in the digests cache area instead of emailing.
-					$suffix = ($is_html) ? '.html' : '.txt';
-					$cache_path = './../ext/phpbbservices/digests/cache/';
-					$file_name = $row['username'] . '-' . $gmt_year . '-' . str_pad($gmt_month, 2, '0', STR_PAD_LEFT) . '-' . str_pad($gmt_day, 2, '0', STR_PAD_LEFT) . '-' . str_pad($gmt_hour, 2, '0', STR_PAD_LEFT) . $suffix;
-					$handle = @fopen($cache_path . $file_name, "w");
-					if ($handle === false)
+					// Since this indicates a major problem, let's abort now. It's likely a global write error.
+					add_log('admin', 'LOG_CONFIG_DIGESTS_FILE_OPEN_ERROR', $cache_path);
+					if ($this->config['phpbbservices_digests_enable_log'])
 					{
-						// Since this indicates a major problem, let's abort now. It's likely a global write error.
-						add_log('admin', 'LOG_CONFIG_DIGESTS_FILE_OPEN_ERROR', $cache_path);
-						if ($this->config['phpbbservices_digests_enable_log'])
-						{
-							add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_END');
-						}
-						return false;
+						add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_END');
 					}
-					$success = @fwrite($handle, htmlspecialchars_decode($email_content));
-					if ($success === false)
-					{
-						// Since this indicates a major problem, let's abort now.  It's likely a global write error.
-						add_log('admin', 'LOG_CONFIG_DIGESTS_FILE_WRITE_ERROR', $cache_path . $file_name);
-						if ($this->config['phpbbservices_digests_enable_log'])
-						{
-							add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_END');
-						}
-						return false;
-					}
-					$success = @fclose($handle);
-					if ($success === false)
-					{
-						// Since this indicates a major problem, let's abort now
-						add_log('admin', 'LOG_CONFIG_DIGESTS_FILE_CLOSE_ERROR', $cache_path . $file_name);
-						if ($this->config['phpbbservices_digests_enable_log'])
-						{
-							add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_END');
-						}
-						return false;
-					}
-					
+					return false;
 				}
 				
-				// Note in the log that digests were written to disk
+				$success = @fwrite($handle, htmlspecialchars_decode($email_content));
+				if ($success === false)
+				{
+					// Since this indicates a major problem, let's abort now.  It's likely a global write error.
+					add_log('admin', 'LOG_CONFIG_DIGESTS_FILE_WRITE_ERROR', $cache_path . $file_name);
+					if ($this->config['phpbbservices_digests_enable_log'])
+					{
+						add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_END');
+					}
+					return false;
+				}
+				
+				$success = @fclose($handle);
+				if ($success === false)
+				{
+					// Since this indicates a major problem, let's abort now
+					add_log('admin', 'LOG_CONFIG_DIGESTS_FILE_CLOSE_ERROR', $cache_path . $file_name);
+					if ($this->config['phpbbservices_digests_enable_log'])
+					{
+						add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_END');
+					}
+					return false;
+				}
+				
+				// Note in the log that digest was written to disk
 				if ($this->config['phpbbservices_digests_enable_log'])
 				{
 					add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_DISK', $file_name);
 				}
 				
-				// If requested, update user_lastvisit
-				if ($row['user_digest_reset_lastvisit'] == 1)
-				{
-					$sql2 = 'UPDATE ' . USERS_TABLE . '
-								SET user_lastvisit = ' . time() . ' 
-								WHERE user_id = ' . $row['user_id'];
-					$result2 = $this->db->sql_query($sql2);
-				}
-				
 			}
+			
 			else
+			
 			{
 
 				// Send the digest out only if there are new qualifying posts OR the user requests a digest to be sent if there are no posts OR
 				// if there are unread private messages AND the user wants to see private messages in the digest.
-				if (!$this->digest_exception)
+					
+				// Try to send this digest
+				if ($row['user_digest_send_on_no_posts'] || $this->toc_post_count > 0 || ((sizeof($pm_rowset) > 0) && $row['user_digest_show_pms']))
 				{
 					
-					// Try to send this digest
-					if ($row['user_digest_send_on_no_posts'] || $this->toc_post_count > 0 || ((sizeof($pm_rowset) > 0) && $row['user_digest_show_pms']))
+					$mail_sent = $html_messenger->send(NOTIFY_EMAIL, false, $is_html, true);
+					
+					if (!$mail_sent)
 					{
-						//$mail_sent = $messenger->send(NOTIFY_EMAIL, false, $is_html, true);
-						$mail_sent = $messenger->send(NOTIFY_EMAIL, false);
-			
-						if (!$mail_sent)
+						
+						if ($this->config['phpbbservices_digests_show_email'])
 						{
-							if ($this->config['phpbbservices_digests_show_email'])
-							{
-								add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_ENTRY_BAD', $row['username'], $row['user_email']);
-							}
-							else
-							{
-								add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_ENTRY_BAD_NO_EMAIL', $row['username']);
-							}
-							$run_successful = false;
+							add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_ENTRY_BAD', $row['username'], $row['user_email']);
 						}
 						else
 						{
-							$sent_to_created_for = ($use_mail_queue) ? $this->user->lang['DIGESTS_CREATED_FOR'] : $this->user->lang['DIGESTS_SENT_TO'];
-							if ($this->config['phpbbservices_digests_enable_log'])
-							{
-								if ($this->config['phpbbservices_digests_show_email'])
-								{
-									add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD', $sent_to_created_for, $row['username'], $row['user_email'], $this->posts_in_digest, sizeof($pm_rowset));
-								}
-								else
-								{
-									add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_NO_EMAIL', $sent_to_created_for, $row['username'], $this->posts_in_digest, sizeof($pm_rowset));
-								}
-							}
-							// Capture when digest was successfully sent
-							$sql2 = 'UPDATE ' . USERS_TABLE . '
-										SET user_digest_last_sent = ' . time() . ' 
-										WHERE user_id = ' . $row['user_id'];
-							$result2 = $this->db->sql_query($sql2);
-							// If requested, update user_lastvisit
-							if ($row['user_digest_reset_lastvisit'] == 1)
-							{
-								$sql2 = 'UPDATE ' . USERS_TABLE . '
-											SET user_lastvisit = ' . time() . ' 
-											WHERE user_id = ' . $row['user_id'];
-								$result2 = $this->db->sql_query($sql2);
-							}
+							add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_ENTRY_BAD_NO_EMAIL', $row['username']);
 						}
+						$run_successful = false;
+						
 					}
 					else
 					{
-						// Don't send a digest, the user doesn't want one because there are no qualifying posts
-						if ($this->config['phpbbservices_digests_show_email'])
+						
+						$sent_to_created_for = ($use_mail_queue) ? $this->user->lang['DIGESTS_CREATED_FOR'] : $this->user->lang['DIGESTS_SENT_TO'];
+						if ($this->config['phpbbservices_digests_enable_log'])
 						{
-							add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_ENTRY_NONE', $row['username'], $row['user_email']);
+							if ($this->config['phpbbservices_digests_show_email'])
+							{
+								add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD', $sent_to_created_for, $row['username'], $row['user_email'], $this->posts_in_digest, sizeof($pm_rowset));
+							}
+							else
+							{
+								add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_NO_EMAIL', $sent_to_created_for, $row['username'], $this->posts_in_digest, sizeof($pm_rowset));
+							}
 						}
-						else
+						
+						// Capture when digest was successfully sent
+						$sql2 = 'UPDATE ' . USERS_TABLE . '
+									SET user_digest_last_sent = ' . time() . ' 
+									WHERE user_id = ' . $row['user_id'];
+						$result2 = $this->db->sql_query($sql2);
+			
+						// If requested, update user_lastvisit
+						if ($row['user_digest_reset_lastvisit'] == 1)
 						{
-							add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_ENTRY_NONE_NO_EMAIL', $row['username']);
+							$sql2 = 'UPDATE ' . USERS_TABLE . '
+										SET user_lastvisit = ' . time() . ' 
+										WHERE user_id = ' . $row['user_id'];
+							$result2 = $this->db->sql_query($sql2);
 						}
+						
 					}
-					
+				
 				}
 				else
 				{
-					// Digest exception errors are handled by create_content but we do want to note that something odd occurred to let the calling program know.
-					$run_successful = false;
+					
+					// Don't send a digest, the user doesn't want one because there are no qualifying posts
+					if ($this->config['phpbbservices_digests_show_email'])
+					{
+						add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_ENTRY_NONE', $row['username'], $row['user_email']);
+					}
+					else
+					{
+						add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_ENTRY_NONE_NO_EMAIL', $row['username']);
+					}
+					
 				}
-				
+					
 			}
 
 		}	// foreach
+		
+		if ($this->digest_exception)
+		{
+			// Digest exception errors are handled by create_content but we do want to note that something odd occurred to let the calling program know
+			// after all digests for the hour are sent.
+			$run_successful = false;
+		}
 			
 		// Do not forget to update the configuration variable for last run time.
-		$this->config->set('phpbbservices_digests_cron_task_last_gc', time());
+		if (!($this->manual_mode) && ($this->config['phpbbservices_digests_test_spool']) && $run_successful)
+		{
+			// We only want to report that the mailer run was successful if it ran successfully and actually sent some emails out.
+			$this->config->set('phpbbservices_digests_cron_task_last_gc', time());
+		}
+		
 		if ($this->config['phpbbservices_digests_enable_log'])
 		{
 			add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_END');
 		}
-		
+	
 		return $run_successful;
 		
 	}

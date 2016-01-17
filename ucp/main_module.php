@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Digests
-* @copyright (c) 2015 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2016 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -23,7 +23,7 @@ class main_module
 
 	function main($id, $mode)
 	{
-		global $config, $db, $user, $auth, $template, $table_prefix, $request;
+		global $config, $db, $user, $auth, $template, $table_prefix, $request, $phpbb_root_path, $phpEx;
 
 		$user->add_lang_ext('phpbbservices/digests', array('info_acp_common', 'common'));
 
@@ -62,6 +62,7 @@ class main_module
 			
 					// Note: user_digest_send_hour_gmt is stored in UTC and translated to local time (as set in the profile). 
 					// This is different than in phpBB 2, when all times were stored in server time.
+					
 					$local_send_hour = $request->variable('send_hour', (int) $user->data['user_digest_send_hour_gmt']) - ((int) make_tz_offset($user->data['user_timezone']));
 					if ($local_send_hour >= 24)
 					{
@@ -192,85 +193,101 @@ class main_module
 					)
 				);
 
-				if ($user->data['user_digests_type'] == constants::DIGESTS_NONE_VALUE)
+				// If user hasn't set their timezone, trigger an error message because to select an hour for a digest to go out it must be
+				// calculated from their timezone.
+				if ($user->data['user_timezone'] == '')
 				{
-					if ($config['phpbbservices_digests_user_digest_send_hour_gmt'] == -1)
+					$template->assign_vars(array(
+						'L_DIGESTS_NO_TIMEZONE'		=> sprintf($user->lang['DIGESTS_NO_TIMEZONE'], append_sid($phpbb_root_path . "ucp.$phpEx?i=ucp_prefs&mode=personal")),
+						'S_DIGESTS_NO_TIMEZONE'		=> true,
+					));
+				}
+				
+				else
+				
+				{
+
+					if ($user->data['user_digests_type'] == constants::DIGESTS_NONE_VALUE)
 					{
-						// Pick a random hour, since this is a new digest and the administrator requested this to even out digest server processing
-						$local_send_hour = rand(0,23);
+						if ($config['phpbbservices_digests_user_digest_send_hour_gmt'] == -1)
+						{
+							// Pick a random hour, since this is a new digest and the administrator requested this to even out digest server processing
+							$local_send_hour = rand(0,23);
+						}
+						else
+						{
+							$local_send_hour = $config['phpbbservices_digests_user_digest_send_hour_gmt'];
+						}
 					}
 					else
 					{
-						$local_send_hour = $config['phpbbservices_digests_user_digest_send_hour_gmt'];
+						// Translate the digests send hour (in GMT) to the local timezone, based on the timezone set in the user's profile.
+						$local_send_hour = (int) $user->data['user_digest_send_hour_gmt'] + (int) make_tz_offset($user->data['user_timezone']);
 					}
-				}
-				else
-				{
-					// Translate the digests send hour (in GMT) to the local timezone, based on the timezone set in the user's profile.
-					$local_send_hour = (int) $user->data['user_digest_send_hour_gmt'] + (int) make_tz_offset($user->data['user_timezone']);
-				}
-				
-				// Adjust time if outside of hour range
-				if ($local_send_hour >= 24)
-				{
-					$local_send_hour = $local_send_hour - 24;
-				}
-				else if ($local_send_hour < 0)
-				{
-					$local_send_hour = $local_send_hour + 24;
-				}
-				
-
-				// Set other form fields using board defaults if necessary, otherwise pull from the user's settings
-				// Note, setting an administator configured default for digest type is a bad idea because
-				// the user might think they have a digest subscription when they do not.
-				
-				if ($user->data['user_digests_type'] == constants::DIGESTS_NONE_VALUE)
-				{
-					$styling_html = ($config['phpbbservices_digests_user_digests_format'] == constants::DIGESTS_HTML_VALUE);
-					$styling_html_classic = ($config['phpbbservices_digests_user_digests_format'] == constants::DIGESTS_HTML_CLASSIC_VALUE);
-					$styling_plain = ($config['phpbbservices_digests_user_digests_format'] == constants::DIGESTS_PLAIN_VALUE);
-					$styling_plain_classic = ($config['phpbbservices_digests_user_digests_format'] == constants::DIGESTS_PLAIN_CLASSIC_VALUE);
-					$styling_text = ($config['phpbbservices_digests_user_digests_format'] == constants::DIGESTS_TEXT_VALUE);
-				}
-				else
-				{
-					$styling_html = ($user->data['user_digest_format'] == constants::DIGESTS_HTML_VALUE);
-					$styling_html_classic = ($user->data['user_digest_format'] == constants::DIGESTS_HTML_CLASSIC_VALUE);
-					$styling_plain = ($user->data['user_digest_format'] == constants::DIGESTS_PLAIN_VALUE);
-					$styling_plain_classic = ($user->data['user_digest_format'] == constants::DIGESTS_PLAIN_CLASSIC_VALUE);
-					$styling_text = ($user->data['user_digest_format'] == constants::DIGESTS_TEXT_VALUE);
-				}
-				
-				// Populated the Hour Sent select control
-				for($i=0;$i<24;$i++)
-				{
-					$template->assign_block_vars('hour_loop',array(
-						'COUNT' 						=>	$i,
-						'SELECTED'						=>	($local_send_hour == $i) ? ' selected="selected"' : '',
-						'DISPLAY_HOUR'					=>	make_hour_string($i, $user->data['user_dateformat']),
-					));
-				}
+					
+					// Adjust time if outside of hour range
+					if ($local_send_hour >= 24)
+					{
+						$local_send_hour = $local_send_hour - 24;
+					}
+					else if ($local_send_hour < 0)
+					{
+						$local_send_hour = $local_send_hour + 24;
+					}
+					
 	
-				$template->assign_vars(array(
-					'L_DIGESTS_FREQUENCY_EXPLAIN'		=> sprintf($user->lang['DIGESTS_FREQUENCY_EXPLAIN'], $user->lang['DIGESTS_WEEKDAY'][$config['phpbbservices_digests_weekly_digest_day']]),
-					'L_DIGESTS_HTML_CLASSIC_VALUE'		=> constants::DIGESTS_HTML_CLASSIC_VALUE,
-					'L_DIGESTS_HTML_VALUE'				=> constants::DIGESTS_HTML_VALUE,
-					'L_DIGESTS_PLAIN_CLASSIC_VALUE'		=> constants::DIGESTS_PLAIN_CLASSIC_VALUE,
-					'L_DIGESTS_PLAIN_VALUE'				=> constants::DIGESTS_PLAIN_VALUE,
-					'L_DIGESTS_TEXT_VALUE'				=> constants::DIGESTS_TEXT_VALUE,
-					'S_DIGESTS_BASICS'					=> true,
-					'S_DIGESTS_DAY_CHECKED' 			=> ($user->data['user_digest_type'] == constants::DIGESTS_DAILY_VALUE),
-					'S_DIGESTS_HTML_CHECKED' 			=> $styling_html,
-					'S_DIGESTS_HTML_CLASSIC_CHECKED' 	=> $styling_html_classic,
-					'S_DIGESTS_MONTH_CHECKED' 			=> ($user->data['user_digest_type'] == constants::DIGESTS_MONTHLY_VALUE),
-					'S_DIGESTS_NONE_CHECKED' 			=> ($user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE),
-					'S_DIGESTS_PLAIN_CHECKED' 			=> $styling_plain,
-					'S_DIGESTS_PLAIN_CLASSIC_CHECKED' 	=> $styling_plain_classic,
-					'S_DIGESTS_TEXT_CHECKED' 			=> $styling_text,
-					'S_DIGESTS_WEEK_CHECKED' 			=> ($user->data['user_digest_type'] == constants::DIGESTS_WEEKLY_VALUE),
-					)
-				);
+					// Set other form fields using board defaults if necessary, otherwise pull from the user's settings
+					// Note, setting an administator configured default for digest type is a bad idea because
+					// the user might think they have a digest subscription when they do not.
+					
+					if ($user->data['user_digests_type'] == constants::DIGESTS_NONE_VALUE)
+					{
+						$styling_html = ($config['phpbbservices_digests_user_digests_format'] == constants::DIGESTS_HTML_VALUE);
+						$styling_html_classic = ($config['phpbbservices_digests_user_digests_format'] == constants::DIGESTS_HTML_CLASSIC_VALUE);
+						$styling_plain = ($config['phpbbservices_digests_user_digests_format'] == constants::DIGESTS_PLAIN_VALUE);
+						$styling_plain_classic = ($config['phpbbservices_digests_user_digests_format'] == constants::DIGESTS_PLAIN_CLASSIC_VALUE);
+						$styling_text = ($config['phpbbservices_digests_user_digests_format'] == constants::DIGESTS_TEXT_VALUE);
+					}
+					else
+					{
+						$styling_html = ($user->data['user_digest_format'] == constants::DIGESTS_HTML_VALUE);
+						$styling_html_classic = ($user->data['user_digest_format'] == constants::DIGESTS_HTML_CLASSIC_VALUE);
+						$styling_plain = ($user->data['user_digest_format'] == constants::DIGESTS_PLAIN_VALUE);
+						$styling_plain_classic = ($user->data['user_digest_format'] == constants::DIGESTS_PLAIN_CLASSIC_VALUE);
+						$styling_text = ($user->data['user_digest_format'] == constants::DIGESTS_TEXT_VALUE);
+					}
+					
+					// Populated the Hour Sent select control
+					for($i=0;$i<24;$i++)
+					{
+						$template->assign_block_vars('hour_loop',array(
+							'COUNT' 						=>	$i,
+							'SELECTED'						=>	($local_send_hour == $i) ? ' selected="selected"' : '',
+							'DISPLAY_HOUR'					=>	make_hour_string($i, $user->data['user_dateformat']),
+						));
+					}
+		
+					$template->assign_vars(array(
+						'L_DIGESTS_FREQUENCY_EXPLAIN'		=> sprintf($user->lang['DIGESTS_FREQUENCY_EXPLAIN'], $user->lang['DIGESTS_WEEKDAY'][$config['phpbbservices_digests_weekly_digest_day']]),
+						'L_DIGESTS_HTML_CLASSIC_VALUE'		=> constants::DIGESTS_HTML_CLASSIC_VALUE,
+						'L_DIGESTS_HTML_VALUE'				=> constants::DIGESTS_HTML_VALUE,
+						'L_DIGESTS_PLAIN_CLASSIC_VALUE'		=> constants::DIGESTS_PLAIN_CLASSIC_VALUE,
+						'L_DIGESTS_PLAIN_VALUE'				=> constants::DIGESTS_PLAIN_VALUE,
+						'L_DIGESTS_TEXT_VALUE'				=> constants::DIGESTS_TEXT_VALUE,
+						'S_DIGESTS_BASICS'					=> true,
+						'S_DIGESTS_DAY_CHECKED' 			=> ($user->data['user_digest_type'] == constants::DIGESTS_DAILY_VALUE),
+						'S_DIGESTS_HTML_CHECKED' 			=> $styling_html,
+						'S_DIGESTS_HTML_CLASSIC_CHECKED' 	=> $styling_html_classic,
+						'S_DIGESTS_MONTH_CHECKED' 			=> ($user->data['user_digest_type'] == constants::DIGESTS_MONTHLY_VALUE),
+						'S_DIGESTS_NONE_CHECKED' 			=> ($user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE),
+						'S_DIGESTS_PLAIN_CHECKED' 			=> $styling_plain,
+						'S_DIGESTS_PLAIN_CLASSIC_CHECKED' 	=> $styling_plain_classic,
+						'S_DIGESTS_TEXT_CHECKED' 			=> $styling_text,
+						'S_DIGESTS_WEEK_CHECKED' 			=> ($user->data['user_digest_type'] == constants::DIGESTS_WEEKLY_VALUE),
+						)
+					);
+					
+				}
 
 			break;
 			
@@ -629,7 +646,7 @@ class main_module
 
 		// These template variables are used on all the pages
 		$template->assign_vars(array(
-			'L_DIGESTS_DISABLED_MESSAGE' 	=> ($user->data['user_digests_type'] == constants::DIGESTS_NONE_VALUE) ? '<p><em>' . $user->lang['DIGESTS_DISABLED_MESSAGE'] . '</em></p>' : '',
+			'L_DIGESTS_DISABLED_MESSAGE' 	=> ($user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE) ? '<p><em>' . $user->lang['DIGESTS_DISABLED_MESSAGE'] . '</em></p>' : '',
 			'L_DIGESTS_MODE'				=> $user->lang['UCP_DIGESTS_' . strtoupper($mode)],
 			'S_DIGESTS_CONTROL_DISABLED' 	=> ($user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE),
 			'S_DIGESTS_HOME'				=> $config['phpbbservices_digests_digests_title'],

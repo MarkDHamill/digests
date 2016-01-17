@@ -36,7 +36,7 @@ function unCheckSubscribedForums (checkbox, id_match) {
  
 	var element_name = new String();
 	
-	// Assume a HTML 4.0 compatible browser
+	// Assume a HTML 5 compatible browser
 	var x = document.getElementsByTagName('input');
 	for(i=0;i<x.length;i++) {
 		thisobject = x[i];
@@ -52,7 +52,7 @@ function unCheckAllForums (id_match,all_forums) {
 	// Unchecks or checks the all forums checkbox for a particular user
 	any_unchecked = false;
 	
-	// Assume a HTML 4.0 compatible browser
+	// Assume a HTML 5 compatible browser
 	var all_forums = document.getElementById(all_forums);
 	var inputs = document.getElementsByTagName('input');
 	for(i=0;i<inputs.length;i++) 

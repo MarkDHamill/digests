@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Digests
-* @copyright (c) 2015 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2016 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -48,8 +48,6 @@ class main_module
 					'title'	=> 'ACP_DIGESTS_GENERAL_SETTINGS',
 					'vars'	=> array(
 						'legend1'								=> '',
-						//'phpbbservices_digests_enabled'					=> array('lang' => 'DIGESTS_ENABLED',							'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
-						//'phpbbservices_digests_show_output'					=> array('lang' => 'DIGESTS_SHOW_OUTPUT',						'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_enable_log'					=> array('lang' => 'DIGESTS_ENABLE_LOG',							'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_show_email'					=> array('lang' => 'DIGESTS_SHOW_EMAIL',						'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_enable_auto_subscriptions'	=> array('lang' => 'DIGESTS_ENABLE_AUTO_SUBSCRIPTIONS',			'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
@@ -59,9 +57,6 @@ class main_module
 						'phpbbservices_digests_max_items'					=> array('lang' => 'DIGESTS_MAX_ITEMS',							'validate' => 'int:0',	'type' => 'text:5:5', 'explain' => true),
 						'phpbbservices_digests_enable_custom_stylesheets'	=> array('lang' => 'DIGESTS_ENABLE_CUSTOM_STYLESHEET',			'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_custom_stylesheet_path'		=> array('lang' => 'DIGESTS_CUSTOM_STYLESHEET_PATH',				'validate' => 'string',	'type' => 'text:40:255', 'explain' => true),
-						//'phpbbservices_digests_require_key'					=> array('lang' => 'DIGESTS_REQUIRE_KEY',						'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
-						//'phpbbservices_digests_key_value'					=> array('lang' => 'DIGESTS_KEY_VALUE',							'validate' => 'string',	'type' => 'text:40:255', 'explain' => true),
-						'phpbbservices_digests_override_queue'				=> array('lang' => 'DIGESTS_OVERRIDE_QUEUE',						'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_from_email_address'			=> array('lang' => 'DIGESTS_FROM_EMAIL_ADDRESS',					'validate' => 'string',	'type' => 'text:40:255', 'explain' => true),
 						'phpbbservices_digests_from_email_name'				=> array('lang' => 'DIGESTS_FROM_EMAIL_NAME',					'validate' => 'string',	'type' => 'text:40:255', 'explain' => true),
 						'phpbbservices_digests_reply_to_email_address'		=> array('lang' => 'DIGESTS_REPLY_TO_EMAIL_ADDRESS',				'validate' => 'string',	'type' => 'text:40:255', 'explain' => true),
@@ -269,8 +264,6 @@ class main_module
 					'LASTVISIT_SELECTED'		=> $lastvisit_selected,
 					'L_CONTEXT'					=> $context,
 					'MEMBER'					=> $member,
-					'PAGE_NUMBER'       		=> $current_page,
-					'PAGINATION'        		=> $total_pages_string,
 					'STOPPED_SUBSCRIBING_SELECTED'	=> $stopped_subscribing,
 					'SUBSCRIBE_SELECTED'		=> $subscribe_selected,
 					'TOTAL_USERS'       		=> ($total_users == 1) ? $user->lang['DIGESTS_LIST_USER'] : sprintf($user->lang['DIGESTS_LIST_USERS'], $total_users),
@@ -681,8 +674,7 @@ class main_module
 						'legend1'								=> '',
 						'phpbbservices_digests_enable_subscribe_unsubscribe'	=> array('lang' => 'DIGESTS_ENABLE_SUBSCRIBE_UNSUBSCRIBE',	'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_subscribe_all'					=> array('lang' => 'DIGESTS_SUBSCRIBE_ALL',				'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
-						'phpbbservices_digests_include_admins'				=> array('lang' => 'DIGESTS_INCLUDE_ADMINS',				'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
-						//'phpbbservices_digests_include_inactive'				=> array('lang' => 'DIGESTS_INCLUDE_INACTIVE',			'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
+						'phpbbservices_digests_include_admins'					=> array('lang' => 'DIGESTS_INCLUDE_ADMINS',				'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_notify_on_mass_subscribe'		=> array('lang' => 'DIGESTS_NOTIFY_ON_MASS_SUBSCRIBE',			'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
 					)
 				);
@@ -1119,10 +1111,6 @@ class main_module
 				{
 					$user_types[] = USER_FOUNDER;
 				}
-				/*if ($config['phpbbservices_digests_include_inactive'])
-				{
-					$user_types[] = USER_INACTIVE;
-				}*/
 				
 				// If doing a mass subscription, we don't want to mess up digest subscriptions already in place, so we need to create a snippet of SQL.
 				// If doing a mass unsubscribe, all qualified subscriptions are removed. Note however that except for the digest type, all other settings 
@@ -1343,7 +1331,7 @@ class main_module
 			// Create a mailer object and call its run method. The logic for sending a digest is embedded in this method, which is normally run as a cron task.
 			if ($good_date && $config['phpbbservices_digests_test'])
 			{
-				$mailer = new \phpbbservices\digests\cron\task\mailer($config, $request, $user, $db, $phpEx, $phpbb_root_path, $template, $auth, $table_prefix);
+				$mailer = new \phpbbservices\digests\cron\task\digests($config, $request, $user, $db, $phpEx, $phpbb_root_path, $template, $auth, $table_prefix);
 				$success = $mailer->run();
 			}
 			

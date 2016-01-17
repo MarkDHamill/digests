@@ -1,26 +1,15 @@
 services:
-    phpbbservices.digests.controller:
-        class: phpbbservices\digests\controller\main
-        arguments:
-            - @config
-            - @controller.helper
-            - @template
-            - @user
-            - %core.php_ext%
-            - @dbal.conn
-            - @auth
-            - %core.root_path%
-            - @request
     phpbbservices.digests.listener:
         class: phpbbservices\digests\event\main_listener
         arguments:
             - @config
             - @controller.helper
             - @template
+            - @request
         tags:
             - { name: event.listener }
     phpbbservices.digests.cron.task.cron_task:
-        class: phpbbservices\digests\cron\task\mailer
+        class: phpbbservices\digests\cron\task\digests
         arguments:
             - @config
             - @request
@@ -30,7 +19,7 @@ services:
             - %core.root_path%
             - @template
             - @auth
-            - %core.table_prefix
+            - %core.table_prefix%
         calls:
             - [set_name, [cron.task.cron_task]]
         tags:

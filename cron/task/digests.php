@@ -90,7 +90,6 @@ class digests extends \phpbb\cron\task\base
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		
 		$run_successful = true;	// Assume a successful run
-		$cache_path = $extension_path . './../ext/phpbbservices/digests/cache/';
 
 		// We need to distinguish if the request is being made from a system cron (typical) or by the ACP's manual mailer (atypical). We can do this
 		// by looking at the referer and verifying the call was from the ACP for the correct extension and module mode.
@@ -101,11 +100,14 @@ class digests extends \phpbb\cron\task\base
 		if ($this->manual_mode)
 		{
 			$email_templates_path = './../ext/phpbbservices/digests/language/en/email/';
+			$cache_path = './../ext/phpbbservices/digests/cache/';
 		}
 		else
 		{
 			$this->user->add_lang_ext('phpbbservices/digests', array('info_acp_common', 'common'));	// Language strings are already loaded if in manual mode
 			$email_templates_path = './ext/phpbbservices/digests/language/en/email/';
+			$cache_path = './ext/phpbbservices/digests/cache/';
+			$this->template->set_style(array('/ext/phpbbservices/digests/styles', 'styles'));	// Necessary because for system crons no styling information is set when the template class is instantiated, so template rendering can't happen. Likely phpBB bug/enhancement request.
 		}
 		
 		// If the board is currently disabled, digests should also be disabled too, don't ya think?
@@ -903,7 +905,7 @@ class digests extends \phpbb\cron\task\base
 		}
 			
 		// Do not forget to update the configuration variable for last run time.
-		if (!($this->manual_mode) && ($this->config['phpbbservices_digests_test_spool']) && $run_successful)
+		if (!(($this->manual_mode) && ($this->config['phpbbservices_digests_test_spool'])) && $run_successful)
 		{
 			// We only want to report that the mailer run was successful if it ran successfully and actually sent some emails out.
 			$this->config->set('phpbbservices_digests_cron_task_last_gc', time());

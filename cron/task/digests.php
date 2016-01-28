@@ -25,6 +25,7 @@ class digests extends \phpbb\cron\task\base
 	protected $template;
 	protected $auth;
 	protected $table_prefix;
+	protected $phpbb_log;
 	
 	// Most of these private variables are needed because a create_content function does much of the assembly work and it needs a lot of common information
 	
@@ -50,7 +51,7 @@ class digests extends \phpbb\cron\task\base
 	*
 	* @param \phpbb\config\config $config The config
 	*/
-	public function __construct(\phpbb\config\config $config, \phpbb\request\request $request, \phpbb\user $user, \phpbb\db\driver\factory $db, $php_ext, $phpbb_root_path, \phpbb\template\template $template, \phpbb\auth\auth $auth, $table_prefix)
+	public function __construct(\phpbb\config\config $config, \phpbb\request\request $request, \phpbb\user $user, \phpbb\db\driver\factory $db, $php_ext, $phpbb_root_path, \phpbb\template\template $template, \phpbb\auth\auth $auth, $table_prefix, \phpbb\log\log $phpbb_log)
 	{
 		$this->config = $config;
 		$this->request = $request;
@@ -61,6 +62,7 @@ class digests extends \phpbb\cron\task\base
 		$this->template = $template;
 		$this->auth = $auth;
 		$this->table_prefix = $table_prefix;
+		$this->phpbb_log = $phpbb_log;
 	}
 	
 	/**
@@ -113,7 +115,7 @@ class digests extends \phpbb\cron\task\base
 		// If the board is currently disabled, digests should also be disabled too, don't ya think?
 		if ($this->config['board_disable'] && $this->config['phpbbservices_digests_enable_log'])
 		{
-			add_log('admin', 'LOG_CONFIG_DIGESTS_BOARD_DISABLED');
+			$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_BOARD_DISABLED');
 			return false;
 		}
 
@@ -128,7 +130,7 @@ class digests extends \phpbb\cron\task\base
 		// Display a digest mail start processing message. It is captured in a log.
 		if ($this->config['phpbbservices_digests_enable_log'])
 		{
-			add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_START');
+			$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_START');
 		}
 		
 		// Need a board URL since URLs in the digest pointing to the board need to be absolute URLs
@@ -139,7 +141,7 @@ class digests extends \phpbb\cron\task\base
 		if (($this->manual_mode) && ($this->config['phpbbservices_digests_test_time_use']))
 		{
 			$this->time = mktime($this->config['phpbbservices_digests_test_hour'], 0, 0, $this->config['phpbbservices_digests_test_month'], $this->config['phpbbservices_digests_test_day'], $this->config['phpbbservices_digests_test_year']);
-			add_log('admin', 'LOG_CONFIG_DIGESTS_SIMULATION_DATE_TIME', str_pad($this->config['phpbbservices_digests_test_year'], 2, '0', STR_PAD_LEFT) . '-' . str_pad($this->config['phpbbservices_digests_test_month'], 2, '0', STR_PAD_LEFT) . '-' . str_pad($this->config['phpbbservices_digests_test_day'], 2, '0', STR_PAD_LEFT), $this->config['phpbbservices_digests_test_hour']);
+			$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_SIMULATION_DATE_TIME', false, array(str_pad($this->config['phpbbservices_digests_test_year'], 2, '0', STR_PAD_LEFT) . '-' . str_pad($this->config['phpbbservices_digests_test_month'], 2, '0', STR_PAD_LEFT) . '-' . str_pad($this->config['phpbbservices_digests_test_day'], 2, '0', STR_PAD_LEFT), $this->config['phpbbservices_digests_test_hour']));
 		}
 		else
 		{
@@ -299,8 +301,8 @@ class digests extends \phpbb\cron\task\base
 		// Execute the SQL to retrieve the relevant posts. Note, if $this->config['phpbbservices_digests_max_items'] == 0 then there is no limit on the rows returned
 		$result_posts = $this->db->sql_query_limit($sql_posts, $this->config['phpbbservices_digests_max_items']); 
 		$rowset_posts = $this->db->sql_fetchrowset($result_posts); // Get all the posts as a set
-
-		// Now that we have all the posts, time to send one digests at a time
+		
+		// Now that we have all the posts, time to send one digest at a time
 		
 		foreach ($rowset as $row)
 		{
@@ -329,7 +331,7 @@ class digests extends \phpbb\cron\task\base
 				default:
 					// The database may be corrupted if the digest type for a subscriber is invalid. 
 					// Write an error to the log and continue to the next subscriber.
-					add_log('admin', sprintf('LOG_CONFIG_DIGESTS_BAD_DIGEST_TYPE', $row['user_digest_type'], $row['username']));
+					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_BAD_DIGEST_TYPE', false, array($row['user_digest_type'], $row['username']));
 					continue;
 				break;
 			}
@@ -391,7 +393,7 @@ class digests extends \phpbb\cron\task\base
 				default:
 					// The database may be corrupted if the digest format for a subscriber is invalid. 
 					// Write an error to the log and continue to the next subscriber.
-					add_log('admin', sprintf('LOG_CONFIG_DIGESTS_FORMAT_ERROR', $row['user_digest_type'], $row['username']));
+					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FORMAT_ERROR', false, array($row['user_digest_type'], $row['username']));
 					continue;
 				break;
 				
@@ -439,7 +441,7 @@ class digests extends \phpbb\cron\task\base
 			{
 				// The database may be corrupted if the local send hour for a subscriber is still not between 0 and 23. 
 				// Write an error to the log and continue to the next subscriber.
-				add_log('admin', sprintf('LOG_CONFIG_DIGESTS_BAD_SEND_HOUR', $row['user_digest_type'], $row['user_digest_send_hour_gmt']));
+				$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_BAD_SEND_HOUR', false, array($row['user_digest_type'], $row['user_digest_send_hour_gmt']));
 				continue;
 			}
 
@@ -462,7 +464,7 @@ class digests extends \phpbb\cron\task\base
 				default:
 					// The database may be corrupted if the filter type for a subscriber is incorrect. 
 					// Write an error to the log and continue to the next subscriber.
-					add_log('admin', sprintf('LOG_CONFIG_DIGESTS_FILTER_ERROR', $row['user_digest_filter_type'], $row['username']));
+					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILTER_ERROR', false, array($row['user_digest_filter_type'], $row['username']));
 					continue;
 				break;
 					
@@ -495,7 +497,7 @@ class digests extends \phpbb\cron\task\base
 				default:
 					// The database may be corrupted if the digest sort by for a subscriber is incorrect. 
 					// Write an error to the log and continue to the next subscriber.
-					add_log('admin', sprintf('LOG_CONFIG_DIGESTS_SORT_BY_ERROR', $row['user_digest_sortby'], $row['username']));
+					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_SORT_BY_ERROR', false, array($row['user_digest_sortby'], $row['username']));
 					continue;
 				break;
 					
@@ -777,10 +779,10 @@ class digests extends \phpbb\cron\task\base
 				if ($handle === false)
 				{
 					// Since this indicates a major problem, let's abort now. It's likely a global write error.
-					add_log('admin', 'LOG_CONFIG_DIGESTS_FILE_OPEN_ERROR', $cache_path);
+					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILE_OPEN_ERROR', false, array($cache_path));
 					if ($this->config['phpbbservices_digests_enable_log'])
 					{
-						add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_END');
+						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END');
 					}
 					return false;
 				}
@@ -789,10 +791,10 @@ class digests extends \phpbb\cron\task\base
 				if ($success === false)
 				{
 					// Since this indicates a major problem, let's abort now.  It's likely a global write error.
-					add_log('admin', 'LOG_CONFIG_DIGESTS_FILE_WRITE_ERROR', $cache_path . $file_name);
+					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILE_WRITE_ERROR', false, array($cache_path . $file_name));
 					if ($this->config['phpbbservices_digests_enable_log'])
 					{
-						add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_END');
+						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END');
 					}
 					return false;
 				}
@@ -801,10 +803,10 @@ class digests extends \phpbb\cron\task\base
 				if ($success === false)
 				{
 					// Since this indicates a major problem, let's abort now
-					add_log('admin', 'LOG_CONFIG_DIGESTS_FILE_CLOSE_ERROR', $cache_path . $file_name);
+					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILE_CLOSE_ERROR', false, array($cache_path . $file_name));
 					if ($this->config['phpbbservices_digests_enable_log'])
 					{
-						add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_END');
+						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END');
 					}
 					return false;
 				}
@@ -812,7 +814,7 @@ class digests extends \phpbb\cron\task\base
 				// Note in the log that digest was written to disk
 				if ($this->config['phpbbservices_digests_enable_log'])
 				{
-					add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_DISK', $file_name);
+					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_DISK', false, array($file_name));
 				}
 				
 			}
@@ -830,16 +832,18 @@ class digests extends \phpbb\cron\task\base
 					
 					$mail_sent = $html_messenger->send(NOTIFY_EMAIL, false, $is_html, true);
 					
+					echo $mail_sent;
+					
 					if (!$mail_sent)
 					{
 						
 						if ($this->config['phpbbservices_digests_show_email'])
 						{
-							add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_ENTRY_BAD', $row['username'], $row['user_email']);
+							$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_BAD', false, array($row['username'], $row['user_email']));
 						}
 						else
 						{
-							add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_ENTRY_BAD_NO_EMAIL', $row['username']);
+							$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_BAD_NO_EMAIL', false, array($row['username']));
 						}
 						$run_successful = false;
 						
@@ -848,15 +852,17 @@ class digests extends \phpbb\cron\task\base
 					{
 						
 						$sent_to_created_for = ($use_mail_queue) ? $this->user->lang['DIGESTS_CREATED_FOR'] : $this->user->lang['DIGESTS_SENT_TO'];
+						echo $sent_to_created_for;
+						echo $this->config['phpbbservices_digests_enable_log'];
 						if ($this->config['phpbbservices_digests_enable_log'])
 						{
 							if ($this->config['phpbbservices_digests_show_email'])
 							{
-								add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD', $sent_to_created_for, $row['username'], $row['user_email'], $this->posts_in_digest, sizeof($pm_rowset));
+								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD', false, array($sent_to_created_for, $row['username'], $row['user_email'], $this->posts_in_digest, sizeof($pm_rowset)));
 							}
 							else
 							{
-								add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_NO_EMAIL', $sent_to_created_for, $row['username'], $this->posts_in_digest, sizeof($pm_rowset));
+								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_NO_EMAIL', false, array($sent_to_created_for, $row['username'], $this->posts_in_digest, sizeof($pm_rowset)));
 							}
 						}
 						
@@ -884,11 +890,11 @@ class digests extends \phpbb\cron\task\base
 					// Don't send a digest, the user doesn't want one because there are no qualifying posts
 					if ($this->config['phpbbservices_digests_show_email'])
 					{
-						add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_ENTRY_NONE', $row['username'], $row['user_email']);
+						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_NONE', false, array($row['username'], $row['user_email']));
 					}
 					else
 					{
-						add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_ENTRY_NONE_NO_EMAIL', $row['username']);
+						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_NONE_NO_EMAIL', false, array($row['username']));
 					}
 					
 				}
@@ -913,7 +919,7 @@ class digests extends \phpbb\cron\task\base
 		
 		if ($this->config['phpbbservices_digests_enable_log'])
 		{
-			add_log('admin', 'LOG_CONFIG_DIGESTS_LOG_END');
+			$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END');
 		}
 	
 		return $run_successful;
@@ -1061,7 +1067,7 @@ class digests extends \phpbb\cron\task\base
 					'ANCHOR'					=> 'm' . $pm_row['msg_id'],
 					'CONTENT'					=> $pm_text,
 					'DATE'						=> date(str_replace('|','',$pm_row['user_dateformat']), $recipient_time) . "\n",
-					'FROM'						=> ($is_html) ? sprintf('<a href="%s?mode=viewprofile&amp;u=%s">%s</a>', $this->board_url . 'memberlist.' . $this->phpEx, $pm_row['author_id'], $pm_row['username']) : $pm_row['username'],
+					'FROM'						=> ($is_html) ? sprintf("<a href=\"%s?mode=viewprofile&amp;u=%s\">%s</a>", $this->board_url . 'memberlist.' . $this->phpEx, $pm_row['author_id'], $pm_row['username']) : $pm_row['username'],
 					'NEW_UNREAD'				=> ($pm_row['pm_new'] == 1) ? $this->user->lang['DIGESTS_NEW'] . ' ' : $this->user->lang['DIGESTS_UNREAD'] . ' ',
 					'PRIVATE_MESSAGE_LINK'		=> ($is_html) ? sprintf('<a href="%s?i=pm&amp;mode=view&amp;f=0&amp;p=%s">%s</a>', $this->board_url . 'ucp.' . $this->phpEx, $pm_row['msg_id'], $pm_row['msg_id']) . "\n" : html_entity_decode(censor_text($pm_row['message_subject'])) . "\n",
 					'PRIVATE_MESSAGE_SUBJECT'	=> ($is_html) ? sprintf('<a href="%s?i=pm&amp;mode=view&amp;f=0&amp;p=%s">%s</a>', $this->board_url . 'ucp.' . $this->phpEx, $pm_row['msg_id'], html_entity_decode(censor_text($pm_row['message_subject']))) . "\n" : html_entity_decode(censor_text($pm_row['message_subject'])) . "\n",
@@ -1112,7 +1118,7 @@ class digests extends \phpbb\cron\task\base
 					// Logically, if there are no bookmarked topics for this user_id then there will be nothing in the digest. Flag an exception and
 					// make a note in the log about this inconsistency.
 					$this->digest_exception = true;
-					add_log('admin', 'LOG_CONFIG_DIGEST_NO_BOOKMARKS', $user_row['username']);
+					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGEST_NO_BOOKMARKS', false, array($user_row['username']));
 					return '';
 				}
 				
@@ -1147,7 +1153,7 @@ class digests extends \phpbb\cron\task\base
 				{
 					// If this user cannot retrieve ANY forums, in most cases no digest will be produced. However, there may be forums that the admin
 					// requires be presented, so we don't do an exception, but we do note it in the log.
-					add_log('admin', 'LOG_CONFIG_DIGEST_NO_ALLOWED_FORUMS', $user_row['username']);
+					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGEST_NO_ALLOWED_FORUMS', false, array($user_row['username']));
 				}
 				$allowed_forums[] = 0;	// Add in global announcements forum
 		
@@ -1648,7 +1654,7 @@ class digests extends \phpbb\cron\task\base
 				{
 					// Process a forum break
 					$this->template->assign_block_vars('forum', array(
-						'FORUM'			=> ($is_html) ? sprintf('<a href="%sviewforum.%s?f=%s">%s</a>', $this->board_url, $this->phpEx, $post_row['forum_id'], html_entity_decode($post_row['forum_name'])) : html_entity_decode($post_row['forum_name']),
+						'FORUM'			=> ($is_html) ? sprintf("<a href=\"%sviewforum.%s?f=%s\">%s</a>", $this->board_url, $this->phpEx, $post_row['forum_id'], html_entity_decode($post_row['forum_name'])) : html_entity_decode($post_row['forum_name']),
 					));
 					$last_forum_id = (int) $post_row['forum_id'];
 				}
@@ -1658,7 +1664,7 @@ class digests extends \phpbb\cron\task\base
 					// Process a topic break
 					$this->template->assign_block_vars('forum.topic', array(
 						'S_USE_CLASSIC_TEMPLATE'	=> $this->layout_with_html_tables,
-						'TOPIC'						=> ($is_html) ? sprintf('<a href="%sviewtopic.%s?f=%s&amp;t=%s">%s</a>', $this->board_url, $this->phpEx, $post_row['forum_id'], $post_row['topic_id'], html_entity_decode($post_row['topic_title'])) : html_entity_decode($post_row['topic_title']),
+						'TOPIC'						=> ($is_html) ? sprintf("<a href=\"%sviewtopic.%s?f=%s&amp;t=%s\">%s</a>", $this->board_url, $this->phpEx, $post_row['forum_id'], $post_row['topic_id'], html_entity_decode($post_row['topic_title'])) : html_entity_decode($post_row['topic_title']),
 					));
 					$last_topic_id = (int) $post_row['topic_id'];
 				}
@@ -1670,7 +1676,7 @@ class digests extends \phpbb\cron\task\base
 				}
 				
 				// Create a link to the profile of the poster
-				$from_url = sprintf('<a href="%s?mode=viewprofile&amp;u=%s">%s</a>%s', $this->board_url . 'memberlist.' . $this->phpEx, $post_row['user_id'], html_entity_decode($post_row['username']), "\n");
+				$from_url = sprintf("<a href=\"%s?mode=viewprofile&amp;u=%s\">%s</a>%s", $this->board_url . 'memberlist.' . $this->phpEx, $post_row['user_id'], html_entity_decode($post_row['username']), "\n");
 			
 				$this->template->assign_block_vars('forum.topic.post', array(
 					'ANCHOR'		=> 'p' . $post_row['post_id'],

@@ -20,6 +20,7 @@ services:
             - @template
             - @auth
             - %core.table_prefix%
+            - @log
         calls:
             - [set_name, [cron.task.cron_task]]
         tags:

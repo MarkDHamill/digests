@@ -9,11 +9,17 @@
 
 namespace phpbbservices\digests\includes;
 
+if (!defined('IN_PHPBB'))
+{
+	exit;
+}
+
 global $phpbb_root_path, $phpEx;
 include($phpbb_root_path . 'includes/functions_messenger.' . $phpEx); // Used to send emails
 
 // The purpose of this class is to override the messenger class so HTML can be sent in email. The code is a copy and paste for the relevant events 
-// from the 3.1.6 source for /includes/functions_messenger.php with minimal changes needed to add this functionality.
+// from the 3.1.6 source for /includes/functions_messenger.php with minimal changes needed to add this functionality. One minor change: I had to use
+// new \queue() instead of new queue();
 
 class html_messenger extends \messenger
 {
@@ -151,7 +157,7 @@ class html_messenger extends \messenger
 		{
 			if (empty($this->queue))
 			{
-				$this->queue = new queue();
+				$this->queue = new \queue();
 				$this->queue->init('email', $config['email_package_size']);
 			}
 			$use_queue = true;

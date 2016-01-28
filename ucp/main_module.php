@@ -97,9 +97,9 @@ class main_module
 					{
 						foreach ($request_vars as $key => $value) 
 						{
-							if (substr(htmlspecialchars($key), 0, 4) == 'elt_') 
+							if (substr($key, 0, 4) == 'elt_') 
 							{
-								$forum_id = intval(substr(htmlspecialchars($key), 4, strpos($key, '_', 4) - 4));
+								$forum_id = intval(substr($key, 4, strpos($key, '_', 4) - 4));
 	
 								$sql_ary = array(
 									'user_id'		=> (int) $user->data['user_id'],

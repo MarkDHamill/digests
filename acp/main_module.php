@@ -24,12 +24,12 @@ class main_module
 	function main($id, $mode)
 	{
 		global $db, $user, $auth, $template;
-		global $config, $phpbb_root_path, $phpbb_admin_path, $phpEx;
+		global $config, $phpbb_root_path, $phpbb_admin_path, $phpEx, $phpbb_log;
 		global $cache, $phpbb_container, $phpbb_dispatcher, $table_prefix, $request;
 		
 		$user->add_lang_ext('phpbbservices/digests', array('info_acp_common','common'));
 
-		$action	= request_var('action', '');
+		$action	= $request->variable('action', '');
 		$submit = (isset($_POST['submit'])) ? true : false;
 
 		$form_key = 'phpbbservices/digests';
@@ -106,11 +106,11 @@ class main_module
 				);
 
 				// Grab some URL parameters
-				$member = request_var('member', '');
-				$start = request_var('start', 0	);
-				$subscribe = request_var('subscribe', 'a');
-				$sortby = request_var('sortby', 'u');
-				$sortorder = request_var('sortorder', 'a');
+				$member = $request->variable('member', '');
+				$start = $request->variable('start', 0	);
+				$subscribe = $request->variable('subscribe', 'a');
+				$sortby = $request->variable('sortby', 'u');
+				$sortorder = $request->variable('sortorder', 'a');
 				
 				// Translate time zone information
 				$template->assign_vars(array(
@@ -708,7 +708,7 @@ class main_module
 		}
 
 		$this->new_config = $config;
-		$cfg_array = (isset($_REQUEST['config'])) ? utf8_normalize_nfc(request_var('config', array('' => ''), true)) : $this->new_config;
+		$cfg_array = (isset($_REQUEST['config'])) ? utf8_normalize_nfc($request->variable('config', array('' => ''), true)) : $this->new_config;
 		$error = array();
 
 		// We validate the complete config if wished
@@ -753,7 +753,7 @@ class main_module
 		{
 			
 			// Find the value of "selected" so we can set a switch
-			$subscribe_mode = request_var('selected', constants::DIGESTS_NONE_VALUE);
+			$subscribe_mode = $request->variable('selected', constants::DIGESTS_NONE_VALUE);
 
 			// Get the entire request variables as an array for parsing
 			unset($requests_vars);
@@ -788,9 +788,9 @@ class main_module
 						$current_user_id = $user_id;
 						// We need to set these variables so we can detect if individual forum subscriptions will need to be processed.
 						$var = 'user-' . $current_user_id . '-all_forums';
-						$all_forums = request_var($var,'');
+						$all_forums = $request->variable($var,'');
 						$var = 'user-' . $current_user_id . '-filter_type';
-						$filter_type = request_var($var,'');
+						$filter_type = $request->variable($var,'');
 					}
 						
 					// Associate the database columns with its requested value
@@ -947,9 +947,9 @@ class main_module
 						
 						// We need to set these variables so we can detect if individual forum subscriptions will need to be processed.
 						$var = 'user-' . $current_user_id . '-all_forums';
-						$all_forums = request_var($var,'');
+						$all_forums = $request->variable($var,'');
 						$var = 'user-' . $current_user_id . '-filter_type';
-						$filter_type = request_var($var,'');
+						$filter_type = $request->variable($var,'');
 
 					}
 					
@@ -1249,7 +1249,7 @@ class main_module
 							
 							if (!$mail_sent)
 							{
-								add_log('admin', sprintf($user->lang['LOG_CONFIG_DIGESTS_SEND_MASS_EMAIL_ERROR'], $row_info_array['user_email']));
+								$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LOG_CONFIG_DIGESTS_SEND_MASS_EMAIL_ERROR', false, array($row_info_array['user_email']));
 							}
 							$messenger->reset();
 							
@@ -1318,11 +1318,11 @@ class main_module
 				{
 					if ($all_cleared)
 					{
-						add_log('admin', 'LOG_CONFIG_DIGESTS_CACHE_CLEARED');
+						$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LOG_CONFIG_DIGESTS_CACHE_CLEARED');
 					}
 					else
 					{
-						add_log('admin', 'LOG_CONFIG_DIGESTS_CLEAR_SPOOL_ERROR');
+						$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LOG_CONFIG_DIGESTS_CLEAR_SPOOL_ERROR');
 					}
 				}
 			
@@ -1331,7 +1331,7 @@ class main_module
 			// Create a mailer object and call its run method. The logic for sending a digest is embedded in this method, which is normally run as a cron task.
 			if ($good_date && $config['phpbbservices_digests_test'])
 			{
-				$mailer = new \phpbbservices\digests\cron\task\digests($config, $request, $user, $db, $phpEx, $phpbb_root_path, $template, $auth, $table_prefix);
+				$mailer = new \phpbbservices\digests\cron\task\digests($config, $request, $user, $db, $phpEx, $phpbb_root_path, $template, $auth, $table_prefix, $phpbb_log);
 				$success = $mailer->run();
 			}
 			
@@ -1369,7 +1369,7 @@ class main_module
 				else if (!$success)
 				{
 					$message_type = E_USER_WARNING;
-					add_log('admin', 'LOG_CONFIG_DIGESTS_MAILER_RAN_WITH_ERROR');
+					$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LOG_CONFIG_DIGESTS_MAILER_RAN_WITH_ERROR');
 					$message = strip_tags($user->lang['LOG_CONFIG_DIGESTS_MAILER_RAN_WITH_ERROR']);
 				}
 				else
@@ -1379,7 +1379,7 @@ class main_module
 			}
 			else
 			{
-				add_log('admin', 'LOG_CONFIG_' . strtoupper($mode));
+				$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LOG_CONFIG_' . strtoupper($mode));
 			}
 			
 			if (!isset($message))

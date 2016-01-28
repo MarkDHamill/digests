@@ -744,7 +744,7 @@ class main_module
 					// send the password to the output
 					continue;
 				}
-				set_config($config_name, $config_value);
+				$config->set($config_name, $config_value);
 
 			}
 		}
@@ -774,14 +774,14 @@ class main_module
 				
 				// We only care if the request variable starts with "user-". There are likely multiple variables like this for the same user
 				// representing all the controls for that user.
-				if (substr(htmlspecialchars($name),0,5) == 'user-')
+				if (substr($name,0,5) == 'user-')
 				{
 					
 					// Parse for the user id, which is embedded in the form field name. Format is user-99-column_name where 99
 					// is the user id.
 					$delimiter_pos = strpos($name, '-', 5);
-					$user_id = substr(htmlspecialchars($name), 5, $delimiter_pos - 5);
-					$var_part = substr(htmlspecialchars($name), $delimiter_pos + 1);
+					$user_id = substr($name, 5, $delimiter_pos - 5);
+					$var_part = substr($name, $delimiter_pos + 1);
 					
 					if ($current_user_id === NULL)
 					{

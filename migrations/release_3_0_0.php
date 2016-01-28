@@ -36,7 +36,7 @@ class release_3_0_0 extends \phpbb\db\migration\migration
 		{
 			$message_type = E_USER_WARNING;
 			trigger_error(sprintf($user->lang['DIGESTS_MIGRATE_UNSUPPORTED_VERSION'], $this->config['digests_version']), $message_type);
-			exit;
+			return;
 		}
 
 		// To upgrade from 2.2.6 or greater, the basic approach is to compare arrays of configuration variables and database column names.

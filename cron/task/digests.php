@@ -832,8 +832,6 @@ class digests extends \phpbb\cron\task\base
 					
 					$mail_sent = $html_messenger->send(NOTIFY_EMAIL, false, $is_html, true);
 					
-					echo $mail_sent;
-					
 					if (!$mail_sent)
 					{
 						
@@ -852,8 +850,6 @@ class digests extends \phpbb\cron\task\base
 					{
 						
 						$sent_to_created_for = ($use_mail_queue) ? $this->user->lang['DIGESTS_CREATED_FOR'] : $this->user->lang['DIGESTS_SENT_TO'];
-						echo $sent_to_created_for;
-						echo $this->config['phpbbservices_digests_enable_log'];
 						if ($this->config['phpbbservices_digests_enable_log'])
 						{
 							if ($this->config['phpbbservices_digests_show_email'])

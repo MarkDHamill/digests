@@ -96,22 +96,13 @@ class digests extends \phpbb\cron\task\base
 		// We need to distinguish if the request is being made from a system cron (typical) or by the ACP's manual mailer (atypical). We can do this
 		// by looking at the referer and verifying the call was from the ACP for the correct extension and module mode.
 		
+		
 		$referer = $this->request->server('HTTP_REFERER');
-		$this->manual_mode = (strstr($referer, 'adm/index.php') && strstr($referer, 'i=-phpbbservices-digests-acp-main_module') && strstr($referer, 'mode=digests_test')) ? true : false;
-
-		if ($this->manual_mode)
 		{
-			$email_templates_path = './../ext/phpbbservices/digests/language/en/email/';
-			$cache_path = './../ext/phpbbservices/digests/cache/';
 		}
 		else
 		{
-			$this->user->add_lang_ext('phpbbservices/digests', array('info_acp_common', 'common'));	// Language strings are already loaded if in manual mode
-			$email_templates_path = './ext/phpbbservices/digests/language/en/email/';
-			$cache_path = './ext/phpbbservices/digests/cache/';
-			$this->template->set_style(array('/ext/phpbbservices/digests/styles', 'styles'));	// Necessary because for system crons no styling information is set when the template class is instantiated, so template rendering can't happen. Likely phpBB bug/enhancement request.
 		}
-		
 		// If the board is currently disabled, digests should also be disabled too, don't ya think?
 		if ($this->config['board_disable'] && $this->config['phpbbservices_digests_enable_log'])
 		{
@@ -124,8 +115,6 @@ class digests extends \phpbb\cron\task\base
 		
 		// Set an indefinite execution time for this program, since we don't know how many digests
 		// must be processed for a particular hour or how long it may take. The set_time_limit function
-		// only works if PHP's safe mode is off.
-		set_time_limit(0);
 		
 		// Display a digest mail start processing message. It is captured in a log.
 		if ($this->config['phpbbservices_digests_enable_log'])
@@ -221,25 +210,9 @@ class digests extends \phpbb\cron\task\base
 		// Get users requesting digests for the current hour. Also, grab the user's style, so the digest will have a familiar look.
 		if ($this->config['override_user_style'])
 		{
-			$sql = 'SELECT u.*, s.* 
-				FROM ' . USERS_TABLE . ' u, ' . STYLES_TABLE . ' s
-				WHERE s.style_id = ' . $this->config['default_style'] . ' AND (' . 
-					$daily_digest_sql . $weekly_digest_sql . $monthly_digest_sql . 
-					") AND (user_digest_send_hour_gmt = $current_hour_gmt OR user_digest_send_hour_gmt = $current_hour_gmt_plus_30) 
-					AND user_inactive_reason = 0
-					AND user_digest_type <> '" . constants::DIGESTS_NONE_VALUE . 
-					"' ORDER BY user_lang";
 		}
 		else
 		{
-			$sql = 'SELECT u.*, s.* 
-				FROM ' . USERS_TABLE . ' u, ' . STYLES_TABLE . ' s
-				WHERE u.user_style = s.style_id AND (' . 
-					$daily_digest_sql . $weekly_digest_sql . $monthly_digest_sql . 
-					") AND (user_digest_send_hour_gmt = $current_hour_gmt OR user_digest_send_hour_gmt = $current_hour_gmt_plus_30) 
-					AND user_inactive_reason = 0
-					AND user_digest_type <> '" . constants::DIGESTS_NONE_VALUE . 
-					"' ORDER BY user_lang";
 		}
 		
 		$use_mail_queue = ($this->config['email_package_size'] > 0) ? true : false;
@@ -262,13 +235,9 @@ class digests extends \phpbb\cron\task\base
 		}
 		else if ($weekly_digest_sql != '')	// Weekly
 		{
-			$this->date_limit = $this->gmt_time - (7 * 24 * 60 * 60);
-			$date_limit_sql = ' AND p.post_time >= ' . $this->date_limit . ' AND p.post_time < ' . $this->gmt_time;
 		}
 		else	// Daily
 		{
-			$this->date_limit = $this->gmt_time - (24 * 60 * 60);
-			$date_limit_sql = ' AND p.post_time >= ' . $this->date_limit. ' AND p.post_time < ' . $this->gmt_time;
 		}
 
 		// Now get all potential posts for all users and place them in an array for parsing. Later the mailer will filter out the stuff that should not go
@@ -279,18 +248,8 @@ class digests extends \phpbb\cron\task\base
 			'SELECT'	=> 'f.*, t.*, p.*, u.*',
 		
 			'FROM'		=> array(
-				POSTS_TABLE => 'p',
-				USERS_TABLE => 'u',
-				TOPICS_TABLE => 't',
-				FORUMS_TABLE => 'f'),
 		
 			'WHERE'		=> "f.forum_id = t.forum_id
-						AND p.topic_id = t.topic_id 
-						AND t.forum_id = f.forum_id
-						AND p.poster_id = u.user_id
-						$date_limit_sql
-						AND p.post_visibility = 1
-						AND forum_password = ''",
 		
 			'ORDER_BY'	=> 'f.left_id, f.right_id'
 		);
@@ -532,7 +491,6 @@ class digests extends \phpbb\cron\task\base
 			// Print the non-post and non-private message information in the digest. The actual posts and private messages require the full templating system, 
 			// because the messenger class is too dumb to do more than basic templating. Note: most language variables are handled automatically by the templating
 			// system.
-			
 			$html_messenger->assign_vars(array(
 				'DIGESTS_BLOCK_IMAGES'				=> ($row['user_digest_block_images'] == 0) ? $this->user->lang['NO'] : $this->user->lang['YES'],
 				'DIGESTS_COUNT_LIMIT'				=> $max_posts_msg,
@@ -573,20 +531,10 @@ class digests extends \phpbb\cron\task\base
 			if ($row['user_digest_show_pms'])
 			{
 			
-				// If there are any unread private messages, they are fetched separately and passed as a rowset to create_content.
-				$pm_sql = 	'SELECT *
-							FROM ' . PRIVMSGS_TO_TABLE . ' pt, ' . PRIVMSGS_TABLE . ' pm, ' . USERS_TABLE . ' u
-							WHERE pt.msg_id = pm.msg_id
-								AND pt.author_id = u.user_id
-								AND pt.user_id = ' . $row['user_id'] . '
-								AND (pm_unread = 1 OR pm_new = 1)
-							ORDER BY message_time';
-							
 				$pm_result = $this->db->sql_query($pm_sql);
 				$pm_rowset = $this->db->sql_fetchrowset($pm_result);
 				$this->db->sql_freeresult();
 				
-				// Count # of unread and new for this user. Counts may need to be decremented later.
 				$total_pm_unread = 0;
 				$total_pm_new = 0;
 				
@@ -613,7 +561,6 @@ class digests extends \phpbb\cron\task\base
 			// Construct the body of the digest. We use the templating system because of the advanced features missing in the 
 			// email templating system, e.g. loops and switches. Note: create_content may set the flag $this->digest_exception.
 			$digest_content = $this->create_content($rowset_posts, $pm_rowset, $row, $is_html);
-			
 			// List the subscribed forums, if any
 			if ($row['user_digest_filter_type'] == constants::DIGESTS_BOOKMARKS)
 			{
@@ -745,16 +692,11 @@ class digests extends \phpbb\cron\task\base
 			{
 				
 				$pm_read_sql = 'UPDATE ' . PRIVMSGS_TO_TABLE . '
-					SET pm_new = 0, pm_unread = 0, folder_id = 0 
 					WHERE user_id = ' . $row['user_id'] . '
 						AND (pm_unread = 1 OR pm_new = 1)';
 				$pm_read_sql_result = $this->db->sql_query($pm_read_sql);
-				$this->db->sql_freeresult($pm_read_sql_result);
 
 				// Decrement the user_unread_privmsg and user_new_privmsg count
-				$pm_read_sql = 'UPDATE ' . USERS_TABLE . ' 
-					SET user_unread_privmsg = user_unread_privmsg - ' . $total_pm_unread . ',
-						user_new_privmsg = user_new_privmsg - ' . $total_pm_new . '
 					WHERE user_id = ' . $row['user_id'];
 				$this->db->sql_query($pm_read_sql);
 
@@ -862,19 +804,12 @@ class digests extends \phpbb\cron\task\base
 							}
 						}
 						
-						// Capture when digest was successfully sent
 						$sql2 = 'UPDATE ' . USERS_TABLE . '
-									SET user_digest_last_sent = ' . time() . ' 
-									WHERE user_id = ' . $row['user_id'];
-						$result2 = $this->db->sql_query($sql2);
 			
 						// If requested, update user_lastvisit
 						if ($row['user_digest_reset_lastvisit'] == 1)
 						{
 							$sql2 = 'UPDATE ' . USERS_TABLE . '
-										SET user_lastvisit = ' . time() . ' 
-										WHERE user_id = ' . $row['user_id'];
-							$result2 = $this->db->sql_query($sql2);
 						}
 						
 					}
@@ -1099,10 +1034,6 @@ class digests extends \phpbb\cron\task\base
 				// from certain forums. Instead we will create the SQL to get the bookmarked topics only.
 				
 				$bookmarked_topics = array();
-				$sql3 = 'SELECT t.topic_id
-					FROM ' . USERS_TABLE . ' u, ' . BOOKMARKS_TABLE . ' b, ' . TOPICS_TABLE . ' t
-					WHERE u.user_id = b.user_id AND b.topic_id = t.topic_id 
-						AND b.user_id = ' . $user_row['user_id'];
 				$result3 = $this->db->sql_query($sql3);
 				while ($row3 = $this->db->sql_fetchrow($result3))
 				{
@@ -1160,11 +1091,6 @@ class digests extends \phpbb\cron\task\base
 				$requested_forums = array();
 				$this->requested_forums_names = array();
 				
-				$sql3 = 'SELECT s.forum_id, forum_name 
-						FROM ' . $this->table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' s, ' . FORUMS_TABLE . ' f 
-						WHERE s.forum_id = f.forum_id 
-							AND user_id = ' . $user_row['user_id'];
-						
 				$result3 = $this->db->sql_query($sql3);
 				while ($row3 = $this->db->sql_fetchrow($result3))
 				{
@@ -1444,9 +1370,6 @@ class digests extends \phpbb\cron\task\base
 			{
 			
 				// Fetch your foes
-				$sql3 = 'SELECT zebra_id 
-						FROM ' . ZEBRA_TABLE . '
-						WHERE user_id = ' . $user_row['user_id'] . ' AND foe = 1';
 				$result3 = $this->db->sql_query($sql3);
 				while ($row3 = $this->db->sql_fetchrow($result3))
 				{
@@ -1566,11 +1489,6 @@ class digests extends \phpbb\cron\task\base
 				{
 					$post_text .= sprintf("<div class=\"box\">\n<p>%s</p>\n", $this->user->lang['ATTACHMENTS']);
 					
-					// Get all attachments
-					$sql3 = 'SELECT *
-						FROM ' . ATTACHMENTS_TABLE . '
-						WHERE post_msg_id = ' . $post_row['post_id'] . ' AND in_message = 0 
-						ORDER BY attach_id';
 					$result3 = $this->db->sql_query($sql3);
 					while ($row3 = $this->db->sql_fetchrow($result3))
 					{
@@ -1734,9 +1652,6 @@ class digests extends \phpbb\cron\task\base
 		if (!$parents_loaded)
 		{
 			// Get a list of parent_ids for each forum and put them in an array.
-			$sql = 'SELECT forum_id, parent_id 
-				FROM ' . FORUMS_TABLE . '
-				ORDER BY 1';
 			$result = $this->db->sql_query($sql);
 			while ($row = $this->db->sql_fetchrow($result))
 			{

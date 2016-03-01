@@ -12,7 +12,7 @@ namespace phpbbservices\digests\migrations;
 use phpbb\db\tools;
 use phpbb\db\migration\tool\module;
 
-class release_3_0_0 extends \phpbb\db\migration\migration
+class release_3_0_1 extends \phpbb\db\migration\migration
 {
 	
 	public function effectively_installed()
@@ -264,7 +264,15 @@ class release_3_0_0 extends \phpbb\db\migration\migration
 		// ----- Add New ACP Modules ----- //
 		
 		// We need the module_id for the extensions tab to add a new category for Digests within the ACP
-		$sql = 'SELECT module_id FROM ' . $this->table_prefix . "modules WHERE module_langname = 'ACP_CAT_DOT_MODS'";
+		//$sql = 'SELECT module_id FROM ' . $this->table_prefix . "modules WHERE module_langname = 'ACP_CAT_DOT_MODS'";
+		$sql_array = array(
+			'SELECT'	=> 'module_id',
+			'FROM'		=> array(
+				$this->table_prefix . 'modules'	=> 'm',
+			),
+			'WHERE'		=> "module_langname = 'ACP_CAT_DOT_MODS'",
+		);
+		$sql = $this->db->sql_build_query('SELECT', $sql_array);
 		$result = $this->db->sql_query($sql);
 		$rowset = $this->db->sql_fetchrowset($result);
 		$module_id = $rowset[0]['module_id'];
@@ -284,7 +292,15 @@ class release_3_0_0 extends \phpbb\db\migration\migration
 		);
 		
 		// We need the module_id for the newly created Digests category
-		$sql = 'SELECT module_id FROM ' . $this->table_prefix . "modules WHERE module_langname = 'ACP_CAT_DIGESTS'";
+		//$sql = 'SELECT module_id FROM ' . $this->table_prefix . "modules WHERE module_langname = 'ACP_CAT_DIGESTS'";
+		$sql_array = array(
+			'SELECT'	=> 'module_id',
+			'FROM'		=> array(
+				$this->table_prefix . 'modules'	=> 'm',
+			),
+			'WHERE'		=> "module_langname = 'ACP_CAT_DIGESTS'",
+		);
+		$sql = $this->db->sql_build_query('SELECT', $sql_array);
 		$result = $this->db->sql_query($sql);
 		$rowset = $this->db->sql_fetchrowset($result);
 		$module_id = $rowset[0]['module_id'];
@@ -384,7 +400,15 @@ class release_3_0_0 extends \phpbb\db\migration\migration
 		);
 		
 		// We need the module_id for the new Digests category
-		$sql = 'SELECT module_id FROM ' . $this->table_prefix . "modules WHERE module_langname = 'UCP_DIGESTS'";
+		//$sql = 'SELECT module_id FROM ' . $this->table_prefix . "modules WHERE module_langname = 'UCP_DIGESTS'";
+		$sql_array = array(
+			'SELECT'	=> 'module_id',
+			'FROM'		=> array(
+				$this->table_prefix . 'modules'	=> 'm',
+			),
+			'WHERE'		=> "module_langname = 'UCP_DIGESTS'",
+		);
+		$sql = $this->db->sql_build_query('SELECT', $sql_array);
 		$result = $this->db->sql_query($sql);
 		$rowset = $this->db->sql_fetchrowset($result);
 		$module_id = $rowset[0]['module_id'];

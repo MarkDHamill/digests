@@ -101,13 +101,14 @@ class main_module
 							{
 								$forum_id = intval(substr($key, 4, strpos($key, '_', 4) - 4));
 	
-								$sql_ary = array(
+								$sql_ary[] = array(
 									'user_id'		=> (int) $user->data['user_id'],
 									'forum_id'		=> $forum_id);
-								$sql = 'INSERT INTO ' . $table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' ' . $db->sql_build_array('INSERT', $sql_ary);
-	
-								$result = $db->sql_query($sql);
 							}
+						}
+						if (sizeof($sql_ary) > 0)
+						{
+							$result = $db->sql_multi_insert($table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE, $sql_ary);
 						}
 					}
 					unset($sql_ary);
@@ -207,7 +208,7 @@ class main_module
 				
 				{
 
-					if ($user->data['user_digests_type'] == constants::DIGESTS_NONE_VALUE)
+					if ($user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE)
 					{
 						if ($config['phpbbservices_digests_user_digest_send_hour_gmt'] == -1)
 						{
@@ -240,7 +241,7 @@ class main_module
 					// Note, setting an administator configured default for digest type is a bad idea because
 					// the user might think they have a digest subscription when they do not.
 					
-					if ($user->data['user_digests_type'] == constants::DIGESTS_NONE_VALUE)
+					if ($user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE)
 					{
 						$styling_html = ($config['phpbbservices_digests_user_digests_format'] == constants::DIGESTS_HTML_VALUE);
 						$styling_html_classic = ($config['phpbbservices_digests_user_digests_format'] == constants::DIGESTS_HTML_CLASSIC_VALUE);
@@ -328,9 +329,19 @@ class main_module
 
 				// Get current subscribed forums for this user, if any. If none, all allowed forums are assumed
 				$rowset = array();
-				$sql = 'SELECT forum_id 
-						FROM ' . $table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' 
-						WHERE user_id = ' . (int) $user->data['user_id'];
+
+				$sql_array = array(
+					'SELECT'	=> 'forum_id',
+				
+					'FROM'		=> array(
+						$table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE	=> 'sf',
+					),
+				
+					'WHERE'		=> 'user_id = ' . (int) $user->data['user_id'],
+				);
+				
+				$sql = $db->sql_build_query('SELECT', $sql_array);
+
 				$result = $db->sql_query($sql);
 				$rowset = $db->sql_fetchrowset($result);
 				$db->sql_freeresult();
@@ -344,9 +355,19 @@ class main_module
 				
 				// Get a list of parent_ids for each forum and put them in an array.
 				$parent_array = array();
-				$sql = 'SELECT forum_id, parent_id 
-					FROM ' . FORUMS_TABLE . '
-					ORDER BY 1';
+
+				$sql_array = array(
+					'SELECT'	=> 'forum_id, parent_id',
+				
+					'FROM'		=> array(
+						FORUMS_TABLE	=> 'f',
+					),
+				
+					'ORDER_BY'		=> '1',
+				);
+
+				$sql = $db->sql_build_query('SELECT', $sql_array);
+
 				$result = $db->sql_query($sql);
 				while ($row = $db->sql_fetchrow($result))
 				{
@@ -395,11 +416,21 @@ class main_module
 					// Set a flag in case no forums should be checked
 					$uncheck = ($user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE) && ($config['phpbbservices_digests_user_check_all_forums'] == 0);
 				
-					$sql = 'SELECT forum_name, forum_id, parent_id, forum_type
-							FROM ' . FORUMS_TABLE . ' 
-							WHERE ' . $db->sql_in_set('forum_id', $allowed_forums) . ' AND forum_type <> ' . FORUM_LINK . "
-							AND forum_password = ''
-							ORDER BY left_id ASC";
+					$sql_array = array(
+						'SELECT'	=> 'forum_name, forum_id, parent_id, forum_type',
+					
+						'FROM'		=> array(
+							FORUMS_TABLE		=> 'f',
+						),
+					
+						'WHERE'		=> $db->sql_in_set('forum_id', $allowed_forums) . ' AND forum_type <> ' . FORUM_LINK . "
+							AND forum_password = ''",
+					
+						'ORDER_BY'	=> 'left_id ASC',
+					);
+					
+					$sql = $db->sql_build_query('SELECT', $sql_array);
+
 					$result = $db->sql_query($sql);
 					
 					$template->assign_block_vars('show_forums', array());
@@ -591,8 +622,8 @@ class main_module
 				}
 				
 				$template->assign_vars(array(
-					'L_DIGEST_COUNT_LIMIT_EXPLAIN'				=> sprintf($user->lang['DIGEST_SIZE_ERROR'],$config['digests_max_items']),
-					'LA_DIGEST_SIZE_ERROR'						=> sprintf($user->lang['DIGEST_SIZE_ERROR'],$config['digests_max_items']),
+					'L_DIGEST_COUNT_LIMIT_EXPLAIN'				=> sprintf($user->lang['DIGESTS_SIZE_ERROR'], $config['digests_max_items']),
+					'LA_DIGEST_SIZE_ERROR'						=> sprintf($user->lang['DIGESTS_SIZE_ERROR'], $config['digests_max_items']),
 					'S_DIGESTS_FILTER_FOES_CHECKED_NO' 			=> ($user->data['user_digest_remove_foes'] == 0),
 					'S_DIGESTS_FILTER_FOES_CHECKED_YES' 		=> ($user->data['user_digest_remove_foes'] == 1),
 					'S_DIGESTS_MARK_READ_CHECKED' 				=> ($user->data['user_digest_pm_mark_read'] == 1),

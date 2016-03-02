@@ -33,7 +33,7 @@ class main_module
 
 		if ($submit && !check_form_key($form_key))
 		{
-			$message = $user->lang['FORM_INVALID'] . '<br /><br />' . sprintf($user->lang['RETURN_UCP'], '<a href="' . $this->u_action . '">', '</a>');
+			$message = $user->lang('FORM_INVALID') . '<br /><br />' . $user->lang('RETURN_UCP', '<a href="' . $this->u_action . '">', '</a>');
 			trigger_error($message);	// Program exits
 		}
 		
@@ -148,7 +148,7 @@ class main_module
 				break;
 					
 				default:
-					trigger_error(sprintf($user->lang['UCP_DIGESTS_MODE_ERROR'], $mode) . '<br /><br />' . sprintf($user->lang['RETURN_UCP'], '<a href="' . $this->u_action . '">', '</a>'));
+					trigger_error($user->lang('UCP_DIGESTS_MODE_ERROR', $mode) . '<br /><br />' . $user->lang('RETURN_UCP', '<a href="' . $this->u_action . '">', '</a>'));
 				break;
 				
 			}
@@ -165,7 +165,7 @@ class main_module
 			
 			// Send a confirmation message
 			meta_refresh(3, $this->u_action);
-			$message = $user->lang['DIGESTS_UPDATED'] . '<br /><br />' . sprintf($user->lang['RETURN_UCP'], '<a href="' . $this->u_action . '">', '</a>');
+			$message = $user->lang('DIGESTS_UPDATED') . '<br /><br />' . $user->lang('RETURN_UCP', '<a href="' . $this->u_action . '">', '</a>');
 			trigger_error($message);	// Program exits
 			
 		}
@@ -199,7 +199,7 @@ class main_module
 				if ($user->data['user_timezone'] == '')
 				{
 					$template->assign_vars(array(
-						'L_DIGESTS_NO_TIMEZONE'		=> sprintf($user->lang['DIGESTS_NO_TIMEZONE'], append_sid($phpbb_root_path . "ucp.$phpEx?i=ucp_prefs&mode=personal")),
+						'L_DIGESTS_NO_TIMEZONE'		=> $user->lang('DIGESTS_NO_TIMEZONE', append_sid($phpbb_root_path . "ucp.$phpEx?i=ucp_prefs&mode=personal")),
 						'S_DIGESTS_NO_TIMEZONE'		=> true,
 					));
 				}
@@ -269,7 +269,7 @@ class main_module
 					}
 		
 					$template->assign_vars(array(
-						'L_DIGESTS_FREQUENCY_EXPLAIN'		=> sprintf($user->lang['DIGESTS_FREQUENCY_EXPLAIN'], $user->lang['DIGESTS_WEEKDAY'][$config['phpbbservices_digests_weekly_digest_day']]),
+						'L_DIGESTS_FREQUENCY_EXPLAIN'		=> $user->lang('DIGESTS_FREQUENCY_EXPLAIN', $user->lang['DIGESTS_WEEKDAY'][$config['phpbbservices_digests_weekly_digest_day']]),
 						'L_DIGESTS_HTML_CLASSIC_VALUE'		=> constants::DIGESTS_HTML_CLASSIC_VALUE,
 						'L_DIGESTS_HTML_VALUE'				=> constants::DIGESTS_HTML_VALUE,
 						'L_DIGESTS_PLAIN_CLASSIC_VALUE'		=> constants::DIGESTS_PLAIN_CLASSIC_VALUE,
@@ -591,7 +591,7 @@ class main_module
 				{
 					// No forums to show!
 					$template->assign_vars(array(
-						'L_DIGESTS_NO_FORUMS_MESSAGE' 	=> $user->lang['DIGESTS_NO_FORUMS_AVAILABLE'],
+						'L_DIGESTS_NO_FORUMS_MESSAGE' 	=> $user->lang('DIGESTS_NO_FORUMS_AVAILABLE'),
 						'S_DIGESTS_NO_FORUMS' 			=> true, 
 						)
 					);
@@ -622,8 +622,8 @@ class main_module
 				}
 				
 				$template->assign_vars(array(
-					'L_DIGEST_COUNT_LIMIT_EXPLAIN'				=> sprintf($user->lang['DIGESTS_SIZE_ERROR'], $config['digests_max_items']),
-					'LA_DIGEST_SIZE_ERROR'						=> sprintf($user->lang['DIGESTS_SIZE_ERROR'], $config['digests_max_items']),
+					'L_DIGEST_COUNT_LIMIT_EXPLAIN'				=> $user->lang('DIGESTS_SIZE_ERROR', $config['digests_max_items']),
+					'LA_DIGEST_SIZE_ERROR'						=> $user->lang('DIGESTS_SIZE_ERROR', $config['digests_max_items']),
 					'S_DIGESTS_FILTER_FOES_CHECKED_NO' 			=> ($user->data['user_digest_remove_foes'] == 0),
 					'S_DIGESTS_FILTER_FOES_CHECKED_YES' 		=> ($user->data['user_digest_remove_foes'] == 1),
 					'S_DIGESTS_MARK_READ_CHECKED' 				=> ($user->data['user_digest_pm_mark_read'] == 1),
@@ -677,8 +677,8 @@ class main_module
 
 		// These template variables are used on all the pages
 		$template->assign_vars(array(
-			'L_DIGESTS_DISABLED_MESSAGE' 	=> ($user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE) ? '<p><em>' . $user->lang['DIGESTS_DISABLED_MESSAGE'] . '</em></p>' : '',
-			'L_DIGESTS_MODE'				=> $user->lang['UCP_DIGESTS_' . strtoupper($mode)],
+			'L_DIGESTS_DISABLED_MESSAGE' 	=> ($user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE) ? '<p><em>' . $user->lang('DIGESTS_DISABLED_MESSAGE') . '</em></p>' : '',
+			'L_DIGESTS_MODE'				=> $user->lang('UCP_DIGESTS_' . strtoupper($mode)),
 			'S_DIGESTS_CONTROL_DISABLED' 	=> ($user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE),
 			'S_DIGESTS_HOME'				=> $config['phpbbservices_digests_digests_title'],
 			'S_DIGESTS_SHOW_BUTTONS'		=> $show_buttons,

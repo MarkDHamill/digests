@@ -16,7 +16,7 @@ class main_info
 		return array(
 			'filename'	=> '\phpbbservices\digests\ucp\main_module',
 			'title'		=> 'UCP_DIGESTS',
-			'version'	=> '3.0.0',
+			'version'	=> '3.0.1',
 			'modes'		=> array(
 				'basics'					=> array('title' => 'UCP_DIGESTS_BASICS', 'auth' => '', 'cat' => array('UCP_DIGESTS')),
 				'forums_selection'			=> array('title' => 'UCP_DIGESTS_FORUMS_SELECTION', 'auth' => '', 'cat' => array('UCP_DIGESTS')),

@@ -35,7 +35,7 @@ class release_3_0_1 extends \phpbb\db\migration\migration
 		if ((version_compare($this->config['digests_version'], '2.2.6') === -1) && (version_compare($this->config['digests_version'], '2.2.26') === 1))
 		{
 			$message_type = E_USER_WARNING;
-			trigger_error(sprintf($user->lang['DIGESTS_MIGRATE_UNSUPPORTED_VERSION'], $this->config['digests_version']), $message_type);
+			trigger_error($user->lang('DIGESTS_MIGRATE_UNSUPPORTED_VERSION', $this->config['digests_version']), $message_type);
 			return;
 		}
 
@@ -559,7 +559,7 @@ class release_3_0_1 extends \phpbb\db\migration\migration
 			// Add the UCP digests category, a top level category
 			array('module.add', array(
 				'ucp',
-				0,
+				false,
 				'UCP_DIGESTS'
 			)),
 			// Add the four UCP digest modules

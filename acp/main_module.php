@@ -289,15 +289,15 @@ class main_module
 					'USERNAME_SELECTED'			=> $username_selected,
 				));
 	
-				$gmt_offset = make_tz_offset($config['board_timezone']);	// Returns offset in hours from GMT for a timezone
+				$board_offset_hours = $config['phpbbservices_digests_time_zone'];
 				
 				$sql_array = array(
 					'SELECT'	=> '*, CASE
-										WHEN user_digest_send_hour_gmt + ' . $gmt_offset . ' >= 24 THEN
-						 					user_digest_send_hour_gmt + ' . $gmt_offset . ' - 24  
-										WHEN user_digest_send_hour_gmt + ' . $gmt_offset . ' < 0 THEN
-						 					user_digest_send_hour_gmt + ' . $gmt_offset . ' + 24 
-										ELSE user_digest_send_hour_gmt + ' . $gmt_offset . '
+										WHEN user_digest_send_hour_gmt + ' . $board_offset_hours . ' >= 24 THEN
+						 					user_digest_send_hour_gmt + ' . $board_offset_hours . ' - 24  
+										WHEN user_digest_send_hour_gmt + ' . $board_offset_hours . ' < 0 THEN
+						 					user_digest_send_hour_gmt + ' . $board_offset_hours . ' + 24 
+										ELSE user_digest_send_hour_gmt + ' . $board_offset_hours . '
 										END AS send_hour_board',
 				
 					'FROM'		=> array(
@@ -355,7 +355,7 @@ class main_module
 					}
 					
 					// Calculate a digest send hour in board time
-					$send_hour_board = str_replace('.',':', floor($row['user_digest_send_hour_gmt']) + $gmt_offset);
+					$send_hour_board = str_replace('.',':', floor($row['user_digest_send_hour_gmt']) + $board_offset_hours);
 					if ($send_hour_board >= 24)
 					{
 						$send_hour_board = $send_hour_board - 24;
@@ -368,17 +368,17 @@ class main_module
 					// Create an array of GMT offsets from board time zone
 					for($i=0;$i<24;$i++)
 					{
-						if (($i - $gmt_offset) < 0)
+						if (($i - $board_offset_hours) < 0)
 						{
-							$board_to_gmt[$i] = $i - $gmt_offset + 24;
+							$board_offset[$i] = $i - $board_offset_hours + 24;
 						}
-						else if (($i - $gmt_offset) > 23)
+						else if (($i - $board_offset_hours) > 23)
 						{
-							$board_to_gmt[$i] = $i - $gmt_offset - 24;
+							$board_offset[$i] = $i - $board_offset_hours - 24;
 						}
 						else
 						{
-							$board_to_gmt[$i] = $i - $gmt_offset;
+							$board_offset[$i] = $i - $board_offset_hours;
 						}
 					}
 
@@ -404,30 +404,30 @@ class main_module
 						'1ST'								=> ($row['user_digest_filter_type'] == constants::DIGESTS_FIRST),
 						'ALL'								=> ($row['user_digest_filter_type'] == constants::DIGESTS_ALL),
 						'BM'								=> ($row['user_digest_filter_type'] == constants::DIGESTS_BOOKMARKS),
-						'BOARD_TO_GMT_0'					=> $board_to_gmt[0],
-						'BOARD_TO_GMT_1'					=> $board_to_gmt[1],
-						'BOARD_TO_GMT_2'					=> $board_to_gmt[2],
-						'BOARD_TO_GMT_3'					=> $board_to_gmt[3],
-						'BOARD_TO_GMT_4'					=> $board_to_gmt[4],
-						'BOARD_TO_GMT_5'					=> $board_to_gmt[5],
-						'BOARD_TO_GMT_6'					=> $board_to_gmt[6],
-						'BOARD_TO_GMT_7'					=> $board_to_gmt[7],
-						'BOARD_TO_GMT_8'					=> $board_to_gmt[8],
-						'BOARD_TO_GMT_9'					=> $board_to_gmt[9],
-						'BOARD_TO_GMT_10'					=> $board_to_gmt[10],
-						'BOARD_TO_GMT_11'					=> $board_to_gmt[11],
-						'BOARD_TO_GMT_12'					=> $board_to_gmt[12],
-						'BOARD_TO_GMT_13'					=> $board_to_gmt[13],
-						'BOARD_TO_GMT_14'					=> $board_to_gmt[14],
-						'BOARD_TO_GMT_15'					=> $board_to_gmt[15],
-						'BOARD_TO_GMT_16'					=> $board_to_gmt[16],
-						'BOARD_TO_GMT_17'					=> $board_to_gmt[17],
-						'BOARD_TO_GMT_18'					=> $board_to_gmt[18],
-						'BOARD_TO_GMT_19'					=> $board_to_gmt[19],
-						'BOARD_TO_GMT_20'					=> $board_to_gmt[20],
-						'BOARD_TO_GMT_21'					=> $board_to_gmt[21],
-						'BOARD_TO_GMT_22'					=> $board_to_gmt[22],
-						'BOARD_TO_GMT_23'					=> $board_to_gmt[23],
+						'BOARD_OFFSET_0'					=> $board_offset[0],
+						'BOARD_OFFSET_1'					=> $board_offset[1],
+						'BOARD_OFFSET_2'					=> $board_offset[2],
+						'BOARD_OFFSET_3'					=> $board_offset[3],
+						'BOARD_OFFSET_4'					=> $board_offset[4],
+						'BOARD_OFFSET_5'					=> $board_offset[5],
+						'BOARD_OFFSET_6'					=> $board_offset[6],
+						'BOARD_OFFSET_7'					=> $board_offset[7],
+						'BOARD_OFFSET_8'					=> $board_offset[8],
+						'BOARD_OFFSET_9'					=> $board_offset[9],
+						'BOARD_OFFSET_10'					=> $board_offset[10],
+						'BOARD_OFFSET_11'					=> $board_offset[11],
+						'BOARD_OFFSET_12'					=> $board_offset[12],
+						'BOARD_OFFSET_13'					=> $board_offset[13],
+						'BOARD_OFFSET_14'					=> $board_offset[14],
+						'BOARD_OFFSET_15'					=> $board_offset[15],
+						'BOARD_OFFSET_16'					=> $board_offset[16],
+						'BOARD_OFFSET_17'					=> $board_offset[17],
+						'BOARD_OFFSET_18'					=> $board_offset[18],
+						'BOARD_OFFSET_19'					=> $board_offset[19],
+						'BOARD_OFFSET_20'					=> $board_offset[20],
+						'BOARD_OFFSET_21'					=> $board_offset[21],
+						'BOARD_OFFSET_22'					=> $board_offset[22],
+						'BOARD_OFFSET_23'					=> $board_offset[23],
 						'DIGEST_MAX_SIZE' 					=> $row['user_digest_max_display_words'],
 						'L_DIGEST_CHANGE_SUBSCRIPTION' 		=> ($row['user_digest_type'] != 'NONE') ? $user->lang('DIGESTS_UNSUBSCRIBE') : $user->lang('DIGESTS_SUBSCRIBE_LITERAL'),
 						'S_ALL_BY_DEFAULT'					=> $all_by_default,
@@ -1642,13 +1642,4 @@ class main_module
 		return $digest_sort_order;
 	}
 
-}
-
-function make_tz_offset ($tz_text)
-{
-	// This function translates a text timezone (like America/New York) to an hour offset from GMT, doing magic like figuring out DST
-	$tz = new \DateTimeZone($tz_text);
-	$datetime_tz = new \DateTime('now', $tz);
-	$timeOffset = $tz->getOffset($datetime_tz) / 3600;
-	return $timeOffset;
 }

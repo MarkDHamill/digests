@@ -277,7 +277,7 @@ class main_module
 						'L_DIGESTS_TEXT_VALUE'				=> constants::DIGESTS_TEXT_VALUE,
 						'S_DIGESTS_BASICS'					=> true,
 						'S_DIGESTS_DAY_CHECKED' 			=> ($user->data['user_digest_type'] == constants::DIGESTS_DAILY_VALUE),
-						'S_DIGESTS_HTML_CHECKED' 			=> $styling_html,
+						'S_DIGESTS_HTML_CHECKED' 			=> $styling_html || ($user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE),
 						'S_DIGESTS_HTML_CLASSIC_CHECKED' 	=> $styling_html_classic,
 						'S_DIGESTS_MONTH_CHECKED' 			=> ($user->data['user_digest_type'] == constants::DIGESTS_MONTHLY_VALUE),
 						'S_DIGESTS_NONE_CHECKED' 			=> ($user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE),

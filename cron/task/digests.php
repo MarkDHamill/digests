@@ -162,7 +162,7 @@ class digests extends \phpbb\cron\task\base
 		}
 
 		// Do not forget to update the configuration variable for last run time.
-		if (!(($this->manual_mode) && ($this->config['phpbbservices_digests_test_spool'])) && $run_successful)
+		if (!(($this->manual_mode) && ($this->config['phpbbservices_digests_test_spool'])) && $success)
 		{
 			// We only want to report that the mailer run was successful if it ran successfully and actually sent some emails out.
 			$this->config->set('phpbbservices_digests_cron_task_last_gc', $now);
@@ -885,7 +885,7 @@ class digests extends \phpbb\cron\task\base
 				if ($handle === false)
 				{
 					// Since this indicates a major problem, let's abort now. It's likely a global write error.
-					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILE_OPEN_ERROR', false, array($cache_path));
+					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILE_OPEN_ERROR', false, array($this->cache_path));
 					if ($this->config['phpbbservices_digests_enable_log'])
 					{
 						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END');
@@ -897,7 +897,7 @@ class digests extends \phpbb\cron\task\base
 				if ($success === false)
 				{
 					// Since this indicates a major problem, let's abort now.  It's likely a global write error.
-					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILE_WRITE_ERROR', false, array($cache_path . $file_name));
+					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILE_WRITE_ERROR', false, array($this->cache_path . $file_name));
 					if ($this->config['phpbbservices_digests_enable_log'])
 					{
 						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END');
@@ -909,7 +909,7 @@ class digests extends \phpbb\cron\task\base
 				if ($success === false)
 				{
 					// Since this indicates a major problem, let's abort now
-					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILE_CLOSE_ERROR', false, array($cache_path . $file_name));
+					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILE_CLOSE_ERROR', false, array($this->cache_path . $file_name));
 					if ($this->config['phpbbservices_digests_enable_log'])
 					{
 						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END');

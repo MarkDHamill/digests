@@ -164,6 +164,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_USERS_PER_PAGE'								=> 'Subscribers per page',
 	'DIGESTS_USERS_PER_PAGE_EXPLAIN'						=> 'This controls how many digest subscribers an administrator sees per page when they select the edit subscribers option. Based on your PHP max_input_vars, you should keep this to ' . floor((ini_get('max_input_vars') - 100) / 24) . ' subscribers per page or less. Otherwise you may have to increase max_input_vars in your php.ini file to keep the function from failing.',
 	'DIGESTS_WEEKLY_DIGESTS_DAY'							=> 'Select the day of the week for sending out weekly digests',
+	'DIGESTS_WITH_SELECTED'									=> 'With selected',
 
 	'LOG_CONFIG_DIGESTS_BAD_SEND_HOUR'						=> '<strong>User %s digest send hour is invalid. It is %d. The number should be >= 0 and < 24.</strong>',
 	'LOG_CONFIG_DIGESTS_BALANCE_LOAD'						=> '<strong>Digests balance load run successfully</strong>',

@@ -31,8 +31,8 @@ class release_3_0_1 extends \phpbb\db\migration\migration
 		}
 
 		// If the version of the digests mod is old (prior to 2.2.6, the first officially approved digests mod for 3.0) or is more than the last version 
-		// 2.2.26 then this migrator cannot be used.
-		if ((version_compare($this->config['digests_version'], '2.2.6') === -1) && (version_compare($this->config['digests_version'], '2.2.26') === 1))
+		// 2.2.27 then this migrator cannot be used.
+		if ((version_compare($this->config['digests_version'], '2.2.6') === -1) && (version_compare($this->config['digests_version'], '2.2.27') === 1))
 		{
 			$message_type = E_USER_WARNING;
 			trigger_error($user->lang('DIGESTS_MIGRATE_UNSUPPORTED_VERSION', $this->config['digests_version']), $message_type);
@@ -264,7 +264,6 @@ class release_3_0_1 extends \phpbb\db\migration\migration
 		// ----- Add New ACP Modules ----- //
 		
 		// We need the module_id for the extensions tab to add a new category for Digests within the ACP
-		//$sql = 'SELECT module_id FROM ' . $this->table_prefix . "modules WHERE module_langname = 'ACP_CAT_DOT_MODS'";
 		$sql_array = array(
 			'SELECT'	=> 'module_id',
 			'FROM'		=> array(

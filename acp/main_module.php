@@ -1550,7 +1550,7 @@ class main_module
 		
 		$dow_options = '';
 		$index = 0;
-		foreach ($user->lang('DIGESTS_WEEKDAY') as $key => $value)
+		foreach ($user->lang['DIGESTS_WEEKDAY'] as $key => $value)
 		{
 			$selected = ($index == $config['phpbbservices_digests_weekly_digest_day']) ? ' selected="selected"' : '';
 			$dow_options .= '<option value="' . $index . '"' . $selected . '>' . $value . '</option>';

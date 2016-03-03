@@ -133,6 +133,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_SUBSCRIBE_ALL_EXPLAIN'							=> 'If you say no, everyone will be unsubscribed.',
 	'DIGESTS_SUBSCRIBE_LITERAL'								=> 'Subscribe',
 	'DIGESTS_SUBSCRIBED'									=> 'Subscribed',
+	'DIGESTS_SUBSCRIBERS'                           		=> 'Subscribers',	
 	'DIGESTS_TIME_ZONE'										=> 'Time zone',
 	'DIGESTS_TIME_ZONE_EXPLAIN'								=> 'The edit subscribers and balance load digest functions show the hour when digests are emailed. If you set a particular time zone here, the hour emailed will be translated into the time zone you set here. Initially this is set to the board timezone. Values must be integers from -12 to 12, with 0 being GMT.',
 	'DIGESTS_UNSUBSCRIBE'									=> 'Unsubscribe',

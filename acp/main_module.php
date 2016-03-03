@@ -1369,14 +1369,7 @@ class main_module
 
 		if ($submit && $mode == 'digests_test')
 		{
-			
-			// Make sure run date is valid, if a run date was requested.
-			$good_date = true;
-			if ($config['phpbbservices_digests_test_time_use'])
-			{
-				$good_date = checkdate($config['phpbbservices_digests_test_month'], $config['phpbbservices_digests_test_day'], $config['phpbbservices_digests_test_year']);
-			}
-			
+
 			// Clear the digests cache folder, if so instructed
 			$all_cleared = true;
 			$success = true; // Assume all went well
@@ -1419,11 +1412,20 @@ class main_module
 			
 			}
 			
+			// Make sure run date is valid, if a run date was requested.
+			$good_date = true;
+			if ($config['phpbbservices_digests_test_time_use'])
+			{
+				$good_date = checkdate($config['phpbbservices_digests_test_month'], $config['phpbbservices_digests_test_day'], $config['phpbbservices_digests_test_year']);
+			}
+			
 			// Create a mailer object and call its run method. The logic for sending a digest is embedded in this method, which is normally run as a cron task.
 			if ($good_date && $config['phpbbservices_digests_test'])
 			{
+				$save_template = $template;	// Need to save this object because the mailer will make changes such that the sidebar will get lost
 				$mailer = new \phpbbservices\digests\cron\task\digests($config, $request, $user, $db, $phpEx, $phpbb_root_path, $template, $auth, $table_prefix, $phpbb_log);
 				$success = $mailer->run();
+				$template = $save_template;	// Restore template object
 			}
 
 			if ($config['board_disable'])

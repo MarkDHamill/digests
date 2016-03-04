@@ -1,0 +1,13 @@
+Hallo {USERNAME},
+
+ein Administrator von {FORUM_NAME} hat für dich eben den regelmäßigen Versand von eMail-Zusammenfassungen eingerichtet.
+Du ershältst ab jetzt eine {DIGESTS_TYPE} im {DIGESTS_FORMAT}-Format.
+
+Wenn du diese Zusammenfassungen nicht mehr erhalten möchtest, kannst du das wieder abbestellen, indem du in deinen Persönlichen Einstellungen des Boards auf eMail-Zusammenstellungen klickst und dort \'Keine eMail-Zusammenfassung\' auswählst. Dafür musst du natürlich eingeloggt sein.
+Über den nachfolgenden Link kommst du direkt dort hin:
+
+{DIGESTS_UCP_LINK}
+
+Herzlichen Gruß,
+
+Das Administrationsteam von {FORUM_NAME}

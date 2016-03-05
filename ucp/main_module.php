@@ -54,10 +54,16 @@ class main_module
 								WHERE user_id = ' . (int) $user->data['user_id'];
 						$result = $db->sql_query($sql);
 						
-						// If a user chooses to unsubscribe, keep track of this so the admin cannot automatically resubscribe him or her
-						// in the Administration Control Panel at some other date. That would be counterproductive.
+						// If a user chooses to unsubscribe, keep track of this so the admin is aware of this fact so if they 
+						// resubscribe the person it won't be out of ignorance. The concern is that an admin resubscription would be
+						// perceived as spam.
 						$sql_ary['user_digest_has_unsubscribed'] = 1;
 						
+					}
+					else
+					{
+						// If a user chooses to resubscribe, they may have unsubscribed in the past, so we want to clear this flag.
+						$sql_ary['user_digest_has_unsubscribed'] = 0;
 					}
 			
 					// Note: user_digest_send_hour_gmt is stored in UTC and translated to local time (as set in the profile). 

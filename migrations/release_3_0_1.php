@@ -514,7 +514,7 @@ class release_3_0_1 extends \phpbb\db\migration\migration
 			array('config.add',	array('phpbbservices_digests_test_spool', 0)),
 			array('config.add',	array('phpbbservices_digests_test_time_use', 0)),
 			array('config.add',	array('phpbbservices_digests_test_year', 2016)),
-			array('config.add',	array('phpbbservices_digests_time_zone', $this->config['board_timezone'])),
+			array('config.add',	array('phpbbservices_digests_time_zone', make_tz_offset($this->config['board_timezone']))),
 			array('config.add',	array('phpbbservices_digests_user_check_all_forums', 1)),
 			array('config.add',	array('phpbbservices_digests_user_digest_attachments', 1)),
 			array('config.add',	array('phpbbservices_digests_user_digest_block_images', 0)),
@@ -653,4 +653,13 @@ class release_3_0_1 extends \phpbb\db\migration\migration
 		);
 	}
 	
+}
+
+function make_tz_offset ($tz_text)
+{
+	// This function translates a text timezone (like America/New York) to an hour offset from GMT, doing magic like figuring out DST
+	$tz = new \DateTimeZone($tz_text);
+	$datetime_tz = new \DateTime('now', $tz);
+	$timeOffset = $tz->getOffset($datetime_tz) / 3600;
+	return $timeOffset;
 }

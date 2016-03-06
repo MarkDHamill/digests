@@ -4,6 +4,6 @@ Please note that when deployed the extension will go under ext/phpbbservices/dig
 
 If you download this archive you MUST create a cache directory in the archive at the root level, and give it public read/write permissions (777).
 
-If you upgrading from the digests mod for phpBB 3.0, please remove the cron job that you created. 
+If you are upgrading from the digests mod for phpBB 3.0, please remove the cron job that you created. 
 
 Digests no longer requires that a cron job be run hourly. It now uses phpBB's built in cron.php program. If traffic is light on your forum, digests may be delivered hours or even days later than the scheduled time. However the digest will always contain posts for the date and time requested.

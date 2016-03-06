@@ -128,16 +128,19 @@ class main_module
 						$unsubscribe_selected = ' selected="selected"';
 						$context = $user->lang('DIGESTS_UNSUBSCRIBED');
 					break;
+					
 					case 't':
 						$subscribe_sql = "user_digest_type = 'NONE' AND user_digest_has_unsubscribed = 1 AND";
 						$stopped_subscribing = ' selected="selected"';
 						$context = $user->lang('DIGESTS_STOPPED_SUBSCRIBING');
 					break;
+					
 					case 's':
 						$subscribe_sql = "user_digest_type <> 'NONE' AND user_digest_send_hour_gmt >= 0 AND user_digest_send_hour_gmt < 24 AND user_digest_has_unsubscribed = 0 AND";
 						$subscribe_selected = ' selected="selected"';
 						$context = $user->lang('DIGESTS_SUBSCRIBED');
 					break;
+					
 					case 'a':
 					default:
 						$subscribe_sql = '';
@@ -154,30 +157,37 @@ class main_module
 						$sort_by_sql = 'user_digest_type %s, lower(username) %s';
 						$frequency_selected = ' selected="selected"';
 					break;
+					
 					case 'e':
 						$sort_by_sql = 'user_email %s, lower(username) %s';
 						$email_selected = ' selected="selected"';
 					break;
+					
 					case 's':
 						$sort_by_sql = 'user_digest_format %s, lower(username) %s';
 						$format_selected = ' selected="selected"';
 					break;
+					
 					case 'h':
 						$sort_by_sql = 'send_hour_board %s, lower(username) %s';
 						$hour_selected = ' selected="selected"';
 					break;
+					
 					case 'l':
 						$sort_by_sql = 'user_lastvisit %s, lower(username) %s';
 						$lastvisit_selected = ' selected="selected"';
 					break;
+					
 					case 'b':
 						$sort_by_sql = 'user_digest_has_unsubscribed %s, lower(username) %s';
 						$has_unsubscribed_selected = ' selected="selected"';
 					break;
+					
 					case 't':
 						$sort_by_sql = 'user_digest_last_sent %s, lower(username) %s';
 						$last_sent_selected = ' selected="selected"';
 					break;
+					
 					case 'u':
 					default:
 						$sort_by_sql = 'lower(username) %s';
@@ -193,6 +203,7 @@ class main_module
 						$order_by_sql = 'DESC';
 						$descending_selected = ' selected="selected"';
 					break;
+					
 					case 'a':
 					default:
 						$order_by_sql = 'ASC';
@@ -289,7 +300,7 @@ class main_module
 					'USERNAME_SELECTED'			=> $username_selected,
 				));
 	
-				$board_offset_hours = $config['phpbbservices_digests_time_zone'];
+				$board_offset_hours = (int) $config['phpbbservices_digests_time_zone'];
 				
 				$sql_array = array(
 					'SELECT'	=> '*, CASE
@@ -321,12 +332,15 @@ class main_module
 						case 'DAY':
 							$digest_type = $user->lang('DIGESTS_DAILY');
 						break;
+						
 						case 'WEEK':
 							$digest_type = $user->lang('DIGESTS_WEEKLY');
 						break;
+						
 						case 'MNTH':
 							$digest_type = $user->lang('DIGESTS_MONTHLY');
 						break;
+						
 						default:
 							$digest_type = $user->lang('DIGESTS_UNKNOWN');
 						break;
@@ -337,18 +351,23 @@ class main_module
 						case constants::DIGESTS_HTML_VALUE:
 							$digest_format = $user->lang('DIGESTS_FORMAT_HTML');
 						break;
+						
 						case constants::DIGESTS_HTML_CLASSIC_VALUE:
 							$digest_format = $user->lang('DIGESTS_FORMAT_HTML_CLASSIC');
 						break;
+						
 						case constants::DIGESTS_PLAIN_VALUE:
 							$digest_format = $user->lang('DIGESTS_FORMAT_PLAIN');
 						break;
+						
 						case constants::DIGESTS_PLAIN_CLASSIC_VALUE:
 							$digest_format = $user->lang('DIGESTS_FORMAT_PLAIN_CLASSIC');
 						break;
+						
 						case constants::DIGESTS_TEXT_VALUE:
 							$digest_format = $user->lang('DIGESTS_FORMAT_TEXT');
 						break;
+						
 						default:
 							$digest_format = $user->lang('DIGESTS_UNKNOWN');
 						break;
@@ -498,14 +517,14 @@ class main_module
 						'USERNAME'							=> $row['username'],
 						'USER_DIGEST_FORMAT'				=> $digest_format,
 						'USER_DIGEST_HAS_UNSUBSCRIBED'		=> ($row['user_digest_has_unsubscribed']) ? 'x' : '-',
-						'USER_DIGEST_LAST_SENT'				=> ($row['user_digest_last_sent'] == 0) ? $user->lang('DIGESTS_NO_DIGESTS_SENT') : date($config['default_dateformat'], $row['user_digest_last_sent'] + (60 * 60 * $config['phpbbservices_digests_time_zone'])),
+						'USER_DIGEST_LAST_SENT'				=> ($row['user_digest_last_sent'] == 0) ? $user->lang('DIGESTS_NO_DIGESTS_SENT') : date($config['default_dateformat'], $row['user_digest_last_sent'] + (60 * 60 * ($config['phpbbservices_digests_time_zone'] - (date('O')/100)))),
 						'USER_DIGEST_MAX_DISPLAY_WORDS'		=> $row['user_digest_max_display_words'],
 						'USER_DIGEST_MAX_POSTS'				=> $row['user_digest_max_posts'],
 						'USER_DIGEST_MIN_WORDS'				=> $row['user_digest_min_words'],
 						'USER_DIGEST_TYPE'					=> $digest_type,
 						'USER_EMAIL'						=> $row['user_email'],
 						'USER_ID'							=> $row['user_id'],
-						'USER_LAST_VISIT'					=> ($row['user_lastvisit'] == 0) ? $user->lang('DIGESTS_NEVER_VISITED') : date($config['default_dateformat'], $row['user_lastvisit'] + (60 * 60 * $config['phpbbservices_digests_time_zone'])),
+						'USER_LAST_VISIT'					=> ($row['user_lastvisit'] == 0) ? $user->lang('DIGESTS_NEVER_VISITED') : date($config['default_dateformat'], $row['user_lastvisit'] + (60 * 60 * ($config['phpbbservices_digests_time_zone'] - (date('O')/100)))),
 						'USER_SUBSCRIBE_UNSUBSCRIBE_FLAG'	=> ($row['user_digest_type'] != 'NONE') ? 'u' : 's')
 					);
 
@@ -865,61 +884,79 @@ class main_module
 							{
 								$sql_ary['user_digest_type'] = $value;
 							}
-							break;
+						break;
+						
 						case 'style':
 							$sql_ary['user_digest_format'] = $value;
-							break;
+						break;
+						
 						case 'send_hour':
 							$sql_ary['user_digest_send_hour_gmt'] = $value;
-							break;
+						break;
+						
 						case 'filter_type':
 							$sql_ary['user_digest_filter_type'] = $value;
-							break;
+						break;
+						
 						case 'max_posts':
 							$sql_ary['user_digest_max_posts'] = $value;
-							break;
+						break;
+						
 						case 'min_words':
 							$sql_ary['user_digest_min_words'] = $value;
-							break;
+						break;
+						
 						case 'new_posts_only':
 							$sql_ary['user_digest_new_posts_only'] = $value;
-							break;
+						break;
+						
 						case 'show_mine':
 							$sql_ary['user_digest_show_mine'] = ($value == '0') ? '1' : '0';
-							break;
+						break;
+						
 						case 'filter_foes':
 							$sql_ary['user_digest_remove_foes'] = $value;
-							break;
+						break;
+						
 						case 'pms':
 							$sql_ary['user_digest_show_pms'] = $value;
-							break;
+						break;
+						
 						case 'mark_read':
 							$sql_ary['user_digest_pm_mark_read'] = $value;
-							break;
+						break;
+						
 						case 'sortby':
 							$sql_ary['user_digest_sortby'] = $value;
-							break;
+						break;
+						
 						case 'max_display_words':
 							$sql_ary['user_digest_max_display_words'] = $value;
-							break;
+						break;
+						
 						case 'no_post_text':
 							$sql_ary['user_digest_no_post_text'] = $value;
-							break;
+						break;
+						
 						case 'send_on_no_posts':
 							$sql_ary['user_digest_send_on_no_posts'] = $value;
-							break;
+						break;
+						
 						case 'lastvisit':
 							$sql_ary['user_digest_reset_lastvisit'] = $value;
-							break;
+						break;
+						
 						case 'attachments':
 							$sql_ary['user_digest_attachments'] = $value;
-							break;
+						break;
+						
 						case 'blockimages':
 							$sql_ary['user_digest_block_images'] = $value;
-							break;
+						break;
+						
 						case 'toc':
 							$sql_ary['user_digest_toc'] = $value;
-							break;
+						break;
 					}
 					
 					// Note that if "all_forums" is unchecked and bookmarks is unchecked, there are individual forum subscriptions, so they must be saved.
@@ -1274,13 +1311,15 @@ class main_module
 						{
 							case DIGESTS_DAILY_VALUE:
 								$digest_type_text = strtolower($user->lang('DIGESTS_DAILY'));
-								break;
+							break;
+							
 							case DIGESTS_WEEKLY_VALUE:
 								$digest_type_text = strtolower($user->lang('DIGESTS_WEEKLY'));
-								break;
+							break;
+							
 							case DIGESTS_MONTHLY_VALUE:
 								$digest_type_text = strtolower($user->lang('DIGESTS_MONTHLY'));
-								break;
+							break;
 						}
 						
 						// Set up associations between digest formats as constants and their language equivalents
@@ -1288,19 +1327,23 @@ class main_module
 						{
 							case DIGESTS_HTML_VALUE:
 								$digest_format_text = $user->lang('DIGESTS_FORMAT_HTML');
-								break;
+							break;
+							
 							case DIGESTS_HTML_CLASSIC_VALUE:
 								$digest_format_text = $user->lang('DIGESTS_FORMAT_HTML_CLASSIC');
-								break;
+							break;
+							
 							case DIGESTS_PLAIN_VALUE:
 								$digest_format_text = $user->lang('DIGESTS_FORMAT_PLAIN');
-								break;
+							break;
+							
 							case DIGESTS_PLAIN_CLASSIC_VALUE:
 								$digest_format_text = $user->lang('DIGESTS_FORMAT_PLAIN_CLASSIC');
-								break;
+							break;
+							
 							case DIGESTS_TEXT_VALUE:
 								$digest_format_text = strtolower($user->lang('DIGESTS_FORMAT_TEXT'));
-								break;
+							break;
 						}
 						
 						foreach ($digest_notify_list as $username => $row_info_array)

@@ -76,7 +76,7 @@ class release_3_0_1 extends \phpbb\db\migration\migration
 			'digests_test_spool' => 0,
 			'digests_test_time_use' => 0,
 			'digests_test_year' => 2016,
-			'digests_time_zone' => $this->config['board_timezone'],
+			'digests_time_zone' => make_tz_offset($this->config['board_timezone']),
 			'digests_user_check_all_forums' => 1,
 			'digests_user_digest_attachments' => 1,
 			'digests_user_digest_block_images' => 0,

@@ -144,9 +144,13 @@ $lang = array_merge($lang, array(
 	'DIGESTS_YOUR_DIGEST_OPTIONS' 		=> '%s\'s persönliche Einstellungen:',
 	'UCP_DIGESTS'						=> 'eMail-Zusammenfassungen',
 	'UCP_DIGESTS_ADDITIONAL_CRITERIA'	=> 'Weitere Optionen',
+	'UCP_DIGESTS_ADDITIONAL_CRITERIA_OPTIONS'	=> 'Weitere Optionen',
 	'UCP_DIGESTS_BASICS'				=> 'Grundeinstellungen',
+	'UCP_DIGESTS_BASICS_OPTIONS'				=> 'Grundeinstellungen',
 	'UCP_DIGESTS_FORUMS_SELECTION'		=> 'Themenbereichsauswahl',
+	'UCP_DIGESTS_FORUMS_SELECTION_OPTIONS'		=> 'Themenbereichsauswahl',
 	'UCP_DIGESTS_MODE_ERROR'			=> 'Fehlerhafter Zusammenfassungsmodus-Aufruf von %s',
 	'UCP_DIGESTS_POST_FILTERS'			=> 'Beitragsfilter',
+	'UCP_DIGESTS_POST_FILTERS_OPTIONS'			=> 'Beitragsfilter',
 				
 ));

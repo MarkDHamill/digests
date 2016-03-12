@@ -53,6 +53,7 @@ class main_module
 						'phpbbservices_digests_enable_auto_subscriptions'	=> array('lang' => 'DIGESTS_ENABLE_AUTO_SUBSCRIPTIONS',			'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_registration_field'			=> array('lang' => 'DIGESTS_REGISTRATION_FIELD',			'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_block_images'				=> array('lang' => 'DIGESTS_BLOCK_IMAGES',						'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
+						'phpbbservices_digests_notify_on_admin_changes'		=> array('lang' => 'DIGESTS_NOTIFY_ON_ADMIN_CHANGES',			'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_weekly_digest_day'			=> array('lang' => 'DIGESTS_WEEKLY_DIGESTS_DAY',					'validate' => 'int:0:6',	'type' => 'select', 'method' => 'dow_select', 'explain' => false),
 						'phpbbservices_digests_max_items'					=> array('lang' => 'DIGESTS_MAX_ITEMS',							'validate' => 'int:0',	'type' => 'text:5:5', 'explain' => true),
 						'phpbbservices_digests_enable_custom_stylesheets'	=> array('lang' => 'DIGESTS_ENABLE_CUSTOM_STYLESHEET',			'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
@@ -385,7 +386,7 @@ class main_module
 					}
 					
 					// Create an array of GMT offsets from board time zone
-					for($i=0;$i<24;$i++)
+					for($i=0; $i<24; $i++)
 					{
 						if (($i - $board_offset_hours) < 0)
 						{
@@ -748,7 +749,6 @@ class main_module
 						'phpbbservices_digests_enable_subscribe_unsubscribe'	=> array('lang' => 'DIGESTS_ENABLE_SUBSCRIBE_UNSUBSCRIBE',	'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_subscribe_all'					=> array('lang' => 'DIGESTS_SUBSCRIBE_ALL',				'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_include_admins'					=> array('lang' => 'DIGESTS_INCLUDE_ADMINS',				'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
-						'phpbbservices_digests_notify_on_mass_subscribe'		=> array('lang' => 'DIGESTS_NOTIFY_ON_MASS_SUBSCRIBE',			'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
 					)
 				);
 			break;
@@ -825,220 +825,291 @@ class main_module
 		if ($submit && $mode == 'digests_edit_subscribers')
 		{
 			
-			// Find the value of "selected" so we can set a switch
-			$subscribe_mode = $request->variable('selected', constants::DIGESTS_NONE_VALUE, true);
-
+			// The "selected" input control indicates whether to do mass actions or not. With mass actions only the select control and
+			// the mark checkboxes matter. Other controls are ignored.
+			$selected = $request->variable('selected', 'IGNORE', true);
+			$mass_action = ($selected == 'IGNORE') ? false : true;
+			$use_defaults = false;
+			$use_defaults_pass = false;
+			unset($sql_ary, $sql_ary2);
+			
 			// Get the entire request variables as an array for parsing
 			unset($requests_vars);
 			$request_vars = $request->get_super_global(\phpbb\request\request_interface::POST);
-					
-			// Now let's sort them so we process one user at a time
+			
+			// If a mass action, we want to remove all post variables with the user-99-col_name pattern. It makes the logic easier by effectively ignoring them.
+			if ($mass_action)
+			{
+				foreach ($request_vars as $key => $value)
+				{
+					if (substr($key,0,5) == 'user-' && strpos($key, '-', 5) > 5)
+					{
+						unset($request_vars[$key]);
+					}
+				}
+			}
+			
+			// Now let's sort the request variables so we process one can user at a time
 			ksort($request_vars);
 
 			// Set some flags
 			$current_user_id = NULL;
-			$subscribe_default = false;	// When true, subscribe this user with the default rules
-			unset($sql_ary, $sql_ary2);
 			
 			// Any users to unsubscribe or subscribe? If yes, process these now.
 			
 			foreach ($request_vars as $name => $value)
 			{
 				
-				// We only care if the request variable starts with "user-". There are likely multiple variables like this for the same user
-				// representing all the controls for that user.
+				// We only care if the request variable starts with "user-".
 				if (substr($name,0,5) == 'user-')
 				{
 					
-					// Parse for the user id, which is embedded in the form field name. Format is user-99-column_name where 99
-					// is the user id.
+					// Parse for the user_id, which is embedded in the form field name. Format is user-99-column_name where 99
+					// is the user id. The mark switch is in the form user-99.
 					$delimiter_pos = strpos($name, '-', 5);
+					if ($delimiter_pos === false)
+					{
+						// This is the mark all checkbox for a given user
+						$delimiter_pos = strlen($name);
+					}
 					$user_id = substr($name, 5, $delimiter_pos - 5);
 					$var_part = substr($name, $delimiter_pos + 1);
-					
+
 					if ($current_user_id === NULL)
 					{
 						$current_user_id = $user_id;
-						// We need to set these variables so we can detect if individual forum subscriptions will need to be processed.
-						$var = 'user-' . $current_user_id . '-all_forums';
-						$all_forums = $request->variable($var, '', true);
-						$var = 'user-' . $current_user_id . '-filter_type';
-						$filter_type = $request->variable($var, '', true);
 					}
-						
-					// Associate the database columns with its requested value
-					switch (substr($name,$delimiter_pos + 1))
+					else if ($current_user_id !== $user_id)
 					{
-						case 'digest_type':
-							// Default digest wanted because row is checked
-							if ((($subscribe_mode == constants::DIGESTS_DEFAULT_VALUE) && (array_key_exists('mark-' . $user_id, $request_vars))) ||
-								($value == constants::DIGESTS_DEFAULT_VALUE))
-							{
-								$subscribe_default = true;
-							}
-							else if (($subscribe_mode == constants::DIGESTS_NONE_VALUE) && (array_key_exists('mark-' . $user_id, $request_vars)))
-							{
-								$sql_ary['user_digest_type'] = constants::DIGESTS_NONE_VALUE;
-							}
-							else
-							{
-								$sql_ary['user_digest_type'] = $value;
-							}
-						break;
-						
-						case 'style':
-							$sql_ary['user_digest_format'] = $value;
-						break;
-						
-						case 'send_hour':
-							$sql_ary['user_digest_send_hour_gmt'] = $value;
-						break;
-						
-						case 'filter_type':
-							$sql_ary['user_digest_filter_type'] = $value;
-						break;
-						
-						case 'max_posts':
-							$sql_ary['user_digest_max_posts'] = $value;
-						break;
-						
-						case 'min_words':
-							$sql_ary['user_digest_min_words'] = $value;
-						break;
-						
-						case 'new_posts_only':
-							$sql_ary['user_digest_new_posts_only'] = $value;
-						break;
-						
-						case 'show_mine':
-							$sql_ary['user_digest_show_mine'] = ($value == '0') ? '1' : '0';
-						break;
-						
-						case 'filter_foes':
-							$sql_ary['user_digest_remove_foes'] = $value;
-						break;
-						
-						case 'pms':
-							$sql_ary['user_digest_show_pms'] = $value;
-						break;
-						
-						case 'mark_read':
-							$sql_ary['user_digest_pm_mark_read'] = $value;
-						break;
-						
-						case 'sortby':
-							$sql_ary['user_digest_sortby'] = $value;
-						break;
-						
-						case 'max_display_words':
-							$sql_ary['user_digest_max_display_words'] = $value;
-						break;
-						
-						case 'no_post_text':
-							$sql_ary['user_digest_no_post_text'] = $value;
-						break;
-						
-						case 'send_on_no_posts':
-							$sql_ary['user_digest_send_on_no_posts'] = $value;
-						break;
-						
-						case 'lastvisit':
-							$sql_ary['user_digest_reset_lastvisit'] = $value;
-						break;
-						
-						case 'attachments':
-							$sql_ary['user_digest_attachments'] = $value;
-						break;
-						
-						case 'blockimages':
-							$sql_ary['user_digest_block_images'] = $value;
-						break;
-						
-						case 'toc':
-							$sql_ary['user_digest_toc'] = $value;
-						break;
-					}
-					
-					// Note that if "all_forums" is unchecked and bookmarks is unchecked, there are individual forum subscriptions, so they must be saved.
-					if (substr($var_part,0,4) == 'elt_')
-					{
-						// We should save this forum as an individual forum subscription, but only if the all forums checkbox
-						// is not set AND the user should not get posts for bookmarked topics only.
-
-						// This request variable is a checkbox for a forum for this user. It should be checked or it would
-						// not be in the $request_vars array.
-						
-						$delimiter_pos = strpos($var_part, '_', 4);
-						$forum_id = substr($var_part,4,$delimiter_pos - 4);
-						
-						if (($all_forums !== 'on') && (trim($filter_type) !== constants::DIGESTS_BOOKMARKS)) 
-						{
-							$sql_ary2[] = array(
-								'user_id'		=> $current_user_id,
-								'forum_id'		=> $forum_id);
-						}
-					}
-
-					if ($user_id !== $current_user_id)
-					{
-						// Since the $user_id has changed, we need to save the digest settings for this user
-						if ($subscribe_default)
-						{
-							unset($sql_ary);
-							
-							// Create a digest subscription using board defaults
-							$sql_ary = array(
-								'user_digest_type' 				=> $config['phpbbservices_digests_user_digest_type'],
-								'user_digest_format' 			=> $config['phpbbservices_digests_user_digest_format'],
-								'user_digest_show_mine' 		=> ($config['phpbbservices_digests_user_digest_show_mine'] == 1) ? 0 : 1,
-								'user_digest_send_on_no_posts' 	=> $config['phpbbservices_digests_user_digest_send_on_no_posts'],
-								'user_digest_send_hour_gmt' 	=> ($config['phpbbservices_digests_user_digest_send_hour_gmt'] == -1) ? rand(0,23) : $config['phpbbservices_digests_user_digest_send_hour_gmt'],
-								'user_digest_show_pms' 			=> $config['phpbbservices_digests_user_digest_show_pms'],
-								'user_digest_max_posts' 		=> $config['phpbbservices_digests_user_digest_max_posts'],
-								'user_digest_min_words' 		=> $config['phpbbservices_digests_user_digest_min_words'],
-								'user_digest_remove_foes' 		=> $config['phpbbservices_digests_user_digest_remove_foes'],
-								'user_digest_sortby' 			=> $config['phpbbservices_digests_user_digest_sortby'],
-								'user_digest_max_display_words' => ($config['phpbbservices_digests_user_digest_max_display_words'] == -1) ? 0 : $config['phpbbservices_digests_user_digest_max_display_words'],
-								'user_digest_reset_lastvisit' 	=> $config['phpbbservices_digests_user_digest_reset_lastvisit'],
-								'user_digest_filter_type' 		=> $config['phpbbservices_digests_user_digest_filter_type'],
-								'user_digest_pm_mark_read' 		=> $config['phpbbservices_digests_user_digest_pm_mark_read'],
-								'user_digest_new_posts_only' 	=> $config['phpbbservices_digests_user_digest_new_posts_only'],
-								'user_digest_no_post_text'		=> ($config['phpbbservices_digests_user_digest_max_display_words'] == 0) ? 1 : 0,
-								'user_digest_attachments' 		=> $config['phpbbservices_digests_user_digest_attachments'],
-								'user_digest_block_images'		=> $config['phpbbservices_digests_user_digest_block_images'],
-								'user_digest_toc'				=> $config['phpbbservices_digests_user_digest_toc'],
-							);
-						}
 						
 						// Save this subscriber's digest settings
-						$sql = 'UPDATE ' . USERS_TABLE . ' 
-							SET ' . $db->sql_build_array('UPDATE', $sql_ary) . '
-							WHERE user_id = ' . $current_user_id;
-						$result = $db->sql_query($sql);
+						if (isset($sql_ary) && sizeof($sql_ary) > 0)
+						{
+							$sql = 'UPDATE ' . USERS_TABLE . ' 
+								SET ' . $db->sql_build_array('UPDATE', $sql_ary) . '
+								WHERE user_id = ' . $current_user_id;
+							$result = $db->sql_query($sql);
+						}
 						
 						// If there are any individual forum subscriptions for this user, remove the old ones. 
 						$sql = 'DELETE FROM ' . $table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' 
 								WHERE user_id = ' . $current_user_id;
-						
 						$result = $db->sql_query($sql);
 		
 						// Now save the individual forum subscriptions, if any
-						if (isset($sql_ary2) && sizeof($sql_ary2) > 0)
+						if (!$mass_action && isset($sql_ary2) && sizeof($sql_ary2) > 0)
 						{
 							$result = $db->sql_multi_insert($table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE, $sql_ary2);					
 						}
 
-						// With all the data saved for this user, we can set variables needed to process the next user.
-						$current_user_id = $user_id;
-						unset($sql_ary, $sql_ary2);
-						$subscribe_default = false;
-						
+						// Also want to save some information to an array to be used for sending emails to affected users.
+						$digest_notify_list[] = $current_user_id;
+
 						// We need to set these variables so we can detect if individual forum subscriptions will need to be processed.
+						$current_user_id = $user_id;
+						$use_defaults = false;
+						$use_defaults_pass = false;
+						unset($sql_ary, $sql_ary2);
+						
+					}
+
+					if ($mass_action)
+					{
+						
+						// We need to save the digest settings for this mass user. There should only be one request variable for the user.
+						
+						// Do a mass action only if the mark variable for the user_id is checked
+						if ($value == 'on')
+						{
+							switch ($selected)
+							{
+								case constants::DIGESTS_DEFAULT_VALUE:
+									// Use the default digest type
+									$sql_ary['user_digest_type'] = $config['phpbbservices_digests_user_digest_type'];
+								break;
+								
+								case constants::DIGESTS_NONE_VALUE;
+									// Remove user's subscription (mass action)
+									$sql_ary['user_digest_type'] = constants::DIGESTS_NONE_VALUE;
+								break;
+								
+								default:
+								break;
+							}
+							
+							// Create a digest subscription using board defaults
+							$sql_ary['user_digest_format'] 				= $config['phpbbservices_digests_user_digest_format'];
+							$sql_ary['user_digest_show_mine'] 			= ($config['phpbbservices_digests_user_digest_show_mine'] == 1) ? 0 : 1;
+							$sql_ary['user_digest_send_on_no_posts'] 	= $config['phpbbservices_digests_user_digest_send_on_no_posts'];
+							$sql_ary['user_digest_send_hour_gmt'] 		= ($config['phpbbservices_digests_user_digest_send_hour_gmt'] == -1) ? rand(0,23) : $config['phpbbservices_digests_user_digest_send_hour_gmt'];
+							$sql_ary['user_digest_show_pms'] 			= $config['phpbbservices_digests_user_digest_show_pms'];
+							$sql_ary['user_digest_max_posts'] 			= $config['phpbbservices_digests_user_digest_max_posts'];
+							$sql_ary['user_digest_min_words'] 			= $config['phpbbservices_digests_user_digest_min_words'];
+							$sql_ary['user_digest_remove_foes'] 		= $config['phpbbservices_digests_user_digest_remove_foes'];
+							$sql_ary['user_digest_sortby'] 				= $config['phpbbservices_digests_user_digest_sortby'];
+							$sql_ary['user_digest_max_display_words'] 	= ($config['phpbbservices_digests_user_digest_max_display_words'] == -1) ? 0 : $config['phpbbservices_digests_user_digest_max_display_words'];
+							$sql_ary['user_digest_reset_lastvisit'] 	= $config['phpbbservices_digests_user_digest_reset_lastvisit'];
+							$sql_ary['user_digest_filter_type'] 		= $config['phpbbservices_digests_user_digest_filter_type'];
+							$sql_ary['user_digest_pm_mark_read'] 		= $config['phpbbservices_digests_user_digest_pm_mark_read'];
+							$sql_ary['user_digest_new_posts_only'] 		= $config['phpbbservices_digests_user_digest_new_posts_only'];
+							$sql_ary['user_digest_no_post_text']		= ($config['phpbbservices_digests_user_digest_max_display_words'] == 0) ? 1 : 0;
+							$sql_ary['user_digest_attachments'] 		= $config['phpbbservices_digests_user_digest_attachments'];
+							$sql_ary['user_digest_block_images']		= $config['phpbbservices_digests_user_digest_block_images'];
+							$sql_ary['user_digest_toc']					= $config['phpbbservices_digests_user_digest_toc'];
+						}
+						
+					}
+					
+					else	// Process individual subscriptions
+					
+					{
+						
+						// We need to get these variables so we can detect if individual forum subscriptions will need to be processed.
 						$var = 'user-' . $current_user_id . '-all_forums';
 						$all_forums = $request->variable($var, '', true);
 						$var = 'user-' . $current_user_id . '-filter_type';
 						$filter_type = $request->variable($var, '', true);
-
+						
+						// No mass action, so associate the database columns with its requested value
+						if (!$use_defaults && ($var_part == 'digest_type') && ($value == constants::DIGESTS_DEFAULT_VALUE))
+						{
+							$use_defaults = true;
+							unset($sql_ary);
+						}
+						
+						if ($use_defaults)
+						{
+							if (!$use_defaults_pass)
+							{
+								// Create a digest subscription using board defaults. but do it only once for the user_id
+								$sql_ary['user_digest_type'] 				= $config['phpbbservices_digests_user_digest_type'];
+								$sql_ary['user_digest_format'] 				= $config['phpbbservices_digests_user_digest_format'];
+								$sql_ary['user_digest_show_mine'] 			= ($config['phpbbservices_digests_user_digest_show_mine'] == 1) ? 0 : 1;
+								$sql_ary['user_digest_send_on_no_posts'] 	= $config['phpbbservices_digests_user_digest_send_on_no_posts'];
+								$sql_ary['user_digest_send_hour_gmt'] 		= ($config['phpbbservices_digests_user_digest_send_hour_gmt'] == -1) ? rand(0,23) : $config['phpbbservices_digests_user_digest_send_hour_gmt'];
+								$sql_ary['user_digest_show_pms'] 			= $config['phpbbservices_digests_user_digest_show_pms'];
+								$sql_ary['user_digest_max_posts'] 			= $config['phpbbservices_digests_user_digest_max_posts'];
+								$sql_ary['user_digest_min_words'] 			= $config['phpbbservices_digests_user_digest_min_words'];
+								$sql_ary['user_digest_remove_foes'] 		= $config['phpbbservices_digests_user_digest_remove_foes'];
+								$sql_ary['user_digest_sortby'] 				= $config['phpbbservices_digests_user_digest_sortby'];
+								$sql_ary['user_digest_max_display_words'] 	= ($config['phpbbservices_digests_user_digest_max_display_words'] == -1) ? 0 : $config['phpbbservices_digests_user_digest_max_display_words'];
+								$sql_ary['user_digest_reset_lastvisit'] 	= $config['phpbbservices_digests_user_digest_reset_lastvisit'];
+								$sql_ary['user_digest_filter_type'] 		= $config['phpbbservices_digests_user_digest_filter_type'];
+								$sql_ary['user_digest_pm_mark_read'] 		= $config['phpbbservices_digests_user_digest_pm_mark_read'];
+								$sql_ary['user_digest_new_posts_only'] 		= $config['phpbbservices_digests_user_digest_new_posts_only'];
+								$sql_ary['user_digest_no_post_text']		= ($config['phpbbservices_digests_user_digest_max_display_words'] == 0) ? 1 : 0;
+								$sql_ary['user_digest_attachments'] 		= $config['phpbbservices_digests_user_digest_attachments'];
+								$sql_ary['user_digest_block_images']		= $config['phpbbservices_digests_user_digest_block_images'];
+								$sql_ary['user_digest_toc']					= $config['phpbbservices_digests_user_digest_toc'];
+								$use_defaults_pass = true;
+							}
+						}
+						else
+						{
+							switch ($var_part)
+							{
+								case 'digest_type':
+									$sql_ary['user_digest_type'] = $value;
+								break;
+								
+								case 'style':
+									$sql_ary['user_digest_format'] = $value;
+								break;
+								
+								case 'send_hour':
+									$sql_ary['user_digest_send_hour_gmt'] = $value;
+								break;
+								
+								case 'filter_type':
+									$sql_ary['user_digest_filter_type'] = $value;
+								break;
+								
+								case 'max_posts':
+									$sql_ary['user_digest_max_posts'] = $value;
+								break;
+								
+								case 'min_words':
+									$sql_ary['user_digest_min_words'] = $value;
+								break;
+								
+								case 'new_posts_only':
+									$sql_ary['user_digest_new_posts_only'] = $value;
+								break;
+								
+								case 'show_mine':
+									$sql_ary['user_digest_show_mine'] = ($value == '0') ? '1' : '0';
+								break;
+								
+								case 'filter_foes':
+									$sql_ary['user_digest_remove_foes'] = $value;
+								break;
+								
+								case 'pms':
+									$sql_ary['user_digest_show_pms'] = $value;
+								break;
+								
+								case 'mark_read':
+									$sql_ary['user_digest_pm_mark_read'] = $value;
+								break;
+								
+								case 'sortby':
+									$sql_ary['user_digest_sortby'] = $value;
+								break;
+								
+								case 'max_display_words':
+									$sql_ary['user_digest_max_display_words'] = $value;
+								break;
+								
+								case 'no_post_text':
+									$sql_ary['user_digest_no_post_text'] = $value;
+								break;
+								
+								case 'send_on_no_posts':
+									$sql_ary['user_digest_send_on_no_posts'] = $value;
+								break;
+								
+								case 'lastvisit':
+									$sql_ary['user_digest_reset_lastvisit'] = $value;
+								break;
+								
+								case 'attachments':
+									$sql_ary['user_digest_attachments'] = $value;
+								break;
+								
+								case 'blockimages':
+									$sql_ary['user_digest_block_images'] = $value;
+								break;
+								
+								case 'toc':
+									$sql_ary['user_digest_toc'] = $value;
+								break;
+								
+								default;
+								break;
+							}
+														
+						}
+						
+						// Note that if "all_forums" is unchecked and bookmarks is unchecked, there are individual forum subscriptions, so they must be saved.
+						if (substr($var_part, 0, 4) == 'elt_')
+						{
+							// We should save this forum as an individual forum subscription, but only if the all forums checkbox
+							// is not set AND the user should not get posts for bookmarked topics only.
+	
+							// This request variable is a checkbox for a forum for this user. It should be checked or it would
+							// not be in the $request_vars array.
+							
+							$delimiter_pos = strpos($var_part, '_', 4);
+							$forum_id = substr($var_part, 4, $delimiter_pos - 4);
+							
+							if (($all_forums !== 'on') && (trim($filter_type) !== constants::DIGESTS_BOOKMARKS)) 
+							{
+								$sql_ary2[] = array(
+									'user_id'		=> $current_user_id,
+									'forum_id'		=> $forum_id);
+							}
+						}
+						
 					}
 					
 				} // $request_vars variable is named user-*
@@ -1046,57 +1117,36 @@ class main_module
 			} // foreach
 			
 			// Process last user
+			
+			// Save this subscriber's digest settings
 			if (isset($sql_ary) && sizeof($sql_ary) > 0)
 			{
-				
-				// Since the $user_id has changed, we need to save the digest settings for this user
-				if ($subscribe_default)
-				{
-					unset($sql_ary);
-					
-					// Create a digest subscription using board defaults
-					$sql_ary = array(
-						'user_digest_type' 				=> $config['phpbbservices_digests_user_digest_type'],
-						'user_digest_format' 			=> $config['phpbbservices_digests_user_digest_format'],
-						'user_digest_show_mine' 		=> ($config['phpbbservices_digests_user_digest_show_mine'] == 1) ? 0 : 1,
-						'user_digest_send_on_no_posts' 	=> $config['phpbbservices_digests_user_digest_send_on_no_posts'],
-						'user_digest_send_hour_gmt' 	=> ($config['phpbbservices_digests_user_digest_send_hour_gmt'] == -1) ? rand(0,23) : $config['phpbbservices_digests_user_digest_send_hour_gmt'],
-						'user_digest_show_pms' 			=> $config['phpbbservices_digests_user_digest_show_pms'],
-						'user_digest_max_posts' 		=> $config['phpbbservices_digests_user_digest_max_posts'],
-						'user_digest_min_words' 		=> $config['phpbbservices_digests_user_digest_min_words'],
-						'user_digest_remove_foes' 		=> $config['phpbbservices_digests_user_digest_remove_foes'],
-						'user_digest_sortby' 			=> $config['phpbbservices_digests_user_digest_sortby'],
-						'user_digest_max_display_words' => ($config['phpbbservices_digests_user_digest_max_display_words'] == -1) ? 0 : $config['phpbbservices_digests_user_digest_max_display_words'],
-						'user_digest_reset_lastvisit' 	=> $config['phpbbservices_digests_user_digest_reset_lastvisit'],
-						'user_digest_filter_type' 		=> $config['phpbbservices_digests_user_digest_filter_type'],
-						'user_digest_pm_mark_read' 		=> $config['phpbbservices_digests_user_digest_pm_mark_read'],
-						'user_digest_new_posts_only' 	=> $config['phpbbservices_digests_user_digest_new_posts_only'],
-						'user_digest_no_post_text'		=> ($config['phpbbservices_digests_user_digest_max_display_words'] == 0) ? 1 : 0,
-						'user_digest_attachments' 		=> $config['phpbbservices_digests_user_digest_attachments'],
-						'user_digest_block_images'		=> $config['phpbbservices_digests_user_digest_block_images'],
-						'user_digest_toc'				=> $config['phpbbservices_digests_user_digest_toc'],
-					);
-				}
-					
-				// Save this subscriber's digest setting
-				$sql = 'UPDATE ' . USERS_TABLE . 
-							' SET ' . $db->sql_build_array('UPDATE', $sql_ary) . '
-							WHERE user_id = ' . $current_user_id;
+				$sql = 'UPDATE ' . USERS_TABLE . ' 
+					SET ' . $db->sql_build_array('UPDATE', $sql_ary) . '
+					WHERE user_id = ' . $current_user_id;
 				$result = $db->sql_query($sql);
-				
-				// If there are any individual forum subscriptions for this user, remove the old ones. 
-				$sql = 'DELETE FROM ' . $table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' 
-							WHERE user_id = ' . $current_user_id;
-				$result = $db->sql_query($sql);
-
-				// Now save the individual forum subscriptions, if any
-				if (isset($sql_ary2) && sizeof($sql_ary2) > 0)
-				{
-					$result = $db->sql_multi_insert($table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE, $sql_ary2);					
-				}
-				
 			}
-					
+			
+			// If there are any individual forum subscriptions for this user, remove the old ones. 
+			$sql = 'DELETE FROM ' . $table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' 
+					WHERE user_id = ' . $current_user_id;
+			$result = $db->sql_query($sql);
+
+			// Now save the individual forum subscriptions, if any
+			if (!$mass_action && isset($sql_ary2) && sizeof($sql_ary2) > 0)
+			{
+				$result = $db->sql_multi_insert($table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE, $sql_ary2);	
+			}
+
+			// Also want to save some information to an array to be used for sending emails to affected users.
+			$digest_notify_list[] = $current_user_id;
+
+			// Notify users whose subscriptions were changed
+			if ($config['phpbbservices_digests_notify_on_admin_changes'])
+			{
+				$notifications_sent = notify_subscribers($digest_notify_list, 'digests_subscription_edited');
+			}
+				
 			$message = $user->lang('CONFIG_UPDATED');
 				
 		}
@@ -1165,7 +1215,7 @@ class main_module
 			{
 				
 				$sql_array = array(
-					'SELECT'	=> 'user_digest_send_hour_gmt, user_id',
+					'SELECT'	=> 'user_digest_send_hour_gmt, user_id, username, user_email, user_lang',
 				
 					'FROM'		=> array(
 						USERS_TABLE	=> 'u',
@@ -1181,13 +1231,16 @@ class main_module
 
 				$result = $db->sql_query_limit($sql, 100000, $avg_subscribers_per_hour - 1); // Result sets start with array indexed at zero
 				$rowset = $db->sql_fetchrowset($result);
-				
+
 				$current_hour = -1;
 				$counted_for_this_hour= 0;
-				
+
 				// Finally, change the digest send hour for these subscribers to a random hour between 0 and 24.
 				foreach ($rowset as $row)
 				{
+
+					$digest_notify_list[] = $row['user_id'];
+
 					if ($current_hour <> $row['user_digest_send_hour_gmt'])
 					{
 						$current_hour = $row['user_digest_send_hour_gmt'];
@@ -1211,6 +1264,12 @@ class main_module
 				
 				$db->sql_freeresult($result);
 			
+				// Notify users whose subscriptions were changed
+				if ($config['phpbbservices_digests_notify_on_admin_changes'])
+				{
+					$notifications_sent = notify_subscribers($digest_notify_list, 'digests_subscription_edited');
+				}
+				
 			}
 			
 			$message = $user->lang('DIGESTS_REBALANCED', $rebalanced);
@@ -1236,11 +1295,11 @@ class main_module
 				// are retained.
 				$sql_qualifier = ($config['phpbbservices_digests_subscribe_all']) ? " AND user_digest_type = '" . constants::DIGESTS_NONE_VALUE . "'": " AND user_digest_type != '" . constants::DIGESTS_NONE_VALUE . "'";
 				
-				if ($config['phpbbservices_digests_notify_on_mass_subscribe'])
+				if ($config['phpbbservices_digests_notify_on_admin_changes'])
 				{
 
 					$sql_array = array(
-						'SELECT'	=> 'username, user_email, user_lang',
+						'SELECT'	=> 'user_id',
 					
 						'FROM'		=> array(
 							USERS_TABLE	=> 'u',
@@ -1256,7 +1315,7 @@ class main_module
 				
 					foreach ($rowset as $row)
 					{
-						$digest_notify_list[$row['username']] = array('user_email' => $row['user_email'], 'user_lang' => $row['user_lang']);
+						$digest_notify_list[] = $row['user_id'];
 					}
 							
 					$db->sql_freeresult($result); // Query be gone!
@@ -1295,101 +1354,9 @@ class main_module
 				$db->sql_freeresult($result); // Query be gone!
 				
 				// Notify users or subscription or unsubscription if directed
-				if ($config['phpbbservices_digests_notify_on_mass_subscribe'])
+				if ($config['phpbbservices_digests_notify_on_admin_changes'])
 				{
-
-					if (isset($digest_notify_list))
-					{
-						
-						if (!class_exists('messenger'))
-						{
-							include($phpbb_root_path . 'includes/functions_messenger.' . $phpEx); // Used to send emails
-						}
-						
-						// Set up associations between digest types as constants and their language equivalents
-						switch ($config['phpbbservices_digests_user_digest_type'])
-						{
-							case DIGESTS_DAILY_VALUE:
-								$digest_type_text = strtolower($user->lang('DIGESTS_DAILY'));
-							break;
-							
-							case DIGESTS_WEEKLY_VALUE:
-								$digest_type_text = strtolower($user->lang('DIGESTS_WEEKLY'));
-							break;
-							
-							case DIGESTS_MONTHLY_VALUE:
-								$digest_type_text = strtolower($user->lang('DIGESTS_MONTHLY'));
-							break;
-						}
-						
-						// Set up associations between digest formats as constants and their language equivalents
-						switch ($config['phpbbservices_digests_user_digest_format'])
-						{
-							case DIGESTS_HTML_VALUE:
-								$digest_format_text = $user->lang('DIGESTS_FORMAT_HTML');
-							break;
-							
-							case DIGESTS_HTML_CLASSIC_VALUE:
-								$digest_format_text = $user->lang('DIGESTS_FORMAT_HTML_CLASSIC');
-							break;
-							
-							case DIGESTS_PLAIN_VALUE:
-								$digest_format_text = $user->lang('DIGESTS_FORMAT_PLAIN');
-							break;
-							
-							case DIGESTS_PLAIN_CLASSIC_VALUE:
-								$digest_format_text = $user->lang('DIGESTS_FORMAT_PLAIN_CLASSIC');
-							break;
-							
-							case DIGESTS_TEXT_VALUE:
-								$digest_format_text = strtolower($user->lang('DIGESTS_FORMAT_TEXT'));
-							break;
-						}
-						
-						foreach ($digest_notify_list as $username => $row_info_array)
-						{
-							
-							// E-mail setup
-							$messenger = new \messenger();
-							$digest_notify_template = ($config['phpbbservices_digests_subscribe_all']) ? 'digests_subscribe' : 'digests_unsubscribe';
-							$digest_email_subject = ($config['phpbbservices_digests_subscribe_all']) ? $user->lang('DIGESTS_SUBSCRIBE_SUBJECT') : $user->lang('DIGESTS_UNSUBSCRIBE_SUBJECT');
-							$messenger->template('@phpbbservices_digests/' . $digest_notify_template, $row_info_array['user_lang']);
-							$messenger->to($row_info_array['user_email']);
-								
-							// SMTP delivery must strip text names due to likely bug in messenger class
-							if ($config['smtp_delivery'])
-							{
-								$messenger->from($config['board_email']);
-							}
-							else
-							{	
-								$messenger->from($config['board_email'] . ' <' . $config['board_contact'] . '>');
-							}
-							
-							$messenger->replyto($config['board_contact']);
-							$messenger->subject($digest_email_subject);
-							
-							$messenger->assign_vars(array(
-								'DIGEST_FORMAT'			=> $digest_format_text,
-								'DIGEST_TYPE'			=> $digest_type_text,
-								'DIGEST_UCP_LINK'		=> generate_board_url() . '/' . 'ucp.' . $phpEx,
-								'FORUM_NAME'			=> $config['sitename'],
-								'USERNAME'				=> $username,
-								)
-							);
-							
-							$mail_sent = $messenger->send(NOTIFY_EMAIL, false, false, true);
-							
-							if (!$mail_sent)
-							{
-								$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LOG_CONFIG_DIGESTS_SEND_MASS_EMAIL_ERROR', false, array($row_info_array['user_email']));
-							}
-							$messenger->reset();
-							
-						}
-						
-					}
-					
+					$notifications_sent = notify_subscribers($digest_notify_list);
 				}
 				
 				if ($config['phpbbservices_digests_subscribe_all'])
@@ -1686,5 +1653,156 @@ class main_module
 		
 		return $digest_sort_order;
 	}
+	
+}
 
+function notify_subscribers ($digest_notify_list, $email_template = '')
+{
+	
+	// This function parses $digest_notify_list, an array of user_id that represent users that had their digest subscriptions changed, and sends them an email
+	// letting them know an action has occurred.
+	
+	global $phpbb_root_path, $phpEx, $config, $user, $db, $phpbb_log;
+	
+	$emails_sent = 0;
+	
+	if (isset($digest_notify_list) && (sizeof($digest_notify_list) > 0))
+	{
+		
+		if (!class_exists('messenger'))
+		{
+			include($phpbb_root_path . 'includes/functions_messenger.' . $phpEx); // Used to send emails
+		}
+		
+		$sql_array = array(
+			'SELECT'	=> 'username, user_email, user_lang, user_digest_type, user_digest_format',
+		
+			'FROM'		=> array(
+				USERS_TABLE	=> 'u',
+			),
+		
+			'WHERE'		=> $db->sql_in_set('user_id', $digest_notify_list),
+		);
+		
+		$sql = $db->sql_build_query('SELECT', $sql_array);
+		
+		$result = $db->sql_query($sql);
+		$rowset = $db->sql_fetchrowset($result);
+		
+		foreach ($rowset as $row)
+		{
+			
+			// E-mail setup
+			$messenger = new \messenger();
+			
+			switch ($email_template)
+			{
+				case 'digests_subscription_edited':
+					$digest_notify_template = $email_template;
+					$digest_email_subject = $user->lang('DIGESTS_SUBSCRIBE_EDITED');
+				break;
+				
+				default:
+					// Mass subscribe/unsubscribe
+					$digest_notify_template = ($config['phpbbservices_digests_subscribe_all']) ? 'digests_subscribe' : 'digests_unsubscribe';
+					$digest_email_subject = ($config['phpbbservices_digests_subscribe_all']) ? $user->lang('DIGESTS_SUBSCRIBE_SUBJECT') : $user->lang('DIGESTS_UNSUBSCRIBE_SUBJECT');
+				break;
+			}
+			
+			// Set up associations between digest types as constants and their language equivalents
+			switch ($row['user_digest_type'])
+			{
+				case DIGESTS_DAILY_VALUE:
+					$digest_type_text = strtolower($user->lang('DIGESTS_DAILY'));
+				break;
+				
+				case DIGESTS_WEEKLY_VALUE:
+					$digest_type_text = strtolower($user->lang('DIGESTS_WEEKLY'));
+				break;
+				
+				case DIGESTS_MONTHLY_VALUE:
+					$digest_type_text = strtolower($user->lang('DIGESTS_MONTHLY'));
+				break;
+				
+				default:
+				break;
+			}
+			
+			// Set up associations between digest formats as constants and their language equivalents
+			switch ($row['user_digest_format'])
+			{
+				case DIGESTS_HTML_VALUE:
+					$digest_format_text = $user->lang('DIGESTS_FORMAT_HTML');
+				break;
+				
+				case DIGESTS_HTML_CLASSIC_VALUE:
+					$digest_format_text = $user->lang('DIGESTS_FORMAT_HTML_CLASSIC');
+				break;
+				
+				case DIGESTS_PLAIN_VALUE:
+					$digest_format_text = $user->lang('DIGESTS_FORMAT_PLAIN');
+				break;
+				
+				case DIGESTS_PLAIN_CLASSIC_VALUE:
+					$digest_format_text = $user->lang('DIGESTS_FORMAT_PLAIN_CLASSIC');
+				break;
+				
+				case DIGESTS_TEXT_VALUE:
+					$digest_format_text = strtolower($user->lang('DIGESTS_FORMAT_TEXT'));
+				break;
+				
+				default:
+				break;
+			}
+				
+			$messenger->template('@phpbbservices_digests/' . $digest_notify_template, $row['user_lang']);
+			$messenger->to($row['user_email']);
+			
+			$from_addr = ($config['phpbbservices_digests_from_email_address'] == '') ? $config['board_email'] : $config['phpbbservices_digests_from_email_address'];
+			$from_name = ($config['phpbbservices_digests_from_email_name'] == '') ? $config['board_contact'] : $config['phpbbservices_digests_from_email_name'];
+				
+			// SMTP delivery must strip text names due to likely bug in messenger class
+			if ($config['smtp_delivery'])
+			{
+				$messenger->from($from_addr);
+			}
+			else
+			{	
+				$messenger->from($from_addr . ' <' . $from_name . '>');
+			}
+			
+			$messenger->replyto($from_addr);
+			$messenger->subject($digest_email_subject);
+			
+			$messenger->assign_vars(array(
+				'DIGEST_FORMAT'			=> $digest_format_text,
+				'DIGEST_TYPE'			=> $digest_type_text,
+				'DIGEST_UCP_LINK'		=> generate_board_url() . '/' . 'ucp.' . $phpEx,
+				'FORUM_NAME'			=> $config['sitename'],
+				'USERNAME'				=> $row['username'],
+				)
+			);
+			
+			$mail_sent = $messenger->send(NOTIFY_EMAIL, false, false, true);
+			
+			if (!$mail_sent)
+			{
+				$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LOG_CONFIG_DIGESTS_NOTIFICATION_ERROR', false, array($row_info_array['user_email']));
+			}
+			else
+			{
+				$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LOG_CONFIG_DIGESTS_NOTIFICATION_SENT', false, array($row['user_email'], $row['username']));
+				$emails_sent++;
+			}
+			
+			$messenger->reset();
+			
+		}
+
+		$db->sql_freeresult($result); // Query be gone!
+		
+	}
+	
+	return $emails_sent;
+	
 }

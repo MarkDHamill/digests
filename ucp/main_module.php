@@ -678,6 +678,9 @@ class main_module
 				);
 				
 			break;
+				
+			default:
+			break;
 			
 		}
 

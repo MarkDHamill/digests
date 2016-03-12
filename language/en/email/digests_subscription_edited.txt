@@ -1,0 +1,10 @@
+Dear {USERNAME},
+
+This is to notify you that an administrator of {FORUM_NAME} has edited your digest settings. To
+view your new digest settings, use the link below and click on the digests link:
+
+{DIGESTS_UCP_LINK}
+
+Sincerely,
+
+{FORUM_NAME} Administration Team

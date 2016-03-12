@@ -1,6 +1,6 @@
 <!-- INCLUDE overall_header.html -->
 <!-- IF S_EDIT_SUBSCRIBERS -->
-<script language="javascript">
+<script>
 // <![CDATA[
 function toggle(id)
 {
@@ -14,15 +14,13 @@ function toggle(id)
 
 	// Toggle the display between hid and shown
 	display = thisId.style.display;
-	if (display == 'none')
-	{
+	if (display == 'none') {
 		thisId.style.display = 'table-row';
 		imageId.src = '{IMAGE_PATH}collapse.png';
 		imageId.alt = '{L_DIGESTS_COLLAPSE}';
 		imageId.title = '{L_DIGESTS_COLLAPSE}';
 	}
-	else
-	{
+	else {
 		thisId.style.display = 'none';
 		imageId.src = '{IMAGE_PATH}expand.png';
 		imageId.alt = '{L_DIGESTS_EXPAND}';
@@ -40,8 +38,7 @@ function unCheckSubscribedForums (checkbox, id_match) {
 	var x = document.getElementsByTagName('input');
 	for(i=0;i<x.length;i++) {
 		thisobject = x[i];
-		if (thisobject.id.search(id_match + 'elt_') == 0)
-		{
+		if (thisobject.id.search(id_match + 'elt_') == 0) {
 			thisobject.checked = is_checked;
 		}
 	}
@@ -55,24 +52,88 @@ function unCheckAllForums (id_match,all_forums) {
 	// Assume a HTML 5 compatible browser
 	var all_forums = document.getElementById(all_forums);
 	var inputs = document.getElementsByTagName('input');
-	for(i=0;i<inputs.length;i++) 
-	{
+	for(i=0;i<inputs.length;i++) {
 		thisobject = inputs[i];
-		if (thisobject.id.search(id_match + 'elt_') == 0)
-		{
-			if (thisobject.checked == false)
-			{
+		if (thisobject.id.search(id_match + 'elt_') == 0) {
+			if (thisobject.checked == false) {
 				all_forums.checked = false;
 				any_unchecked = true;
 			}
 		}
 	}
-	if (any_unchecked == false)
-	{
+	if (any_unchecked == false)	{
 		all_forums.checked = true;
 	}
 
-	return;
+	return true;
+}
+
+var tosubmit = [];	// Collects a list of variables to submit to the web server. There are so many on the edit subscribers page we only want to send those changed.
+tosubmit.push('selected');	// Must have this control
+tosubmit.push('form_token');	// Must have this control
+tosubmit.push('creation_time');	// Must have this control
+tosubmit.push('submit');	// Must have this control
+tosubmit.push('sort');	// Must have this control
+
+function addToStack(name) {
+	// Push onto a stack a form field that will be sent to the web server on form submission. There are so many on the page we 
+	// want to limit these to only those that were changed, hopefull avoiding PHP max_input_vars issues.
+	if (tosubmit.indexOf(name) == -1) {
+		tosubmit.push(name);
+	}
+	// Add the following fields so individual forum subscriptions changes can be detected
+	if (name.substr(0,4) == 'user')	{
+		last_dash_loc = name.lastIndexOf('-');
+		if (last_dash_loc > 4) {
+			user_id = name.substring(5, last_dash_loc);
+			all_forums = 'user-' + user_id + '-all_forums';
+			if (tosubmit.indexOf(all_forums) == -1) {
+				tosubmit.push(all_forums);
+			}
+			filter_type = 'user-' + user_id + '-filter_type';
+			if (tosubmit.indexOf(filter_type) == -1) {
+				tosubmit.push(filter_type);
+			}
+		}
+	}
+	// If mark-all checkbox selected, add to the stack all user-xx mark variables.
+	if (name == 'mark-all') {
+		var allInputs = document.getElementsByTagName("input");
+		for (var k = 0; k < allInputs.length; k++) {
+			var_name = allInputs[k].name;
+			last_dash_loc = var_name.lastIndexOf('-');
+			if (var_name.substr(0,5) == 'user-' && last_dash_loc == 4) {
+				if (tosubmit.indexOf(allInputs[k].name) == -1) {
+					tosubmit.push(allInputs[k].name);
+				}
+			}
+		}
+	}
+}
+
+function inStack(name) {
+	// Tests to see if the named form field is in the stack to be submitted.
+	return (tosubmit.indexOf(name) == -1) ? false : true;
+}
+
+function beforeSubmit() {
+	// Disables a form field if it was not changed. Disabled fields are not submitted to the web server.
+	var allInputs = document.getElementsByTagName("input");
+	var allSelects = document.getElementsByTagName("select");
+	for (var k = 0; k < allInputs.length; k++) {
+		var name = allInputs[k].name;
+		if (!inStack(name)) {
+			allInputs[k].disabled = true;
+		}
+	}
+	
+	for(var k = 0; k < allSelects.length; k++) {
+		var name = allSelects[k].name;
+		if (!inStack(name)) {
+			allSelects[k].disabled = true;
+		}
+	}
+	return true;
 }
 // ]]>  
 </script>
@@ -91,7 +152,7 @@ function unCheckAllForums (id_match,all_forums) {
 	</div>
 <!-- ENDIF -->
 
-<form id="acp_digests" method="post" action="{U_ACTION}">
+<form id="acp_digests" method="post" <!-- IF S_EDIT_SUBSCRIBERS -->onsubmit="return beforeSubmit();" <!-- ENDIF -->action="{U_ACTION}">
 
 <!-- BEGIN options -->
 	<!-- IF options.S_LEGEND -->
@@ -123,7 +184,7 @@ function unCheckAllForums (id_match,all_forums) {
 	<fieldset id="digests">
     	<dl>
         	<dt style="border-right-style:none"><label for="member">{L_DIGESTS_SEARCH_FOR_MEMBER}:</label><br />{L_DIGESTS_SEARCH_FOR_MEMBER_EXPLAIN}</dt>
-        	<dd style="text-align:left;"><input type="text" id="member" name="member" size="30" maxlength="255" value="{MEMBER}" /></dd>
+        	<dd style="text-align:left;"><input type="text" id="member" name="member" size="30" maxlength="255" value="{MEMBER}" onchange="addToStack(this.name);" /></dd>
         </dl>
         <hr />
 		<div style="text-align:right; padding-bottom: 5px;"><span style="font-size:.85em;">&bull; {TOTAL_USERS}</span>
@@ -133,10 +194,10 @@ function unCheckAllForums (id_match,all_forums) {
 				<!-- ENDIF -->
 			</ul>
 		</div>
-	        <table cellspacing="1" id="down">
+		<table cellspacing="1" id="down">
         <thead>
             <tr>
-                <th style="text-align:center;"><input type="checkbox" class="radio" name="mark-all" id="mark-all" onclick="marklist('acp_digests', 'mark-', (this.checked) ? true : false);" /></th>
+                <th style="text-align:center;"><input type="checkbox" class="radio" name="mark-all" id="mark-all" onchange="addToStack(this.name);" onclick="marklist('acp_digests', 'user-', (this.checked) ? true : false);" /></th>
                 <th>{L_USERNAME}</th>
                 <th>{L_EMAIL_ADDRESS}</th>
                 <th style="text-align:center;">{L_DIGESTS_FREQUENCY_SHORT}</th>
@@ -150,24 +211,26 @@ function unCheckAllForums (id_match,all_forums) {
         <tbody>
         <!-- BEGIN digests_edit_subscribers -->
             <!-- IF digests_edit_subscribers.S_ROW_COUNT is even --><tr class="row1"><!-- ELSE --><tr class="row2"><!-- ENDIF -->
-                <td style="text-align:center;"><input type="checkbox" class="radio" name="mark-{digests_edit_subscribers.USER_ID}" id="mark-{digests_edit_subscribers.USER_ID}" /></td>
-                <td><a href="#" onclick="toggle('user-{digests_edit_subscribers.S_ROW_COUNT}-detail');"><img id="plusminus-{digests_edit_subscribers.S_ROW_COUNT}" src="{IMAGE_PATH}expand.png" title="{L_DIGESTS_EXPAND}" alt={L_DIGESTS_EXPAND} /></a>&nbsp;<a href="#" onclick="toggle('user-{digests_edit_subscribers.S_ROW_COUNT}-detail');">{digests_edit_subscribers.USERNAME}</a></td>
+                <td style="text-align:center;"><input type="checkbox" class="radio" name="user-{digests_edit_subscribers.USER_ID}" id="user-{digests_edit_subscribers.USER_ID}" onchange="addToStack(this.name);" /></td>
+                <td>
+					<a href="#" onclick="toggle('user-{digests_edit_subscribers.S_ROW_COUNT}-detail');"><img id="plusminus-{digests_edit_subscribers.S_ROW_COUNT}" src="{IMAGE_PATH}expand.png" title="{L_DIGESTS_EXPAND}" alt={L_DIGESTS_EXPAND} /></a>&nbsp;<a href="#" onclick="toggle('user-{digests_edit_subscribers.S_ROW_COUNT}-detail');">{digests_edit_subscribers.USERNAME}</a>
+				</td>
                 <td>{digests_edit_subscribers.USER_EMAIL}</td>
-                <td style="text-align:center;"><select name="user-{digests_edit_subscribers.USER_ID}-digest_type">
+                <td style="text-align:center;"><select name="user-{digests_edit_subscribers.USER_ID}-digest_type" onchange="addToStack(this.name);">
                 	<option value="NONE"<!-- IF digests_edit_subscribers.S_DIGEST_NONE_CHECKED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_NONE}</option>
                 	<option value="DFLT">{L_DIGESTS_DEFAULT}</option>
                 	<option value="DAY"<!-- IF digests_edit_subscribers.S_DIGEST_DAY_CHECKED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_DAILY}</option>
                 	<option value="WEEK"<!-- IF digests_edit_subscribers.S_DIGEST_WEEK_CHECKED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_WEEKLY}</option>
                 	<option value="MNTH"<!-- IF digests_edit_subscribers.S_DIGEST_MONTH_CHECKED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_MONTHLY}</option>
                 </select></td>
-                <td style="text-align:center;"><select name="user-{digests_edit_subscribers.USER_ID}-style">
+                <td style="text-align:center;"><select name="user-{digests_edit_subscribers.USER_ID}-style" onchange="addToStack(this.name);">
                 	<option value="{DIGESTS_HTML_VALUE}"<!-- IF digests_edit_subscribers.S_DIGEST_HTML_CHECKED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_FORMAT_HTML}</option>
                 	<option value="{DIGESTS_HTML_CLASSIC_VALUE}"<!-- IF digests_edit_subscribers.S_DIGEST_HTML_CLASSIC_CHECKED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_FORMAT_HTML_CLASSIC}</option>
                 	<option value="{DIGESTS_PLAIN_VALUE}"<!-- IF digests_edit_subscribers.S_DIGEST_PLAIN_CHECKED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_FORMAT_PLAIN}</option>
                 	<option value="{DIGESTS_PLAIN_CLASSIC_VALUE}"<!-- IF digests_edit_subscribers.S_DIGEST_PLAIN_CLASSIC_CHECKED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_FORMAT_PLAIN_CLASSIC}</option>
                 	<option value="{DIGESTS_FORMAT_TEXT_VALUE}"<!-- IF digests_edit_subscribers.S_DIGEST_TEXT_CHECKED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_FORMAT_TEXT}</option>
                 </select></td>
-                <td style="text-align:center;"><select name="user-{digests_edit_subscribers.USER_ID}-send_hour">
+                <td style="text-align:center;"><select name="user-{digests_edit_subscribers.USER_ID}-send_hour" onchange="addToStack(this.name);">
                 	<option value="{digests_edit_subscribers.BOARD_OFFSET_0}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_0_CHECKED --> selected="selected"<!-- ENDIF -->>0</option>
                  	<option value="{digests_edit_subscribers.BOARD_OFFSET_1}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_1_CHECKED --> selected="selected"<!-- ENDIF -->>1</option>
                 	<option value="{digests_edit_subscribers.BOARD_OFFSET_2}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_2_CHECKED --> selected="selected"<!-- ENDIF -->>2</option>
@@ -203,7 +266,7 @@ function unCheckAllForums (id_match,all_forums) {
                         <legend>{L_UCP_DIGESTS_FORUMS_SELECTION}</legend>
                         <dl>
                         	<dt><label for="user-{digests_edit_subscribers.USER_ID}-filter_type">{L_DIGESTS_FILTER_TYPE}:</label></dt>
-                            <dd><select id="user-{digests_edit_subscribers.USER_ID}-filter_type" name="user-{digests_edit_subscribers.USER_ID}-filter_type">
+                            <dd><select id="user-{digests_edit_subscribers.USER_ID}-filter_type" name="user-{digests_edit_subscribers.USER_ID}-filter_type" onchange="addToStack(this.name);">
                                 <option value="ALL" <!-- IF digests_edit_subscribers.S_DIGEST_POST_ANY -->selected="selected"<!-- ENDIF -->>{L_DIGESTS_POSTS_TYPE_ANY}</option>
                                 <option value="1ST" <!-- IF digests_edit_subscribers.S_DIGEST_POST_FIRST -->selected="selected"<!-- ENDIF -->>{L_DIGESTS_POSTS_TYPE_FIRST}</option>
                                 <option value="BM" <!-- IF digests_edit_subscribers.S_DIGEST_POST_BM -->selected="selected"<!-- ENDIF -->>{L_DIGESTS_USE_BOOKMARKS}</option>
@@ -212,7 +275,7 @@ function unCheckAllForums (id_match,all_forums) {
                         <dl>
                             <dt><label for="user-{digests_edit_subscribers.USER_ID}-all_forums">{L_DIGESTS_SELECT_FORUMS}:</label><br />{L_DIGESTS_SELECT_FORUMS_ADMIN_EXPLAIN}</dt>
                             <dd>
-                                <input type="checkbox" name="user-{digests_edit_subscribers.USER_ID}-all_forums" id="user-{digests_edit_subscribers.USER_ID}-all_forums" <!-- IF digests_edit_subscribers.S_ALL_BY_DEFAULT --> checked="checked"<!-- ENDIF --> onclick="unCheckSubscribedForums(this,'user-{digests_edit_subscribers.USER_ID}-');" /> <label for="user-{digests_edit_subscribers.USER_ID}-all_forums"><b>{L_DIGESTS_ALL_ALLOWED_FORUMS}</b></label><br /><br />
+                                <input type="checkbox" name="user-{digests_edit_subscribers.USER_ID}-all_forums" id="user-{digests_edit_subscribers.USER_ID}-all_forums" <!-- IF digests_edit_subscribers.S_ALL_BY_DEFAULT --> checked="checked"<!-- ENDIF --> onclick="unCheckSubscribedForums(this,'user-{digests_edit_subscribers.USER_ID}-');" onchange="addToStack(this.name);" /> <label for="user-{digests_edit_subscribers.USER_ID}-all_forums"><b>{L_DIGESTS_ALL_ALLOWED_FORUMS}</b></label><br /><br />
                                 <div id="user-{digests_edit_subscribers.USER_ID}-div_0">
                                     <!-- BEGIN forums -->
                                     <!-- IF digests_edit_subscribers.forums.S_DIV_OPEN -->
@@ -220,7 +283,7 @@ function unCheckAllForums (id_match,all_forums) {
                                     <!-- ENDIF -->
                                     <!-- IF digests_edit_subscribers.forums.S_PRINT -->
                                         <!-- IF digests_edit_subscribers.forums.S_IS_FORUM -->
-                                        <input type="checkbox" name="user-{digests_edit_subscribers.USER_ID}-{digests_edit_subscribers.forums.FORUM_NAME}" id="user-{digests_edit_subscribers.USER_ID}-{digests_edit_subscribers.forums.FORUM_NAME}"<!-- IF digests_edit_subscribers.forums.S_FORUM_SUBSCRIBED --> checked="checked"<!-- ENDIF --> onclick="unCheckAllForums('user-{digests_edit_subscribers.USER_ID}-','user-{digests_edit_subscribers.USER_ID}-all_forums');"/> <label for="user-{digests_edit_subscribers.USER_ID}-{digests_edit_subscribers.forums.FORUM_NAME}"<span style="font-size:.8em;">{digests_edit_subscribers.forums.FORUM_LABEL}</span></label><br />
+                                        <input type="checkbox" name="user-{digests_edit_subscribers.USER_ID}-{digests_edit_subscribers.forums.FORUM_NAME}" id="user-{digests_edit_subscribers.USER_ID}-{digests_edit_subscribers.forums.FORUM_NAME}"<!-- IF digests_edit_subscribers.forums.S_FORUM_SUBSCRIBED --> checked="checked"<!-- ENDIF --> onclick="unCheckAllForums('user-{digests_edit_subscribers.USER_ID}-','user-{digests_edit_subscribers.USER_ID}-all_forums');" onchange="addToStack(this.name);"/> <label for="user-{digests_edit_subscribers.USER_ID}-{digests_edit_subscribers.forums.FORUM_NAME}"><span style="font-size:.8em;">{digests_edit_subscribers.forums.FORUM_LABEL}</span></label><br />
                                         <!-- ENDIF -->
                                         <!-- IF not digests_edit_subscribers.forums.S_IS_FORUM -->
                                         <span style="font-size:.8em;"><i>{digests_edit_subscribers.forums.FORUM_LABEL}</i></span><br />
@@ -238,31 +301,31 @@ function unCheckAllForums (id_match,all_forums) {
                         <legend>{L_UCP_DIGESTS_POST_FILTERS}</legend>
                         <dl>
                             <dt><label for="user-{digests_edit_subscribers.USER_ID}-max_posts">{L_DIGESTS_COUNT_LIMIT}</label></dt>
-                            <dd><input type="text" size="5" maxlength="5" id="user-{digests_edit_subscribers.USER_ID}-max_posts" name="user-{digests_edit_subscribers.USER_ID}-max_posts" value="{digests_edit_subscribers.USER_DIGEST_MAX_POSTS}" /></dd>
+                            <dd><input type="text" size="5" maxlength="5" id="user-{digests_edit_subscribers.USER_ID}-max_posts" name="user-{digests_edit_subscribers.USER_ID}-max_posts" value="{digests_edit_subscribers.USER_DIGEST_MAX_POSTS}" onchange="addToStack(this.name);" /></dd>
                        	</dl>
                         <dl>
                             <dt><label for="user-{digests_edit_subscribers.USER_ID}-min_words">{L_DIGESTS_MIN_SIZE}</label></dt>
-                            <dd><input type="text" size="4" maxlength="4" id="user-{digests_edit_subscribers.USER_ID}-min_words" name="user-{digests_edit_subscribers.USER_ID}-min_words" value="{digests_edit_subscribers.USER_DIGEST_MIN_WORDS}" /></dd>
+                            <dd><input type="text" size="4" maxlength="4" id="user-{digests_edit_subscribers.USER_ID}-min_words" name="user-{digests_edit_subscribers.USER_ID}-min_words" value="{digests_edit_subscribers.USER_DIGEST_MIN_WORDS}" onchange="addToStack(this.name);" /></dd>
                        	</dl>
                         <dl>
                             <dt><label for="user-{digests_edit_subscribers.USER_ID}-new_posts_only1">{L_DIGESTS_NEW_POSTS_ONLY}</label></dt>
-                            <dd><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-new_posts_only" id="user-{digests_edit_subscribers.USER_ID}-new_posts_only1" value="1"<!-- IF digests_edit_subscribers.S_DIGEST_NEW_POSTS_ONLY_CHECKED_YES --> checked="checked"<!-- ENDIF --> /> <label for="user-{digests_edit_subscribers.USER_ID}-new_posts_only1">{L_YES}</label>&nbsp;<input type="radio" name="user-{digests_edit_subscribers.USER_ID}-new_posts_only" id="user-{digests_edit_subscribers.USER_ID}-new_posts_only2" value="0"<!-- IF digests_edit_subscribers.S_DIGEST_NEW_POSTS_ONLY_CHECKED_NO --> checked="checked"<!-- ENDIF --> /> <label for="user-{digests_edit_subscribers.USER_ID}-new_posts_only2">{L_NO}</label></dd>
+                            <dd><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-new_posts_only" id="user-{digests_edit_subscribers.USER_ID}-new_posts_only1" value="1"<!-- IF digests_edit_subscribers.S_DIGEST_NEW_POSTS_ONLY_CHECKED_YES --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> <label for="user-{digests_edit_subscribers.USER_ID}-new_posts_only1">{L_YES}</label>&nbsp;<input type="radio" name="user-{digests_edit_subscribers.USER_ID}-new_posts_only" id="user-{digests_edit_subscribers.USER_ID}-new_posts_only2" value="0"<!-- IF digests_edit_subscribers.S_DIGEST_NEW_POSTS_ONLY_CHECKED_NO --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> <label for="user-{digests_edit_subscribers.USER_ID}-new_posts_only2">{L_NO}</label></dd>
                        	</dl>
                         <dl>
                             <dt><label for="user-{digests_edit_subscribers.USER_ID}-show_mine1">{L_DIGESTS_REMOVE_YOURS}</label></dt>
-                            <dd><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-show_mine" id="user-{digests_edit_subscribers.USER_ID}-show_mine1" value="1"<!-- IF digests_edit_subscribers.S_DIGEST_SHOW_MINE_CHECKED_NO --> checked="checked"<!-- ENDIF --> /> <label for="user-{digests_edit_subscribers.USER_ID}-show_mine1">{L_YES}</label>&nbsp;<input type="radio" name="user-{digests_edit_subscribers.USER_ID}-show_mine" id="user-{digests_edit_subscribers.USER_ID}-show_mine2" value="0"<!-- IF digests_edit_subscribers.S_DIGEST_SHOW_MINE_CHECKED_YES --> checked="checked"<!-- ENDIF --> /> <label for="user-{digests_edit_subscribers.USER_ID}-show_mine2">{L_NO}</label></dd>
+                            <dd><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-show_mine" id="user-{digests_edit_subscribers.USER_ID}-show_mine1" value="1"<!-- IF digests_edit_subscribers.S_DIGEST_SHOW_MINE_CHECKED_NO --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> <label for="user-{digests_edit_subscribers.USER_ID}-show_mine1">{L_YES}</label>&nbsp;<input type="radio" name="user-{digests_edit_subscribers.USER_ID}-show_mine" id="user-{digests_edit_subscribers.USER_ID}-show_mine2" value="0"<!-- IF digests_edit_subscribers.S_DIGEST_SHOW_MINE_CHECKED_YES --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> <label for="user-{digests_edit_subscribers.USER_ID}-show_mine2">{L_NO}</label></dd>
                        	</dl>
                         <dl>
                             <dt><label for="user-{digests_edit_subscribers.USER_ID}-filter_foes1">{L_DIGESTS_FILTER_FOES}</label></dt>
-                            <dd><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-filter_foes" id="user-{digests_edit_subscribers.USER_ID}-filter_foes1" value="1"<!-- IF digests_edit_subscribers.S_DIGEST_FILTER_FOES_CHECKED_YES --> checked="checked"<!-- ENDIF --> /> <label for="user-{digests_edit_subscribers.USER_ID}-filter_foes1">{L_YES}</label>&nbsp;<input type="radio" name="user-{digests_edit_subscribers.USER_ID}-filter_foes" id="user-{digests_edit_subscribers.USER_ID}-filter_foes2" value="0"<!-- IF digests_edit_subscribers.S_DIGEST_FILTER_FOES_CHECKED_NO --> checked="checked"<!-- ENDIF --> /> <label for="user-{digests_edit_subscribers.USER_ID}-filter_foes2">{L_NO}</label></dd>
+                            <dd><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-filter_foes" id="user-{digests_edit_subscribers.USER_ID}-filter_foes1" value="1"<!-- IF digests_edit_subscribers.S_DIGEST_FILTER_FOES_CHECKED_YES --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> <label for="user-{digests_edit_subscribers.USER_ID}-filter_foes1">{L_YES}</label>&nbsp;<input type="radio" name="user-{digests_edit_subscribers.USER_ID}-filter_foes" id="user-{digests_edit_subscribers.USER_ID}-filter_foes2" value="0"<!-- IF digests_edit_subscribers.S_DIGEST_FILTER_FOES_CHECKED_NO --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> <label for="user-{digests_edit_subscribers.USER_ID}-filter_foes2">{L_NO}</label></dd>
                        	</dl>
                         <dl>
                             <dt><label for="user-{digests_edit_subscribers.USER_ID}-pms1">{L_DIGESTS_PRIVATE_MESSAGES_IN_DIGEST}</label></dt>
-                            <dd><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-pms" id="user-{digests_edit_subscribers.USER_ID}-pms1" value="1"<!-- IF digests_edit_subscribers.S_DIGEST_PRIVATE_MESSAGES_IN_DIGEST_YES --> checked="checked"<!-- ENDIF --> /> <label for="user-{digests_edit_subscribers.USER_ID}-pms1">{L_YES}</label>&nbsp;<input type="radio" name="user-{digests_edit_subscribers.USER_ID}-pms" id="user-{digests_edit_subscribers.USER_ID}-pms2" value="0"<!-- IF digests_edit_subscribers.S_DIGEST_PRIVATE_MESSAGES_IN_DIGEST_NO --> checked="checked"<!-- ENDIF --> /> <label for="user-{digests_edit_subscribers.USER_ID}-pms2">{L_NO}</label></dd>
+                            <dd><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-pms" id="user-{digests_edit_subscribers.USER_ID}-pms1" value="1"<!-- IF digests_edit_subscribers.S_DIGEST_PRIVATE_MESSAGES_IN_DIGEST_YES --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> <label for="user-{digests_edit_subscribers.USER_ID}-pms1">{L_YES}</label>&nbsp;<input type="radio" name="user-{digests_edit_subscribers.USER_ID}-pms" id="user-{digests_edit_subscribers.USER_ID}-pms2" value="0"<!-- IF digests_edit_subscribers.S_DIGEST_PRIVATE_MESSAGES_IN_DIGEST_NO --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> <label for="user-{digests_edit_subscribers.USER_ID}-pms2">{L_NO}</label></dd>
                        	</dl>
                         <dl>
                             <dt><label for="user-{digests_edit_subscribers.USER_ID}-mark_read1">{L_DIGESTS_MARK_READ}</label></dt>
-                            <dd><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-mark_read" id="user-{digests_edit_subscribers.USER_ID}-mark_read1" value="1"<!-- IF digests_edit_subscribers.S_DIGEST_PM_MARK_READ_CHECKED_YES --> checked="checked"<!-- ENDIF --> /> <label for="user-{digests_edit_subscribers.USER_ID}-mark_read1">{L_YES}</label>&nbsp;<input type="radio" name="user-{digests_edit_subscribers.USER_ID}-mark_read" id="user-{digests_edit_subscribers.USER_ID}-mark_read2" value="0"<!-- IF digests_edit_subscribers.S_DIGEST_PM_MARK_READ_CHECKED_NO --> checked="checked"<!-- ENDIF --> /> <label for="user-{digests_edit_subscribers.USER_ID}-mark_read2">{L_NO}</label></dd>
+                            <dd><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-mark_read" id="user-{digests_edit_subscribers.USER_ID}-mark_read1" value="1"<!-- IF digests_edit_subscribers.S_DIGEST_PM_MARK_READ_CHECKED_YES --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> <label for="user-{digests_edit_subscribers.USER_ID}-mark_read1">{L_YES}</label>&nbsp;<input type="radio" name="user-{digests_edit_subscribers.USER_ID}-mark_read" id="user-{digests_edit_subscribers.USER_ID}-mark_read2" value="0"<!-- IF digests_edit_subscribers.S_DIGEST_PM_MARK_READ_CHECKED_NO --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> <label for="user-{digests_edit_subscribers.USER_ID}-mark_read2">{L_NO}</label></dd>
                         </dl>
                    	</fieldset>
                     <fieldset>
@@ -270,7 +333,7 @@ function unCheckAllForums (id_match,all_forums) {
                         <dl>
                             <dt><label for="user-{digests_edit_subscribers.USER_ID}-sortby">{L_DIGESTS_SORT_BY}</label></dt>
                             <dd>
-                                <select name="user-{digests_edit_subscribers.USER_ID}-sortby" id="user-{digests_edit_subscribers.USER_ID}-sort_by">
+                                <select name="user-{digests_edit_subscribers.USER_ID}-sortby" id="user-{digests_edit_subscribers.USER_ID}-sort_by" onchange="addToStack(this.name);">
                                     <option value="board"<!-- IF digests_edit_subscribers.S_BOARD_SELECTED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_SORT_USER_ORDER}</option>
                                     <option value="standard"<!-- IF digests_edit_subscribers.S_STANDARD_SELECTED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_SORT_FORUM_TOPIC}</option>
                                     <option value="standard_desc"<!-- IF digests_edit_subscribers.S_STANDARD_DESC_SELECTED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_SORT_FORUM_TOPIC_DESC}</option>
@@ -281,32 +344,32 @@ function unCheckAllForums (id_match,all_forums) {
                         </dl>
                         <dl>
                             <dt><label for="user-{digests_edit_subscribers.USER_ID}-max_display_words">{L_DIGESTS_MAX_DISPLAY_WORDS}</label></dt>
-                            <dd><input type="text" size="4" maxlength="4" name="user-{digests_edit_subscribers.USER_ID}-max_display_words" id="user-{digests_edit_subscribers.USER_ID}-max_display_words" value="{digests_edit_subscribers.USER_DIGEST_MAX_DISPLAY_WORDS}" />
+                            <dd><input type="text" size="4" maxlength="4" name="user-{digests_edit_subscribers.USER_ID}-max_display_words" id="user-{digests_edit_subscribers.USER_ID}-max_display_words" value="{digests_edit_subscribers.USER_DIGEST_MAX_DISPLAY_WORDS}" onchange="addToStack(this.name);" />
                             </dd>
                         </dl>
                         <dl>
                         	<dt><label for="user-{digests_edit_subscribers.USER_ID}-no_post_text1">{L_DIGESTS_NO_POST_TEXT}</label></dt>
-                            <dd><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-no_post_text" id="user-{digests_edit_subscribers.USER_ID}-no_post_text1" value="1"<!-- IF digests_edit_subscribers.S_DIGEST_NO_POST_TEXT_CHECKED_YES --> checked="checked"<!-- ENDIF --> /><label for="user-{digests_edit_subscribers.USER_ID}-no_post_text1"> {L_YES}</label>&nbsp;<input type="radio" name="user-{digests_edit_subscribers.USER_ID}-no_post_text" id="user-{digests_edit_subscribers.USER_ID}-no_post_text2" value="0"<!-- IF digests_edit_subscribers.S_DIGEST_NO_POST_TEXT_CHECKED_NO --> checked="checked"<!-- ENDIF --> /> <label for="user-{digests_edit_subscribers.USER_ID}-no_post_text2"> {L_NO}</label></dd>
+                            <dd><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-no_post_text" id="user-{digests_edit_subscribers.USER_ID}-no_post_text1" value="1"<!-- IF digests_edit_subscribers.S_DIGEST_NO_POST_TEXT_CHECKED_YES --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /><label for="user-{digests_edit_subscribers.USER_ID}-no_post_text1"> {L_YES}</label>&nbsp;<input type="radio" name="user-{digests_edit_subscribers.USER_ID}-no_post_text" id="user-{digests_edit_subscribers.USER_ID}-no_post_text2" value="0"<!-- IF digests_edit_subscribers.S_DIGEST_NO_POST_TEXT_CHECKED_NO --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> <label for="user-{digests_edit_subscribers.USER_ID}-no_post_text2"> {L_NO}</label></dd>
                         </dl>                       
                         <dl>
                             <dt><label for="user-{digests_edit_subscribers.USER_ID}-send_on_no_posts1">{L_DIGESTS_SEND_ON_NO_POSTS}</label></dt>
-                            <dd><label for="user-{digests_edit_subscribers.USER_ID}-send_on_no_posts1"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-send_on_no_posts" id="user-{digests_edit_subscribers.USER_ID}-send_on_no_posts1"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_ON_NO_POSTS_YES_CHECKED --> checked="checked"<!-- ENDIF --> value="1" /> {L_YES}</label>&nbsp;<label for="user-{digests_edit_subscribers.USER_ID}-send_on_no_posts2"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-send_on_no_posts" id="user-{digests_edit_subscribers.USER_ID}-send_on_no_posts2"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_ON_NO_POSTS_NO_CHECKED --> checked="checked"<!-- ENDIF --> value="0" /> {L_NO}</label></dd>
+                            <dd><label for="user-{digests_edit_subscribers.USER_ID}-send_on_no_posts1"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-send_on_no_posts" id="user-{digests_edit_subscribers.USER_ID}-send_on_no_posts1"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_ON_NO_POSTS_YES_CHECKED --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" value="1" /> {L_YES}</label>&nbsp;<label for="user-{digests_edit_subscribers.USER_ID}-send_on_no_posts2"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-send_on_no_posts" id="user-{digests_edit_subscribers.USER_ID}-send_on_no_posts2"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_ON_NO_POSTS_NO_CHECKED --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" value="0" /> {L_NO}</label></dd>
                         </dl>
                         <dl>
                             <dt><label for="user-{digests_edit_subscribers.USER_ID}-lastvisit1">{L_DIGESTS_LASTVISIT_RESET}</label></dt>
-                            <dd><label for="user-{digests_edit_subscribers.USER_ID}-lastvisit1"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-lastvisit" id="user-{digests_edit_subscribers.USER_ID}-lastvisit1" value="1"<!-- IF digests_edit_subscribers.S_LASTVISIT_YES_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_YES}</label>&nbsp;<label for="user-{digests_edit_subscribers.USER_ID}-lastvisit2"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-lastvisit" id="user-{digests_edit_subscribers.USER_ID}-lastvisit2" value="0"<!-- IF digests_edit_subscribers.S_LASTVISIT_NO_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_NO}</label></dd>
+                            <dd><label for="user-{digests_edit_subscribers.USER_ID}-lastvisit1"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-lastvisit" id="user-{digests_edit_subscribers.USER_ID}-lastvisit1" value="1"<!-- IF digests_edit_subscribers.S_LASTVISIT_YES_CHECKED --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> {L_YES}</label>&nbsp;<label for="user-{digests_edit_subscribers.USER_ID}-lastvisit2"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-lastvisit" id="user-{digests_edit_subscribers.USER_ID}-lastvisit2" value="0"<!-- IF digests_edit_subscribers.S_LASTVISIT_NO_CHECKED --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> {L_NO}</label></dd>
                         </dl>
                         <dl>
                             <dt><label for="user-{digests_edit_subscribers.USER_ID}-attachments1">{L_DIGESTS_SHOW_ATTACHMENTS}</label></dt>
-                            <dd><label for="user-{digests_edit_subscribers.USER_ID}-attachments1"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-attachments" id="user-{digests_edit_subscribers.USER_ID}-attachments1" value="1"<!-- IF digests_edit_subscribers.S_ATTACHMENTS_YES_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_YES}</label>&nbsp;<label for="user-{digests_edit_subscribers.USER_ID}-attachments2"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-attachments" id="user-{digests_edit_subscribers.USER_ID}-attachments2" value="0"<!-- IF digests_edit_subscribers.S_ATTACHMENTS_NO_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_NO}</label></dd>
+                            <dd><label for="user-{digests_edit_subscribers.USER_ID}-attachments1"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-attachments" id="user-{digests_edit_subscribers.USER_ID}-attachments1" value="1"<!-- IF digests_edit_subscribers.S_ATTACHMENTS_YES_CHECKED --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> {L_YES}</label>&nbsp;<label for="user-{digests_edit_subscribers.USER_ID}-attachments2"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-attachments" id="user-{digests_edit_subscribers.USER_ID}-attachments2" value="0"<!-- IF digests_edit_subscribers.S_ATTACHMENTS_NO_CHECKED --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> {L_NO}</label></dd>
                         </dl>
                         <dl>
                             <dt><label for="user-{digests_edit_subscribers.USER_ID}-blockimages1">{L_DIGESTS_BLOCK_IMAGES}</label></dt>
-                            <dd><label for="user-{digests_edit_subscribers.USER_ID}-blockimages1"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-blockimages" id="user-{digests_edit_subscribers.USER_ID}-blockimages1" value="1"<!-- IF digests_edit_subscribers.S_BLOCK_IMAGES_YES_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_YES}</label>&nbsp;<label for="user-{digests_edit_subscribers.USER_ID}-blockimages2"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-blockimages" id="user-{digests_edit_subscribers.USER_ID}-blockimages2" value="0"<!-- IF digests_edit_subscribers.S_BLOCK_IMAGES_NO_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_NO}</label></dd>
+                            <dd><label for="user-{digests_edit_subscribers.USER_ID}-blockimages1"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-blockimages" id="user-{digests_edit_subscribers.USER_ID}-blockimages1" value="1"<!-- IF digests_edit_subscribers.S_BLOCK_IMAGES_YES_CHECKED --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> {L_YES}</label>&nbsp;<label for="user-{digests_edit_subscribers.USER_ID}-blockimages2"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-blockimages" id="user-{digests_edit_subscribers.USER_ID}-blockimages2" value="0"<!-- IF digests_edit_subscribers.S_BLOCK_IMAGES_NO_CHECKED --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> {L_NO}</label></dd>
                         </dl>
                         <dl>
                             <dt><label for="user-{digests_edit_subscribers.USER_ID}-toc1">{L_DIGESTS_TOC}:</label></dt>
-                            <dd><label for="user-{digests_edit_subscribers.USER_ID}-toc1"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-toc" id="user-{digests_edit_subscribers.USER_ID}-toc1" value="1"<!-- IF digests_edit_subscribers.S_TOC_YES_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_YES}</label>&nbsp;<label for="user-{digests_edit_subscribers.USER_ID}-toc2"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-toc" id="user-{digests_edit_subscribers.USER_ID}-toc2" value="0"<!-- IF digests_edit_subscribers.S_TOC_NO_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_NO}</label></dd>
+                            <dd><label for="user-{digests_edit_subscribers.USER_ID}-toc1"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-toc" id="user-{digests_edit_subscribers.USER_ID}-toc1" value="1"<!-- IF digests_edit_subscribers.S_TOC_YES_CHECKED --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> {L_YES}</label>&nbsp;<label for="user-{digests_edit_subscribers.USER_ID}-toc2"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-toc" id="user-{digests_edit_subscribers.USER_ID}-toc2" value="0"<!-- IF digests_edit_subscribers.S_TOC_NO_CHECKED --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> {L_NO}</label></dd>
                         </dl>
                     </fieldset>
                </td>
@@ -316,20 +379,20 @@ function unCheckAllForums (id_match,all_forums) {
         </table>
         <p class="quick">
             <label for="selected">{L_DIGESTS_WITH_SELECTED}:</label>
-            <select id="selected" name="selected">
+            <select id="selected" name="selected" onchange="addToStack(this.name);">
                 <option value="IGNORE" selected="selected">{L_DIGESTS_IGNORE}</option>
                 <option value="NONE">{L_DIGESTS_UNSUBSCRIBE}</option>
                 <option value="DFLT">{L_DIGESTS_DEFAULT}</option>
             </select>&nbsp;
             <label for="subscribe">{L_DIGESTS_SHOW}:</label>
-            <select id="subscribe" name="subscribe">
+            <select id="subscribe" name="subscribe" onchange="addToStack(this.name);">
                 <option value="a"{ALL_SELECTED}>{L_DIGESTS_ALL}</option>
                 <option value="s"{SUBSCRIBE_SELECTED}>{L_DIGESTS_SUBSCRIBED}</option>
                 <option value="u"{UNSUBSCRIBE_SELECTED}>{L_DIGESTS_UNSUBSCRIBED}</option>
                 <option value="t"{STOPPED_SUBSCRIBING_SELECTED}>{L_DIGESTS_STOPPED_SUBSCRIBING}</option>
             </select>&nbsp;
             <label for="sortby">{L_SORT_BY}:</label>
-            <select id="sortby" name="sortby">
+            <select id="sortby" name="sortby" onchange="addToStack(this.name);">
                 <option value="u"{USERNAME_SELECTED}>{L_USERNAME}</option>
                 <option value="e"{EMAIL_SELECTED}>{L_EMAIL_ADDRESS}</option>
                 <option value="f"{FREQUENCY_SELECTED}>{L_DIGESTS_FREQUENCY_SHORT}</option>
@@ -340,7 +403,7 @@ function unCheckAllForums (id_match,all_forums) {
                 <option value="t"{LAST_SENT_SELECTED}>{L_DIGESTS_LAST_SENT}</option>
             </select>&nbsp;
             <label for="sortorder">{L_DIGESTS_SORT_ORDER}:</label>
-            <select id="sortorder" name="sortorder">
+            <select id="sortorder" name="sortorder" onchange="addToStack(this.name);">
                 <option value="a"{ASCENDING_SELECTED}>{L_ASCENDING}</option>
                 <option value="d"{DESCENDING_SELECTED}>{L_DESCENDING}</option>
             </select>&nbsp;
@@ -354,7 +417,7 @@ function unCheckAllForums (id_match,all_forums) {
 			</ul>
 		</div>
         <fieldset class="quick">
-            <p class="small"><a href="#" onclick="marklist('acp_digests', 'mark-', true);">{L_MARK_ALL}</a> &bull; <a href="#" onclick="marklist('acp_digests', 'mark-', false);">{L_UNMARK_ALL}</a></p>
+            <p class="small"><a href="#" onclick="marklist('acp_digests', 'user-', true);">{L_MARK_ALL}</a> &bull; <a href="#" onclick="marklist('acp_digests', 'user-', false);">{L_UNMARK_ALL}</a></p>
             {S_FORM_TOKEN}
         </fieldset>
 <!-- ENDIF -->

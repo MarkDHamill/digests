@@ -1508,7 +1508,10 @@ class digests extends \phpbb\cron\task\base
 								break;
 							}
 						break;
-						
+					
+						default:
+						break;
+					
 					}
 					
 				break;

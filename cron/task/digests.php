@@ -1812,7 +1812,7 @@ class digests extends \phpbb\cron\task\base
 				// Handle max display words logic
 				if ($user_row['user_digest_max_display_words'] > 0)
 				{
-					$post_text = $this->$this->truncate_words($post_text, $user_row['user_digest_max_display_words']);
+					$post_text = $this->truncate_words($post_text, $user_row['user_digest_max_display_words']);
 				}
 				
 				// Create a link to the profile of the poster

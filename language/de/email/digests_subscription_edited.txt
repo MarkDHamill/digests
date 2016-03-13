@@ -1,0 +1,12 @@
+
+Hallo {USERNAME},
+
+ein Administrator von {FORUM_NAME} hat Änderungen an deinen Einstellungen der eMail-Zusamménfassung vorgenommen. 
+Die aktuellen Einstellung sind über den folgenden Link erreichbar und dort über eMail-Zusammnefassungen:
+
+{DIGESTS_UCP_LINK}
+
+Herzliche Grüße,
+
+{FORUM_NAME}
+Das Administrations-Team

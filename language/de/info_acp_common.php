@@ -187,10 +187,14 @@ $lang = array_merge($lang, array(
 	'LOG_CONFIG_DIGESTS_LOG_START'							=> '<strong>Digest-Mailer gestartet</strong>',
 	'LOG_CONFIG_DIGESTS_LOG_END'							=> '<strong>Digest-Mailer beendet</strong>',
 	'LOG_CONFIG_DIGESTS_MAILER_RAN_WITH_ERROR'				=> '<strong>Ein Fehler trat während der Verwendung des Digest-Mailers auf. Es können dennoch einige eMail-Zusammenfassungen erfolgreich erstellt worden sein.</strong>',
+	'LOG_CONFIG_DIGESTS_MANUAL_RUN'							=> '<strong>Mailer manuell gestartet</strong>',
 	'LOG_CONFIG_DIGESTS_MASS_SUBSCRIBE_UNSUBSCRIBE'			=> '<strong>Eine Massenabonnementsoperation wurde erfolgreich durchgeführt.</strong>',	
+	'LOG_CONFIG_DIGESTS_REGULAR_CRON_RUN'						=> '<strong>Mailer durch internen phpBB-Crondienst gestartet</strong>',
 	'LOG_CONFIG_DIGESTS_SEND_MASS_EMAIL_ERROR'				=> '<strong>Massenabonnementsoperation konnte bei %s nicht erfolgreich durchgeführt werden.</strong>',
 	'LOG_CONFIG_DIGESTS_SIMULATION_DATE_TIME'				=> '<strong>Ein Administrator hat eMail-Zusammenstellungen für %s um %s:00 Board-Zeit erzeugt.</strong>',
-	'LOG_CONFIG_DIGESTS_SORT_BY_ERROR'						=> "<strong>Der Digest-Mailer mit ungültigem user_digest_sortby = %s für %s aufgerufen</strong>",
+	'LOG_CONFIG_DIGESTS_SORT_BY_ERROR'						=> '<strong>Der Digest-Mailer mit ungültigem user_digest_sortby = %s für %s aufgerufen</strong>',
+	'LOG_CONFIG_DIGESTS_SYSTEM_CRON_RUN'						=> '<strong>Mailer durch externen System-Cronjob gestartet.</strong>',
+	'LOG_CONFIG_DIGESTS_TIMEZONE_ERROR'				=> '<strong>Die user_timezone "%s" für Nutzer "%s" ist fehlerhaft. Die Zeitzone lautet "%s". Bitte den Nutzer seine Zeitenzoneneinstellung im UCP zu korrigieren. Siehe dazu auch die Liste erlaubter Einstellungen unter http://php.net/manual/de/timezones.php.</strong>',
 	'LOG_CONFIG_DIGESTS_USER_DEFAULTS'						=> '<strong>Standard-Nutzereinstellungen geändert</strong>',
 
 ));

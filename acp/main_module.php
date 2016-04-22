@@ -11,11 +11,6 @@ namespace phpbbservices\digests\acp;
 
 use phpbbservices\digests\constants\constants;
 
-if (!defined('IN_PHPBB'))
-{
-	exit;
-}
-
 class main_module
 {
 	var $u_action;
@@ -23,11 +18,9 @@ class main_module
 
 	function main($id, $mode)
 	{
-		global $db, $user, $auth, $template;
-		global $config, $phpbb_root_path, $phpbb_admin_path, $phpEx, $phpbb_log;
-		global $cache, $phpbb_container, $phpbb_dispatcher, $table_prefix, $request;
+		global $db, $user, $auth, $template, $config, $phpbb_root_path, $phpEx, $phpbb_log, $phpbb_container, $table_prefix, $request;
 		
-		$user->add_lang_ext('phpbbservices/digests', array('info_acp_common','common'));
+		$user->add_lang_ext('phpbbservices/digests', array('info_acp_common'));
 
 		$action	= $request->variable('action', '', true);
 		$submit = (isset($_POST['submit'])) ? true : false;
@@ -243,7 +236,7 @@ class main_module
 				$base_url = append_sid($base_url);	
 				$pagination->generate_template_pagination($base_url, 'pagination', 'start', $total_users, $config['phpbbservices_digests_users_per_page'], $start);
 								
-				// Stealing some code from my Smartfeed mod so I can get a list of forums that a particular user can access
+				// Stealing some code from my Smartfeed extension so I can get a list of forums that a particular user can access
 				
 				// We need to know which auth_option_id corresponds to the forum read privilege (f_read) and forum list (f_list) privilege.
 				$auth_options = array('f_read', 'f_list');
@@ -810,15 +803,7 @@ class main_module
 
 			if ($submit)
 			{
-				if (strpos($data['type'], 'password') === 0 && $config_value === '********')
-				{
-					// Do not update password fields if the content is ********,
-					// because that is the password replacement we use to not
-					// send the password to the output
-					continue;
-				}
 				$config->set($config_name, $config_value);
-
 			}
 		}
 
@@ -855,8 +840,6 @@ class main_module
 			// Set some flags
 			$current_user_id = NULL;
 			
-			// Any users to unsubscribe or subscribe? If yes, process these now.
-			
 			foreach ($request_vars as $name => $value)
 			{
 				
@@ -887,13 +870,13 @@ class main_module
 						{
 							$sql = 'UPDATE ' . USERS_TABLE . ' 
 								SET ' . $db->sql_build_array('UPDATE', $sql_ary) . '
-								WHERE user_id = ' . $current_user_id;
+								WHERE user_id = ' . (int) $current_user_id;
 							$result = $db->sql_query($sql);
 						}
 						
 						// If there are any individual forum subscriptions for this user, remove the old ones. 
 						$sql = 'DELETE FROM ' . $table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' 
-								WHERE user_id = ' . $current_user_id;
+								WHERE user_id = ' . (int) $current_user_id;
 						$result = $db->sql_query($sql);
 		
 						// Now save the individual forum subscriptions, if any
@@ -1105,8 +1088,8 @@ class main_module
 							if (($all_forums !== 'on') && (trim($filter_type) !== constants::DIGESTS_BOOKMARKS)) 
 							{
 								$sql_ary2[] = array(
-									'user_id'		=> $current_user_id,
-									'forum_id'		=> $forum_id);
+									'user_id'		=> (int) $current_user_id,
+									'forum_id'		=> (int) $forum_id);
 							}
 						}
 						
@@ -1123,14 +1106,17 @@ class main_module
 			{
 				$sql = 'UPDATE ' . USERS_TABLE . ' 
 					SET ' . $db->sql_build_array('UPDATE', $sql_ary) . '
-					WHERE user_id = ' . $current_user_id;
+					WHERE user_id = ' . (int) $current_user_id;
 				$result = $db->sql_query($sql);
 			}
 			
 			// If there are any individual forum subscriptions for this user, remove the old ones. 
-			$sql = 'DELETE FROM ' . $table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' 
-					WHERE user_id = ' . $current_user_id;
-			$result = $db->sql_query($sql);
+			if (!is_null($current_user_id))
+			{
+				$sql = 'DELETE FROM ' . $table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' 
+						WHERE user_id = ' . (int) $current_user_id;
+				$result = $db->sql_query($sql);
+			}
 
 			// Now save the individual forum subscriptions, if any
 			if (!$mass_action && isset($sql_ary2) && sizeof($sql_ary2) > 0)
@@ -1144,7 +1130,7 @@ class main_module
 			// Notify users whose subscriptions were changed
 			if ($config['phpbbservices_digests_notify_on_admin_changes'])
 			{
-				$notifications_sent = notify_subscribers($digest_notify_list, 'digests_subscription_edited');
+				$notifications_sent = $this->notify_subscribers($digest_notify_list, 'digests_subscription_edited');
 			}
 				
 			$message = $user->lang('CONFIG_UPDATED');
@@ -1267,7 +1253,7 @@ class main_module
 				// Notify users whose subscriptions were changed
 				if ($config['phpbbservices_digests_notify_on_admin_changes'])
 				{
-					$notifications_sent = notify_subscribers($digest_notify_list, 'digests_subscription_edited');
+					$notifications_sent = $this->notify_subscribers($digest_notify_list, 'digests_subscription_edited');
 				}
 				
 			}
@@ -1356,7 +1342,7 @@ class main_module
 				// Notify users or subscription or unsubscription if directed
 				if ($config['phpbbservices_digests_notify_on_admin_changes'])
 				{
-					$notifications_sent = notify_subscribers($digest_notify_list);
+					$notifications_sent = $this->notify_subscribers($digest_notify_list);
 				}
 				
 				if ($config['phpbbservices_digests_subscribe_all'])
@@ -1380,6 +1366,8 @@ class main_module
 		if ($submit && $mode == 'digests_test')
 		{
 
+			define('IN_DIGESTS_TEST', true);
+			
 			// Clear the digests cache folder, if so instructed
 			$all_cleared = true;
 			$success = true; // Assume all went well
@@ -1432,10 +1420,10 @@ class main_module
 			// Create a mailer object and call its run method. The logic for sending a digest is embedded in this method, which is normally run as a cron task.
 			if ($good_date && $config['phpbbservices_digests_test'])
 			{
-				$save_template = $template;	// Need to save this object because the mailer will make changes such that the sidebar will get lost
-				$mailer = new \phpbbservices\digests\cron\task\digests($config, $request, $user, $db, $phpEx, $phpbb_root_path, $template, $auth, $table_prefix, $phpbb_log);
+				$save_template = serialize($template);
+				$mailer = new \phpbbservices\digests\cron\task\digests($config, $request, $user, $db, $phpEx, $phpbb_root_path, $template, $auth, $table_prefix, $phpbb_log);	
 				$success = $mailer->run();
-				$template = $save_template;	// Restore template object
+				$template = unserialize($save_template);	// This ensures the sidebar menu on the extensions tab won't disappear
 			}
 
 			if ($config['board_disable'])
@@ -1654,155 +1642,159 @@ class main_module
 		return $digest_sort_order;
 	}
 	
-}
-
-function notify_subscribers ($digest_notify_list, $email_template = '')
-{
-	
-	// This function parses $digest_notify_list, an array of user_id that represent users that had their digest subscriptions changed, and sends them an email
-	// letting them know an action has occurred.
-	
-	global $phpbb_root_path, $phpEx, $config, $user, $db, $phpbb_log;
-	
-	$emails_sent = 0;
-	
-	if (isset($digest_notify_list) && (sizeof($digest_notify_list) > 0))
+	function notify_subscribers ($digest_notify_list, $email_template = '')
 	{
 		
-		if (!class_exists('messenger'))
-		{
-			include($phpbb_root_path . 'includes/functions_messenger.' . $phpEx); // Used to send emails
-		}
+		// This function parses $digest_notify_list, an array of user_ids that represent users that had their digest subscriptions changed, and sends them an email
+		// letting them know an action has occurred.
 		
-		$sql_array = array(
-			'SELECT'	=> 'username, user_email, user_lang, user_digest_type, user_digest_format',
+		global $phpbb_root_path, $phpEx, $config, $user, $db, $phpbb_log;
 		
-			'FROM'		=> array(
-				USERS_TABLE	=> 'u',
-			),
+		$emails_sent = 0;
 		
-			'WHERE'		=> $db->sql_in_set('user_id', $digest_notify_list),
-		);
-		
-		$sql = $db->sql_build_query('SELECT', $sql_array);
-		
-		$result = $db->sql_query($sql);
-		$rowset = $db->sql_fetchrowset($result);
-		
-		foreach ($rowset as $row)
+		if (isset($digest_notify_list) && (sizeof($digest_notify_list) > 0))
 		{
 			
-			// E-mail setup
-			$messenger = new \messenger();
-			
-			switch ($email_template)
+			if (!class_exists('messenger'))
 			{
-				case 'digests_subscription_edited':
-					$digest_notify_template = $email_template;
-					$digest_email_subject = $user->lang('DIGESTS_SUBSCRIBE_EDITED');
-				break;
-				
-				default:
-					// Mass subscribe/unsubscribe
-					$digest_notify_template = ($config['phpbbservices_digests_subscribe_all']) ? 'digests_subscribe' : 'digests_unsubscribe';
-					$digest_email_subject = ($config['phpbbservices_digests_subscribe_all']) ? $user->lang('DIGESTS_SUBSCRIBE_SUBJECT') : $user->lang('DIGESTS_UNSUBSCRIBE_SUBJECT');
-				break;
+				include($phpbb_root_path . 'includes/functions_messenger.' . $phpEx); // Used to send emails
 			}
 			
-			// Set up associations between digest types as constants and their language equivalents
-			switch ($row['user_digest_type'])
-			{
-				case DIGESTS_DAILY_VALUE:
-					$digest_type_text = strtolower($user->lang('DIGESTS_DAILY'));
-				break;
-				
-				case DIGESTS_WEEKLY_VALUE:
-					$digest_type_text = strtolower($user->lang('DIGESTS_WEEKLY'));
-				break;
-				
-				case DIGESTS_MONTHLY_VALUE:
-					$digest_type_text = strtolower($user->lang('DIGESTS_MONTHLY'));
-				break;
-				
-				default:
-				break;
-			}
+			$sql_array = array(
+				'SELECT'	=> 'username, user_email, user_lang, user_digest_type, user_digest_format',
 			
-			// Set up associations between digest formats as constants and their language equivalents
-			switch ($row['user_digest_format'])
-			{
-				case DIGESTS_HTML_VALUE:
-					$digest_format_text = $user->lang('DIGESTS_FORMAT_HTML');
-				break;
-				
-				case DIGESTS_HTML_CLASSIC_VALUE:
-					$digest_format_text = $user->lang('DIGESTS_FORMAT_HTML_CLASSIC');
-				break;
-				
-				case DIGESTS_PLAIN_VALUE:
-					$digest_format_text = $user->lang('DIGESTS_FORMAT_PLAIN');
-				break;
-				
-				case DIGESTS_PLAIN_CLASSIC_VALUE:
-					$digest_format_text = $user->lang('DIGESTS_FORMAT_PLAIN_CLASSIC');
-				break;
-				
-				case DIGESTS_TEXT_VALUE:
-					$digest_format_text = strtolower($user->lang('DIGESTS_FORMAT_TEXT'));
-				break;
-				
-				default:
-				break;
-			}
-				
-			$messenger->template('@phpbbservices_digests/' . $digest_notify_template, $row['user_lang']);
-			$messenger->to($row['user_email']);
+				'FROM'		=> array(
+					USERS_TABLE	=> 'u',
+				),
 			
-			$from_addr = ($config['phpbbservices_digests_from_email_address'] == '') ? $config['board_email'] : $config['phpbbservices_digests_from_email_address'];
-			$from_name = ($config['phpbbservices_digests_from_email_name'] == '') ? $config['board_contact'] : $config['phpbbservices_digests_from_email_name'];
-				
-			// SMTP delivery must strip text names due to likely bug in messenger class
-			if ($config['smtp_delivery'])
-			{
-				$messenger->from($from_addr);
-			}
-			else
-			{	
-				$messenger->from($from_addr . ' <' . $from_name . '>');
-			}
-			
-			$messenger->replyto($from_addr);
-			$messenger->subject($digest_email_subject);
-			
-			$messenger->assign_vars(array(
-				'DIGEST_FORMAT'			=> $digest_format_text,
-				'DIGEST_TYPE'			=> $digest_type_text,
-				'DIGEST_UCP_LINK'		=> generate_board_url() . '/' . 'ucp.' . $phpEx,
-				'FORUM_NAME'			=> $config['sitename'],
-				'USERNAME'				=> $row['username'],
-				)
+				'WHERE'		=> $db->sql_in_set('user_id', $digest_notify_list),
 			);
 			
-			$mail_sent = $messenger->send(NOTIFY_EMAIL, false, false, true);
+			$sql = $db->sql_build_query('SELECT', $sql_array);
 			
-			if (!$mail_sent)
-			{
-				$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LOG_CONFIG_DIGESTS_NOTIFICATION_ERROR', false, array($row_info_array['user_email']));
-			}
-			else
-			{
-				$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LOG_CONFIG_DIGESTS_NOTIFICATION_SENT', false, array($row['user_email'], $row['username']));
-				$emails_sent++;
-			}
+			$result = $db->sql_query($sql);
+			$rowset = $db->sql_fetchrowset($result);
 			
-			$messenger->reset();
+			foreach ($rowset as $row)
+			{
+				
+				// E-mail setup
+				$messenger = new \messenger();
+				
+				switch ($email_template)
+				{
+					case 'digests_subscription_edited':
+						$digest_notify_template = $email_template;
+						$digest_email_subject = $user->lang('DIGESTS_SUBSCRIBE_EDITED');
+					break;
+					
+					default:
+						// Mass subscribe/unsubscribe
+						$digest_notify_template = ($config['phpbbservices_digests_subscribe_all']) ? 'digests_subscribe' : 'digests_unsubscribe';
+						$digest_email_subject = ($config['phpbbservices_digests_subscribe_all']) ? $user->lang('DIGESTS_SUBSCRIBE_SUBJECT') : $user->lang('DIGESTS_UNSUBSCRIBE_SUBJECT');
+					break;
+				}
+				
+				// Set up associations between digest types as constants and their language equivalents
+				switch ($row['user_digest_type'])
+				{
+					case constants::DIGESTS_DAILY_VALUE:
+						$digest_type_text = strtolower($user->lang('DIGESTS_DAILY'));
+					break;
+					
+					case constants::DIGESTS_WEEKLY_VALUE:
+						$digest_type_text = strtolower($user->lang('DIGESTS_WEEKLY'));
+					break;
+					
+					case constants::DIGESTS_MONTHLY_VALUE:
+						$digest_type_text = strtolower($user->lang('DIGESTS_MONTHLY'));
+					break;
+					
+					case constants::DIGESTS_NONE_VALUE:
+						$digest_type_text = strtolower($user->lang('DIGESTS_NONE'));
+					break;
+					
+					default:
+					break;
+				}
+				
+				// Set up associations between digest formats as constants and their language equivalents
+				switch ($row['user_digest_format'])
+				{
+					case constants::DIGESTS_HTML_VALUE:
+						$digest_format_text = $user->lang('DIGESTS_FORMAT_HTML');
+					break;
+					
+					case constants::DIGESTS_HTML_CLASSIC_VALUE:
+						$digest_format_text = $user->lang('DIGESTS_FORMAT_HTML_CLASSIC');
+					break;
+					
+					case constants::DIGESTS_PLAIN_VALUE:
+						$digest_format_text = $user->lang('DIGESTS_FORMAT_PLAIN');
+					break;
+					
+					case constants::DIGESTS_PLAIN_CLASSIC_VALUE:
+						$digest_format_text = $user->lang('DIGESTS_FORMAT_PLAIN_CLASSIC');
+					break;
+					
+					case constants::DIGESTS_TEXT_VALUE:
+						$digest_format_text = strtolower($user->lang('DIGESTS_FORMAT_TEXT'));
+					break;
+					
+					default:
+					break;
+				}
+					
+				$messenger->template('@phpbbservices_digests/' . $digest_notify_template, $row['user_lang']);
+				$messenger->to($row['user_email']);
+				
+				$from_addr = ($config['phpbbservices_digests_from_email_address'] == '') ? $config['board_email'] : $config['phpbbservices_digests_from_email_address'];
+				$from_name = ($config['phpbbservices_digests_from_email_name'] == '') ? $config['board_contact'] : $config['phpbbservices_digests_from_email_name'];
+					
+				// SMTP delivery must strip text names due to likely bug in messenger class
+				if ($config['smtp_delivery'])
+				{
+					$messenger->from($from_addr);
+				}
+				else
+				{	
+					$messenger->from($from_addr . ' <' . $from_name . '>');
+				}
+				
+				$messenger->replyto($from_addr);
+				$messenger->subject($digest_email_subject);
+				
+				$messenger->assign_vars(array(
+					'DIGESTS_FORMAT'		=> $digest_format_text,
+					'DIGESTS_TYPE'			=> $digest_type_text,
+					'DIGESTS_UCP_LINK'		=> generate_board_url() . '/' . 'ucp.' . $phpEx,
+					'FORUM_NAME'			=> $config['sitename'],
+					'USERNAME'				=> $row['username'],
+					)
+				);
+				
+				$mail_sent = $messenger->send(NOTIFY_EMAIL, false, false, true);
+				
+				if (!$mail_sent)
+				{
+					$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LOG_CONFIG_DIGESTS_NOTIFICATION_ERROR', false, array($row_info_array['user_email']));
+				}
+				else
+				{
+					$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LOG_CONFIG_DIGESTS_NOTIFICATION_SENT', false, array($row['user_email'], $row['username']));
+					$emails_sent++;
+				}
+				
+				$messenger->reset();
+				
+			}
+	
+			$db->sql_freeresult($result); // Query be gone!
 			
 		}
-
-		$db->sql_freeresult($result); // Query be gone!
 		
-	}
+		return $emails_sent;
 	
-	return $emails_sent;
+	}
 	
 }

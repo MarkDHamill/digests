@@ -9,11 +9,6 @@
 
 namespace phpbbservices\digests\includes;
 
-if (!defined('IN_PHPBB'))
-{
-	exit;
-}
-
 global $phpbb_root_path, $phpEx;
 include($phpbb_root_path . 'includes/functions_messenger.' . $phpEx); // Used to send emails
 

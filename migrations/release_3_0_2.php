@@ -12,7 +12,7 @@ namespace phpbbservices\digests\migrations;
 use phpbb\db\tools;
 use phpbb\db\migration\tool\module;
 
-class release_3_0_1 extends \phpbb\db\migration\migration
+class release_3_0_2 extends \phpbb\db\migration\migration
 {
 	
 	public function effectively_installed()

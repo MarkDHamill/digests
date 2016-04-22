@@ -41,10 +41,13 @@ class digests extends \phpbb\cron\task\base
 	private $list_id;					// Integer indicating auth_option_id for this forum for the forum list permission, used to ensure proper read permissions
 	private $manual_mode;				// Whether or not digests is being run in manual mode via the ACP as opposed to a cron
 	private $max_posts_msg;				// Maximum number of posts allowed in a digest. If 0 there is no limit.
-	private $read_id;					// Integer indicating auth_option_id for this forum for the forum read permission, used to ensure proper read permissions
-	private $requested_forums_names;	// If user specifies forums for posts wanted, this will contain the forum names
+	private $path_prefix;				// Appended to paths to find files in correct location
 	private $posts_in_digest;			// # of posts in a digest for a particular subscriber
+	private $read_id;					// Integer indicating auth_option_id for this forum for the forum read permission, used to ensure proper read permissions
+	private $regular_cron;				// Whether or not digests is being run by cron.php
+	private $requested_forums_names;	// If user specifies forums for posts wanted, this will contain the forum names
 	private $server_timezone;			// Offset in hours from GMT
+	private $system_cron;				// Whether or not digests is being run by a system cron (cron job)
 	private $time;						// Current time (or requested start time if running an out of cycle digest)
 	private $toc;						// Table of contents
 	private $toc_pm_count;				// Table of contents private message count
@@ -101,48 +104,40 @@ class digests extends \phpbb\cron\task\base
 
 		$now = time();
 		
-		// In manual mode, send all digests to a specified email address if this feature is enabled.
-		$this->email_address_override = ($this->config['phpbbservices_digests_test_email_address'] != '') ? $this->config['phpbbservices_digests_test_email_address'] : $this->config['board_contact'];
-		
 		// Need a board URL since URLs in the digest pointing to the board need to be absolute URLs
 		$this->board_url = generate_board_url() . '/';
 	
 		$this->server_timezone = floatval(date('O')/100);	// Server timezone offset from GMT, in hours. Digests are mailed based on GMT time, so rehosting is unaffected.
 		
-		$referer = $this->request->server('HTTP_REFERER');
-		$this->manual_mode = (strstr($referer, "adm/index.$this->phpEx") && strstr($referer, 'i=-phpbbservices-digests-acp-main_module') && strstr($referer, 'mode=digests_test')) ? true : false;
+		// Determine how this is program is being executed. Options are:
+		//   - Manual mode (via the ACP Digests "Manually run the mailer" option)
+		//   - Regular cron (via invocation of cron.php as part of loading a web page in a browser
+		//   - System cron (via an actual cron/scheduled task from the operating system
+		$this->manual_mode = (defined('IN_DIGESTS_TEST')) ? true : false;
+		$this->regular_cron = (!$this->manual_mode && defined('IN_CRON') && php_sapi_name() != 'cli') ? true : false;
+		$this->system_cron = (!$this->manual_mode && !$this->regular_cron && php_sapi_name() == 'cli') ? true : false;
+
+		$this->path_prefix = ($this->manual_mode) ? './../' : './';
 		
-		$path_prefix = (strstr($referer, '/adm/') || strstr($referer, '/bin/') || strstr(__FILE__, '/bin/')) ? './../' : './';
-		
-		$this->email_templates_path = $path_prefix . 'ext/phpbbservices/digests/language/en/email/';	// Note: the email templates (except subscribe and unsubscribe) are language independent, so it's okay to use British English as it is always supported.
-		$this->cache_path = $path_prefix . 'ext/phpbbservices/digests/cache/';
-		
+		$this->email_templates_path = $this->path_prefix . 'ext/phpbbservices/digests/language/en/email/';	// Note: the email templates (except subscribe and unsubscribe) are language independent, so it's okay to use British English as it is always supported and the subscribe/unsubscribe feature is not done here.
+		$this->cache_path = $this->path_prefix . 'ext/phpbbservices/digests/cache/';
+
 		if (!$this->manual_mode)
 		{
-			// cron.php and phpbbcli.php assumes an interface where language variables and styles won't be needed, so it must be told where to find them.
+			// phpBB cron and a system cron assumes an interface where language variables and styles won't be needed, so it must be told where to find them.
+			$this->user->add_lang('common');
 			$this->user->add_lang_ext('phpbbservices/digests', array('info_acp_common', 'common'));
-			$this->template->set_style(array($path_prefix . 'ext/phpbbservices/digests/styles', 'styles'));
-		}
-		else
-		{
-			$hours_to_do = 1;	// When run manually, create digests for the current hour only
-		}
+			$this->template->set_style(array($this->path_prefix . 'ext/phpbbservices/digests/styles', 'styles'));
 			
-		// How many hours of digests are wanted? We want to do it for the number of hours between now and when digests were last ran successfully.
-		if ($this->config['phpbbservices_digests_cron_task_last_gc'] == 0)
-		{
-			$hours_to_do = 1;	// First ever attempt to run digests, so provide only one hour of digests
-		}
-		else if (!$this->manual_mode)
-		{
+			// How many hours of digests are wanted? We want to do it for the number of hours between now and when digests were last ran successfully.
 			$hours_to_do = floor(($now - $this->config['phpbbservices_digests_cron_task_last_gc']) / (60 * 60));
-		}
-
-		if (($hours_to_do <= 0) && !$this->manual_mode)
-		{
-			// Error. An hour has not elapsed since digests were last run. Shouldn't happen because should_run() should capture this.
-			$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_RUN_TOO_SOON');
-			return false;
+			if ($hours_to_do <= 0)
+			{
+				// Error. An hour has not elapsed since digests were last run. Shouldn't happen because should_run() should capture this.
+				$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_RUN_TOO_SOON');
+				return false;
+			}
+			
 		}
 
 		// Display a digest mail start processing message. It is captured in a log.
@@ -151,8 +146,31 @@ class digests extends \phpbb\cron\task\base
 			$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_START');
 		}
 				
+		// Annotate the log with the type of run
+		if ($this->manual_mode)
+		{
+			$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_MANUAL_RUN');
+			// Send all digests to a specified email address if this feature is enabled.
+			$this->email_address_override = ($this->config['phpbbservices_digests_test_email_address'] != '') ? $this->config['phpbbservices_digests_test_email_address'] : $this->config['board_contact'];
+			$hours_to_do = 1;	// When run manually, create digests for the current hour only
+		}
+		if ($this->regular_cron)
+		{
+			$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_REGULAR_CRON_RUN');
+		}
+		if ($this->system_cron)
+		{
+			include($this->path_prefix . 'includes/functions_content.' . $this->phpEx);	// Otherwise censor_text won't be found.
+			$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_SYSTEM_CRON_RUN');
+		}
+		
+		if ($this->config['phpbbservices_digests_cron_task_last_gc'] == 0)
+		{
+			$hours_to_do = 1;	// First ever attempt to run digests, so provide only one hour of digests
+		}
+
 		// Process digests for each hour. For example, to do three hours, start with -2 hours from now and end after 0 hours from now (current hour).
-		for ($i=1-$hours_to_do; $i <= 0; $i++)
+		for ($i=(1 - $hours_to_do); $i <= 0; $i++)
 		{
 			$success = $this->mail_digests($now, $i);
 			if (!$success)
@@ -161,8 +179,8 @@ class digests extends \phpbb\cron\task\base
 			}
 		}
 
-		// Do not forget to update the configuration variable for last run time.
-		if (!(($this->manual_mode) && ($this->config['phpbbservices_digests_test_spool'])) && $success)
+		// Do not forget to update the configuration variable for last run time, but only if not in manual mode
+		if (!$this->manual_mode)
 		{
 			// We only want to report that the mailer run was successful if it ran successfully and actually sent some emails out.
 			$this->config->set('phpbbservices_digests_cron_task_last_gc', $now);
@@ -177,7 +195,7 @@ class digests extends \phpbb\cron\task\base
 		return true;	
 			
 	}
-	
+
 	private function mail_digests($now, $hour)
 	{
 		
@@ -511,7 +529,7 @@ class digests extends \phpbb\cron\task\base
 			$html_messenger->subject($email_subject);
 				
 			// Transform user_digest_send_hour_gmt to the subscriber's local time
-			$local_send_hour = $row['user_digest_send_hour_gmt'] + $this->make_tz_offset($row['user_timezone']);
+			$local_send_hour = $row['user_digest_send_hour_gmt'] + $this->make_tz_offset($row['user_timezone'], $row['username']);
 			if ($local_send_hour >= 24)
 			{
 				$local_send_hour = $local_send_hour - 24;
@@ -1032,7 +1050,7 @@ class digests extends \phpbb\cron\task\base
 		// in an email.
 
 		$mail_template = ($is_html) ? 'mail_digests_html.html' : 'mail_digests_text.html';
-				
+
 		$this->template->set_filenames(array(
 		   'mail_digests'      => $mail_template,
 		));
@@ -1074,15 +1092,25 @@ class digests extends \phpbb\cron\task\base
 				$flags = (($pm_row['enable_bbcode']) ? OPTION_FLAG_BBCODE : 0) +
 					(($pm_row['enable_smilies']) ? OPTION_FLAG_SMILIES : 0) + 
 					(($pm_row['enable_magic_url']) ? OPTION_FLAG_LINKS : 0);
-					
+				
+				if ($this->system_cron)
+				{
+					// Hack that is needed for system crons to show smilies
+					$pm_row['message_text'] = str_replace('{SMILIES_PATH}', $this->board_url . 'images/smilies', $pm_row['message_text']);
+				}
 				$pm_text = generate_text_for_display(censor_text($pm_row['message_text']), $pm_row['bbcode_uid'], $pm_row['bbcode_bitfield'], $flags);
 				
 				// User signature wanted? If so append it to the private message.
 				$user_sig = ($pm_row['enable_sig'] && $pm_row['user_sig'] != '' && $this->config['allow_sig']) ? censor_text($pm_row['user_sig']) : '';
 				if ($user_sig != '')
 				{
+					if ($this->system_cron)
+					{
+						// Hack that is needed for system crons to show smilies
+						$user_sig = str_replace('{SMILIES_PATH}', $this->board_url . 'images/smilies', $user_sig);
+					}
 					// Format the signature for display
-					$user_sig = generate_text_for_display(censor_text($user_sig), $rowset['user_sig_bbcode_uid'], $rowset['user_sig_bbcode_bitfield'], $flags);
+					$user_sig = generate_text_for_display(censor_text($user_sig), $user_row['user_sig_bbcode_uid'], $user_row['user_sig_bbcode_bitfield'], $flags);
 				}
 			
 				// Handle logic to display attachments in private messages
@@ -1675,8 +1703,8 @@ class digests extends \phpbb\cron\task\base
 			
 				// If there are inline attachments, remove them otherwise they will show up twice. Getting the styling right
 				// in these cases is probably a lost cause due to the complexity to be addressed due to various styling issues.
-				$post_text = preg_replace('#\[attachment=.*?\].*?\[/attachment:.*?]#', '', censor_text($post_row['post_text']));
-			
+				$post_text = preg_replace('#\[attachment=.*?\].*?\[/attachment:.*?]#', '', $post_row['post_text']);
+		
 				// Now adjust post time to digest recipient's local time
 				$recipient_time = $post_row['post_time'] - ($this->make_tz_offset($post_row['user_timezone']) * 60 * 60);
 			
@@ -1692,9 +1720,16 @@ class digests extends \phpbb\cron\task\base
 				$flags = (($post_row['enable_bbcode']) ? OPTION_FLAG_BBCODE : 0) +
 					(($post_row['enable_smilies']) ? OPTION_FLAG_SMILIES : 0) + 
 					(($post_row['enable_magic_url']) ? OPTION_FLAG_LINKS : 0);
-					
+				
+				if ($this->system_cron)
+				{
+					// Hack that is needed for system crons to show smilies
+					$post_text = str_replace('{SMILIES_PATH}', $this->board_url . 'images/smilies', $post_text);
+					//$this->user->style['style_path'] = array($this->path_prefix . 'ext/phpbbservices/digests/styles', 'styles');
+					//$this->user->style['style_parent_id'] = 0;
+				}
 				$post_text = generate_text_for_display($post_text, $post_row['bbcode_uid'], $post_row['bbcode_bitfield'], $flags);
-			
+		
 				// Handle logic to display attachments
 				if ($post_row['post_attachment'] > 0 && $user_row['user_digest_attachments'])
 				{
@@ -1764,6 +1799,11 @@ class digests extends \phpbb\cron\task\base
 					$sigflags = (($post_row['enable_sig']) ? OPTION_FLAG_BBCODE : 0) +
 									(($post_row['enable_smilies']) ? OPTION_FLAG_SMILIES : 0) + 
 									(($post_row['enable_magic_url']) ? OPTION_FLAG_LINKS : 0);
+					if ($this->system_cron)
+					{
+						// Hack that is needed for system crons to show smilies
+						$user_sig = str_replace('{SMILIES_PATH}', $this->board_url . 'images/smilies', $user_sig);
+					}
 					$user_sig = generate_text_for_display($user_sig, $post_row['user_sig_bbcode_uid'], $post_row['user_sig_bbcode_bitfield'], $sigflags);
 				}
 				
@@ -1845,7 +1885,7 @@ class digests extends \phpbb\cron\task\base
 			'S_SHOW_POST_TEXT'				=> $show_post_text,
 		));
 
-		if ($row['user_digest_filter_type'] == constants::DIGESTS_BOOKMARKS)
+		if ($user_row['user_digest_filter_type'] == constants::DIGESTS_BOOKMARKS)
 		{
 			// Substitute a no bookmarked posts error message if needed.
 			$this->template->assign_vars(array(
@@ -1928,11 +1968,26 @@ class digests extends \phpbb\cron\task\base
 		
 	}
 	
-	private function make_tz_offset ($tz_text)
+	private function make_tz_offset ($tz_text, $username=NULL)
 	{
 		// This function translates a text timezone (like America/New_York) to an hour offset from GMT, doing magic like figuring out DST
-		$tz = new \DateTimeZone($tz_text);
+		
+		try
+		{
+			$tz = new \DateTimeZone($tz_text);
+		}
+		catch (\Exception $e)
+		{
+			// Handles the issue of a timezone not being correct, see http://php.net/manual/en/timezones.php
+			if ($this->config['phpbbservices_digests_enable_log'])
+			{
+				$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_TIMEZONE_ERROR', false, array($tz_text, $username, $this->config['board_timezone']));
+			}
+			$tz = new \DateTimeZone($this->config['board_timezone']);
+		}
+		
 		$datetime_tz = new \DateTime('now', $tz);
+		
 		$timeOffset = $tz->getOffset($datetime_tz) / 3600;
 		return $timeOffset;
 	}

@@ -12,8 +12,8 @@
 						</tr>
 				<!-- ENDIF -->
 				<!-- IF not pm.S_USE_CLASSIC_TEMPLATE -->
-				<h4 id="{pm.ANCHOR}">{L_SUBJECT}: {pm.PRIVATE_MESSAGE_SUBJECT}</h4>
-				<p class="author">{L_FROM}: {pm.FROM} {L_DIGESTS_ON} {pm.DATE}</p>
+				<h4 id="{pm.ANCHOR}">{L_SUBJECT}{L_COLON} {pm.PRIVATE_MESSAGE_SUBJECT}</h4>
+				<p class="author">{L_FROM}{L_COLON} {pm.FROM} {L_DIGESTS_ON} {pm.DATE}</p>
 				<div class="content">{pm.CONTENT}</div>
 				<!-- ELSE -->
 						<tr id="{pm.ANCHOR}">
@@ -31,9 +31,9 @@
 		<!-- ENDIF -->
 		
 		<!-- BEGIN forum -->
-			<h3 style="color:#000000">{L_FORUM}: {forum.FORUM}</h3>
+			<h3 style="color:#000000">{L_FORUM}{L_COLON} {forum.FORUM}</h3>
 			<!-- BEGIN topic -->
-				<h3>{L_TOPIC}: {forum.topic.TOPIC}</h3>
+				<h3>{L_TOPIC}{L_COLON} {forum.topic.TOPIC}</h3>
 				<!-- IF forum.topic.S_USE_CLASSIC_TEMPLATE -->
 					<table>
 						<tr>
@@ -43,10 +43,10 @@
 				<!-- BEGIN post -->
 					<!-- IF not forum.topic.S_USE_CLASSIC_TEMPLATE -->
 						<!-- IF not forum.topic.post.S_FIRST_POST -->
-						<h4>{L_DIGESTS_REPLY}: {forum.topic.post.SUBJECT}</h4>
+						<h4>{L_DIGESTS_REPLY}{L_COLON} {forum.topic.post.SUBJECT}</h4>
 						<!-- ENDIF -->
 						<!-- IF S_SHOW_POST_TEXT --><br /><!-- ENDIF -->
-						<p class="author" id="{forum.topic.post.ANCHOR}">{L_DIGESTS_BY}: {forum.topic.post.FROM} {L_DIGESTS_ON} {forum.topic.post.DATE}</p>
+						<p class="author" id="{forum.topic.post.ANCHOR}">{L_DIGESTS_BY}{L_COLON} {forum.topic.post.FROM} {L_DIGESTS_ON} {forum.topic.post.DATE}</p>
 						<!-- IF S_SHOW_POST_TEXT -->
 						<div class="content">{forum.topic.post.CONTENT}</div>
 						<!-- ENDIF -->

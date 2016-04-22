@@ -183,7 +183,7 @@ function beforeSubmit() {
 <!-- IF S_EDIT_SUBSCRIBERS -->
 	<fieldset id="digests">
     	<dl>
-        	<dt style="border-right-style:none"><label for="member">{L_DIGESTS_SEARCH_FOR_MEMBER}:</label><br />{L_DIGESTS_SEARCH_FOR_MEMBER_EXPLAIN}</dt>
+        	<dt style="border-right-style:none"><label for="member">{L_DIGESTS_SEARCH_FOR_MEMBER}{L_COLON}</label><br />{L_DIGESTS_SEARCH_FOR_MEMBER_EXPLAIN}</dt>
         	<dd style="text-align:left;"><input type="text" id="member" name="member" size="30" maxlength="255" value="{MEMBER}" onchange="addToStack(this.name);" /></dd>
         </dl>
         <hr />
@@ -265,7 +265,7 @@ function beforeSubmit() {
                     <fieldset>
                         <legend>{L_UCP_DIGESTS_FORUMS_SELECTION}</legend>
                         <dl>
-                        	<dt><label for="user-{digests_edit_subscribers.USER_ID}-filter_type">{L_DIGESTS_FILTER_TYPE}:</label></dt>
+                        	<dt><label for="user-{digests_edit_subscribers.USER_ID}-filter_type">{L_DIGESTS_FILTER_TYPE}{L_COLON}</label></dt>
                             <dd><select id="user-{digests_edit_subscribers.USER_ID}-filter_type" name="user-{digests_edit_subscribers.USER_ID}-filter_type" onchange="addToStack(this.name);">
                                 <option value="ALL" <!-- IF digests_edit_subscribers.S_DIGEST_POST_ANY -->selected="selected"<!-- ENDIF -->>{L_DIGESTS_POSTS_TYPE_ANY}</option>
                                 <option value="1ST" <!-- IF digests_edit_subscribers.S_DIGEST_POST_FIRST -->selected="selected"<!-- ENDIF -->>{L_DIGESTS_POSTS_TYPE_FIRST}</option>
@@ -273,7 +273,7 @@ function beforeSubmit() {
                             </select></dd>
                         </dl>
                         <dl>
-                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-all_forums">{L_DIGESTS_SELECT_FORUMS}:</label><br />{L_DIGESTS_SELECT_FORUMS_ADMIN_EXPLAIN}</dt>
+                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-all_forums">{L_DIGESTS_SELECT_FORUMS}{L_COLON}</label><br />{L_DIGESTS_SELECT_FORUMS_ADMIN_EXPLAIN}</dt>
                             <dd>
                                 <input type="checkbox" name="user-{digests_edit_subscribers.USER_ID}-all_forums" id="user-{digests_edit_subscribers.USER_ID}-all_forums" <!-- IF digests_edit_subscribers.S_ALL_BY_DEFAULT --> checked="checked"<!-- ENDIF --> onclick="unCheckSubscribedForums(this,'user-{digests_edit_subscribers.USER_ID}-');" onchange="addToStack(this.name);" /> <label for="user-{digests_edit_subscribers.USER_ID}-all_forums"><b>{L_DIGESTS_ALL_ALLOWED_FORUMS}</b></label><br /><br />
                                 <div id="user-{digests_edit_subscribers.USER_ID}-div_0">
@@ -368,7 +368,7 @@ function beforeSubmit() {
                             <dd><label for="user-{digests_edit_subscribers.USER_ID}-blockimages1"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-blockimages" id="user-{digests_edit_subscribers.USER_ID}-blockimages1" value="1"<!-- IF digests_edit_subscribers.S_BLOCK_IMAGES_YES_CHECKED --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> {L_YES}</label>&nbsp;<label for="user-{digests_edit_subscribers.USER_ID}-blockimages2"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-blockimages" id="user-{digests_edit_subscribers.USER_ID}-blockimages2" value="0"<!-- IF digests_edit_subscribers.S_BLOCK_IMAGES_NO_CHECKED --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> {L_NO}</label></dd>
                         </dl>
                         <dl>
-                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-toc1">{L_DIGESTS_TOC}:</label></dt>
+                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-toc1">{L_DIGESTS_TOC}{L_COLON}</label></dt>
                             <dd><label for="user-{digests_edit_subscribers.USER_ID}-toc1"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-toc" id="user-{digests_edit_subscribers.USER_ID}-toc1" value="1"<!-- IF digests_edit_subscribers.S_TOC_YES_CHECKED --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> {L_YES}</label>&nbsp;<label for="user-{digests_edit_subscribers.USER_ID}-toc2"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-toc" id="user-{digests_edit_subscribers.USER_ID}-toc2" value="0"<!-- IF digests_edit_subscribers.S_TOC_NO_CHECKED --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> {L_NO}</label></dd>
                         </dl>
                     </fieldset>
@@ -378,20 +378,20 @@ function beforeSubmit() {
         </tbody>
         </table>
         <p class="quick">
-            <label for="selected">{L_DIGESTS_WITH_SELECTED}:</label>
+            <label for="selected">{L_DIGESTS_WITH_SELECTED}{L_COLON}</label>
             <select id="selected" name="selected" onchange="addToStack(this.name);">
                 <option value="IGNORE" selected="selected">{L_DIGESTS_IGNORE}</option>
                 <option value="NONE">{L_DIGESTS_UNSUBSCRIBE}</option>
                 <option value="DFLT">{L_DIGESTS_DEFAULT}</option>
             </select>&nbsp;
-            <label for="subscribe">{L_DIGESTS_SHOW}:</label>
+            <label for="subscribe">{L_DIGESTS_SHOW}{L_COLON}</label>
             <select id="subscribe" name="subscribe" onchange="addToStack(this.name);">
                 <option value="a"{ALL_SELECTED}>{L_DIGESTS_ALL}</option>
                 <option value="s"{SUBSCRIBE_SELECTED}>{L_DIGESTS_SUBSCRIBED}</option>
                 <option value="u"{UNSUBSCRIBE_SELECTED}>{L_DIGESTS_UNSUBSCRIBED}</option>
                 <option value="t"{STOPPED_SUBSCRIBING_SELECTED}>{L_DIGESTS_STOPPED_SUBSCRIBING}</option>
             </select>&nbsp;
-            <label for="sortby">{L_SORT_BY}:</label>
+            <label for="sortby">{L_SORT_BY}{L_COLON}</label>
             <select id="sortby" name="sortby" onchange="addToStack(this.name);">
                 <option value="u"{USERNAME_SELECTED}>{L_USERNAME}</option>
                 <option value="e"{EMAIL_SELECTED}>{L_EMAIL_ADDRESS}</option>
@@ -402,7 +402,7 @@ function beforeSubmit() {
                 <option value="l"{LASTVISIT_SELECTED}>{L_LAST_VISIT}</option>
                 <option value="t"{LAST_SENT_SELECTED}>{L_DIGESTS_LAST_SENT}</option>
             </select>&nbsp;
-            <label for="sortorder">{L_DIGESTS_SORT_ORDER}:</label>
+            <label for="sortorder">{L_DIGESTS_SORT_ORDER}{L_COLON}</label>
             <select id="sortorder" name="sortorder" onchange="addToStack(this.name);">
                 <option value="a"{ASCENDING_SELECTED}>{L_ASCENDING}</option>
                 <option value="d"{DESCENDING_SELECTED}>{L_DESCENDING}</option>

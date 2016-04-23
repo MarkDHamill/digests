@@ -129,6 +129,27 @@ class digests extends \phpbb\cron\task\base
 			$this->user->add_lang_ext('phpbbservices/digests', array('info_acp_common', 'common'));
 			$this->template->set_style(array($this->path_prefix . 'ext/phpbbservices/digests/styles', 'styles'));
 			
+			// In cron mode $this->user->style is not filled out. We need enough style information to keep get_user_style from complaining.
+			$sql_array = array(
+				'SELECT'	=> 'style_path, style_parent_id',
+			
+				'FROM'		=> array(
+					STYLES_TABLE	=> 's',
+				),
+			
+				'WHERE'		=> 's.style_id = ' . $this->config['default_style'],
+			);
+
+			$sql = $this->db->sql_build_query('SELECT', $sql_array);
+			
+			$result = $this->db->sql_query($sql);
+			$rowset = $this->db->sql_fetchrowset($result);	// Gets users and their metadata that are receiving digests for this hour
+			
+			$this->user->style['style_path'] = $rowset[0]['style_path'];
+			$this->user->style['style_parent_id'] = $rowset[0]['style_parent_id'];
+			
+			$this->db->sql_freeresult($result); // Query be gone!
+						
 			// How many hours of digests are wanted? We want to do it for the number of hours between now and when digests were last ran successfully.
 			$hours_to_do = floor(($now - $this->config['phpbbservices_digests_cron_task_last_gc']) / (60 * 60));
 			if ($hours_to_do <= 0)

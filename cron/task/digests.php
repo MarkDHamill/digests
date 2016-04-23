@@ -143,7 +143,7 @@ class digests extends \phpbb\cron\task\base
 			$sql = $this->db->sql_build_query('SELECT', $sql_array);
 			
 			$result = $this->db->sql_query($sql);
-			$rowset = $this->db->sql_fetchrowset($result);	// Gets users and their metadata that are receiving digests for this hour
+			$rowset = $this->db->sql_fetchrowset($result);
 			
 			$this->user->style['style_path'] = $rowset[0]['style_path'];
 			$this->user->style['style_parent_id'] = $rowset[0]['style_parent_id'];

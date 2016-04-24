@@ -447,7 +447,7 @@ class digests extends \phpbb\cron\task\base
 		
 			// Set various variables and flags based on the requested digest format. Note: will always use the British English email template because it's the 
 			// only one provided with the extension and it is effectively language neutral since it renders HTML and CSS only. There are no English words 
-			// in the template.
+			// in the templates.
 			
 			switch($row['user_digest_format'])
 			{

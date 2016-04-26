@@ -181,6 +181,7 @@ $lang = array_merge($lang, array(
 	'LOG_CONFIG_DIGESTS_FILTER_ERROR'						=> '<strong>Digests mailer was called with an invalid user_digest_filter_type = %s for %s</strong>',
 	'LOG_CONFIG_DIGESTS_FORMAT_ERROR'						=> '<strong>Digests mailer was called with an invalid user_digest_format of %s for %s</strong>',
 	'LOG_CONFIG_DIGESTS_GENERAL'							=> '<strong>Altered Digest general settings</strong>',
+	'LOG_CONFIG_DIGESTS_HOUR_RUN'							=> '<strong>Running digests for hour %d GMT</strong>',
 	'LOG_CONFIG_DIGESTS_LOG_ENTRY_BAD'						=> '<strong>Unable to send a digest to %s (%s)</strong>',
 	'LOG_CONFIG_DIGESTS_LOG_ENTRY_BAD_NO_EMAIL'				=> '<strong>Unable to send a digest to %s</strong>',
 	'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD'						=> '<strong>A digest was %s %s (%s) containing %d posts and %d private messages</strong>',

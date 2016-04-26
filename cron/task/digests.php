@@ -279,6 +279,8 @@ class digests extends \phpbb\cron\task\base
 		{
 			$monthly_digest_sql = '';
 		}
+
+		$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_HOUR_RUN', false, array($current_hour_gmt));
 		
 		// We need to know which auth_option_id corresponds to the forum read privilege (f_read) and forum list (f_list) privilege. Why not use $this->auth->acl_get?
 		// Because this program must get permissions for different users, so forum authentication will need to be done outside of the regular authentication 
@@ -666,7 +668,7 @@ class digests extends \phpbb\cron\task\base
 				'L_DIGESTS_INTRODUCTION'			=> $this->user->lang('DIGESTS_INTRODUCTION', $this->config['sitename']),
 				'L_DIGESTS_PUBLISH_DATE'			=> $this->user->lang('DIGESTS_PUBLISH_DATE', $row['username'], date(str_replace('|','',$row['user_dateformat']), $recipient_time)),
 				'L_DIGESTS_TITLE'					=> $email_subject,
-				'L_DIGESTS_YOUR_DIGEST_OPTIONS'		=> $this->user->lang('DIGESTS_YOUR_DIGEST_OPTIONS', $row['username']),
+				'L_DIGESTS_YOUR_DIGEST_OPTIONS'		=> ($is_html) ? $this->user->lang('DIGESTS_YOUR_DIGEST_OPTIONS', $row['username']) : str_replace('&apos;', "'", $this->user->lang('DIGESTS_YOUR_DIGEST_OPTIONS', $row['username'])),
 				'S_CONTENT_DIRECTION'				=> $this->user->lang['DIRECTION'],
 				'S_USER_LANG'						=> $user_lang,
 				'T_STYLESHEET_LINK'					=> ($this->config['phpbbservices_digests_enable_custom_stylesheets']) ? "{$this->board_url}styles/" . $this->config['phpbbservices_digests_custom_stylesheet_path'] : "{$this->board_url}styles/" . $row['style_name'] . '/theme/stylesheet.css',
@@ -1730,8 +1732,6 @@ class digests extends \phpbb\cron\task\base
 				{
 					// Hack that is needed for system crons to show smilies
 					$post_text = str_replace('{SMILIES_PATH}', $this->board_url . 'images/smilies', $post_text);
-					//$this->user->style['style_path'] = array($this->path_prefix . 'ext/phpbbservices/digests/styles', 'styles');
-					//$this->user->style['style_parent_id'] = 0;
 				}
 				$post_text = generate_text_for_display($post_text, $post_row['bbcode_uid'], $post_row['bbcode_bitfield'], $flags);
 		

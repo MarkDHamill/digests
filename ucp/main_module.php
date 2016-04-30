@@ -11,11 +11,6 @@ namespace phpbbservices\digests\ucp;
 
 use phpbbservices\digests\constants\constants;
 
-if (!defined('IN_PHPBB'))
-{
-	exit;
-}
-
 class main_module
 {
 	var $u_action;
@@ -69,7 +64,7 @@ class main_module
 					// Note: user_digest_send_hour_gmt is stored in UTC and translated to local time (as set in the profile). 
 					// This is different than in phpBB 2, when all times were stored in server time.
 					
-					$local_send_hour = $request->variable('send_hour', (int) $user->data['user_digest_send_hour_gmt']) - ((int) make_tz_offset($user->data['user_timezone']));
+					$local_send_hour = $request->variable('send_hour', (int) $user->data['user_digest_send_hour_gmt']) - ((int) $this->make_tz_offset($user->data['user_timezone']));
 					if ($local_send_hour >= 24)
 					{
 						$local_send_hour = $local_send_hour - 24;
@@ -229,7 +224,7 @@ class main_module
 					else
 					{
 						// Translate the digests send hour (in GMT) to the local timezone, based on the timezone set in the user's profile.
-						$local_send_hour = (int) $user->data['user_digest_send_hour_gmt'] + (int) make_tz_offset($user->data['user_timezone']);
+						$local_send_hour = (int) $user->data['user_digest_send_hour_gmt'] + (int) $this->make_tz_offset($user->data['user_timezone']);
 					}
 					
 					// Adjust time if outside of hour range
@@ -270,7 +265,7 @@ class main_module
 						$template->assign_block_vars('hour_loop',array(
 							'COUNT' 						=>	$i,
 							'SELECTED'						=>	($local_send_hour == $i) ? ' selected="selected"' : '',
-							'DISPLAY_HOUR'					=>	make_hour_string($i, $user->data['user_dateformat']),
+							'DISPLAY_HOUR'					=>	$this->make_hour_string($i, $user->data['user_dateformat']),
 						));
 					}
 		
@@ -698,48 +693,49 @@ class main_module
 
 	}
 	
+	private function make_hour_string($hour, $user_dateformat)
+	{
+		
+		// This function returns a string representing an hour (0-23) for display. It attempts to be smart by looking at 
+		// the user's date format and determining whether they support AM/PM or not. Some countries (like France) display
+		// 24 hour time.
+		
+		static $display_hour_array_am_pm = array(12,1,2,3,4,5,6,7,8,9,10,11,12,1,2,3,4,5,6,7,8,9,10,11);
+		
+		// Is AM/PM expected?
+		$use_lowercase_am_pm = strstr($user_dateformat,'a');
+		$use_uppercase_am_pm = strstr($user_dateformat,'A');
+		if ($use_lowercase_am_pm)
+		{
+			$am = ' am';
+			$pm = ' pm';
+		}
+		else if ($use_uppercase_am_pm)
+		{
+			$am = ' AM';
+			$pm = ' PM';
+		}
+		else // 24 hour time wanted
+		{
+			$am = '';
+			$pm = '';
+		}
+		
+		$suffix = ($hour < 12) ? $am : $pm;
+		$display_hour = ($use_lowercase_am_pm || $use_uppercase_am_pm) ? $display_hour_array_am_pm[$hour] : $hour;
+		
+		return $display_hour . $suffix;
+		
+	}
+
+	function make_tz_offset ($tz_text)
+	{
+		// This function translates a text timezone (like America/New York) to an hour offset from GMT, doing magic like figuring out DST
+		$tz = new \DateTimeZone($tz_text);
+		$datetime_tz = new \DateTime('now', $tz);
+		$timeOffset = $tz->getOffset($datetime_tz) / 3600;
+		return $timeOffset;
+	}
+
 }
 
-function make_hour_string($hour, $user_dateformat)
-{
-	
-	// This function returns a string representing an hour (0-23) for display. It attempts to be smart by looking at 
-	// the user's date format and determining whether they support AM/PM or not. Some countries (like France) display
-	// 24 hour time.
-	
-	static $display_hour_array_am_pm = array(12,1,2,3,4,5,6,7,8,9,10,11,12,1,2,3,4,5,6,7,8,9,10,11);
-	
-	// Is AM/PM expected?
-	$use_lowercase_am_pm = strstr($user_dateformat,'a');
-	$use_uppercase_am_pm = strstr($user_dateformat,'A');
-	if ($use_lowercase_am_pm)
-	{
-		$am = ' am';
-		$pm = ' pm';
-	}
-	else if ($use_uppercase_am_pm)
-	{
-		$am = ' AM';
-		$pm = ' PM';
-	}
-	else // 24 hour time wanted
-	{
-		$am = '';
-		$pm = '';
-	}
-	
-	$suffix = ($hour < 12) ? $am : $pm;
-	$display_hour = ($use_lowercase_am_pm || $use_uppercase_am_pm) ? $display_hour_array_am_pm[$hour] : $hour;
-	
-	return $display_hour . $suffix;
-	
-}
-
-function make_tz_offset ($tz_text)
-{
-	// This function translates a text timezone (like America/New York) to an hour offset from GMT, doing magic like figuring out DST
-	$tz = new \DateTimeZone($tz_text);
-	$datetime_tz = new \DateTime('now', $tz);
-	$timeOffset = $tz->getOffset($datetime_tz) / 3600;
-	return $timeOffset;
-}

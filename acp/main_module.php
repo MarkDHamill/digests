@@ -1777,7 +1777,7 @@ class main_module
 				
 				if (!$mail_sent)
 				{
-					$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LOG_CONFIG_DIGESTS_NOTIFICATION_ERROR', false, array($row_info_array['user_email']));
+					$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LOG_CONFIG_DIGESTS_NOTIFICATION_ERROR', false, array($row['user_email']));
 				}
 				else
 				{

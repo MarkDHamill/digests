@@ -280,7 +280,8 @@ class digests extends \phpbb\cron\task\base
 			$monthly_digest_sql = '';
 		}
 
-		$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_HOUR_RUN', false, array($current_hour_gmt));
+		$formatted_date = date($this->config['default_dateformat'], $this->gmt_time);
+		$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_HOUR_RUN', false, array($formatted_date));
 		
 		// We need to know which auth_option_id corresponds to the forum read privilege (f_read) and forum list (f_list) privilege. Why not use $this->auth->acl_get?
 		// Because this program must get permissions for different users, so forum authentication will need to be done outside of the regular authentication 
@@ -1868,7 +1869,7 @@ class digests extends \phpbb\cron\task\base
 					'CONTENT'		=> $post_text,
 					'DATE'			=> date(str_replace('|','',$user_row['user_dateformat']), $recipient_time) . "\n",
 					'FROM'			=> ($is_html) ? $from_url : html_entity_decode($post_row['username']),
-					'POST_LINK'		=> ($is_html) ? sprintf("<a href=\"%sviewtopic.$this->phpEx?f=%s&amp;t=%s&amp;p%s#p%s\">%s</a>%s", $this->board_url, $post_row['forum_id'], $post_row['topic_id'], $post_row['topic_first_post_id'], $post_row['post_id'], $post_row['post_id'], "\n") : $post_row['post_id'],
+					'POST_LINK'		=> ($is_html) ? sprintf("<a href=\"%sviewtopic.$this->phpEx?f=%s&amp;t=%s#p%s\">%s</a>%s", $this->board_url, $post_row['forum_id'], $post_row['topic_id'], $post_row['post_id'], html_entity_decode(censor_text($post_row['post_subject'])), "\n") : html_entity_decode(censor_text($post_row['post_subject'])),
 					'SUBJECT'		=> ($is_html) ? sprintf("<a href=\"%sviewtopic.$this->phpEx?f=%s&amp;t=%s#p%s\">%s</a>%s", $this->board_url, $post_row['forum_id'], $post_row['topic_id'], $post_row['post_id'], html_entity_decode(censor_text($post_row['post_subject'])), "\n") : html_entity_decode(censor_text($post_row['post_subject'])),
 					'S_FIRST_POST' 	=> ($post_row['topic_first_post_id'] == $post_row['post_id']), // Hide subject if first post, as it is the same as topic title
 				));

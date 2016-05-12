@@ -13,8 +13,8 @@ global $phpbb_root_path, $phpEx;
 include($phpbb_root_path . 'includes/functions_messenger.' . $phpEx); // Used to send emails
 
 // The purpose of this class is to override the messenger class so HTML can be sent in email. The code is a copy and paste for the relevant events 
-// from the 3.1.6 source for /includes/functions_messenger.php with minimal changes needed to add this functionality. One minor change: I had to use
-// new \queue() instead of new queue();
+// from the 3.1.6 source for /includes/functions_messenger.php with minimal changes needed to add this functionality. I made one major change from
+// the way phpBB works by default: to bypass the queue altogether as the expectation is that a digest will be delivered promptly.
 
 class html_messenger extends \messenger
 {
@@ -147,17 +147,6 @@ class html_messenger extends \messenger
 			return true;
 		}
 
-		$use_queue = false;
-		if ($config['email_package_size'] && $this->use_queue)
-		{
-			if (empty($this->queue))
-			{
-				$this->queue = new \queue();
-				$this->queue->init('email', $config['email_package_size']);
-			}
-			$use_queue = true;
-		}
-
 		$contact_name = htmlspecialchars_decode($config['board_contact_name']);
 		$board_contact = (($contact_name !== '') ? '"' . mail_encode($contact_name) . '" ' : '') . '<' . $config['board_contact'] . '>';
 
@@ -192,35 +181,22 @@ class html_messenger extends \messenger
 		$headers = $this->build_header($to, $cc, $bcc, $is_html);
 
 		// Send message ...
-		if (!$use_queue)
+		$mail_to = ($to == '') ? 'undisclosed-recipients:;' : $to;
+		$err_msg = '';
+
+		if ($config['smtp_delivery'])
 		{
-			$mail_to = ($to == '') ? 'undisclosed-recipients:;' : $to;
-			$err_msg = '';
-
-			if ($config['smtp_delivery'])
-			{
-				$result = smtpmail($this->addresses, mail_encode($this->subject), wordwrap(utf8_wordwrap($this->msg), 997, "\n", true), $err_msg, $headers);
-			}
-			else
-			{
-				$result = phpbb_mail($mail_to, $this->subject, $this->msg, $headers, $this->eol, $err_msg);
-			}
-
-			if (!$result)
-			{
-				$this->error('EMAIL', $err_msg);
-				return false;
-			}
+			$result = smtpmail($this->addresses, mail_encode($this->subject), wordwrap(utf8_wordwrap($this->msg), 997, "\n", true), $err_msg, $headers);
 		}
 		else
 		{
-			$this->queue->put('email', array(
-				'to'			=> $to,
-				'addresses'		=> $this->addresses,
-				'subject'		=> $this->subject,
-				'msg'			=> $this->msg,
-				'headers'		=> $headers)
-			);
+			$result = phpbb_mail($mail_to, $this->subject, $this->msg, $headers, $this->eol, $err_msg);
+		}
+
+		if (!$result)
+		{
+			$this->error('EMAIL', $err_msg);
+			return false;
 		}
 
 		return true;

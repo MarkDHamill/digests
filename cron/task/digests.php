@@ -708,7 +708,7 @@ class digests extends \phpbb\cron\task\base
 				'L_DIGESTS_YOUR_DIGEST_OPTIONS'		=> ($is_html) ? $this->user->lang('DIGESTS_YOUR_DIGEST_OPTIONS', $row['username']) : str_replace('&apos;', "'", $this->user->lang('DIGESTS_YOUR_DIGEST_OPTIONS', $row['username'])),
 				'S_CONTENT_DIRECTION'				=> $this->user->lang['DIRECTION'],
 				'S_USER_LANG'						=> $user_lang,
-				'T_STYLESHEET_LINK'					=> ($this->config['phpbbservices_digests_enable_custom_stylesheets']) ? "{$this->board_url}styles/" . $this->config['phpbbservices_digests_custom_stylesheet_path'] : "{$this->board_url}styles/" . $row['style_name'] . '/theme/stylesheet.css',
+				'T_STYLESHEET_LINK'					=> ($this->config['phpbbservices_digests_enable_custom_stylesheets']) ? "{$this->board_url}styles/" . $this->config['phpbbservices_digests_custom_stylesheet_path'] : "{$this->board_url}styles/" . $row['style_path'] . '/theme/stylesheet.css',
 				'T_THEME_PATH'						=> "{$this->board_url}styles/" . $row['style_name'] . '/theme',
 			));
 
@@ -1022,11 +1022,11 @@ class digests extends \phpbb\cron\task\base
 						{
 							if ($this->config['phpbbservices_digests_show_email'])
 							{
-								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD', false, array($sent_to_created_for, $row['username'], $row['user_email'], $this->posts_in_digest, sizeof($pm_rowset)));
+								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD', false, array($sent_to_created_for, $row['username'], $row['user_email'], $current_hour_gmt, $this->posts_in_digest, sizeof($pm_rowset)));
 							}
 							else
 							{
-								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_NO_EMAIL', false, array($sent_to_created_for, $row['username'], $this->posts_in_digest, sizeof($pm_rowset)));
+								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_NO_EMAIL', false, array($sent_to_created_for, $row['username'], $current_hour_gmt, $this->posts_in_digest, sizeof($pm_rowset)));
 							}
 						}
 						

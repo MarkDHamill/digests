@@ -125,16 +125,17 @@ class digests extends \phpbb\cron\task\base
 		if (!$this->manual_mode)
 		{
 			
-			// phpBB cron and a system cron assumes an interface where language variables and styles won't be needed, so it must be told where to find them.
-			$this->user->add_lang('common');
-			$this->user->add_lang_ext('phpbbservices/digests', array('info_acp_common', 'common'));
-			$this->template->set_style(array($this->path_prefix . 'ext/phpbbservices/digests/styles', 'styles'));
-			
 			// In cron mode $this->user->style is a null array. We need enough style information to keep get_user_style() from complaining that bbcode.html
 			// cannot be found. Ideally the default style should be used to find templates but since it is looking for bbcode.html, most styles extend
 			// prosilver and bbcode.html is not a template that should ever be customized, it's safe to instruct the templating engine to use prosilver.
 			$this->user->style['style_path'] = 'prosilver';
 			$this->user->style['style_parent_id'] = 0;
+			$this->user->style['bbcode_bitfield'] = 'kNg=';
+			
+			// phpBB cron and a system cron assumes an interface where language variables and styles won't be needed, so it must be told where to find them.
+			$this->user->add_lang('common');
+			$this->user->add_lang_ext('phpbbservices/digests', array('info_acp_common', 'common'));
+			$this->template->set_style(array($this->path_prefix . 'ext/phpbbservices/digests/styles', 'styles'));
 			
 			// How many hours of digests are wanted? We want to do it for the number of hours between now and when digests were last ran successfully.
 			$hours_to_do = floor(($now - $this->config['phpbbservices_digests_cron_task_last_gc']) / (60 * 60));

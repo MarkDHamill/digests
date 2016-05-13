@@ -3,7 +3,7 @@
 	"type": "phpbb-extension",
 	"description": "Sends daily, weekly or monthly digests of posts to subscribers via email.",
 	"homepage": "https://phpbbservices.com/digests_wp",
-	"version": "3.0.2-RC1",
+	"version": "3.0.3-RC2",
 	"license": "GPL-2.0",
 	"authors": [
 		{
@@ -20,7 +20,7 @@
 	"extra": {
 		"display-name": "Digests",
 		"soft-require": {
-			"phpbb/phpbb": ">=3.1.8,<3.2.0@dev"
+			"phpbb/phpbb": ">=3.1.9,<3.2.0@dev"
 		},
 		"version-check": {
 			"host": "https://phpbbservices.com/",

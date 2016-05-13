@@ -232,7 +232,7 @@ class main_module
 				// Create pagination logic
 				$pagination = $phpbb_container->get('pagination');
 
-				$base_url = 'index.php?i=-phpbbservices-digests-acp-main_module&amp;mode=digests_edit_subscribers';
+				$base_url = "index.php?i=-phpbbservices-digests-acp-main_module&amp;mode=digests_edit_subscribers&amp;sortby=$sortby";
 				$base_url = append_sid($base_url);	
 				$pagination->generate_template_pagination($base_url, 'pagination', 'start', $total_users, $config['phpbbservices_digests_users_per_page'], $start);
 								

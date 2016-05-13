@@ -124,6 +124,7 @@ class digests extends \phpbb\cron\task\base
 
 		if (!$this->manual_mode)
 		{
+			
 			// phpBB cron and a system cron assumes an interface where language variables and styles won't be needed, so it must be told where to find them.
 			$this->user->add_lang('common');
 			$this->user->add_lang_ext('phpbbservices/digests', array('info_acp_common', 'common'));
@@ -137,12 +138,47 @@ class digests extends \phpbb\cron\task\base
 			
 			// How many hours of digests are wanted? We want to do it for the number of hours between now and when digests were last ran successfully.
 			$hours_to_do = floor(($now - $this->config['phpbbservices_digests_cron_task_last_gc']) / (60 * 60));
+			
+			// Care must be taken not to miss an hour. For example, if a phpBB cron was run at 11:29 and next at 13:06 then digests must be sent for 
+			// hours 12 and 13, not just 13. The following algorithm should handle these cases by adding 1 to $hours_to_do.
+			$year_last_ran = (int) date('Y', $this->config['phpbbservices_digests_cron_task_last_gc']);
+			$day_last_ran = (int) date('z', $this->config['phpbbservices_digests_cron_task_last_gc']);	// 0 thru 365
+			$hour_last_ran = (int) date('g', $this->config['phpbbservices_digests_cron_task_last_gc']);
+			$minute_last_ran = (int) date('i', $this->config['phpbbservices_digests_cron_task_last_gc']);
+			$second_last_ran = (int) date('s', $this->config['phpbbservices_digests_cron_task_last_gc']);
+			
+			$year_now = (int) date('Y', $now);
+			$day_now = (int) date('z', $now);	// 0 thru 365
+			$hour_now = (int) date('g', $now);
+			$minute_now = (int) date('i', $now);
+			$second_now = (int) date('s', $now);
+			
+			// If the year or day differs from when digests was last run, or if these are the same but the hour differs, we look at the minute last ran 
+			// and compare it  with the minute now. If the minute now is less than the minute last run we have to increment $hours_to_do to capture the missing hour.
+			if ($year_now != $year_last_ran || $day_now != $day_last_ran || 
+				($year_now == $year_last_ran && $day_now == $day_last_ran && $hour_now != $hour_last_ran))
+			{
+				if ($minute_now < $minute_last_ran)
+				{
+					$hours_to_do++; 
+				}
+				else if ($minute_now == $minute_last_ran)
+				{
+					if ($second_now < $second_last_ran)
+					{
+						$hours_to_do++; 
+					}
+				}
+			}
+			
+			// If the decimal part of $hours_to_do 
 			if ($hours_to_do <= 0)
 			{
 				// Error. An hour has not elapsed since digests were last run. Shouldn't happen because should_run() should capture this.
 				$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_RUN_TOO_SOON');
 				return false;
 			}
+			
 		}
 
 		// Display a digest mail start processing message. It is captured in a log.
@@ -280,7 +316,7 @@ class digests extends \phpbb\cron\task\base
 			$monthly_digest_sql = '';
 		}
 
-		$formatted_date = date($this->config['default_dateformat'], $this->gmt_time);
+		$formatted_date = date('Y-m-d H', $this->gmt_time);
 		$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_HOUR_RUN', false, array($formatted_date));
 		
 		// We need to know which auth_option_id corresponds to the forum read privilege (f_read) and forum list (f_list) privilege. Why not use $this->auth->acl_get?

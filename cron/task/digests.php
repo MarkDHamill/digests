@@ -1122,7 +1122,7 @@ class digests extends \phpbb\cron\task\base
 				$pm_row['message_text'] = preg_replace('#\[attachment=.*?\].*?\[/attachment:.*?]#', '', censor_text($pm_row['message_text']));
 	
 				// Now adjust post time to digest recipient's local time
-				$recipient_time = $pm_row['message_time'] - ($this->make_tz_offset($pm_row['user_timezone']) * 60 * 60);
+				$recipient_time = $pm_row['message_time'] + ($this->server_timezone * 60 * 60) - ($this->make_tz_offset($pm_row['user_timezone']) * 60 * 60);
 	
 				// Add to table of contents array
 				$this->toc['pms'][$this->toc_pm_count]['message_id'] = html_entity_decode($pm_row['msg_id']);
@@ -1749,7 +1749,7 @@ class digests extends \phpbb\cron\task\base
 				$post_text = preg_replace('#\[attachment=.*?\].*?\[/attachment:.*?]#', '', $post_row['post_text']);
 		
 				// Now adjust post time to digest recipient's local time
-				$recipient_time = $post_row['post_time'] - ($this->make_tz_offset($post_row['user_timezone']) * 60 * 60);
+				$recipient_time = $post_row['post_time'] + ($this->server_timezone * 60 * 60) - ($this->make_tz_offset($post_row['user_timezone']) * 60 * 60);
 			
 				// Add to table of contents array
 				$this->toc['posts'][$this->toc_post_count]['post_id'] = html_entity_decode($post_row['post_id']);

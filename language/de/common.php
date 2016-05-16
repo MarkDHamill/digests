@@ -28,7 +28,6 @@ $lang = array_merge($lang, array(
 	'DIGESTS_CLOSED_QUOTE'				=> '"',
 	'DIGESTS_COUNT_LIMIT'				=> 'Höchstzahl von Beiträgen innerhalb einer Zusammenfassung',
 	'DIGESTS_COUNT_LIMIT_EXPLAIN'		=> 'Gib einen Wert >0 ein, um die Anzahl der in einer Zusammenfassung angezeigten Beiträge zu begrenzen.',
-	'DIGESTS_CREATED_FOR'				=> 'erstellt für',
 	'DIGESTS_DAILY'						=> 'Tägliche Zusammenfassung',
 	'DIGESTS_DATE'						=> 'Datum',
 	'DIGESTS_DISABLED_MESSAGE'			=> 'Zum Aktivieren der eMail-Zusammenfassung bitte die gewünschte Art und das Layout der Zusammenfassung auswählen.',

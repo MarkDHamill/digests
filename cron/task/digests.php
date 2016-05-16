@@ -708,7 +708,7 @@ class digests extends \phpbb\cron\task\base
 				'S_CONTENT_DIRECTION'				=> $this->user->lang['DIRECTION'],
 				'S_USER_LANG'						=> $user_lang,
 				'T_STYLESHEET_LINK'					=> ($this->config['phpbbservices_digests_enable_custom_stylesheets']) ? "{$this->board_url}styles/" . $this->config['phpbbservices_digests_custom_stylesheet_path'] : "{$this->board_url}styles/" . $row['style_path'] . '/theme/stylesheet.css',
-				'T_THEME_PATH'						=> "{$this->board_url}styles/" . $row['style_name'] . '/theme',
+				'T_THEME_PATH'						=> "{$this->board_url}styles/" . $row['style_path'] . '/theme',
 			));
 
 			// Get any private messages for this user

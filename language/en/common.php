@@ -28,7 +28,6 @@ $lang = array_merge($lang, array(
 	'DIGESTS_CLOSED_QUOTE'				=> '"',
 	'DIGESTS_COUNT_LIMIT'				=> 'Maximum number of posts in the digest',
 	'DIGESTS_COUNT_LIMIT_EXPLAIN'		=> 'Enter a number greater than zero if you want to limit the number of posts in the digest.',
-	'DIGESTS_CREATED_FOR'				=> 'created for',
 	'DIGESTS_DAILY'						=> 'Daily',
 	'DIGESTS_DATE'						=> 'Date',
 	'DIGESTS_DISABLED_MESSAGE'			=> 'To enable fields, select Basics and select a digest type',

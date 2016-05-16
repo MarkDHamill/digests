@@ -390,9 +390,7 @@ class digests extends \phpbb\cron\task\base
 		
 		$sql = $this->db->sql_build_query('SELECT', $sql_array);
 		
-		$use_mail_queue = ($this->config['email_package_size'] > 0) ? true : false;
-
-		$html_messenger = new \phpbbservices\digests\includes\html_messenger($use_mail_queue);
+		$html_messenger = new \phpbbservices\digests\includes\html_messenger();
 
 		$result = $this->db->sql_query($sql);
 		$rowset = $this->db->sql_fetchrowset($result);	// Gets users and their metadata that are receiving digests for this hour
@@ -1018,16 +1016,15 @@ class digests extends \phpbb\cron\task\base
 					else
 					{
 						
-						$sent_to_created_for = ($use_mail_queue) ? $this->user->lang['DIGESTS_CREATED_FOR'] : $this->user->lang['DIGESTS_SENT_TO'];
 						if ($this->config['phpbbservices_digests_enable_log'])
 						{
 							if ($this->config['phpbbservices_digests_show_email'])
 							{
-								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD', false, array($sent_to_created_for, $row['username'], $row['user_email'], $current_hour_gmt, $this->posts_in_digest, sizeof($pm_rowset)));
+								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD', false, array($this->user->lang['DIGESTS_SENT_TO'], $row['username'], $row['user_email'], $this->posts_in_digest, sizeof($pm_rowset)));
 							}
 							else
 							{
-								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_NO_EMAIL', false, array($sent_to_created_for, $row['username'], $current_hour_gmt, $this->posts_in_digest, sizeof($pm_rowset)));
+								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_NO_EMAIL', false, array($this->user->lang['DIGESTS_SENT_TO'], $row['username'], $this->posts_in_digest, sizeof($pm_rowset)));
 							}
 						}
 						
@@ -1192,10 +1189,11 @@ class digests extends \phpbb\cron\task\base
 						}
 						else
 						{
+							$my_styles = $this->template->get_user_style();
 							$pm_text .= ($row3['attach_comment'] == '') ? '' : '<em>' . censor_text($row3['attach_comment']) . '</em><br />';
 							$pm_text .= 
 								sprintf("<img src=\"%s\" title=\"\" alt=\"\" /> ", 
-									$this->board_url . 'styles/' . $user_row['style_name'] . '/theme/images/icon_topic_attach.gif') .
+									$this->board_url . 'styles/' . $my_styles[sizeof($my_styles) - 1] . '/theme/images/icon_topic_attach.gif') .
 								sprintf("<b><a href=\"%s\">%s</a></b> (%s KiB)<br />",
 									$this->board_url . "download/file.$this->phpEx?id=" . $row3['attach_id'], 
 									$row3['real_filename'], 
@@ -1817,10 +1815,11 @@ class digests extends \phpbb\cron\task\base
 						}
 						else
 						{
+							$my_styles = $this->template->get_user_style();
 							$post_text .= ($row3['attach_comment'] == '') ? '' : '<em>' . censor_text($row3['attach_comment']) . '</em><br />';
 							$post_text .= 
 								sprintf("<img src=\"%s\" title=\"\" alt=\"\" /> ", 
-									$this->board_url . 'styles/' . $user_row['style_name'] . '/theme/images/icon_topic_attach.gif') .
+									$this->board_url . 'styles/' . $my_styles[sizeof($my_styles) - 1] . '/theme/images/icon_topic_attach.gif') .
 								sprintf("<b><a href=\"%s\">%s</a></b> (%s KiB)<br />",
 									$this->board_url . "download/file.$this->phpEx?id=" . $row3['attach_id'], 
 									$row3['real_filename'], 

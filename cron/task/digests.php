@@ -264,7 +264,7 @@ class digests extends \phpbb\cron\task\base
 			$this->time = $now + ($hour * (60 * 60));
 		}
 
-		$this->gmt_time = $this->time - ($this->server_timezone * 60 * 60);	// Convert server time (or requested run date) into GMT time
+		$this->gmt_time = $this->time - (int) ($this->server_timezone * 60 * 60);	// Convert server time (or requested run date) into GMT time
 		
 		// Get the current hour in GMT, so applicable digests can be sent out for this hour
 		$current_hour_gmt = date('G', $this->gmt_time); // 0 thru 23
@@ -572,7 +572,7 @@ class digests extends \phpbb\cron\task\base
 			$html_messenger->subject($email_subject);
 				
 			// Transform user_digest_send_hour_gmt to the subscriber's local time
-			$local_send_hour = $row['user_digest_send_hour_gmt'] + $this->make_tz_offset($row['user_timezone'], $row['username']);
+			$local_send_hour = $row['user_digest_send_hour_gmt'] + (int) $this->make_tz_offset($row['user_timezone'], $row['username']);
 			if ($local_send_hour >= 24)
 			{
 				$local_send_hour = $local_send_hour - 24;
@@ -672,7 +672,7 @@ class digests extends \phpbb\cron\task\base
 				$max_posts_msg = $row['user_digest_max_posts'];
 			}
 		
-			$recipient_time = $this->gmt_time + ($this->make_tz_offset($row['user_timezone']) * 60 * 60);
+			$recipient_time = $this->gmt_time + (int) ($this->make_tz_offset($row['user_timezone']) * 60 * 60);
 
 			// Print the non-post and non-private message information in the digest. The actual posts and private messages require the full templating system, 
 			// because the messenger class is too dumb to do more than basic templating. Note: most language variables are handled automatically by the templating
@@ -1121,8 +1121,9 @@ class digests extends \phpbb\cron\task\base
 				// in these cases is probably a lost cause due to the complexity to be addressed due to various styling issues.
 				$pm_row['message_text'] = preg_replace('#\[attachment=.*?\].*?\[/attachment:.*?]#', '', censor_text($pm_row['message_text']));
 	
-				// Now adjust post time to digest recipient's local time
-				$recipient_time = $pm_row['message_time'] + ($this->server_timezone * 60 * 60) - ($this->make_tz_offset($pm_row['user_timezone']) * 60 * 60);
+				// Now adjust message time to digest recipient's local time
+				$pm_time_offset = ((int) $this->make_tz_offset($user_row['user_timezone']) - (int) $this->server_timezone) * 60 * 60;
+				$recipient_time = $pm_row['message_time'] + $pm_time_offset;
 	
 				// Add to table of contents array
 				$this->toc['pms'][$this->toc_pm_count]['message_id'] = html_entity_decode($pm_row['msg_id']);
@@ -1672,8 +1673,8 @@ class digests extends \phpbb\cron\task\base
 					break;
 				}
 				
-				// Skip post if user wants new posts only (since last visit date) and the post is before the user's last visit date
-				if ($user_row['user_digest_new_posts_only'] && ($post_row['post_time'] < $user_row['user_lastvisit']))
+				// Skip posts if new posts only logic applies
+				if (($user_row['user_digest_new_posts_only']) && ($post_row['post_time'] < min($this->date_limit, $user_row['user_lastvisit'])))
 				{
 					continue;
 				}
@@ -1726,12 +1727,6 @@ class digests extends \phpbb\cron\task\base
 					}
 				}
 			
-				// Skip posts if new posts only logic applies
-				if (($user_row['user_digest_new_posts_only']) && ($post_row['post_time'] < max($this->date_limit, $user_row['user_lastvisit'])))
-				{
-					continue;
-				}
-	
 				// Skip posts if first post logic applies and not a first post
 				if (($user_row['user_digest_filter_type'] == constants::DIGESTS_FIRST) && ($post_row['topic_first_post_id'] != $post_row['post_id']))
 				{
@@ -1749,17 +1744,18 @@ class digests extends \phpbb\cron\task\base
 				$post_text = preg_replace('#\[attachment=.*?\].*?\[/attachment:.*?]#', '', $post_row['post_text']);
 		
 				// Now adjust post time to digest recipient's local time
-				$recipient_time = $post_row['post_time'] + ($this->server_timezone * 60 * 60) - ($this->make_tz_offset($post_row['user_timezone']) * 60 * 60);
+				$post_time_offset = ((int) $this->make_tz_offset($user_row['user_timezone']) - (int) $this->server_timezone) * 60 * 60;
+				$recipient_time = $post_row['post_time'] + $post_time_offset;
 			
 				// Add to table of contents array
 				$this->toc['posts'][$this->toc_post_count]['post_id'] = html_entity_decode($post_row['post_id']);
 				$this->toc['posts'][$this->toc_post_count]['forum'] = html_entity_decode($post_row['forum_name']);
 				$this->toc['posts'][$this->toc_post_count]['topic'] = html_entity_decode($post_row['topic_title']);
 				$this->toc['posts'][$this->toc_post_count]['author'] = html_entity_decode($post_row['username']);
-				$this->toc['posts'][$this->toc_post_count]['datetime'] = date(str_replace('|','',$user_row['user_dateformat']), $recipient_time);
+				$this->toc['posts'][$this->toc_post_count]['datetime'] = date(str_replace('|', '', $user_row['user_dateformat']), $recipient_time);
 				$this->toc_post_count++;
 
-				// Need BBCode flags to translate BBCode
+				// Need BBCode flags to translate BBCode into HTML
 				$flags = (($post_row['enable_bbcode']) ? OPTION_FLAG_BBCODE : 0) +
 					(($post_row['enable_smilies']) ? OPTION_FLAG_SMILIES : 0) + 
 					(($post_row['enable_magic_url']) ? OPTION_FLAG_LINKS : 0);

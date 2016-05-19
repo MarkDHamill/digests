@@ -390,8 +390,6 @@ class digests extends \phpbb\cron\task\base
 		
 		$sql = $this->db->sql_build_query('SELECT', $sql_array);
 		
-		$html_messenger = new \phpbbservices\digests\includes\html_messenger();
-
 		$result = $this->db->sql_query($sql);
 		$rowset = $this->db->sql_fetchrowset($result);	// Gets users and their metadata that are receiving digests for this hour
 
@@ -458,6 +456,8 @@ class digests extends \phpbb\cron\task\base
 			$this->toc_post_count = 0; 	// # of posts in the table of contents
 			$this->toc_pm_count = 0; 	// # of private messages in the table of contents
 		
+			$html_messenger = new \phpbbservices\digests\includes\html_messenger();
+
 			// Set the text showing the digest type
 			switch ($row['user_digest_type'])
 			{

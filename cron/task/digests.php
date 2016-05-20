@@ -1020,11 +1020,11 @@ class digests extends \phpbb\cron\task\base
 						{
 							if ($this->config['phpbbservices_digests_show_email'])
 							{
-								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD', false, array($this->user->lang['DIGESTS_SENT_TO'], $row['username'], $row['user_email'], $this->posts_in_digest, sizeof($pm_rowset)));
+								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD', false, array($this->user->lang['DIGESTS_SENT_TO'], $row['username'], $row['user_email'], $current_hour_gmt, $this->posts_in_digest, sizeof($pm_rowset)));
 							}
 							else
 							{
-								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_NO_EMAIL', false, array($this->user->lang['DIGESTS_SENT_TO'], $row['username'], $this->posts_in_digest, sizeof($pm_rowset)));
+								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_NO_EMAIL', false, array($this->user->lang['DIGESTS_SENT_TO'], $row['username'], $current_hour_gmt, $this->posts_in_digest, sizeof($pm_rowset)));
 							}
 						}
 						

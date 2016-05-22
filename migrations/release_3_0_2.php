@@ -9,6 +9,11 @@
 
 namespace phpbbservices\digests\migrations;
 
+if (!defined('IN_PHPBB'))
+{
+	exit;
+}
+
 use phpbb\db\tools;
 use phpbb\db\migration\tool\module;
 

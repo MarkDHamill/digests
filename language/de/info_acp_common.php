@@ -24,7 +24,7 @@ $tz_board = new \DateTimeZone($config['board_timezone']);
 $datetime_tz_board = new \DateTime('now', $tz_board);
 $timeOffset = $tz_board->getOffset($datetime_tz_board) / 3600;
 
-$server_settings_url = append_sid('index.php?i=acp_board&mode=server');
+$server_settings_url = append_sid('index.php?i=acp_board&amp;mode=server');
 
 $lang = array_merge($lang, array(
 	'ACP_CAT_DIGESTS'										=> 'eMail-Zusammenfassungen',

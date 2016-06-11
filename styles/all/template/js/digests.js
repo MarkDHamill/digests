@@ -1,17 +1,14 @@
 function check_word_size_min (field) 
 {
 	size = field.value;
-	if (size == '')
-	{
+	if (size == '')	{
 		return;
 	}
-	if ((size < 0) || (isNaN(size))) 
-	{
+	if ((size < 0) || (isNaN(size))) {
 		alert("{LA_DIGESTS_SIZE_ERROR_MIN}");
 		field.focus();
 	}
-	else
-	{
+	else {
 		field.value = parseInt(size);
 	}
 }
@@ -20,12 +17,10 @@ function check_word_size_min (field)
 function check_uncheck(checkbox_id, radio_button)
 {
 	var checkbox = document.getElementById(checkbox_id);
-	if (radio_button.checked)
-	{
+	if (radio_button.checked) {
 		checkbox.disabled = (radio_button.id == 'pms1') ? false : true;
 	}
-	else
-	{
+	else {
 		checkbox.disabled = (radio_button.id == 'pms1') ? true : false;
 	}
 }
@@ -40,10 +35,8 @@ function disable_forums(disabled)
 	for(i=0;i<x.length;i++) {
 		thisobject = x[i];
 		element_name = thisobject.id;
-		if(element_name != null) 
-		{
-			if(element_name.substr(0,4) == "elt_")
-			{
+		if(element_name != null) {
+			if(element_name.substr(0,4) == "elt_") {
 				thisobject.disabled = disabled;
 			}
 		}
@@ -66,10 +59,8 @@ function unCheckSubscribedForums (checkbox) {
 	for(i=0;i<x.length;i++) {
 		thisobject = x[i];
 		element_name = thisobject.id;
-		if(element_name != null) 
-		{
-			if(element_name.substr(0,4) == "elt_")
-			{
+		if(element_name != null) {
+			if(element_name.substr(0,4) == "elt_") {
 				thisobject.checked = is_checked;
 			}
 		}
@@ -86,23 +77,19 @@ function unCheckAllForums () {
 	// Assume a HTML 5 compatible browser
 	var x = document.getElementById('div_0');
 	var y = x.getElementsByTagName("input");
-	for(i=0;((i<y.length) && (any_unchecked == false));i++) 
-	{
+	for(i=0;((i<y.length) && (any_unchecked == false));i++) {
 		thisobject = y[i];
 		element_name = thisobject.name;
 		if(element_name != null) {
-			if(element_name.substr(0,4) == "elt_")
-			{
-				if (thisobject.checked == false)
-				{
+			if(element_name.substr(0,4) == "elt_") {
+				if (thisobject.checked == false) {
 					digests_id.all_forums.checked = false;
 					any_unchecked = true;
 				}
 			}
 		}
 	}
-	if (any_unchecked == false)
-	{
+	if (any_unchecked == false)	{
 		digests_id.all_forums.checked = true;
 	}
 

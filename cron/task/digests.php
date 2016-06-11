@@ -219,15 +219,13 @@ class digests extends \phpbb\cron\task\base
 			{
 				return false;
 			}
+			else if (!$this->manual_mode)
+			{
+				// Note that the hour was processed successfully.
+				$this->config->set('phpbbservices_digests_cron_task_last_gc', $now + ($i * 60 * 60));
+			}
 		}
 
-		// Do not forget to update the configuration variable for last run time, but only if not in manual mode
-		if (!$this->manual_mode)
-		{
-			// We only want to report that the mailer run was successful if it ran successfully and actually sent some emails out.
-			$this->config->set('phpbbservices_digests_cron_task_last_gc', $now);
-		}
-		
 		// Display a digest mail end processing message. It is captured in a log.
 		if ($this->config['phpbbservices_digests_enable_log'])
 		{

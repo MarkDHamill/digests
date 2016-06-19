@@ -746,6 +746,16 @@ class main_module
 				);
 			break;
 
+			case 'digests_reset_cron_run_time':
+				$display_vars = array(
+					'title'	=> 'ACP_DIGESTS_RESET_CRON_RUN_TIME',
+					'vars'	=> array(
+						'legend1'								=> '',
+						'phpbbservices_digests_enable_subscribe_unsubscribe'	=> array('lang' => 'DIGESTS_RESET_CRON_RUN_TIME',	'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
+					)
+				);
+			break;
+
 			case 'digests_test':
 				$display_vars = array(
 					'title'	=> 'ACP_DIGESTS_TEST',
@@ -1361,6 +1371,11 @@ class main_module
 				$message = $user->lang('DIGESTS_NO_MASS_ACTION');
 			}
 
+		}
+
+		if ($submit && $mode == 'digests_reset_cron_run_time')
+		{
+			$config->set('phpbbservices_digests_cron_task_last_gc', 0);
 		}
 
 		if ($submit && $mode == 'digests_test')

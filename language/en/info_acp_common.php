@@ -27,6 +27,13 @@ $timeOffset = $tz_board->getOffset($datetime_tz_board) / 3600;
 $server_settings_url = append_sid('index.php?i=acp_board&amp;mode=server');
 
 $lang = array_merge($lang, array(
+	'ACP_DIGESTS_NEVER'										=> 'never',
+	)
+);
+
+$last_run = ($config['phpbbservices_digests_cron_task_last_gc'] == 0) ? $lang['ACP_DIGESTS_NEVER'] : date($config['default_dateformat'], $config['phpbbservices_digests_cron_task_last_gc']) . ' board time';
+
+$lang = array_merge($lang, array(
 	'ACP_CAT_DIGESTS'										=> 'Digests',
 
 	'ACP_DIGESTS_SETTINGS'									=> 'Digest settings',
@@ -40,6 +47,8 @@ $lang = array_merge($lang, array(
 	'ACP_DIGESTS_BALANCE_LOAD_EXPLAIN'						=> 'If too many digests going out at certain hours are causing performance issues, this will rebalance digest subscriptions so that roughly the same number of digests are sent for each hour. The table below shows the current number of digest subscribers for each hour, with the hour based on the digest hour set in Digest general settings. This function updates digest send hours minimally. Changes occur only on those hours where the number of subscribers exceeds the average load, and only for subscribers that exceed the hourly average for that hour. <em>Caution</em>: subscribers may be upset that their subscription times were changed.',
 	'ACP_DIGESTS_MASS_SUBSCRIBE_UNSUBSCRIBE'				=> 'Mass subscribe/unsubscribe',
 	'ACP_DIGESTS_MASS_SUBSCRIBE_UNSUBSCRIBE_EXPLAIN'		=> 'This feature allows administrators to conveniently subscribe or unsubscribe all members of your forum at once. Digest default settings are used to subscribe members. If a member already has a digest subscription, a mass subscription will retain their digest settings. You cannot specify the forums that will be subscribed. Users will be subscribed to all forums to which they have read access. <strong>Caution</strong>: subscribers may be upset if they are subscribed or unsubscribed without their permission.',
+	'ACP_DIGESTS_RESET_CRON_RUN_TIME'						=> 'Reset mailer',
+	'ACP_DIGESTS_RESET_CRON_RUN_TIME_EXPLAIN'				=> '',
 	'ACP_DIGESTS_TEST'										=> 'Manually run the mailer',
 	'ACP_DIGESTS_TEST_EXPLAIN'								=> 'This feature allows you to manually run digests for initial testing or troubleshooting. You can also use it to recreate digests for a particular date and hour. The board timezone (currently ' . $timeOffset . ' GMT) is used when calculating the date and hour. Please note that when digests are sent depends on board traffic, so digests may arrive late for some users. This can be changed if you set up <a href="https://wiki.phpbb.com/Modular_cron#Use_system_cron">a system cron</a> and <a href="'. $server_settings_url . '">enable</a> phpBB&apos;s <strong>system cron</strong> feature. For more information, see the FAQ for the Digests extension on the forums at phpbb.com.',
 
@@ -100,6 +109,8 @@ $lang = array_merge($lang, array(
 	'DIGESTS_REGISTRATION_FIELD_EXPLAIN'					=> 'If enabled, upon registration users have the option to get digests using the board&apos;s defaults. This option does not appear if automatic subscriptions are enabled.',
 	'DIGESTS_REPLY_TO_EMAIL_ADDRESS'						=> 'Reply to e-mail Address',
 	'DIGESTS_REPLY_TO_EMAIL_ADDRESS_EXPLAIN'				=> 'When users receive a digest, this e-mail address will appear in the REPLY TO field. If left blank it will default to your board&apos;s e-mail contact address. Use caution if using an e-mail address with a domain other than the one the digest is hosted on, as your mail server or the user&apos;s mail server may interpret the e-mail as spam.',
+	'DIGESTS_RESET_CRON_RUN_TIME'							=> 'Reset digests last run time',
+	'DIGESTS_RESET_CRON_RUN_TIME_EXPLAIN'					=> "If too many days have elapsed since digests were mailed, you can reset the digest mailing time. When digests next are mailed they will be mailed to subscribers for the current hour only. The mailer was last run: $last_run. Note: manually running the mailer does not affect this setting.", 
 	'DIGESTS_RUN_TEST'										=> 'Run the mailer',
 	'DIGESTS_RUN_TEST_CLEAR_SPOOL'							=> 'Clear the digest extension&apos;s cache folder',
 	'DIGESTS_RUN_TEST_CLEAR_SPOOL_ERROR'					=> 'Could not clear all the files in the digest extension&apos;s cache folder. This may be due to a permissions issue. The file permissions on the folder should be set to publicly writeable (777 on Unix-based systems).',

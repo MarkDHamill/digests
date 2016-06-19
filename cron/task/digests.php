@@ -172,7 +172,6 @@ class digests extends \phpbb\cron\task\base
 				}
 			}
 			
-			// If the decimal part of $hours_to_do 
 			if ($hours_to_do <= 0)
 			{
 				// Error. An hour has not elapsed since digests were last run. Shouldn't happen because should_run() should capture this.

@@ -8,6 +8,9 @@ services:
             - @request
         tags:
             - { name: event.listener }
+    phpbbservices.digests.common:
+        class: phpbbservices\digests\core\common
+        arguments:
     phpbbservices.digests.cron.task.cron_task:
         class: phpbbservices\digests\cron\task\digests
         arguments:
@@ -21,6 +24,7 @@ services:
             - @auth
             - %core.table_prefix%
             - @log
+            - '@phpbbservices.digests.common'
         calls:
             - [set_name, [cron.task.cron_task]]
         tags:

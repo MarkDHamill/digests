@@ -26,6 +26,7 @@ class digests extends \phpbb\cron\task\base
 	protected $auth;
 	protected $table_prefix;
 	protected $phpbb_log;
+	protected $helper;
 	
 	// Most of these private variables are needed because a create_content function does much of the assembly work and it needs a lot of common information
 	
@@ -58,7 +59,7 @@ class digests extends \phpbb\cron\task\base
 	*
 	* @param \phpbb\config\config $config The config
 	*/
-	public function __construct(\phpbb\config\config $config, \phpbb\request\request $request, \phpbb\user $user, \phpbb\db\driver\factory $db, $php_ext, $phpbb_root_path, \phpbb\template\template $template, \phpbb\auth\auth $auth, $table_prefix, \phpbb\log\log $phpbb_log)
+	public function __construct(\phpbb\config\config $config, \phpbb\request\request $request, \phpbb\user $user, \phpbb\db\driver\factory $db, $php_ext, $phpbb_root_path, \phpbb\template\template $template, \phpbb\auth\auth $auth, $table_prefix, \phpbb\log\log $phpbb_log, \phpbbservices\digests\core\common $helper)
 	{
 		$this->config = $config;
 		$this->request = $request;
@@ -70,6 +71,7 @@ class digests extends \phpbb\cron\task\base
 		$this->auth = $auth;
 		$this->table_prefix = $table_prefix;
 		$this->phpbb_log = $phpbb_log;
+		$this->helper = $helper;
 	}
 	
 	/**
@@ -569,7 +571,7 @@ class digests extends \phpbb\cron\task\base
 			$html_messenger->subject($email_subject);
 				
 			// Transform user_digest_send_hour_gmt to the subscriber's local time
-			$local_send_hour = $row['user_digest_send_hour_gmt'] + (int) $this->make_tz_offset($row['user_timezone'], $row['username']);
+			$local_send_hour = $row['user_digest_send_hour_gmt'] + (int) $this->helper->make_tz_offset($row['user_timezone'], $row['username']);
 			if ($local_send_hour >= 24)
 			{
 				$local_send_hour = $local_send_hour - 24;
@@ -669,7 +671,7 @@ class digests extends \phpbb\cron\task\base
 				$max_posts_msg = $row['user_digest_max_posts'];
 			}
 		
-			$recipient_time = $this->gmt_time + (int) ($this->make_tz_offset($row['user_timezone']) * 60 * 60);
+			$recipient_time = $this->gmt_time + (int) ($this->helper->make_tz_offset($row['user_timezone']) * 60 * 60);
 
 			// Print the non-post and non-private message information in the digest. The actual posts and private messages require the full templating system, 
 			// because the messenger class is too dumb to do more than basic templating. Note: most language variables are handled automatically by the templating
@@ -690,7 +692,7 @@ class digests extends \phpbb\cron\task\base
 				'DIGESTS_POWERED_BY'				=> $powered_by,
 				'DIGESTS_REMOVE_YOURS'				=> ($row['user_digest_show_mine'] == 0) ? $this->user->lang['YES'] : $this->user->lang['NO'],
 				'DIGESTS_SALUTATION'				=> $row['username'],
-				'DIGESTS_SEND_HOUR'					=> $this->make_hour_string($local_send_hour, $row['user_dateformat']),
+				'DIGESTS_SEND_HOUR'					=> $this->helper->make_hour_string($local_send_hour, $row['user_dateformat']),
 				'DIGESTS_SEND_IF_NO_NEW_MESSAGES'	=> ($row['user_digest_send_on_no_posts'] == 0) ? $this->user->lang['NO'] : $this->user->lang['YES'],
 				'DIGESTS_SHOW_ATTACHMENTS'			=> ($row['user_digest_attachments'] == 0) ? $this->user->lang['NO'] : $this->user->lang['YES'],
 				'DIGESTS_SHOW_NEW_POSTS_ONLY'		=> ($row['user_digest_new_posts_only'] == 1) ? $this->user->lang['YES'] : $this->user->lang['NO'],
@@ -1119,7 +1121,7 @@ class digests extends \phpbb\cron\task\base
 				$pm_row['message_text'] = preg_replace('#\[attachment=.*?\].*?\[/attachment:.*?]#', '', censor_text($pm_row['message_text']));
 	
 				// Now adjust message time to digest recipient's local time
-				$pm_time_offset = ((int) $this->make_tz_offset($user_row['user_timezone']) - (int) $this->server_timezone) * 60 * 60;
+				$pm_time_offset = ((int) $this->helper->make_tz_offset($user_row['user_timezone']) - (int) $this->server_timezone) * 60 * 60;
 				$recipient_time = $pm_row['message_time'] + $pm_time_offset;
 	
 				// Add to table of contents array
@@ -1741,7 +1743,7 @@ class digests extends \phpbb\cron\task\base
 				$post_text = preg_replace('#\[attachment=.*?\].*?\[/attachment:.*?]#', '', $post_row['post_text']);
 		
 				// Now adjust post time to digest recipient's local time
-				$post_time_offset = ((int) $this->make_tz_offset($user_row['user_timezone']) - (int) $this->server_timezone) * 60 * 60;
+				$post_time_offset = ((int) $this->helper->make_tz_offset($user_row['user_timezone']) - (int) $this->server_timezone) * 60 * 60;
 				$recipient_time = $post_row['post_time'] + $post_time_offset;
 			
 				// Add to table of contents array
@@ -2003,65 +2005,6 @@ class digests extends \phpbb\cron\task\base
 		
 	}
 	
-	private function make_tz_offset ($tz_text, $username=NULL)
-	{
-		// This function translates a text timezone (like America/New_York) to an hour offset from GMT, doing magic like figuring out DST
-		
-		try
-		{
-			$tz = new \DateTimeZone($tz_text);
-		}
-		catch (\Exception $e)
-		{
-			// Handles the issue of a timezone not being correct, see http://php.net/manual/en/timezones.php
-			if ($this->config['phpbbservices_digests_enable_log'])
-			{
-				$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_TIMEZONE_ERROR', false, array($tz_text, $username, $this->config['board_timezone']));
-			}
-			$tz = new \DateTimeZone($this->config['board_timezone']);
-		}
-		
-		$datetime_tz = new \DateTime('now', $tz);
-		
-		$timeOffset = $tz->getOffset($datetime_tz) / 3600;
-		return $timeOffset;
-	}
-
-	private function make_hour_string($hour, $user_dateformat)
-	{
-		
-		// This function returns a string representing an hour (0-23) for display. It attempts to be smart by looking at 
-		// the user's date format and determining whether they support AM/PM or not. Some countries (like France) display
-		// 24 hour time.
-		
-		static $display_hour_array_am_pm = array(12,1,2,3,4,5,6,7,8,9,10,11,12,1,2,3,4,5,6,7,8,9,10,11);
-		
-		// Is AM/PM expected?
-		$use_lowercase_am_pm = strstr($user_dateformat,'a');
-		$use_uppercase_am_pm = strstr($user_dateformat,'A');
-		if ($use_lowercase_am_pm)
-		{
-			$am = ' am';
-			$pm = ' pm';
-		}
-		else if ($use_uppercase_am_pm)
-		{
-			$am = ' AM';
-			$pm = ' PM';
-		}
-		else // 24 hour time wanted
-		{
-			$am = '';
-			$pm = '';
-		}
-		
-		$suffix = ($hour < 12) ? $am : $pm;
-		$display_hour = ($use_lowercase_am_pm || $use_uppercase_am_pm) ? $display_hour_array_am_pm[$hour] : $hour;
-		
-		return $display_hour . $suffix;
-		
-	}
-
 	private function truncate_words($text, $max_words, $just_count_words = false)
 	{
 	

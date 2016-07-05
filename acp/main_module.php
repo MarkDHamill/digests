@@ -1436,8 +1436,13 @@ class main_module
 			if ($good_date && $config['phpbbservices_digests_test'])
 			{
 				$save_template = serialize($template);
-				$mailer = new \phpbbservices\digests\cron\task\digests($config, $request, $user, $db, $phpEx, $phpbb_root_path, $template, $auth, $table_prefix, $phpbb_log);	
+				
+				// Get the common include files, to pass the reference to mailer
+				$helper = $phpbb_container->get('phpbbservices.digests.common');
+
+				$mailer = new \phpbbservices\digests\cron\task\digests($config, $request, $user, $db, $phpEx, $phpbb_root_path, $template, $auth, $table_prefix, $phpbb_log, $helper);	
 				$success = $mailer->run();
+				
 				$template = unserialize($save_template);	// This ensures the sidebar menu on the extensions tab won't disappear
 			}
 

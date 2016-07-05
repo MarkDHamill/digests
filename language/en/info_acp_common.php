@@ -209,6 +209,7 @@ $lang = array_merge($lang, array(
 	'LOG_CONFIG_DIGESTS_NOTIFICATION_ERROR'					=> '<strong>Unable to send an administrator generated digests email notification to %s</strong>',
 	'LOG_CONFIG_DIGESTS_NOTIFICATION_SENT'					=> '<strong>An email was sent to %s (%s) indicating that their digest settings were changed</strong>',	
 	'LOG_CONFIG_DIGESTS_REGULAR_CRON_RUN'					=> '<strong>Regular (phpBB) cron run of the mailer invoked</strong>',
+	'LOG_CONFIG_DIGESTS_RESET_CRON_RUN_TIME'				=> '<strong>Digests mailing time was reset</strong>',
 	'LOG_CONFIG_DIGESTS_RUN_TOO_SOON'						=> '<strong>Less than an hour has elapsed since digests were last run. Run aborted.</strong>',
 	'LOG_CONFIG_DIGESTS_SIMULATION_DATE_TIME'				=> '<strong>Administrator chose to create digests for %s at %d:00 board time.</strong>',
 	'LOG_CONFIG_DIGESTS_SORT_BY_ERROR'						=> "<strong>Digests mailer was called with an invalid user_digest_sortby = %s for %s</strong>",

@@ -27,6 +27,13 @@ $timeOffset = $tz_board->getOffset($datetime_tz_board) / 3600;
 $server_settings_url = append_sid('index.php?i=acp_board&amp;mode=server');
 
 $lang = array_merge($lang, array(
+	'ACP_DIGESTS_NEVER'										=> 'never',
+	)
+);
+
+$last_run = ($config['phpbbservices_digests_cron_task_last_gc'] == 0) ? $lang['ACP_DIGESTS_NEVER'] : date($config['default_dateformat'], $config['phpbbservices_digests_cron_task_last_gc']) . ' board time';
+
+$lang = array_merge($lang, array(
 	'ACP_CAT_DIGESTS'										=> 'eMail-Zusammenfassungen',
 
 	'ACP_DIGESTS_SETTINGS'									=> 'Konfiguration',
@@ -40,6 +47,8 @@ $lang = array_merge($lang, array(
 	'ACP_DIGESTS_BALANCE_LOAD_EXPLAIN'						=> 'Wenn in manchen Stunden zu viele eMail-Zusammenfassungen versendet werden, kann das zu Performance-Beeinträchtigungen führen. Hier kann deshalb eine ausgewogene Verteilung der Serverlast hergestellt werden. Die Tabelle stellt die Abonnementzahlen für jede einzelne Stunde dar. Die Stundenangabe bezieht sich dabei auf die in den individuellen Grundeinstellungen ausgewählte Sendeuhrzeit. Die Ausführung dieser Funktion beeinflusst die individuell eingestellten Zeiten nicht mehr, als für eine ausgelichene Verteilung wirklich notwendig ist. Es werden nur die Stunden entzerrt, in denen die Abonnentenzahl die Durchschnittslast übersteigt. <em>Achtung</em>: Trotzdem sind damit möglicherweise nicht alle Abonnenten einverstanden.',
 	'ACP_DIGESTS_MASS_SUBSCRIBE_UNSUBSCRIBE'				=> 'Massen-Abonnement',
 	'ACP_DIGESTS_MASS_SUBSCRIBE_UNSUBSCRIBE_EXPLAIN'		=> 'Diese Option erlaubt es Administratoren, die Zustellung von eMail-Zusammenstellungen bequem für alle Forumsteilnehmer auf einmal zu aktivieren oder zu deaktivieren. Bei der Aktivierung werden die eingestellten Standardvorgaben verwendet. Wenn ein Nutzer bereits die Zusammenfassung abonniert hat, bleiben seine persönlichen Einstellungen erhalten. Für neue Nutzer werden dabei alle Themenbereiche, für die eine Leseberechtigung besteht, aktiviert. Eine Auswahl ist nicht möglich. <strong>Achtung:</strong> Diese Funktion kann leicht zur Verärgerung einzelner Nutzer führen und ist mit Vorsicht zu verwenden.',
+	'ACP_DIGESTS_RESET_CRON_RUN_TIME'						=> 'Mailer zurücksetzen',
+	'ACP_DIGESTS_RESET_CRON_RUN_TIME_EXPLAIN'				=> '',
 	'ACP_DIGESTS_TEST'										=> 'Manueller Test-Versand',
 	'ACP_DIGESTS_TEST_EXPLAIN'								=> 'Diese Funktion ermöglicht den manuellen eMail-Versand zur Überprüfung der Grundeinstellungen oder zur Fehlersuche. Man kann mit dieser Funktion auch die abonnierten Zusammenfassungen für eine bestimmten Zeitpunkt (nochmal) versenden. Die Zeitzone des Boards (GMT [+] ' . $timeOffset . ') wird dabei für die Berechnung des Datums und der Stunde verwendet. Bitte beachte, dass der Versand der Zusammenfassungen erst dadurch Nutzer-Aktivitäten im Board angestoßen werden können. Das bedeutet, dass die Zusammenfassungen etwas später als geplant gesendet werden. Für stundengenauen eMail-Versand muss sonst ein <a href="https://wiki.phpbb.com/Modular_cron#Use_system_cron">System-Cronjob</a> eingerichtet werden muss und in der <a href="'. $server_settings_url . '">Serverkonfiguration des Boards</a> unter <strong>\'Wiederkehrende Aufgaben über Cron-Job des Systems ausführen\'</strong> aktiviert werden muss. Weitere Informationen stehen in den FAQ zu dieser Extension im Forum von phpbb.com.',
 
@@ -97,6 +106,8 @@ $lang = array_merge($lang, array(
 	'DIGESTS_REGISTRATION_FIELD_EXPLAIN'					=> 'Wenn diese Option aktiviert ist, können Nutzer schon bei Ausfüllen des Registrierungsformulares auswählen, ob sie die eMail-Zusammenfassung mit den Standardvorgaben abonnieren möchten. Diese Auswahlmöglichkeit erscheint dort nicht, wenn das \'Automatische Abonnieren\' aktiviert ist.',
 	'DIGESTS_REPLY_TO_EMAIL_ADDRESS'						=> 'Antwortemailadresse',
 	'DIGESTS_REPLY_TO_EMAIL_ADDRESS_EXPLAIN'				=> 'Diese Emailadresse erscheint beim Empfänger im REPLY-TO-Feld (Antworten). Wenn das feld leer ist, wird die Kontakt-Emailadresse des Boards verwendet. Diese Adresse sollte mit Bedacht gewählt werden, da Adressen von einer fremden Domain schon vom absendenden Mailserver oder dann vom empfangeneden Server leicht als spamverdächtig eingestuft und herausgefiltert werden könnten.',
+	'DIGESTS_RESET_CRON_RUN_TIME'							=> 'Letzten Versandzeitpunkt zurücksetzen',
+	'DIGESTS_RESET_CRON_RUN_TIME_EXPLAIN'					=> "Wenn seit dem letzten Versand von eMail-Zusammenfassungen zu viele Tage vergangen sind, kann hier der letzte Versandzeitpunkt zurückgesetzt werden. Beim nächsten Versand werden nur die Zusammenfassungen der aktuellen Stunde berücksichtigt. Der Mailer wurde zuletzt zu folgender Zeit gestartet: $last_run. Hinweis: Eine manuelle Ausführung des Mailers hat keine Einflüsse auf diese Einstellung.", 
 	'DIGESTS_RUN_TEST'										=> 'Mailer starten',
 	'DIGESTS_RUN_TEST_CLEAR_SPOOL'							=> 'Cache-Ordner der Digest-Extension leeren',
 	'DIGESTS_RUN_TEST_CLEAR_SPOOL_ERROR'					=> 'Es konnten nicht alle Dateien aus dem Cache-Ordner entfernt werden. Ursache könnten fehlende Datei-Rechte sein. Alle Dateien sollten \'publicly writeable\' sein (777 auf Unix-basierten Systemen).',
@@ -189,8 +200,13 @@ $lang = array_merge($lang, array(
 	'LOG_CONFIG_DIGESTS_LOG_END'							=> '<strong>Digest-Mailer beendet</strong>',
 	'LOG_CONFIG_DIGESTS_MAILER_RAN_WITH_ERROR'				=> '<strong>Ein Fehler trat während der Verwendung des Digest-Mailers auf. Es können dennoch einige eMail-Zusammenfassungen erfolgreich erstellt worden sein.</strong>',
 	'LOG_CONFIG_DIGESTS_MANUAL_RUN'							=> '<strong>Mailer manuell gestartet</strong>',
+	'LOG_CONFIG_DIGESTS_MESSAGE'							=> '<strong>%s</strong>',	// Used for general debugging, otherwise hard to do in cron mode.
 	'LOG_CONFIG_DIGESTS_MASS_SUBSCRIBE_UNSUBSCRIBE'			=> '<strong>Eine Massenabonnementsoperation wurde erfolgreich durchgeführt.</strong>',	
-	'LOG_CONFIG_DIGESTS_REGULAR_CRON_RUN'						=> '<strong>Mailer durch internen phpBB-Crondienst gestartet</strong>',
+	'LOG_CONFIG_DIGESTS_NOTIFICATION_ERROR'					=> '<strong>Eine vom Administrator erzeugte Zusammenfassungungsbenachrichtigung könnte nicht an folgen adresse versendet werden: %s</strong>',
+	'LOG_CONFIG_DIGESTS_NOTIFICATION_SENT'					=> '<strong>Es wurde eine E-Mail an %s (%s) versandt, die besagt, dass die Zusammenfassungseinstellungen verändert wurden.</strong>',	
+	'LOG_CONFIG_DIGESTS_REGULAR_CRON_RUN'						=> '<strong>Mailer durch internen phpBB-Crondienst gestartet.</strong>',
+	'LOG_CONFIG_DIGESTS_RESET_CRON_RUN_TIME'				=> '<strong>Letzter Versandzeitpunkt wurde zurückgesetzt.</strong>',
+	'LOG_CONFIG_DIGESTS_RUN_TOO_SOON'						=> '<strong>Weniger als eine Stunde ist seit dem letzten Start des Zusammenfassungsversandes vergangen. Die Ausführung wurde deshalb abgebrochen.</strong>',
 	'LOG_CONFIG_DIGESTS_SEND_MASS_EMAIL_ERROR'				=> '<strong>Massenabonnementsoperation konnte bei %s nicht erfolgreich durchgeführt werden.</strong>',
 	'LOG_CONFIG_DIGESTS_SIMULATION_DATE_TIME'				=> '<strong>Ein Administrator hat eMail-Zusammenstellungen für %s um %s:00 Board-Zeit erzeugt.</strong>',
 	'LOG_CONFIG_DIGESTS_SORT_BY_ERROR'						=> '<strong>Der Digest-Mailer mit ungültigem user_digest_sortby = %s für %s aufgerufen</strong>',

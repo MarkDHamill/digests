@@ -27,11 +27,11 @@ $timeOffset = $tz_board->getOffset($datetime_tz_board) / 3600;
 $server_settings_url = append_sid('index.php?i=acp_board&amp;mode=server');
 
 $lang = array_merge($lang, array(
-	'ACP_DIGESTS_NEVER'										=> 'never',
+	'ACP_DIGESTS_NEVER'										=> 'niemals',
 	)
 );
 
-$last_run = ($config['phpbbservices_digests_cron_task_last_gc'] == 0) ? $lang['ACP_DIGESTS_NEVER'] : date($config['default_dateformat'], $config['phpbbservices_digests_cron_task_last_gc']) . ' board time';
+$last_run = ($config['phpbbservices_digests_cron_task_last_gc'] == 0) ? $lang['ACP_DIGESTS_NEVER'] : date($config['default_dateformat'], $config['phpbbservices_digests_cron_task_last_gc']) . ' Board-Zeit';
 
 $lang = array_merge($lang, array(
 	'ACP_CAT_DIGESTS'										=> 'eMail-Zusammenfassungen',

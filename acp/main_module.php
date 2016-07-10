@@ -1382,14 +1382,29 @@ class main_module
 		{
 
 			define('IN_DIGESTS_TEST', true);
+			$continue = true;
+
+			if ($continue && !$config['phpbbservices_digests_test'])
+			{
+				$message = $user->lang('DIGESTS_MAILER_NOT_RUN');
+				$continue = false;
+			}
 			
-			// Clear the digests cache folder, if so instructed
-			$all_cleared = true;
-			$success = true; // Assume all went well
-			if ($config['phpbbservices_digests_test_clear_spool'])
+			if ($config['board_disable'])
+			{
+				$message_type = E_USER_WARNING;
+				$message = strip_tags($user->lang('LOG_CONFIG_DIGESTS_BOARD_DISABLED'));
+				$continue = false;
+			}
+			
+			if ($continue && $config['phpbbservices_digests_test_clear_spool'])
 			{
 				
-				$files = glob('./../ext/phpbbservices/digests/cache/*'); // get all file names in the extension's cache folder
+				// Clear the digests cache folder, if so instructed
+				$all_cleared = true;
+				$success = true; // Assume all went well
+					
+				$files = glob('./store/digests/*'); // get all file names in the extension's cache folder
 				
 				if ($files)
 				{
@@ -1423,61 +1438,61 @@ class main_module
 					}
 				}
 			
+				if (!$all_cleared)
+				{
+					$message_type = E_USER_WARNING;
+					$message = strip_tags($user->lang('LOG_CONFIG_DIGESTS_CLEAR_SPOOL_ERROR'));
+					$continue = false;
+				}
+
 			}
 			
-			// Make sure run date is valid, if a run date was requested.
-			$good_date = true;
-			if ($config['phpbbservices_digests_test_time_use'])
+			if ($continue && $config['phpbbservices_digests_test_time_use'])
 			{
+				
+				// Make sure run date is valid, if a run date was requested.
 				$good_date = checkdate($config['phpbbservices_digests_test_month'], $config['phpbbservices_digests_test_day'], $config['phpbbservices_digests_test_year']);
+				if (!$good_date)
+				{
+					$message_type = E_USER_WARNING;
+					$message = $user->lang('DIGESTS_ILLOGICAL_DATE');
+					$continue = false;
+				}
+
 			}
 			
-			// Create a mailer object and call its run method. The logic for sending a digest is embedded in this method, which is normally run as a cron task.
-			if ($good_date && $config['phpbbservices_digests_test'])
+			// Get ready to manually mail digests
+			if ($continue)
 			{
+				
+				// Must save the current state or the sidebar will disappear after the mailer call
 				$save_template = serialize($template);
 				
 				// Get the common include files, to pass the reference to mailer
 				$helper = $phpbb_container->get('phpbbservices.digests.common');
 
+				// Create a mailer object and call its run method. The logic for sending a digest is embedded in this method, which is normally run as a cron task.
 				$mailer = new \phpbbservices\digests\cron\task\digests($config, $request, $user, $db, $phpEx, $phpbb_root_path, $template, $auth, $table_prefix, $phpbb_log, $helper);	
 				$success = $mailer->run();
 				
-				$template = unserialize($save_template);	// This ensures the sidebar menu on the extensions tab won't disappear
-			}
+				if (!$success)
+				{
+					$message_type = E_USER_WARNING;
+					$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LOG_CONFIG_DIGESTS_MAILER_RAN_WITH_ERROR');
+					$message = strip_tags($user->lang('LOG_CONFIG_DIGESTS_MAILER_RAN_WITH_ERROR'));
+				}
+				else if ($config['phpbbservices_digests_test_spool'])
+				{
+					$message = $user->lang('DIGESTS_MAILER_SPOOLED');
+				}
+				else
+				{
+					$message = $user->lang('DIGESTS_MAILER_RAN_SUCCESSFULLY');
+				}
 
-			if ($config['board_disable'])
-			{
-				$message_type = E_USER_WARNING;
-				$message = strip_tags($user->lang('LOG_CONFIG_DIGESTS_BOARD_DISABLED'));
-			}
-			else if (isset($all_cleared) && !$all_cleared)
-			{
-				$message_type = E_USER_WARNING;
-				$message = strip_tags($user->lang('LOG_CONFIG_DIGESTS_CLEAR_SPOOL_ERROR'));
-			}
-			else if (isset($good_date) && !$good_date)
-			{
-				$message_type = E_USER_WARNING;
-				$message = $user->lang('DIGESTS_ILLOGICAL_DATE');
-			}
-			else if (!$config['phpbbservices_digests_test'] && !$config['phpbbservices_digests_test_spool'])
-			{
-				$message = $user->lang('DIGESTS_MAILER_NOT_RUN');
-			}
-			else if (!$config['phpbbservices_digests_test'] || $config['phpbbservices_digests_test_spool'])
-			{
-				$message = $user->lang('DIGESTS_MAILER_SPOOLED');
-			}
-			else if (!$success)
-			{
-				$message_type = E_USER_WARNING;
-				$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LOG_CONFIG_DIGESTS_MAILER_RAN_WITH_ERROR');
-				$message = strip_tags($user->lang('LOG_CONFIG_DIGESTS_MAILER_RAN_WITH_ERROR'));
-			}
-			else
-			{
-				$message = $user->lang('DIGESTS_MAILER_RAN_SUCCESSFULLY');
+				// Restore the sidebar content
+				$template = unserialize($save_template);
+				
 			}
 			
 		}

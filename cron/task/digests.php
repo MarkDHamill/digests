@@ -122,7 +122,7 @@ class digests extends \phpbb\cron\task\base
 		$this->path_prefix = ($this->manual_mode) ? './../' : './';
 		
 		$this->email_templates_path = $this->path_prefix . 'ext/phpbbservices/digests/language/en/email/';	// Note: the email templates (except subscribe and unsubscribe) are language independent, so it's okay to use British English as it is always supported and the subscribe/unsubscribe feature is not done here.
-		$this->cache_path = $this->path_prefix . 'ext/phpbbservices/digests/cache/';
+		$this->cache_path = $this->path_prefix . 'store/digests/';
 
 		if (!$this->manual_mode)
 		{
@@ -548,7 +548,7 @@ class digests extends \phpbb\cron\task\base
 			$from_field_name = (isset($this->config['phpbbservices_digests_from_email_name']) && (strlen($this->config['phpbbservices_digests_from_email_name']) > 0)) ? $this->config['phpbbservices_digests_from_email_name'] : $this->config['sitename'] . ' ' . $this->user->lang['DIGESTS_ROBOT'];
 			$reply_to_field_email = (isset($this->config['phpbbservices_digests_reply_to_email_address']) && (strlen($this->config['phpbbservices_digests_reply_to_email_address']) > 0)) ? $this->config['phpbbservices_digests_reply_to_email_address'] : $this->config['board_email'];
 		
-			// Admin may override where email is sent in manual mode. This won't apply if digests are stored to cache instead.
+			// Admin may override where email is sent in manual mode. This won't apply if digests are stored to the store/digests folder instead.
 			if ($this->manual_mode && $this->config['phpbbservices_digests_test_send_to_admin'])
 			{
 				$html_messenger->to($this->email_address_override);
@@ -936,8 +936,38 @@ class digests extends \phpbb\cron\task\base
 				// the mail from being sent out. The function won't fail since nothing is being sent out.
 				$html_messenger->send(NOTIFY_EMAIL, true, $is_html, true);
 				$email_content = $html_messenger->msg;
+				
+				// If the digests folder does not exist in the store folder, create it.
+				if (!is_dir($this->cache_path))
+				{
+					umask(0);
+					if (!mkdir($this->cache_path, 0777))
+					{
+						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_DIRECTORY_CREATE_ERROR');
+						return false;
+					}
+					// For Apache based systems, the directory requires a .htaccess file with Allow from All permissions so a browser can read files.
+					$server_software = $this->request->server('SERVER_SOFTWARE');
+					if (stristr($server_software, 'Apache'))
+					{
+						$handle = @fopen($this->cache_path . '.htaccess', "w");
+						if ($handle === false)
+						{
+							// Since this indicates a major problem, let's abort now. It's likely a global write error.
+							$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILE_OPEN_ERROR', false, array($this->cache_path));
+							if ($this->config['phpbbservices_digests_enable_log'])
+							{
+								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END');
+							}
+							return false;
+						}
+						$data = "<Files *>\n\tOrder Allow,Deny\n\tAllow from All\n</Files>\n";
+						@fwrite($handle, $data);
+						@fclose($handle);
+					}
+				}
 		
-				// Save digests as file in the digests cache area instead of emailing.
+				// Save digests as file in the store/digests folder instead of emailing.
 				$suffix = ($is_html) ? '.html' : '.txt';
 				$file_name = $row['username'] . '-' . $gmt_year . '-' . str_pad($gmt_month, 2, '0', STR_PAD_LEFT) . '-' . str_pad($gmt_day, 2, '0', STR_PAD_LEFT) . '-' . str_pad($gmt_hour, 2, '0', STR_PAD_LEFT) . $suffix;
 				

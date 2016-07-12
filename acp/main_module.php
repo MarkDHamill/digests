@@ -1384,16 +1384,9 @@ class main_module
 			define('IN_DIGESTS_TEST', true);
 			$continue = true;
 
-			if ($continue && !$config['phpbbservices_digests_test'])
+			if (!$config['phpbbservices_digests_test'] && !$config['phpbbservices_digests_test_clear_spool'])
 			{
 				$message = $user->lang('DIGESTS_MAILER_NOT_RUN');
-				$continue = false;
-			}
-			
-			if ($config['board_disable'])
-			{
-				$message_type = E_USER_WARNING;
-				$message = strip_tags($user->lang('LOG_CONFIG_DIGESTS_BOARD_DISABLED'));
 				$continue = false;
 			}
 			
@@ -1404,7 +1397,7 @@ class main_module
 				$all_cleared = true;
 				$success = true; // Assume all went well
 					
-				$files = glob('./store/digests/*'); // get all file names in the extension's cache folder
+				$files = glob('./store/ext/phpbbservices/digests/*'); // get all file names in the extension's cache folder
 				
 				if ($files)
 				{

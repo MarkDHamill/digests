@@ -1393,20 +1393,20 @@ class main_module
 			if ($continue && $config['phpbbservices_digests_test_clear_spool'])
 			{
 				
-				// Clear the digests cache folder, if so instructed
+				// Clear the digests cache folder of .txt and .html files, if so instructed
 				$all_cleared = true;
-				$success = true; // Assume all went well
-					
-				$files = glob('./store/ext/phpbbservices/digests/*'); // get all file names in the extension's cache folder
+				$directory_found = true;
 				
-				if ($files)
+				$path = $phpbb_root_path . 'store/ext/phpbbservices/digests';
+				if (is_dir($path))
 				{
-					foreach ($files as $file)
+					foreach (new \DirectoryIterator($path) as $file_info)
 					{
-						// iterate files
-						if (is_file($file))
+						$file_name = $file_info->getFilename();
+						// Exclude dot files, hidden files and non "real" files, and real files if they don't have the .html or .txt suffix
+						if ((substr($file_name, 0, 1) !== '.') && $file_info->isFile() && ($file_info->getExtension() == 'html' || $file_info->getExtension() == 'txt'))
 						{
-							$deleted = unlink($file); // delete file
+							$deleted = unlink($path . '/' . $file_name); // delete file
 							if (!$deleted)
 							{
 								$all_cleared = false;
@@ -1414,12 +1414,12 @@ class main_module
 						}
 					}
 				}
-				else if ($files === false)	// An actual error occurred with the glob command
+				else	// Directory not found, which is generally okay. If it's missing it will get recreated.
 				{
-					$all_cleared = false;
+					$directory_found = false;
 				}
-			
-				if ($config['phpbbservices_digests_enable_log'])
+					
+				if ($config['phpbbservices_digests_enable_log'] && $directory_found)
 				{
 					if ($all_cleared)
 					{

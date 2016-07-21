@@ -19,12 +19,12 @@ use phpbb\db\migration\tool\module;
 
 class release_3_0_2 extends \phpbb\db\migration\migration
 {
-	
+
 	public function effectively_installed()
 	{
 		
 		// This handles upgrades from the phpBB Digests mod for phpBB 3.0.x to this extension, allowing configuration and user settings to be preserved
-		// if possible. Versions 2.2.6 through 2.2.26 are supported.
+		// if possible. Versions 2.2.6 through 2.2.27 are supported.
 		
 		global $user, $cache, $phpbb_root_path, $phpEx;
 		
@@ -404,7 +404,6 @@ class release_3_0_2 extends \phpbb\db\migration\migration
 		);
 		
 		// We need the module_id for the new Digests category
-		//$sql = 'SELECT module_id FROM ' . $this->table_prefix . "modules WHERE module_langname = 'UCP_DIGESTS'";
 		$sql_array = array(
 			'SELECT'	=> 'module_id',
 			'FROM'		=> array(
@@ -562,9 +561,10 @@ class release_3_0_2 extends \phpbb\db\migration\migration
 
 			// Add the UCP digests category, a top level category
 			array('module.add', array(
-				'ucp',
-				false,
-				'UCP_DIGESTS'
+				'module_class'		=> 'ucp',
+				'module_basename'	=>	false,	// 0, or top level
+				'module_langname'	=> 'UCP_DIGESTS',
+				'module_auth'       => 'ext_phpbbservices/digests',
 			)),
 			// Add the four UCP digest modules
 			array('module.add', array(

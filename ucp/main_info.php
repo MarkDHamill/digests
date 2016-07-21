@@ -18,10 +18,10 @@ class main_info
 			'title'		=> 'UCP_DIGESTS',
 			'version'	=> '3.0.1',
 			'modes'		=> array(
-				'basics'					=> array('title' => 'UCP_DIGESTS_BASICS', 'auth' => '', 'cat' => array('UCP_DIGESTS')),
-				'forums_selection'			=> array('title' => 'UCP_DIGESTS_FORUMS_SELECTION', 'auth' => '', 'cat' => array('UCP_DIGESTS')),
-				'post_filters'				=> array('title' => 'UCP_DIGESTS_POST_FILTERS', 'auth' => '', 'cat' => array('UCP_DIGESTS')),
-				'additional_criteria'		=> array('title' => 'UCP_DIGESTS_ADDITIONAL_CRITERIA', 'auth' => '', 'cat' => array('UCP_DIGESTS')),
+				'basics'					=> array('title' => 'UCP_DIGESTS_BASICS', 'auth' => 'ext_phpbbservices/digests', 'cat' => array('UCP_DIGESTS')),
+				'forums_selection'			=> array('title' => 'UCP_DIGESTS_FORUMS_SELECTION', 'auth' => 'ext_phpbbservices/digests', 'cat' => array('UCP_DIGESTS')),
+				'post_filters'				=> array('title' => 'UCP_DIGESTS_POST_FILTERS', 'auth' => 'ext_phpbbservices/digests', 'cat' => array('UCP_DIGESTS')),
+				'additional_criteria'		=> array('title' => 'UCP_DIGESTS_ADDITIONAL_CRITERIA', 'auth' => 'ext_phpbbservices/digests', 'cat' => array('UCP_DIGESTS')),
 			),
 		);
 	}

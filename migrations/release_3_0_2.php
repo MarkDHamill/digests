@@ -399,7 +399,7 @@ class release_3_0_2 extends \phpbb\db\migration\migration
 			'parent_id'			=> 0,
 			'module_langname'	=> 'UCP_DIGESTS',
 			'module_mode'		=> '',
-			'module_auth'		=> '',
+			'module_auth'		=> 'ext_phpbbservices/digest',
 			)
 		);
 		
@@ -426,7 +426,7 @@ class release_3_0_2 extends \phpbb\db\migration\migration
 			'parent_id'			=> (int) $module_id,
 			'module_langname'	=> 'UCP_DIGESTS_BASICS',
 			'module_mode'		=> 'basics',
-			'module_auth'		=> 'ext_phpbbservices/digests && acl_a_board',
+			'module_auth'		=> 'ext_phpbbservices/digests',
 			)
 		);
 
@@ -439,7 +439,7 @@ class release_3_0_2 extends \phpbb\db\migration\migration
 			'parent_id'			=> (int) $module_id,
 			'module_langname'	=> 'UCP_DIGESTS_FORUMS_SELECTION',
 			'module_mode'		=> 'forums_selection',
-			'module_auth'		=> 'ext_phpbbservices/digests && acl_a_board',
+			'module_auth'		=> 'ext_phpbbservices/digests',
 			)
 		);
 
@@ -452,7 +452,7 @@ class release_3_0_2 extends \phpbb\db\migration\migration
 			'parent_id'			=> (int) $module_id,
 			'module_langname'	=> 'UCP_DIGESTS_POST_FILTERS',
 			'module_mode'		=> 'post_filters',
-			'module_auth'		=> 'ext_phpbbservices/digests && acl_a_board',
+			'module_auth'		=> 'ext_phpbbservices/digests',
 			)
 		);
 
@@ -465,7 +465,7 @@ class release_3_0_2 extends \phpbb\db\migration\migration
 			'parent_id'			=> (int) $module_id,
 			'module_langname'	=> 'UCP_DIGESTS_ADDITIONAL_CRITERIA',
 			'module_mode'		=> 'additional_criteria',
-			'module_auth'		=> 'ext_phpbbservices/digests && acl_a_board',
+			'module_auth'		=> 'ext_phpbbservices/digests',
 			)
 		);
 

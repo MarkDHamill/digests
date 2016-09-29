@@ -113,8 +113,8 @@ class digests extends \phpbb\cron\task\base
 		
 		// Determine how this is program is being executed. Options are:
 		//   - Manual mode (via the ACP Digests "Manually run the mailer" option)
-		//   - Regular cron (via invocation of cron.php as part of loading a web page in a browser
-		//   - System cron (via an actual cron/scheduled task from the operating system
+		//   - Regular cron (via invocation of cron.php as part of loading a web page in a browser)
+		//   - System cron (via an actual cron/scheduled task from the operating system)
 		$this->manual_mode = (defined('IN_DIGESTS_TEST')) ? true : false;
 		$this->regular_cron = (!$this->manual_mode && defined('IN_CRON') && php_sapi_name() != 'cli') ? true : false;
 		$this->system_cron = (!$this->manual_mode && !$this->regular_cron && php_sapi_name() == 'cli') ? true : false;
@@ -1114,6 +1114,9 @@ class digests extends \phpbb\cron\task\base
 				}
 					
 			}
+
+			// Reset messenger object, bug fix provided by robdocmagic
+			$html_messenger->reset();
 
 		}	// foreach
 		

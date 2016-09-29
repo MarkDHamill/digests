@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<head dir="{S_CONTENT_DIRECTION}" lang="{S_USER_LANG}">
+<html lang="{S_USER_LANG}">
+<head>
 	<meta charset="utf-8">
 	<title>{L_DIGESTS_TITLE}</title>
 	<link href="{T_THEME_PATH}/print.css" rel="stylesheet" type="text/css" media="print" title="printonly" />

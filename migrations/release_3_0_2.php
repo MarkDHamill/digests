@@ -14,9 +14,6 @@ if (!defined('IN_PHPBB'))
 	exit;
 }
 
-use phpbb\db\tools;
-use phpbb\db\migration\tool\module;
-
 class release_3_0_2 extends \phpbb\db\migration\migration
 {
 
@@ -41,7 +38,7 @@ class release_3_0_2 extends \phpbb\db\migration\migration
 		{
 			$message_type = E_USER_WARNING;
 			trigger_error($user->lang('DIGESTS_MIGRATE_UNSUPPORTED_VERSION', $this->config['digests_version']), $message_type);
-			return;
+			return false;
 		}
 
 		// To upgrade from 2.2.6 or greater, the basic approach is to compare arrays of configuration variables and database column names.

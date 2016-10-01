@@ -68,6 +68,7 @@ class html_messenger extends \messenger
 			return true;
 		}
 
+		$result = true;
 		switch ($method)
 		{
 			case NOTIFY_EMAIL:
@@ -138,7 +139,7 @@ class html_messenger extends \messenger
 	*/
 	function msg_email($is_html=false)
 	{
-		global $config, $user;
+		global $config;
 
 		if (empty($config['email_enable']))
 		{

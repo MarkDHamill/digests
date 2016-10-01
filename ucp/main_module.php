@@ -33,7 +33,6 @@ class main_module
 		$user->add_lang_ext('phpbbservices/digests', array('info_acp_common', 'common'));
 
 		$form_key = 'phpbbservices/digests';
-		$action	= $request->variable('action', '');
 		$submit = (isset($_POST['submit'])) ? true : false;
 
 		if ($submit && !check_form_key($form_key))
@@ -57,7 +56,7 @@ class main_module
 						
 						$sql = 'DELETE FROM ' . $table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' 
 								WHERE user_id = ' . (int) $user->data['user_id'];
-						$result = $db->sql_query($sql);
+						$db->sql_query($sql);
 						
 						// If a user chooses to unsubscribe, keep track of this so the admin is aware of this fact so if they 
 						// resubscribe the person it won't be out of ignorance. The concern is that an admin resubscription would be
@@ -95,7 +94,7 @@ class main_module
 					// If there are any individual forum subscriptions, remove the old ones and create the new ones
 					$sql = 'DELETE FROM ' . $table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' 
 							WHERE user_id = ' . (int) $user->data['user_id'];
-					$result = $db->sql_query($sql);
+					$db->sql_query($sql);
 	
 					// Note that if "all_forums" is unchecked and bookmarks is unchecked, there are individual forum subscriptions, so they must be saved.
 					$all_forums = $request->variable('all_forums', $user->data['user_digest_filter_type']);
@@ -117,9 +116,9 @@ class main_module
 									'forum_id'		=> $forum_id);
 							}
 						}
-						if (sizeof($sql_ary) > 0)
+						if (isset($sql_ary))
 						{
-							$result = $db->sql_multi_insert($table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE, $sql_ary);
+							$db->sql_multi_insert($table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE, $sql_ary);
 						}
 					}
 					unset($sql_ary);
@@ -165,13 +164,13 @@ class main_module
 			}
 			
 			// Update the user's digest settings
-			if (sizeof($sql_ary) > 0)
+			if (isset($sql_ary) && sizeof($sql_ary) > 0)
 			{
 				$sql = 'UPDATE ' . USERS_TABLE . '
 					SET ' . $db->sql_build_array('UPDATE', $sql_ary) . '
 					WHERE user_id = ' . (int) $user->data['user_id'];
 				$db->sql_query($sql);
-				$result = $db->sql_query($sql);
+				$db->sql_query($sql);
 			}
 			
 			// Send a confirmation message
@@ -339,8 +338,6 @@ class main_module
 				}
 
 				// Get current subscribed forums for this user, if any. If none, all allowed forums are assumed
-				$rowset = array();
-
 				$sql_array = array(
 					'SELECT'	=> 'forum_id',
 				
@@ -359,7 +356,6 @@ class main_module
 
 				$all_by_default = ((sizeof($rowset) == 0) && $config['phpbbservices_digests_user_check_all_forums']) ? true : false;
 
-				$forum_read_ary = array();
 				$allowed_forums = array();
 				
 				$forum_read_ary = $auth->acl_getf('f_read');
@@ -423,10 +419,7 @@ class main_module
 				if (sizeof($allowed_forums) > 0)
 				
 				{
-				
-					// Set a flag in case no forums should be checked
-					$uncheck = ($user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE) && ($config['phpbbservices_digests_user_check_all_forums'] == 0);
-				
+
 					$sql_array = array(
 						'SELECT'	=> 'forum_name, forum_id, parent_id, forum_type',
 					
@@ -693,11 +686,10 @@ class main_module
 		$template->assign_vars(array(
 			'L_DIGESTS_DISABLED_MESSAGE' 	=> ($user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE) ? '<p><em>' . $user->lang('DIGESTS_DISABLED_MESSAGE') . '</em></p>' : '',
 			'L_DIGESTS_MODE'				=> $user->lang('UCP_DIGESTS_' . strtoupper($mode)),
+			'L_POWERED_BY'					=> sprintf($user->lang['POWERED_BY'], '<a href="' . $config['phpbbservices_digests_page_url'] . '" class="postlink" onclick="window.open(this.href);return false;">' . $user->lang['DIGESTS_POWERED_BY'] . '</a>'),
 			'S_DIGESTS_CONTROL_DISABLED' 	=> ($user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE),
-			'S_DIGESTS_HOME'				=> $config['phpbbservices_digests_digests_title'],
 			'S_DIGESTS_SHOW_BUTTONS'		=> $show_buttons,
 			'U_DIGESTS_ACTION'  			=> $this->u_action,
-			'U_DIGESTS_PAGE_URL'			=> $config['phpbbservices_digests_page_url'],
 			)
 		);
 

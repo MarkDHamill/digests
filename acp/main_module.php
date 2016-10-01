@@ -22,7 +22,6 @@ class main_module
 		
 		$user->add_lang_ext('phpbbservices/digests', array('info_acp_common'));
 
-		$action	= $request->variable('action', '', true);
 		$submit = (isset($_POST['submit'])) ? true : false;
 
 		$form_key = 'phpbbservices/digests';
@@ -207,7 +206,7 @@ class main_module
 				
 				// Set up member search SQL
 				$match_any_chars = $db->get_any_char();
-				$member_sql = ($member <> '') ? " username " . $db->sql_like_expression($match_any_chars . $member . $match_any_chars) . " AND " : '';
+				$member_sql = ($member <> '') ? " username_clean " . $db->sql_like_expression($match_any_chars . utf8_case_fold_nfc($member) . $match_any_chars) . " AND " : '';
 
 				// Get the total rows for pagination purposes
 				$sql_array = array(
@@ -254,16 +253,14 @@ class main_module
 				$sql = $db->sql_build_query('SELECT', $sql_array);
 
 				$result = $db->sql_query($sql);
+				$read_id = '';
 				while ($row = $db->sql_fetchrow($result))
 				{
 					if ($row['auth_option'] == 'f_read')
 					{
 						$read_id = $row['auth_option_id'];
 					}
-					if ($row['auth_option'] == 'f_list')
-					{
-						$list_id = $row['auth_option_id'];
-					}
+
 				}
 				$db->sql_freeresult($result); // Query be gone!
 				
@@ -379,6 +376,7 @@ class main_module
 					}
 					
 					// Create an array of GMT offsets from board time zone
+					$board_offset = array();
 					for($i=0; $i<24; $i++)
 					{
 						if (($i - $board_offset_hours) < 0)
@@ -499,7 +497,6 @@ class main_module
 						'S_DIGEST_SHOW_MINE_CHECKED_NO' 	=> ($row['user_digest_show_mine'] == 0),
 						'S_DIGEST_TEXT_CHECKED' 			=> ($row['user_digest_format'] == constants::DIGESTS_TEXT_VALUE),
 						'S_DIGEST_WEEK_CHECKED' 			=> ($row['user_digest_type'] == constants::DIGESTS_WEEKLY_VALUE),
-						'S_DIGEST_PRIVATE_MESSAGES_IN_DIGEST_NO' 	=> ($user->data['user_digest_show_pms'] == 0),
 						'S_LASTVISIT_NO_CHECKED' 			=> ($row['user_digest_reset_lastvisit'] == 0),
 						'S_LASTVISIT_YES_CHECKED' 			=> ($row['user_digest_reset_lastvisit'] == 1),
 						'S_POSTDATE_DESC_SELECTED' 			=> ($row['user_digest_sortby'] == constants::DIGESTS_SORTBY_POSTDATE_DESC),
@@ -628,7 +625,7 @@ class main_module
 								$check = true;
 							}
 							
-							$success = $template->assign_block_vars('digests_edit_subscribers.forums', array( 
+							$template->assign_block_vars('digests_edit_subscribers.forums', array(
 								'FORUM_LABEL' 			=> $row2['forum_name'],
 								'FORUM_NAME' 			=> 'elt_' . (int) $row2['forum_id'] . '_' . (int) $row2['parent_id'],
 								'S_FORUM_SUBSCRIBED' 	=> $check,
@@ -881,18 +878,18 @@ class main_module
 							$sql = 'UPDATE ' . USERS_TABLE . ' 
 								SET ' . $db->sql_build_array('UPDATE', $sql_ary) . '
 								WHERE user_id = ' . (int) $current_user_id;
-							$result = $db->sql_query($sql);
+							$db->sql_query($sql);
 						}
 						
 						// If there are any individual forum subscriptions for this user, remove the old ones. 
 						$sql = 'DELETE FROM ' . $table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' 
 								WHERE user_id = ' . (int) $current_user_id;
-						$result = $db->sql_query($sql);
+						$db->sql_query($sql);
 		
 						// Now save the individual forum subscriptions, if any
 						if (!$mass_action && isset($sql_ary2) && sizeof($sql_ary2) > 0)
 						{
-							$result = $db->sql_multi_insert($table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE, $sql_ary2);					
+							$db->sql_multi_insert($table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE, $sql_ary2);
 						}
 
 						// Also want to save some information to an array to be used for sending emails to affected users.
@@ -1117,7 +1114,7 @@ class main_module
 				$sql = 'UPDATE ' . USERS_TABLE . ' 
 					SET ' . $db->sql_build_array('UPDATE', $sql_ary) . '
 					WHERE user_id = ' . (int) $current_user_id;
-				$result = $db->sql_query($sql);
+				$db->sql_query($sql);
 			}
 			
 			// If there are any individual forum subscriptions for this user, remove the old ones. 
@@ -1125,13 +1122,13 @@ class main_module
 			{
 				$sql = 'DELETE FROM ' . $table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' 
 						WHERE user_id = ' . (int) $current_user_id;
-				$result = $db->sql_query($sql);
+				$db->sql_query($sql);
 			}
 
 			// Now save the individual forum subscriptions, if any
 			if (!$mass_action && isset($sql_ary2) && sizeof($sql_ary2) > 0)
 			{
-				$result = $db->sql_multi_insert($table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE, $sql_ary2);	
+				$db->sql_multi_insert($table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE, $sql_ary2);
 			}
 
 			// Also want to save some information to an array to be used for sending emails to affected users.
@@ -1140,7 +1137,7 @@ class main_module
 			// Notify users whose subscriptions were changed
 			if ($config['phpbbservices_digests_notify_on_admin_changes'])
 			{
-				$notifications_sent = $this->notify_subscribers($digest_notify_list, 'digests_subscription_edited');
+				$this->notify_subscribers($digest_notify_list, 'digests_subscription_edited');
 			}
 				
 			$message = $user->lang('CONFIG_UPDATED');
@@ -1207,6 +1204,7 @@ class main_module
 			// allowed in that hour. We will ignore the first $oversubscribed_hours subscribers.
 
 			$rebalanced = 0;
+			$digest_notify_list = array();
 			if (sizeof($oversubscribed_hours) > 0)
 			{
 				
@@ -1253,7 +1251,7 @@ class main_module
 							SET ' . $db->sql_build_array('UPDATE', $sql_ary) . '
 							WHERE user_id = ' . (int)  $row['user_id'];
 							
-						$result2 = $db->sql_query($sql2);
+						$db->sql_query($sql2);
 						$rebalanced++;
 					}
 				}
@@ -1263,7 +1261,7 @@ class main_module
 				// Notify users whose subscriptions were changed
 				if ($config['phpbbservices_digests_notify_on_admin_changes'])
 				{
-					$notifications_sent = $this->notify_subscribers($digest_notify_list, 'digests_subscription_edited');
+					$this->notify_subscribers($digest_notify_list, 'digests_subscription_edited');
 				}
 				
 			}
@@ -1290,7 +1288,8 @@ class main_module
 				// If doing a mass unsubscribe, all qualified subscriptions are removed. Note however that except for the digest type, all other settings 
 				// are retained.
 				$sql_qualifier = ($config['phpbbservices_digests_subscribe_all']) ? " AND user_digest_type = '" . constants::DIGESTS_NONE_VALUE . "'": " AND user_digest_type != '" . constants::DIGESTS_NONE_VALUE . "'";
-				
+				$digest_notify_list = array();
+
 				if ($config['phpbbservices_digests_notify_on_admin_changes'])
 				{
 
@@ -1308,7 +1307,7 @@ class main_module
 
 					$result = $db->sql_query($sql);
 					$rowset = $db->sql_fetchrowset($result);
-				
+
 					foreach ($rowset as $row)
 					{
 						$digest_notify_list[] = $row['user_id'];
@@ -1352,7 +1351,7 @@ class main_module
 				// Notify users or subscription or unsubscription if directed
 				if ($config['phpbbservices_digests_notify_on_admin_changes'])
 				{
-					$notifications_sent = $this->notify_subscribers($digest_notify_list);
+					$this->notify_subscribers($digest_notify_list);
 				}
 				
 				if ($config['phpbbservices_digests_subscribe_all'])
@@ -1532,7 +1531,7 @@ class main_module
 			if (strpos($config_key, 'legend') !== false)
 			{
 				$template->assign_block_vars('options', array(
-					'LEGEND'		=> (isset($user->lang[$vars])) ? $user->lang($vars) : $vars,
+					'LEGEND'		=> (sizeof($user->lang[$vars]) > 0) ? $user->lang($vars) : $vars,
 					'S_LEGEND'		=> true)
 				);
 
@@ -1572,7 +1571,7 @@ class main_module
 
 	}
 
-	function dow_select($default = '')
+	function dow_select()
 	{
 		global $config, $user;
 		
@@ -1588,7 +1587,7 @@ class main_module
 		return $dow_options;
 	}
 
-	function digest_type_select($default = '')
+	function digest_type_select()
 	{
 		global $config, $user;
 		
@@ -1602,7 +1601,7 @@ class main_module
 		return $digest_types;
 	}
 
-	function digest_style_select($default = '')
+	function digest_style_select()
 	{
 		global $config, $user;
 		
@@ -1620,7 +1619,7 @@ class main_module
 		return $digest_styles;
 	} 
 
-	function digest_send_hour_gmt($default = '')
+	function digest_send_hour_gmt()
 	{
 		global $config, $user;
 		
@@ -1638,7 +1637,7 @@ class main_module
 		return $digest_send_hour_gmt;
 	} 
 
-	function digest_filter_type ($default = '')
+	function digest_filter_type ()
 	{
 		global $config, $user;
 		
@@ -1652,7 +1651,7 @@ class main_module
 		return $digest_filter_types;
 	} 
 
-	function digest_post_sort_order ($default = '')
+	function digest_post_sort_order ()
 	{
 		global $config, $user;
 		
@@ -1741,8 +1740,9 @@ class main_module
 					case constants::DIGESTS_NONE_VALUE:
 						$digest_type_text = strtolower($user->lang('DIGESTS_NONE'));
 					break;
-					
+
 					default:
+						$digest_type_text = strtolower($user->lang('DIGESTS_DAILY'));
 					break;
 				}
 				
@@ -1770,6 +1770,7 @@ class main_module
 					break;
 					
 					default:
+						$digest_format_text = $user->lang('DIGESTS_FORMAT_HTML');
 					break;
 				}
 					
@@ -1801,7 +1802,7 @@ class main_module
 					)
 				);
 				
-				$mail_sent = $messenger->send(NOTIFY_EMAIL, false, false, true);
+				$mail_sent = $messenger->send(NOTIFY_EMAIL, false);
 				
 				if (!$mail_sent)
 				{

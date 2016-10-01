@@ -38,7 +38,7 @@ class main_listener implements EventSubscriberInterface
 	*
 	* @param \phpbb\config\config		$config
 	* @param \phpbb\controller\helper	$helper		Controller helper object
-	* @param \phpbb\template			$template	Template object
+	* @param \phpbb\template\template	$template	Template object
 	*/
 	public function __construct(\phpbb\config\config $config, \phpbb\controller\helper $helper, \phpbb\template\template $template, \phpbb\request\request $request)
 	{

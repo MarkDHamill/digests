@@ -41,7 +41,7 @@ class digests extends \phpbb\cron\task\base
 	private $layout_with_html_tables;	// Layout posts in the email as HTML tables, similar to the phpBB2 digests mod
 	private $list_id;					// Integer indicating auth_option_id for this forum for the forum list permission, used to ensure proper read permissions
 	private $manual_mode;				// Whether or not digests is being run in manual mode via the ACP as opposed to a cron
-	private $max_posts_msg;				// Maximum number of posts allowed in a digest. If 0 there is no limit.
+	private $max_posts;					// Maximum number of posts in a digest
 	private $path_prefix;				// Appended to paths to find files in correct location
 	private $posts_in_digest;			// # of posts in a digest for a particular subscriber
 	private $read_id;					// Integer indicating auth_option_id for this forum for the forum read permission, used to ensure proper read permissions
@@ -360,6 +360,7 @@ class digests extends \phpbb\cron\task\base
 		else
 		{
 			$monthly_digest_sql = '';
+			$gmt_month_1st_begin = 0; 	// Make PhpStorm happy
 		}
 
 		$formatted_date = date('Y-m-d H', $this->gmt_time);
@@ -521,6 +522,7 @@ class digests extends \phpbb\cron\task\base
 				default:
 					// The database may be corrupted if the digest type for a subscriber is invalid. 
 					// Write an error to the log and continue to the next subscriber.
+					$digest_type = '';	// Make PhpStorm happy
 					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_BAD_DIGEST_TYPE', false, array($row['user_digest_type'], $row['username']));
 					continue;
 				break;
@@ -583,6 +585,10 @@ class digests extends \phpbb\cron\task\base
 				default:
 					// The database may be corrupted if the digest format for a subscriber is invalid. 
 					// Write an error to the log and continue to the next subscriber.
+					$format = '';		// Keep PhpStorm happy
+					$is_html = false;	// Keep PhpStorm happy
+					$disclaimer = '';	// Keep PhpStorm happy
+					$powered_by = '';	// Keep PhpStorm happy
 					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FORMAT_ERROR', false, array($row['user_digest_type'], $row['username']));
 					continue;
 				break;
@@ -654,6 +660,7 @@ class digests extends \phpbb\cron\task\base
 				default:
 					// The database may be corrupted if the filter type for a subscriber is incorrect. 
 					// Write an error to the log and continue to the next subscriber.
+					$post_types = '';	// Keep PhpStorm happy
 					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILTER_ERROR', false, array($row['user_digest_filter_type'], $row['username']));
 					continue;
 				break;
@@ -687,6 +694,7 @@ class digests extends \phpbb\cron\task\base
 				default:
 					// The database may be corrupted if the digest sort by for a subscriber is incorrect. 
 					// Write an error to the log and continue to the next subscriber.
+					$sort_by = '';	// Make PhpStorm happy
 					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_SORT_BY_ERROR', false, array($row['user_digest_sortby'], $row['username']));
 					continue;
 				break;
@@ -759,7 +767,11 @@ class digests extends \phpbb\cron\task\base
 			// Get any private messages for this user
 			
 			$this->digest_exception = false;
-		
+
+			// Count # of unread and new for this user. Counts may need to be reduced later.
+			$total_pm_unread = 0;
+			$total_pm_new = 0;
+
 			if ($row['user_digest_show_pms'])
 			{
 			
@@ -786,10 +798,7 @@ class digests extends \phpbb\cron\task\base
 				$pm_rowset = $this->db->sql_fetchrowset($pm_result);
 				$this->db->sql_freeresult();
 				
-				// Count # of unread and new for this user. Counts may need to be reduced later.
-				$total_pm_unread = 0;
-				$total_pm_new = 0;
-				
+
 				foreach ($pm_rowset as $pm_row)
 				{
 					if ($pm_row['pm_unread'] == 1)
@@ -955,7 +964,7 @@ class digests extends \phpbb\cron\task\base
 					WHERE user_id = ' . $row['user_id'] . '
 						AND (pm_unread = 1 OR pm_new = 1)';
 						
-				$pm_read_sql_result = $this->db->sql_query($pm_read_sql);
+				$this->db->sql_query($pm_read_sql);
 
 				// Decrement the user_unread_privmsg and user_new_privmsg count
 
@@ -1139,6 +1148,15 @@ class digests extends \phpbb\cron\task\base
 		// usually in HTML but possibly in plain text if a text digest is requested. The messenger class simply assigns it to a template variable for inclusion
 		// in an email.
 
+		$topic_first_poster_name = '';	// Keep PhpStorm happy
+		$username_clean = '';			// Keep PhpStorm happy
+		$post_time = array();			// Keep PhpStorm happy
+		$post_subject = '';				// Keep PhpStorm happy
+		$topic_last_post_time = '';		// Keep PhpStorm happy
+		$topic_replies = 0;				// Keep PhpStorm happy
+		$topic_title = '';				// Keep PhpStorm happy
+		$topic_views = 0;				// Keep PhpStorm happy
+
 		$mail_template = ($is_html) ? 'mail_digests_html.html' : 'mail_digests_text.html';
 
 		$this->template->set_filenames(array(
@@ -1205,7 +1223,7 @@ class digests extends \phpbb\cron\task\base
 				}
 			
 				// Handle logic to display attachments in private messages
-				if ($pm_row['message_attachment'] > 0 && $this->user_row['user_digest_attachments'])
+				if ($pm_row['message_attachment'] > 0 && $user_row['user_digest_attachments'])
 				{
 					$pm_text .= sprintf("<div class=\"box\">\n<p>%s</p>\n", $this->user->lang['ATTACHMENTS']);
 					
@@ -1311,6 +1329,7 @@ class digests extends \phpbb\cron\task\base
 			
 			unset($bookmarked_topics);
 			unset($fetched_forums);
+			$fetched_forums = array();
 			
 			// Determine bookmarked topics, if any
 			if ($user_row['user_digest_filter_type'] == constants::DIGESTS_BOOKMARKS) // Bookmarked topics only
@@ -1454,7 +1473,7 @@ class digests extends \phpbb\cron\task\base
 				
 					$topic_asc_desc = ($user_row['user_topic_sortby_dir'] == 'd') ? SORT_DESC : SORT_ASC;
 					$post_asc_desc = ($user_row['user_post_sortby_dir'] == 'd') ? SORT_DESC : SORT_ASC;
-					
+
 					switch($user_row['user_topic_sortby_type'])
 					
 					{
@@ -1761,7 +1780,7 @@ class digests extends \phpbb\cron\task\base
 				// Skip post if not a bookmarked topic
 				if ($user_row['user_digest_filter_type'] == constants::DIGESTS_BOOKMARKS)
 				{
-					if ((sizeof($bookmarked_topics) > 0) && !in_array($post_row['topic_id'], $bookmarked_topics))
+					if ((isset($bookmarked_topics)) && !in_array($post_row['topic_id'], $bookmarked_topics))
 					{
 						continue;
 					}

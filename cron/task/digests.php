@@ -81,7 +81,7 @@ class digests extends \phpbb\cron\task\base
 	*/
 	public function should_run()
 	{
-		return (!$this->config['cron_lock'] && ($this->config['phpbbservices_digests_cron_task_last_gc'] + $this->config['phpbbservices_digests_cron_task_gc'] < time()));
+		return $this->config['phpbbservices_digests_cron_task_last_gc'] + $this->config['phpbbservices_digests_cron_task_gc'] < time();
 	}
 	
 	/**

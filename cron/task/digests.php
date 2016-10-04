@@ -661,7 +661,14 @@ class digests extends \phpbb\cron\task\base
 			}
 			else
 			{	
-				$html_messenger->from($from_field_name . ' <' . $from_field_email . '>');
+				if (trim($from_field_name) !== '')
+				{
+					$html_messenger->from(mail_encode(htmlspecialchars_decode($from_field_name)) . ' <' . $from_field_email . '>');
+				}
+				else
+				{
+					$html_messenger->from($from_field_email);
+				}
 			}
 			$html_messenger->replyto($reply_to_field_email);
 			$html_messenger->subject($email_subject);

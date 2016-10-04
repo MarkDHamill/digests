@@ -81,9 +81,9 @@ class digests extends \phpbb\cron\task\base
 	*/
 	public function should_run()
 	{
-		return $this->config['phpbbservices_digests_cron_task_last_gc'] + $this->config['phpbbservices_digests_cron_task_gc'] < time();
+		return (bool) ($this->config['phpbbservices_digests_cron_task_last_gc'] + $this->config['phpbbservices_digests_cron_task_gc'] < time());
 	}
-	
+
 	/**
 	* Runs this cron task.
 	*
@@ -495,8 +495,52 @@ class digests extends \phpbb\cron\task\base
 		
 		foreach ($rowset as $row)
 		{
-			
 			// Each traverse through this loop sends out exactly one digest
+			
+			// Skip sending this digest if a full "cycle" has not elapsed since when the digest was last sent out. For example, if the user has 
+			// subscribed to a daily digest, 24 hours needs to have elapsed since the last digest went out. The digest last send time is recorded
+			// in the database when sent out.
+			
+			switch ($row['user_digest_type'])
+			{
+				case constants::DIGESTS_DAILY_VALUE:
+					if ($row['user_digest_last_sent'] + (60 * 60 * 24) > $now)
+					{
+						continue;
+					}
+				break;
+				
+				case constants::DIGESTS_WEEKLY_VALUE:
+					if ($row['user_digest_last_sent'] + (7 * 60 * 60 * 24) > $now)
+					{
+						continue;
+					}
+				break;
+				
+				case constants::DIGESTS_MONTHLY_VALUE:
+					// Calculate seconds in previous month, which depends on number of days in that month
+					$use_year = date($now, 'Y');
+					$use_month = date($now, 'n') - 1;
+					if ($use_month == 0)
+					{
+						$use_month = 12;
+						$use_year--;
+					}
+					$use_days_in_month = cal_days_in_month (CAL_GREGORIAN, $use_month, $use_year);
+					if ($row['user_digest_last_sent'] + ($use_days_in_month * 60 * 60 * 24) > $now)
+					{
+						continue;
+					}
+				break;
+				
+				default:
+					// Shouldn't happen but assume a daily digest if it did happen
+					if ($row['user_digest_last_sent'] + (60 * 60 * 24) > $now)
+					{
+						continue;
+					}
+				break;
+			}
 			
 			$this->toc = array();		// Create or empty the array containing table of contents information
 			$this->toc_post_count = 0; 	// # of posts in the table of contents
@@ -1074,11 +1118,11 @@ class digests extends \phpbb\cron\task\base
 						{
 							if ($this->config['phpbbservices_digests_show_email'])
 							{
-								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD', false, array($this->user->lang['DIGESTS_SENT_TO'], $row['username'], $row['user_email'], $current_hour_gmt, $this->posts_in_digest, sizeof($pm_rowset)));
+								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD', false, array($this->user->lang['DIGESTS_SENT_TO'], $row['username'], $row['user_email'], $gmt_year . '-' . $gmt_month . '-' . $gmt_day, $current_hour_gmt, $this->posts_in_digest, sizeof($pm_rowset)));
 							}
 							else
 							{
-								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_NO_EMAIL', false, array($this->user->lang['DIGESTS_SENT_TO'], $row['username'], $current_hour_gmt, $this->posts_in_digest, sizeof($pm_rowset)));
+								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_NO_EMAIL', false, array($this->user->lang['DIGESTS_SENT_TO'], $row['username'], $gmt_year . '-' . $gmt_month . '-' . $gmt_day, $current_hour_gmt, $this->posts_in_digest, sizeof($pm_rowset)));
 							}
 						}
 						

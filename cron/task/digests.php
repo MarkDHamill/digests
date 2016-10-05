@@ -663,7 +663,7 @@ class digests extends \phpbb\cron\task\base
 			{	
 				if (trim($from_field_name) !== '')
 				{
-					$html_messenger->from(mail_encode(htmlspecialchars_decode($from_field_name)) . ' <' . $from_field_email . '>');
+					$html_messenger->from('"' . mail_encode(htmlspecialchars_decode($from_field_name)) . '" <' . $from_field_email . '>');
 				}
 				else
 				{
@@ -797,7 +797,7 @@ class digests extends \phpbb\cron\task\base
 				'DIGESTS_POWERED_BY'				=> $powered_by,
 				'DIGESTS_REMOVE_YOURS'				=> ($row['user_digest_show_mine'] == 0) ? $this->user->lang['YES'] : $this->user->lang['NO'],
 				'DIGESTS_SALUTATION'				=> $row['username'],
-				'DIGESTS_SEND_HOUR'					=> $this->helper->make_hour_string($local_send_hour, $row['user_dateformat']),
+				'DIGESTS_SEND_HOUR'					=> (trim($row['user_dateformat'] == '')) ? $this->helper->make_hour_string($local_send_hour, $this->config['board_timezone']) : $this->helper->make_hour_string($local_send_hour, $row['user_dateformat']),
 				'DIGESTS_SEND_IF_NO_NEW_MESSAGES'	=> ($row['user_digest_send_on_no_posts'] == 0) ? $this->user->lang['NO'] : $this->user->lang['YES'],
 				'DIGESTS_SHOW_ATTACHMENTS'			=> ($row['user_digest_attachments'] == 0) ? $this->user->lang['NO'] : $this->user->lang['YES'],
 				'DIGESTS_SHOW_NEW_POSTS_ONLY'		=> ($row['user_digest_new_posts_only'] == 1) ? $this->user->lang['YES'] : $this->user->lang['NO'],

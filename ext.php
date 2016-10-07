@@ -7,7 +7,7 @@
  *
  */
 
-namespace phpbbservices\smartfeed;
+namespace phpbbservices\digests;
 
 /**
  * @ignore
@@ -18,7 +18,7 @@ class ext extends \phpbb\extension\base
 
 	public function is_enableable()
 	{
-		global $config;
+		$config = $this->container->get('config');
 		return (phpbb_version_compare($config['version'], '3.1.9', '>=') && phpbb_version_compare($config['version'], '3.2.0@dev', '<')) ? true : false;
 	}
 

@@ -142,6 +142,12 @@ class digests extends \phpbb\cron\task\base
 			// How many hours of digests are wanted? We want to do it for the number of hours between now and when digests were last ran successfully.
 			$hours_to_do = floor(($now - $this->config['phpbbservices_digests_cron_task_last_gc']) / (60 * 60));
 			
+			// $this->config['phpbbservices_digests_max_cron_hrs'] may override $hours_to_do if it is not zero
+			if ($this->config['phpbbservices_digests_max_cron_hrs'] != 0)
+			{
+				$hours_to_do = min($hours_to_do, $this->config['phpbbservices_digests_max_cron_hrs']);
+			}
+			
 			// Care must be taken not to miss an hour. For example, if a phpBB cron was run at 11:29 and next at 13:06 then digests must be sent for 
 			// hours 12 and 13, not just 13. The following algorithm should handle these cases by adding 1 to $hours_to_do.
 			$year_last_ran = (int) date('Y', $this->config['phpbbservices_digests_cron_task_last_gc']);

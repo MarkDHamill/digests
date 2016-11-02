@@ -9,14 +9,8 @@
 
 namespace phpbbservices\digests\migrations;
 
-if (!defined('IN_PHPBB'))
-{
-	exit;
-}
-
 class release_3_0_6 extends \phpbb\db\migration\migration
 {
-	
 	static public function depends_on()
 	{
 		return array(
@@ -31,39 +25,38 @@ class release_3_0_6 extends \phpbb\db\migration\migration
 
 			// Need to fix an issue introduced by those who "upgraded" from the phpBB 3.0 digests modification using the effectively_installed
 			// function prior to version 3.0.4. It limited digests UCP access to those with admin privileges only. Oops.
-			
-			// Temporarily get rid of the four digest UCP modules...
-			array('module.remove', array(
-				'ucp',
-				'UCP_DIGESTS',
-				array(
-					'module_basename'       => '\phpbbservices\digests\ucp\main_module',
-					'modes'                 => array('basics', 'forums_selection', 'post_filters', 'additional_criteria'),
-				)
+
+			// ----- Remove UCP modules ----- //
+			array('if', array(
+				array('module.exists', array('ucp', 'UCP_DIGESTS', 'UCP_DIGESTS_BASICS')),
+				array('module.remove', array('ucp', 'UCP_DIGESTS', 'UCP_DIGESTS_BASICS')),
 			)),
-			// then its module category
-			array('module.remove', array(
-				'ucp',
-				0,
-				'UCP_DIGESTS',
+			array('if', array(
+				array('module.exists', array('ucp', 'UCP_DIGESTS', 'UCP_DIGESTS_POSTS_SELECTION')), // Only in 2.2.6, gone in 2.2.7
+				array('module.remove', array('ucp', 'UCP_DIGESTS', 'UCP_DIGESTS_POSTS_SELECTION')),
 			)),
-		
+			array('if', array(
+				array('module.exists', array('ucp', 'UCP_DIGESTS', 'UCP_DIGESTS_FORUMS_SELECTION')), // Appeared in 2.2.7
+				array('module.remove', array('ucp', 'UCP_DIGESTS', 'UCP_DIGESTS_FORUMS_SELECTION')),
+			)),
+			array('if', array(
+				array('module.exists', array('ucp', 'UCP_DIGESTS', 'UCP_DIGESTS_POST_FILTERS')),
+				array('module.remove', array('ucp', 'UCP_DIGESTS', 'UCP_DIGESTS_POST_FILTERS')),
+			)),
+			array('if', array(
+				array('module.exists', array('ucp', 'UCP_DIGESTS', 'UCP_DIGESTS_ADDITIONAL_CRITERIA')),
+				array('module.remove', array('ucp', 'UCP_DIGESTS', 'UCP_DIGESTS_ADDITIONAL_CRITERIA')),
+			)),
+
 			// Now put them back in but with the right authorization this time
 			array('module.add', array(
-				'module_class'		=> 'ucp',
-				'module_basename'	=>	false,	// 0, or top level
-				'module_langname'	=> 'UCP_DIGESTS',
-				'module_auth'       => 'ext_phpbbservices/digests',
-			)),
-			array('module.add', array(
-				'ucp', 
-				'UCP_DIGESTS', 
+				'ucp',
+				'UCP_DIGESTS',
 				array(
 					'module_basename'   => '\phpbbservices\digests\ucp\main_module',
 					'modes' => array('basics', 'forums_selection', 'post_filters', 'additional_criteria'),
 				),
 			)),
-						
 		);
 	}
 }

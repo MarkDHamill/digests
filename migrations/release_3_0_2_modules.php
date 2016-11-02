@@ -9,7 +9,7 @@
 
 namespace phpbbservices\digests\migrations;
 
-class release_3_0_5 extends \phpbb\db\migration\migration
+class release_3_0_2_modules extends \phpbb\db\migration\migration
 {
 	public function effectively_installed()
 	{
@@ -27,7 +27,7 @@ class release_3_0_5 extends \phpbb\db\migration\migration
 	static public function depends_on()
 	{
 		return array(
-			'\phpbbservices\digests\migrations\release_3_0_2_modules',
+			'\phpbbservices\digests\migrations\convert_mod_modules',
 			'\phpbb\db\migration\data\v31x\v319',
 		);
 	}
@@ -35,17 +35,37 @@ class release_3_0_5 extends \phpbb\db\migration\migration
 	public function update_data()
 	{
 		return array(
-
-			// Add a new ACP digest modules
+			// Add the ACP digests category under the extensions tab
+			array('module.add', array(
+				'acp',
+				'ACP_CAT_DOT_MODS',
+				'ACP_CAT_DIGESTS'
+			)),
+			// Add the four ACP digest modules
 			array('module.add', array(
 				'acp',
 				'ACP_CAT_DIGESTS',
 				array(
 					'module_basename'	=> '\phpbbservices\digests\acp\main_module',
-					'modes'				=> array('digests_reset_cron_run_time'),
+					'modes'				=> array('digests_general', 'digests_user_defaults', 'digests_edit_subscribers', 'digests_balance_load', 'digests_mass_subscribe_unsubscribe', 'digests_test'),
 				),
 			)),
 
+			// Add the UCP digests category, a top level category
+			array('module.add', array(
+				'ucp',
+				0,
+				'UCP_DIGESTS',
+			)),
+			// Add the four UCP digest modules
+			array('module.add', array(
+				'ucp',
+				'UCP_DIGESTS',
+				array(
+					'module_basename'   => '\phpbbservices\digests\ucp\main_module',
+					'modes' => array('basics', 'forums_selection', 'post_filters', 'additional_criteria'),
+				),
+			)),
 		);
 	}
 }

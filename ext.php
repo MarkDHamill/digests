@@ -12,14 +12,13 @@ namespace phpbbservices\digests;
 /**
  * @ignore
  */
-
 class ext extends \phpbb\extension\base
 {
-
 	public function is_enableable()
 	{
 		$config = $this->container->get('config');
-		return (phpbb_version_compare($config['version'], '3.1.9', '>=') && phpbb_version_compare($config['version'], '3.2.0@dev', '<')) ? true : false;
+		return phpbb_version_compare($config['version'], '3.1.9', '>=') &&
+			phpbb_version_compare($config['version'], '3.2.0@dev', '<') &&
+			phpbb_version_compare($config['digests_version'], '2.2.6', '<');
 	}
-
 }

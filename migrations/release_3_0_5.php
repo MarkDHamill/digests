@@ -9,11 +9,6 @@
 
 namespace phpbbservices\digests\migrations;
 
-if (!defined('IN_PHPBB'))
-{
-	exit;
-}
-
 class release_3_0_5 extends \phpbb\db\migration\migration
 {
 	
@@ -21,7 +16,6 @@ class release_3_0_5 extends \phpbb\db\migration\migration
 	{
 		return array(
 			'\phpbbservices\digests\migrations\release_3_0_2',
-			'\phpbb\db\migration\data\v31x\v319',
 		);
 	}
 

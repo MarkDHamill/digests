@@ -9,8 +9,7 @@ function show_warning()
 	// If All Forums is unchecked and there are no checked forums, do not allow the form 
 	// to submit and display a message
 	var all_forums = document.getElementById('all_forums');
-	if (all_forums.checked == true)
-	{
+	if (all_forums.checked == true)	{
 		return true;
 	}
 	
@@ -21,12 +20,9 @@ function show_warning()
 	for(i=0;i<x.length;i++) {
 		thisobject = x[i];
 		element_name = thisobject.id;
-		if(element_name != null) 
-		{
-			if(element_name.substr(0,4) == "elt_")
-			{
-				if (thisobject.checked == true)
-				{
+		if(element_name != null) {
+			if(element_name.substr(0,4) == "elt_") {
+				if (thisobject.checked == true) {
 					none_checked = false;
 					break;
 				}
@@ -34,53 +30,40 @@ function show_warning()
 		}					
 	}
 	
-	if (none_checked)
-	{
+	if (none_checked) {
 		alert('{LA_DIGESTS_NO_FORUMS_CHECKED}');
 		return false;
 	}
 
-	return true;
-	<!-- ELSE -->
-	return true;
 	<!-- ENDIF -->
+	return true;
 }
 
 // ]]> 
 <!-- ENDIF -->
 
 <!-- IF S_DIGESTS_POST_FILTERS -->
-function trim(stringToTrim) {
-	return stringToTrim.replace(/^\s+|\s+$/g,"");
-}
-
 function check_word_size (field)
 {
-	if (isNaN(field.value))
-	{
+	if (isNaN(field.value))	{
 		alert("{LA_DIGESTS_SIZE_ERROR}");
 		field.focus();
 		return;
 	}
 	size = parseInt(field.value);
-	if (field.defaultValue != '')
-	{
+	if (field.defaultValue != '') {
 		max_items = parseInt(field.defaultValue);
 	}
-	else
-	{
+	else {
 		max_items = 0;
 	}
-	if (size <= 0)
-	{
+	if (size <= 0) {
 		alert("{LA_DIGESTS_SIZE_ERROR}");
 		field.focus();
 		return;
 	}
-	if (field.defaultValue != '0')
-	{
-		if (size > max_items) 
-		{
+	if (field.defaultValue != '0') {
+		if (size > max_items) {
 			alert("{LA_DIGESTS_SIZE_ERROR}");
 			field.focus();
 		}
@@ -110,10 +93,10 @@ function check_word_size (field)
 			<dl>
 				<dt><label>{L_DIGESTS_FREQUENCY}{L_COLON}</label><br /><span>{L_DIGESTS_FREQUENCY_EXPLAIN}</span></dt>
 				<dd>
-					<label for="none"><input type="radio" name="digest_type" id="none" style="margin-top: 3px;" value="NONE"<!-- IF S_DIGESTS_NONE_CHECKED --> checked="checked"<!-- ENDIF --> />{L_DIGESTS_NONE}</label><br />  
-					<label for="daily"><input type="radio" name="digest_type" id="daily" style="margin-top: 3px;" value="DAY"<!-- IF S_DIGESTS_DAY_CHECKED --> checked="checked"<!-- ENDIF --> />{L_DIGESTS_DAILY}</label><br />  
-					<label for="week"><input type="radio" name="digest_type" id="week" style="margin-top: 3px;" value="WEEK"<!-- IF S_DIGESTS_WEEK_CHECKED --> checked="checked"<!-- ENDIF --> />{L_DIGESTS_WEEKLY}</label><br />  
-					<label for="month"><input type="radio" name="digest_type" id="month" style="margin-top: 3px;" value="MNTH"<!-- IF S_DIGESTS_MONTH_CHECKED --> checked="checked"<!-- ENDIF --> />{L_DIGESTS_MONTHLY}</label>  
+					<label for="none"><input type="radio" name="digest_type" id="none" style="margin-top: 3px;" value="NONE"<!-- IF S_DIGESTS_NONE_CHECKED --> checked="checked"<!-- ENDIF --> />{L_DIGESTS_NONE}</label><br />
+					<label for="daily"><input type="radio" name="digest_type" id="daily" style="margin-top: 3px;" value="DAY"<!-- IF S_DIGESTS_DAY_CHECKED --> checked="checked"<!-- ENDIF --> />{L_DIGESTS_DAILY}</label><br />
+					<label for="week"><input type="radio" name="digest_type" id="week" style="margin-top: 3px;" value="WEEK"<!-- IF S_DIGESTS_WEEK_CHECKED --> checked="checked"<!-- ENDIF --> />{L_DIGESTS_WEEKLY}</label><br />
+					<label for="month"><input type="radio" name="digest_type" id="month" style="margin-top: 3px;" value="MNTH"<!-- IF S_DIGESTS_MONTH_CHECKED --> checked="checked"<!-- ENDIF --> />{L_DIGESTS_MONTHLY}</label>
 				</dd>
 			</dl>
 			<dl>

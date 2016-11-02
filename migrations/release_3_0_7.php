@@ -9,29 +9,21 @@
 
 namespace phpbbservices\digests\migrations;
 
-if (!defined('IN_PHPBB'))
-{
-	exit;
-}
-
 class release_3_0_7 extends \phpbb\db\migration\migration
 {
 	
 	static public function depends_on()
 	{
 		return array(
-			'\phpbbservices\digests\migrations\release_3_0_6',
-			'\phpbb\db\migration\data\v31x\v319',
+			'\phpbbservices\digests\migrations\release_3_0_5',
 		);
 	}
 
 	public function update_data()
 	{
 		return array(
-
 			// Add new digest configuration variable
 			array('config.add',	array('phpbbservices_digests_max_cron_hrs', 0)),
-						
 		);
 	}
 	

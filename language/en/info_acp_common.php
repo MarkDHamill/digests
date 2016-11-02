@@ -27,13 +27,6 @@ $timeOffset = $tz_board->getOffset($datetime_tz_board) / 3600;
 $server_settings_url = append_sid('index.php?i=acp_board&amp;mode=server');
 
 $lang = array_merge($lang, array(
-	'ACP_DIGESTS_NEVER'										=> 'never',
-	)
-);
-
-$last_run = ($config['phpbbservices_digests_cron_task_last_gc'] == 0) ? $lang['ACP_DIGESTS_NEVER'] : date($config['default_dateformat'], $config['phpbbservices_digests_cron_task_last_gc']) . ' board time';
-
-$lang = array_merge($lang, array(
 	'ACP_CAT_DIGESTS'										=> 'Digests',
 
 	'ACP_DIGESTS_SETTINGS'									=> 'Digest settings',
@@ -68,7 +61,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_ENABLE_CUSTOM_STYLESHEET'						=> 'Enable custom stylesheet',
 	'DIGESTS_ENABLE_CUSTOM_STYLESHEET_EXPLAIN'				=> 'If not enabled, the default stylesheet for the style selected in the user&apos;s profile is applied to HTML versions of their digests.',
 	'DIGESTS_ENABLE_LOG'									=> 'Write all digest actions to the admin log',
-	'DIGESTS_ENABLE_LOG_EXPLAIN'							=> 'If this is enabled, all digest actions will be written to the admin log (found on the Maintenance tab). This is helpful for solving digest problems since it indicates what the digests mailer did and when. However, it will quickly result in a very long Admin log since at least two entries will be written every hour to the log. Note: exceptions and warnings are always written to the log.',
+	'DIGESTS_ENABLE_LOG_EXPLAIN'							=> 'If this is enabled, all digest actions will be written to the admin log (found on the Maintenance tab). This is helpful for solving digest problems since it indicates what the digests mailer did, when and for which subscribers. Enabling this will quickly result in a very long Admin log since at least two entries will be written every hour to the log. Note: errors, exceptions and warnings are always written to the log.',
 	'DIGESTS_ENABLE_SUBSCRIBE_UNSUBSCRIBE'					=> 'Enable mass subscribe or unsubscribe',
 	'DIGESTS_ENABLE_SUBSCRIBE_UNSUBSCRIBE_EXPLAIN'			=> 'If you say yes, when you press Submit the mass subscribe or unsubscribe action will occur. Enable with care!',
 	'DIGESTS_EXCLUDE_FORUMS'								=> 'Always exclude these forums',
@@ -111,8 +104,8 @@ $lang = array_merge($lang, array(
 	'DIGESTS_REGISTRATION_FIELD_EXPLAIN'					=> 'If enabled, upon registration users have the option to get digests using the board&apos;s defaults. This option does not appear if automatic subscriptions are enabled.',
 	'DIGESTS_REPLY_TO_EMAIL_ADDRESS'						=> 'Reply to e-mail Address',
 	'DIGESTS_REPLY_TO_EMAIL_ADDRESS_EXPLAIN'				=> 'When users receive a digest, this e-mail address will appear in the REPLY TO field. If left blank it will default to your board&apos;s e-mail contact address. Use caution if using an e-mail address with a domain other than the one the digest is hosted on, as your mail server or the user&apos;s mail server may interpret the e-mail as spam.',
-	'DIGESTS_RESET_CRON_RUN_TIME'							=> 'Reset digests last run time',
-	'DIGESTS_RESET_CRON_RUN_TIME_EXPLAIN'					=> "If too many days have elapsed since digests were mailed, you can reset the digest mailing time. When digests next are mailed they will be mailed to subscribers for the current hour only. The mailer was last run: $last_run. Note: manually running the mailer does not affect this setting.", 
+	'DIGESTS_RESET_CRON_RUN_TIME'							=> 'Reset the mailer',
+	'DIGESTS_RESET_CRON_RUN_TIME_EXPLAIN'					=> 'If reset, when the mailer is next run it will create digests for the current hour only. Any digests in the queue are removed. Resetting can be useful when you are done testing digests or if phpBB&apos;s cron has not been run in a long while.',
 	'DIGESTS_RUN_TEST'										=> 'Run the mailer',
 	'DIGESTS_RUN_TEST_CLEAR_SPOOL'							=> 'Clear the store/ext/phpbbservices/digests directory',
 	'DIGESTS_RUN_TEST_CLEAR_SPOOL_ERROR'					=> 'Could not remove all the files in the store/ext/phpbbservices/digests directory. This may be due to a permissions issue. The file permissions on the directory should be set to publicly writeable (777 on Unix-based systems).',
@@ -139,7 +132,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_SELECT_FORUMS_ADMIN_EXPLAIN'					=> 'The list of forums includes only those forums this user is allowed to read. If you wish to give this user access to additional forums not shown here, expand their forum user or group permissions. Note although you can fine tune the forums that appear in their digest, if their digest type is "None" no digest will actually be sent.',
 	'DIGESTS_SHOW'											=> 'Show',
 	'DIGESTS_SHOW_EMAIL'									=> 'Show email address in log',
-	'DIGESTS_SHOW_EMAIL_EXPLAIN'							=> 'If this is enabled, the subscriber&apos;s email address is shown in entries in the admin log when logging is enabled. This can be useful in troubleshooting digest issues such as "Where was my digest sent to on this date and hour?"',
+	'DIGESTS_SHOW_EMAIL_EXPLAIN'							=> 'If this is enabled, the subscriber&apos;s email address is shown in entries in the admin log by the username of the subscriber. This can be useful in troubleshooting digest issues mailer issues.',
 	'DIGESTS_SORT_ORDER'									=> 'Sort order',
 	'DIGESTS_STOPPED_SUBSCRIBING'							=> 'Stopped subscribing',
 	'DIGESTS_SUBSCRIBE_EDITED'								=> 'Your digest subscription settings have been edited',

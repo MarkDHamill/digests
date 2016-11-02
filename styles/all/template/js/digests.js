@@ -1,7 +1,7 @@
 function check_word_size_min (field) 
 {
 	size = field.value;
-	if (size == '')	{
+	if ((size == '') || (size == 0)){
 		return;
 	}
 	if ((size < 0) || (isNaN(size))) {

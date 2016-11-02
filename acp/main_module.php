@@ -211,7 +211,7 @@ class main_module
 
 				// Get the total rows for pagination purposes
 				$sql_array = array(
-					'SELECT'	=> 'count(*) AS total_users',
+					'SELECT'	=> 'COUNT(user_id) AS total_users',
 				
 					'FROM'		=> array(
 						USERS_TABLE		=> 'u',
@@ -232,8 +232,7 @@ class main_module
 				// Create pagination logic
 				$pagination = $phpbb_container->get('pagination');
 
-				$base_url = "index.php?i=-phpbbservices-digests-acp-main_module&amp;mode=digests_edit_subscribers&amp;sortby=$sortby";
-				$base_url = append_sid($base_url);	
+				$this->u_action = append_sid("index.$phpEx?i=-phpbbservices-digests-acp-main_module&amp;mode=digests_edit_subscribers&amp;sortby=$sortby");	
 				$pagination->generate_template_pagination($base_url, 'pagination', 'start', $total_users, $config['phpbbservices_digests_users_per_page'], $start);
 								
 				// Stealing some code from my Smartfeed extension so I can get a list of forums that a particular user can access
@@ -408,7 +407,7 @@ class main_module
 
 					$result2 = $db->sql_query($sql2);
 					$subscribed_forums = $db->sql_fetchrowset($result2);
-					$db->sql_freeresult();
+					$db->sql_freeresult($result2);
 
 					$all_by_default = (sizeof($subscribed_forums) == 0) ? true : false;
 					
@@ -676,7 +675,7 @@ class main_module
 				));
 
 				$sql_array = array(
-					'SELECT'	=> 'user_digest_send_hour_gmt AS hour, count(*) AS hour_count',
+					'SELECT'	=> 'user_digest_send_hour_gmt AS hour, COUNT(user_id) AS hour_count',
 				
 					'FROM'		=> array(
 						USERS_TABLE		=> 'u',
@@ -1149,7 +1148,7 @@ class main_module
 		{
 
 			$sql_array = array(
-				'SELECT'	=> 'count(*) AS digests_count',
+				'SELECT'	=> 'COUNT(user_id) AS digests_count',
 			
 				'FROM'		=> array(
 					USERS_TABLE		=> 'u',
@@ -1175,7 +1174,7 @@ class main_module
 			// Get oversubscribed hours, place in an array
 
 			$sql_array = array(
-				'SELECT'	=> 'user_digest_send_hour_gmt AS hour, count(*) AS hour_count',
+				'SELECT'	=> 'user_digest_send_hour_gmt AS hour, COUNT(user_id) AS hour_count',
 			
 				'FROM'		=> array(
 					USERS_TABLE		=> 'u',
@@ -1185,7 +1184,7 @@ class main_module
 			
 				'GROUP_BY'	=> 'user_digest_send_hour_gmt',
 				
-				'HAVING'	=> 'count(user_digest_send_hour_gmt) > ' . (int) $avg_subscribers_per_hour,
+				'HAVING'	=> 'COUNT(user_digest_send_hour_gmt) > ' . (int) $avg_subscribers_per_hour,
 				
 				'ORDER_BY'	=> '1',
 			);
@@ -1375,7 +1374,17 @@ class main_module
 
 		if ($submit && $mode == 'digests_reset_cron_run_time')
 		{
+			// This allows the digests to go out next time cron.php is run.
 			$config->set('phpbbservices_digests_cron_task_last_gc', 0);
+			
+			// This resets all the date/time stamps for when a digest was last sent to a user.
+			$sql_ary = array('user_digest_last_sent', 0);
+			
+			$sql = 'UPDATE ' . USERS_TABLE . ' 
+				SET ' . $db->sql_build_array('UPDATE', $sql_ary);
+			$db->sql_query($sql);
+			
+			$sql = $db->sql_build_query('UPDATE', $sql_array);
 		}
 
 		if ($submit && $mode == 'digests_test')
@@ -1434,7 +1443,7 @@ class main_module
 				if (!$all_cleared)
 				{
 					$message_type = E_USER_WARNING;
-					$message = strip_tags($user->lang('LOG_CONFIG_DIGESTS_CLEAR_SPOOL_ERROR'));
+					$message = $user->lang('DIGESTS_RUN_TEST_CLEAR_SPOOL_ERROR');
 					$continue = false;
 				}
 

@@ -9,6 +9,9 @@
 
 namespace phpbbservices\digests\migrations;
 
+use phpbbservices\digests\constants\constants;
+use phpbbservices\digests\core\common;
+
 class convert_mod_data extends \phpbb\db\migration\migration
 {
 	public function effectively_installed()
@@ -33,87 +36,105 @@ class convert_mod_data extends \phpbb\db\migration\migration
 
 	public function update_configs()
 	{
-		// Load the new configuration values array
+
+		// To upgrade from 2.2.6 or greater, the basic approach is to compare arrays of configuration variables and database column names.
+		// Remove what has gone away, add what is missing. If there is a value already, retain it.
+
+		// Load the configuration values for the extensionn for version 3.0.2 into an array.
+
 		$new_config = array(
-			'digests_block_images',
-			'digests_cron_task_last_gc',
-			'digests_cron_task_gc',
-			'digests_custom_stylesheet_path',
-			'digests_enable_auto_subscriptions',
-			'digests_enable_custom_stylesheets',
-			'digests_enable_log',
-			'digests_enable_subscribe_unsubscribe',
-			'digests_exclude_forums',
-			'digests_from_email_name',
-			'digests_from_email_address',
-			'digests_host',
-			'digests_include_admins',
-			'digests_include_forums',
-			'digests_max_items',
-			'digests_notify_on_admin_changes',
-			'digests_registration_field',
-			'digests_reply_to_email_address',
-			'digests_show_email',
-			'digests_subscribe_all',
-			'digests_test',
-			'digests_test_clear_spool',
-			'digests_test_day',
-			'digests_test_email_address',
-			'digests_test_hour',
-			'digests_test_month',
-			'digests_test_send_to_admin',
-			'digests_test_spool',
-			'digests_test_time_use',
-			'digests_test_year',
-			'digests_time_zone',
-			'digests_user_check_all_forums',
-			'digests_user_digest_attachments',
-			'digests_user_digest_block_images',
-			'digests_user_digest_filter_type',
-			'digests_user_digest_format',
-			'digests_user_digest_max_display_words',
-			'digests_user_digest_max_posts',
-			'digests_user_digest_min_words',
-			'digests_user_digest_new_posts_only',
-			'digests_user_digest_no_post_text',
-			'digests_user_digest_pm_mark_read',
-			'digests_user_digest_registration',
-			'digests_user_digest_remove_foes',
-			'digests_user_digest_reset_lastvisit',
-			'digests_user_digest_send_hour_gmt',
-			'digests_user_digest_send_on_no_posts',
-			'digests_user_digest_show_mine',
-			'digests_user_digest_show_pms',
-			'digests_user_digest_sortby',
-			'digests_user_digest_toc',
-			'digests_user_digest_type',
-			'digests_users_per_page',
-			'digests_weekly_digest_day',
+			'digests_block_images'                  => 0,
+			'digests_cron_task_last_gc'             => 0, // timestamp when the digests mailer was last run
+			'digests_cron_task_gc'                  => (60 * 60), // seconds between run; digests are sent hourly
+			'digests_custom_stylesheet_path'        => '',
+			'digests_enable_auto_subscriptions'     => 0,
+			'digests_enable_custom_stylesheets'     => 0,
+			'digests_enable_log'                    => 1,
+			'digests_enable_subscribe_unsubscribe'  => 0,
+			'digests_exclude_forums'                => 0,
+			'digests_from_email_name'               => '',
+			'digests_from_email_address'            => '',
+			'digests_host'                          => 'phpbbservices.com',
+			'digests_include_admins'                => 0,
+			'digests_include_forums'                => 0,
+			'digests_max_items'                     => 0,
+			'digests_notify_on_admin_changes'		=> 1,
+			'digests_page_url'                      => 'https://www.phpbbservices.com/digests_wp/',
+			'digests_registration_field'            => 0,
+			'digests_reply_to_email_address'        => '',
+			'digests_show_email'                    => 0,
+			'digests_subscribe_all'                 => '1',
+			'digests_test'                          => 0,
+			'digests_test_clear_spool'              => 1,
+			'digests_test_day'                      => date('j'),
+			'digests_test_email_address'            => '',
+			'digests_test_hour'                     => date('G'),
+			'digests_test_month'                    => date('n'),
+			'digests_test_send_to_admin'            => 0,
+			'digests_test_spool'                    => 0,
+			'digests_test_time_use'                 => 0,
+			'digests_test_year'                     => date('Y'),
+			'digests_time_zone'                     => $helper->make_tz_offset($config['board_timezone']),
+			'digests_user_check_all_forums'         => 1,
+			'digests_user_digest_attachments'       => 1,
+			'digests_user_digest_block_images'      => 0,
+			'digests_user_digest_filter_type'       => constants::DIGESTS_ALL,
+			'digests_user_digest_format'            => constants::DIGESTS_HTML_VALUE,
+			'digests_user_digest_max_display_words' => -1,
+			'digests_user_digest_max_posts'         => 0,
+			'digests_user_digest_min_words'         => 0,
+			'digests_user_digest_new_posts_only'    => 0,
+			'digests_user_digest_no_post_text'      => 0,
+			'digests_user_digest_pm_mark_read'      => 0,
+			'digests_user_digest_registration'      => 0,
+			'digests_user_digest_remove_foes'       => 0,
+			'digests_user_digest_reset_lastvisit'   => 0,
+			'digests_user_digest_send_hour_gmt'     => -1,
+			'digests_user_digest_send_on_no_posts'  => 0,
+			'digests_user_digest_show_mine'         => 1,
+			'digests_user_digest_show_pms'          => 1,
+			'digests_user_digest_sortby'            => constants::DIGESTS_SORTBY_BOARD,
+			'digests_user_digest_toc'               => 0,
+			'digests_user_digest_type'              => constants::DIGESTS_DAILY_VALUE,
+			'digests_users_per_page'                => 20,
+			'digests_weekly_digest_day'             => 0,
 		);
 
-		$old_config = array();
-
-		// Get all digests_ configs
-		$sql = 'SELECT *
-			FROM ' . $this->table_prefix . 'config
-			WHERE config_name ' . $this->db->sql_like_expression('digests_' . $this->db->get_any_char());
-		$result = $this->db->sql_query($sql);
-		while ($row = $this->db->sql_fetchrow($result))
-		{
-			$old_config[$row['config_name']] = $row['config_value'];
-		}
-		$this->db->sql_freeresult($result);
-
+		$remove_config = array();
 
 		// If the old configuration value exists, keep its value but it must change its name to add the vendor name as a prefix
-		foreach ($old_config as $key => $value)
+		foreach ($config as $key => $value)
 		{
-			if (array_key_exists($key, $new_config))
+			if (substr($key, 0, 8) == 'digests_')
 			{
-				// add the new config value with vendor in the config_name
-				$this->config->set('phpbbservices_' . $key, $value);
+				if (array_key_exists($key, $new_config))
+				{
+					// add the new config value with vendor in the config_name
+					$config->set('phpbbservices_' . $key, $value);
+				}
+				// mark the old config value for deletion once outside of the loop
+				$remove_config[] = $key;
 			}
-			$this->config->delete($key);
 		}
+
+		// Remove the old configuration variables, i.e. digests_* rather than phpbbservices_digests_*
+		foreach ($remove_config as $key => $value)
+		{
+			$config->delete($value);
+		}
+
+		// Add in any new configuration variables using the defaults. These were introduced by later versions of digests or are new in the extension
+		// and all must have phpbbservices_ as a prefix.
+		foreach ($new_config as $key => $value)
+		{
+			if (array_key_exists($key, $config) === false)
+			{
+				$config->set('phpbbservices_' . $key, $value);
+			}
+		}
+
+		// Modify problematic configuration variables explicitly. The digests page is now in Wordpress.
+		$config->set('phpbbservices_digests_page_url', 'https://www.phpbbservices.com/digests_wp/');
+
 	}
 }

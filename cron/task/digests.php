@@ -1452,7 +1452,7 @@ class digests extends \phpbb\cron\task\base
 				{
 					// If this user cannot retrieve ANY forums, in most cases no digest will be produced. However, there may be forums that the admin
 					// requires be presented, so we don't do an exception, but we do note it in the log.
-					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGEST_NO_ALLOWED_FORUMS', false, array($user_row['username']));
+					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_NO_ALLOWED_FORUMS', false, array($user_row['username']));
 				}
 				$allowed_forums[] = 0;	// Add in global announcements forum
 		

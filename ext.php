@@ -19,7 +19,6 @@ class ext extends \phpbb\extension\base
 {
 	public function is_enableable()
 	{
-<<<<<<< HEAD
 
 		global $config, $user, $cache, $phpbb_root_path, $phpEx, $db, $table_prefix;
 		
@@ -305,11 +304,5 @@ class ext extends \phpbb\extension\base
 
 		return true;
 
-=======
-		$config = $this->container->get('config');
-		return phpbb_version_compare($config['version'], '3.1.9', '>=') &&
-			phpbb_version_compare($config['version'], '3.2.0@dev', '<') &&
-			phpbb_version_compare($config['digests_version'], '2.2.6', '<');
->>>>>>> origin/master
 	}
 }

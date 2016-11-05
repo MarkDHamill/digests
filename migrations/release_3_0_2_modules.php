@@ -53,19 +53,20 @@ class release_3_0_2_modules extends \phpbb\db\migration\migration
 
 			// Add the UCP digests category, a top level category
 			array('module.add', array(
-				'ucp',
-				0,
-				'UCP_DIGESTS',
+			   'ucp',
+			   false,
+			   'UCP_DIGESTS',
 			)),
 			// Add the four UCP digest modules
 			array('module.add', array(
-				'ucp',
-				'UCP_DIGESTS',
+				'ucp', 
+				'UCP_DIGESTS', 
 				array(
 					'module_basename'   => '\phpbbservices\digests\ucp\main_module',
 					'modes' => array('basics', 'forums_selection', 'post_filters', 'additional_criteria'),
 				),
 			)),
+
 		);
 	}
 }

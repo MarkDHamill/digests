@@ -42,6 +42,8 @@ class convert_mod_data extends \phpbb\db\migration\migration
 
 		// Load the configuration values for the extensionn for version 3.0.2 into an array.
 
+		$helper = new common();
+
 		$new_config = array(
 			'digests_block_images'                  => 0,
 			'digests_cron_task_last_gc'             => 0, // timestamp when the digests mailer was last run
@@ -74,7 +76,7 @@ class convert_mod_data extends \phpbb\db\migration\migration
 			'digests_test_spool'                    => 0,
 			'digests_test_time_use'                 => 0,
 			'digests_test_year'                     => date('Y'),
-			'digests_time_zone'                     => $helper->make_tz_offset($config['board_timezone']),
+			'digests_time_zone'                     => $helper->make_tz_offset($this->config['board_timezone']),
 			'digests_user_check_all_forums'         => 1,
 			'digests_user_digest_attachments'       => 1,
 			'digests_user_digest_block_images'      => 0,
@@ -103,14 +105,14 @@ class convert_mod_data extends \phpbb\db\migration\migration
 		$remove_config = array();
 
 		// If the old configuration value exists, keep its value but it must change its name to add the vendor name as a prefix
-		foreach ($config as $key => $value)
+		foreach ($this->config as $key => $value)
 		{
 			if (substr($key, 0, 8) == 'digests_')
 			{
 				if (array_key_exists($key, $new_config))
 				{
 					// add the new config value with vendor in the config_name
-					$config->set('phpbbservices_' . $key, $value);
+					$this->config->set('phpbbservices_' . $key, $value);
 				}
 				// mark the old config value for deletion once outside of the loop
 				$remove_config[] = $key;
@@ -120,21 +122,21 @@ class convert_mod_data extends \phpbb\db\migration\migration
 		// Remove the old configuration variables, i.e. digests_* rather than phpbbservices_digests_*
 		foreach ($remove_config as $key => $value)
 		{
-			$config->delete($value);
+			$this->config->delete($value);
 		}
 
 		// Add in any new configuration variables using the defaults. These were introduced by later versions of digests or are new in the extension
 		// and all must have phpbbservices_ as a prefix.
 		foreach ($new_config as $key => $value)
 		{
-			if (array_key_exists($key, $config) === false)
+			if (array_key_exists($key, $this->config) === false)
 			{
-				$config->set('phpbbservices_' . $key, $value);
+				$this->config->set('phpbbservices_' . $key, $value);
 			}
 		}
 
 		// Modify problematic configuration variables explicitly. The digests page is now in Wordpress.
-		$config->set('phpbbservices_digests_page_url', 'https://www.phpbbservices.com/digests_wp/');
+		$this->config->set('phpbbservices_digests_page_url', 'https://www.phpbbservices.com/digests_wp/');
 
 	}
 }

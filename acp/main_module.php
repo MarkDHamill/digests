@@ -1541,7 +1541,7 @@ class main_module
 			if (strpos($config_key, 'legend') !== false)
 			{
 				$template->assign_block_vars('options', array(
-					'LEGEND'		=> (sizeof($user->lang[$vars]) > 0) ? $user->lang($vars) : $vars,
+					'LEGEND'		=> (isset($user->lang[$vars])) ? $user->lang($vars) : $vars,
 					'S_LEGEND'		=> true)
 				);
 

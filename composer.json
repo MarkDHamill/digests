@@ -20,7 +20,7 @@
 	"extra": {
 		"display-name": "Digests",
 		"soft-require": {
-			"phpbb/phpbb": ">=3.1.10,<3.2.0@dev"
+			"phpbb/phpbb": ">=3.1.9,<3.2.0@dev"
 		},
 		"version-check": {
 			"host": "phpbbservices.com",

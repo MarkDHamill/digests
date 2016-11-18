@@ -65,7 +65,7 @@ class convert_mod_data extends \phpbb\db\migration\migration
 			'digests_registration_field'            => 0,
 			'digests_reply_to_email_address'        => '',
 			'digests_show_email'                    => 0,
-			'digests_subscribe_all'                 => '1',
+			'digests_subscribe_all'                 => 1,
 			'digests_test'                          => 0,
 			'digests_test_clear_spool'              => 1,
 			'digests_test_day'                      => date('j'),

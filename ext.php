@@ -9,9 +9,6 @@
 
 namespace phpbbservices\digests;
 
-use phpbbservices\digests\constants\constants;
-use phpbbservices\digests\core\common;
-
 /**
  * @ignore
  */
@@ -22,11 +19,8 @@ class ext extends \phpbb\extension\base
 
 		global $config;
 
-		if (phpbb_version_compare($config['version'], '3.1.9', '<') || phpbb_version_compare($config['version'], '3.2.0@dev', '>='))
-		{
-			return false;
-		}
-		return true;
+		// phpBB 3.2 is not supported. phpBB 3.1.9 and above is required.
+		return (phpbb_version_compare($config['version'], '3.1.9', '<') || phpbb_version_compare($config['version'], '3.2.0@dev', '>=')) ? false : true;
 
 	}
 }

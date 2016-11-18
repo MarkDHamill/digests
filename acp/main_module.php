@@ -233,7 +233,7 @@ class main_module
 				$pagination = $phpbb_container->get('pagination');
 
 				$this->u_action = append_sid("index.$phpEx?i=-phpbbservices-digests-acp-main_module&amp;mode=digests_edit_subscribers&amp;sortby=$sortby");	
-				$pagination->generate_template_pagination($base_url, 'pagination', 'start', $total_users, $config['phpbbservices_digests_users_per_page'], $start);
+				$pagination->generate_template_pagination($this->u_action, 'pagination', 'start', $total_users, $config['phpbbservices_digests_users_per_page'], $start);
 								
 				// Stealing some code from my Smartfeed extension so I can get a list of forums that a particular user can access
 				

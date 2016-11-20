@@ -27,13 +27,6 @@ $timeOffset = $tz_board->getOffset($datetime_tz_board) / 3600;
 $server_settings_url = append_sid('index.php?i=acp_board&amp;mode=server');
 
 $lang = array_merge($lang, array(
-	'ACP_DIGESTS_NEVER'										=> 'niemals',
-	)
-);
-
-$last_run = ($config['phpbbservices_digests_cron_task_last_gc'] == 0) ? $lang['ACP_DIGESTS_NEVER'] : date($config['default_dateformat'], $config['phpbbservices_digests_cron_task_last_gc']) . ' Board-Zeit';
-
-$lang = array_merge($lang, array(
 	'ACP_CAT_DIGESTS'										=> 'eMail-Zusammenfassungen',
 
 	'ACP_DIGESTS_SETTINGS'									=> 'Konfiguration',
@@ -68,7 +61,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_ENABLE_CUSTOM_STYLESHEET'						=> 'Custom-Stylesheet aktivieren',
 	'DIGESTS_ENABLE_CUSTOM_STYLESHEET_EXPLAIN'				=> 'Wenn kein Costum-Stylesheet eingerichtet ist, wird bei der Erzeugung aller HTML-Zusammenfassungen jeweils das Standard-Stylsheet verwendet, welches zum Style gehört, der im jeweiligen Nutzer-Profil ausgewählt wurde.',
 	'DIGESTS_ENABLE_LOG'									=> 'Alle Aktivitäten der Digest-Extension mit im Admin-Log erfassen',
-	'DIGESTS_ENABLE_LOG_EXPLAIN'							=> 'Wenn diese option aktiviert wurde, werden alle Aktivitäten der Extension ins Administrations-Protokoll geschrieben (zu finden im Wartungstab). Das kann bei der Fehlersuche sehr hilfreich sein, weil es genau anzeigt, welche Schritte der Digest-Mailer durchgeführt hat und zu welchem Zeitpunkt das war. Daraus resultiert allerdings ziemlich schnell ein extrem langes Admin-Log, denn der Digest-Mailer erzeugt mindestens zwei Einträge in jeder Stunde. Hinweis: Fehlermeldungen und Warnungen werden unabhängig von dieser Einstellung immer ins Protokoll geschrieben.',
+	'DIGESTS_ENABLE_LOG_EXPLAIN'							=> 'Wenn diese option aktiviert wurde, werden alle Aktivitäten der Extension ins Administrations-Protokoll geschrieben (zu finden im Wartungstab). Das kann bei der Fehlersuche sehr hilfreich sein, weil es genau anzeigt, welche Schritte der Digest-Mailer für welche Abonnenten durchgeführt hat und zu welchem Zeitpunkt das war. Daraus resultiert allerdings ziemlich schnell ein extrem langes Admin-Log, denn der Digest-Mailer erzeugt mindestens zwei Einträge in jeder Stunde. Hinweis: Fehlermeldungen, Ausnahmezustände und Warnungen werden unabhängig von dieser Einstellung immer ins Protokoll geschrieben.',
 	'DIGESTS_ENABLE_SUBSCRIBE_UNSUBSCRIBE'					=> 'Massenabonnement ermöglichen',
 	'DIGESTS_ENABLE_SUBSCRIBE_UNSUBSCRIBE_EXPLAIN'			=> 'Wenn hier \'Ja\' ausgewählt wurde, wird beim Anklicken von \'Absenden\' die ausgewählte Aktion für alle Nutzer unumkehrbar durchgeführt. Bitte nur mit äußerster Vorsicht einsetzen!',
 	'DIGESTS_EXCLUDE_FORUMS'								=> 'Diese Themenbereiche immer ausschließen',
@@ -94,6 +87,8 @@ $lang = array_merge($lang, array(
 	'DIGESTS_MAILER_NOT_RUN'								=> 'Mailer wurde nicht gestartet, weil er nicht aktiviert war.',
 	'DIGESTS_MAILER_RAN_SUCCESSFULLY'						=> 'Mailer wurde erfolgreich gestartet.',
 	'DIGESTS_MAILER_SPOOLED'								=> 'Die für diesen Tag und diese Stunde vorgesehenen Zusammenfassungen wurden im store/ext/phpbbservices/digests-Verzeichnis gespeichert.',
+	'DIGESTS_MAX_CRON_HOURS'								=> 'Maximale Ausführungsdauer pro Aufruf für den Mailer',
+	'DIGESTS_MAX_CRON_HOURS_EXPLAIN'						=> 'Bei einem Dedicated Server oder bei Virtual Hosting Umgebungen kann diese Einstellung normalerweise auf 0 (Null) bleiben, um alle Versandzeitpunkte abzudecken. Läuft das Forum dagegen in einer <strong>Shared Hosting</strong> Umgebung, dann kann die Ausführung des Mailers Fehler verursachen, insbesondere, wenn es dort viele Abonnenten und viele abzudeckende Versandzeitpunkte gibt. Der einfachste Weg zur Vermeidung solcher Probleme ist die <em>Einrichtung eines<a href="https://wiki.phpbb.com/PhpBB3.1/RFC/Modular_cron#Use_system_cron">System-Cronjobs</a></em>. Nur ein System-Cronjob kann den fristgerechten Versand der eMail-Zusammenfassung gewährleisten. Andernfalls läuft man Gefahr, dass solche Fehler durch das Erreichen von Obergrenzen in den aufgeteilten Ressourcen eines Shared Hosts verursacht werden. Wenn das vorkommt, und ein System-Cronjob nicht verwendet werden kann, sollte dieser Wert auf 1 gesetzt werden. Eine weitere Erhöhung dieses Wertes kann eventuell darüberhinaus vorgenommen werden, wenn man die Erfahrung gemacht hat, dass mehrere Stunden bis zum Abschluss der Aufgabe nötig sind. <em>Hinweis:</em> Der Versand der Zusammenfassungen kann sich durch eine solche Konfiguration für manche Abonnenten verzögern, weil das Forum immer Nutzerverkehr benötigt, um den Mailer laufen zu lassen.',
 	'DIGESTS_MAX_ITEMS'										=> 'Maximale Beitragszahl pro Zusammenfassung',
 	'DIGESTS_MAX_ITEMS_EXPLAIN'								=> 'Aus Performance-Gründen kann es sinnvoll sein, hier eine absolute Obergrenze für alle Zusammenfassungen festzulegen. Eine Null bedeutet, dass es kein Beitragslimit gibt und die Zusammenfassungen unendlich groß werden können. Es sind nur ganzzahlige Werte erlaubt. Dabei ist zu bedenken, dass die Größe der Zusammenstellungen auch durch die gewählte Zusammenfassungsart (täglich, wöchentlich, monatlich) und durch andere Voreinstellungen weiter eingeschränkt werden kann.',
 	'DIGESTS_MIGRATE_UNSUPPORTED_VERSION'					=> 'Upgrades of the digests modification (for phpBB 3.0) are supported from version 2.2.6 forward. You have version %s. The extension cannot be migrated or installed. Please seek help on the support forum on phpbb.com.',
@@ -109,8 +104,8 @@ $lang = array_merge($lang, array(
 	'DIGESTS_REGISTRATION_FIELD_EXPLAIN'					=> 'Wenn diese Option aktiviert ist, können Nutzer schon bei Ausfüllen des Registrierungsformulares auswählen, ob sie die eMail-Zusammenfassung mit den Standardvorgaben abonnieren möchten. Diese Auswahlmöglichkeit erscheint dort nicht, wenn das \'Automatische Abonnieren\' aktiviert ist.',
 	'DIGESTS_REPLY_TO_EMAIL_ADDRESS'						=> 'Antwortemailadresse',
 	'DIGESTS_REPLY_TO_EMAIL_ADDRESS_EXPLAIN'				=> 'Diese Emailadresse erscheint beim Empfänger im REPLY-TO-Feld (Antworten). Wenn das feld leer ist, wird die Kontakt-Emailadresse des Boards verwendet. Diese Adresse sollte mit Bedacht gewählt werden, da Adressen von einer fremden Domain schon vom absendenden Mailserver oder dann vom empfangeneden Server leicht als spamverdächtig eingestuft und herausgefiltert werden könnten.',
-	'DIGESTS_RESET_CRON_RUN_TIME'							=> 'Letzten Versandzeitpunkt zurücksetzen',
-	'DIGESTS_RESET_CRON_RUN_TIME_EXPLAIN'					=> "Wenn seit dem letzten Versand von eMail-Zusammenfassungen zu viele Tage vergangen sind, kann hier der letzte Versandzeitpunkt zurückgesetzt werden. Beim nächsten Versand werden nur die Zusammenfassungen der aktuellen Stunde berücksichtigt. Der Mailer wurde zuletzt zu folgender Zeit gestartet: $last_run. Hinweis: Eine manuelle Ausführung des Mailers hat keine Einflüsse auf diese Einstellung.", 
+	'DIGESTS_RESET_CRON_RUN_TIME'							=> 'Mailer zurücksetzen',
+	'DIGESTS_RESET_CRON_RUN_TIME_EXPLAIN'					=> 'Wenn der Mailer zurückgesetzt wurde, werden bei der nächsten Ausführung nur noch Zusammenfassungen für die aktuelle Stunde erzeugt. Alle Zusammenfassungen in der Warteschlange werden entfernt. Ein Zurücksetzen kann z.B. nach dem Ausprobieren des Zusammenfassungsversandes sinnvoll sein oder wenn der phpBB-interne Cron-Dienst sehr lange nicht gelaufen ist.', 
 	'DIGESTS_RUN_TEST'										=> 'Mailer starten',
 	'DIGESTS_RUN_TEST_CLEAR_SPOOL'							=> 'store/ext/phpbbservices/digests-Ordner leeren',
 	'DIGESTS_RUN_TEST_CLEAR_SPOOL_ERROR'					=> 'Es konnten nicht alle Dateien aus dem store/ext/phpbbservices/digests-Ordner entfernt werden. Ursache könnten fehlende Datei-Rechte sein. Alle Dateien sollten \'publicly writeable\' sein (777 auf Unix-basierten Systemen).',
@@ -137,7 +132,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_SELECT_FORUMS_ADMIN_EXPLAIN'					=> 'In der Auswahlliste tauchen nur die Themenbereiche auf, für die der Nutzer auch eine Leseberechtigung hat. Wenn Bedarf besteht, dem Nutzer auch Beiträge aus hier nicht mit aufgeführten Themenbereichen zukommen zu lassen, muss dafür eine entsprechende Änderung in den Benutzer- oder Gruppenrechten vorgenommen werden.',
 	'DIGESTS_SHOW'											=> 'Anzeigen',
 	'DIGESTS_SHOW_EMAIL'									=> 'Emailadresse im Log anzeigen',
-	'DIGESTS_SHOW_EMAIL_EXPLAIN'							=> 'Wenn diese Option und auch das Digest-Logging aktiviert ist, wird die Emailadresse des Nutzers im Administrationsprotokoll mit aufgeführt. Gerade bei der Fehlersuche kann das manchmal hilfreich sein, wenn es z.B. um Fragen wie \"Wo ist am Tag X meine Zusammenfassung abgeblieben?\" geht.',
+	'DIGESTS_SHOW_EMAIL_EXPLAIN'							=> 'Wenn diese Option aktiviert ist, wird zusätzlich zum Nutzernamen auch die Emailadresse des Nutzers im Administrationsprotokoll mit aufgeführt. Gerade im Zusammenhang mit Mailer-Problemen kann diese Funktion bei der Fehlersuche hilfreich sein.',
 	'DIGESTS_SORT_ORDER'									=> 'Sortierreihenfolge',
 	'DIGESTS_STOPPED_SUBSCRIBING'							=> 'Abonnement gestoppt',
 	'DIGESTS_SUBSCRIBE_EDITED'								=> 'Deine Konfiguration des eMail-Zusammensfassungsversandes wurde geändert.',

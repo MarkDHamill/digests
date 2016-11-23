@@ -9,15 +9,10 @@
 
 namespace phpbbservices\digests\includes;
 
-if (!defined('IN_PHPBB'))
-{
-	exit;
-}
-
 global $phpbb_root_path, $phpEx;
 include($phpbb_root_path . 'includes/functions_messenger.' . $phpEx); // Used to send emails
 
-// The purpose of this class is to override the messenger class so HTML can be sent in email. The code is a copy and paste for the relevant events 
+// The purpose of this class is to override the messenger class so HTML can be sent in email. The code is a copy and paste for the relevant events
 // from the 3.1.6 source for /includes/functions_messenger.php with minimal changes needed to add this functionality. I made one major change from
 // the way phpBB works by default: to bypass the queue altogether as the expectation is that a digest will be delivered promptly.
 

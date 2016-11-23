@@ -1,0 +1,10 @@
+.ui-dialog {
+	font-family: Verdana, Helvetica, Arial, sans-serif;
+	text-align: center;
+}
+.ui-dialog-content {
+	text-align: left;
+}
+.ui-dialog-titlebar {
+	background-color: #CADCEB;
+}

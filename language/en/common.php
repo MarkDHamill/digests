@@ -17,6 +17,8 @@ if (empty($lang) || !is_array($lang))
 	$lang = array();
 }
 
+global $config;
+
 $lang = array_merge($lang, array(
 	'DIGESTS_ALL_FORUMS'				=> 'All',
 	'DIGESTS_AUTHOR'					=> 'Author',
@@ -26,6 +28,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_BOARD_LIMIT'				=> '%d (Board limit)',
 	'DIGESTS_BY'						=> 'By',
 	'DIGESTS_CLOSED_QUOTE'				=> '"',
+	'DIGESTS_COMMA'						=> ',',		// Used  in salutations
 	'DIGESTS_COUNT_LIMIT'				=> 'Maximum number of posts in the digest',
 	'DIGESTS_COUNT_LIMIT_EXPLAIN'		=> 'Enter a number greater than zero if you want to limit the number of posts in the digest.',
 	'DIGESTS_DAILY'						=> 'Daily',
@@ -62,7 +65,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_MAIL_FREQUENCY' 			=> 'Digest Frequency',
 	'DIGESTS_MARK_READ'					=> 'Mark as read when they appear in the digest',
 	'DIGESTS_MAX_DISPLAY_WORDS'			=> 'Maximum words to display in a post',
-	'DIGESTS_MAX_DISPLAY_WORDS_EXPLAIN'	=> 'To ensure consistent rendering, if a post must be truncated the HTML will be removed from the post. Leave blank to allow the full post text to appear. If the &quot;Show no post text at all&quot; option is checked, this field is ignored and no post text will appear in the digest.',
+	'DIGESTS_MAX_DISPLAY_WORDS_EXPLAIN'	=> 'To ensure consistent rendering, if a post must be truncated the HTML will be removed from the post. Leave blank or set to 0 to allow the full post text to appear. If the &quot;Show no post text at all&quot; option is checked, this field is ignored and no post text will appear in the digest.',
 	'DIGESTS_MAX_SIZE'					=> 'Maximum words to display in a post',
 	'DIGESTS_MAX_WORDS_NOTIFIER'		=> '... ',
 	'DIGESTS_MIN_SIZE'					=> 'Minimum words required in post for the post to appear in a digest',
@@ -112,7 +115,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_SHOW_ATTACHMENTS_EXPLAIN'	=> 'If enabled, attachment images will appear in your digest at the bottom of the post or private message. Non-image attachments appear as links (HTML digests only). The BBCode [img] tag is not affected by this setting.',
 	'DIGESTS_SHOW_NEW_POSTS_ONLY' 		=> 'Show new posts only',
 	'DIGESTS_SHOW_PMS' 					=> 'Show my private messages',
-	'DIGESTS_SIZE_ERROR'				=> "This field is a required field. You must enter a positive whole number, less than or equal to the maximum allowed by the Forum Administrator. The maximum allowed is %d. If this value is zero, there is no limit.",
+	'DIGESTS_SIZE_ERROR'				=> sprintf("This field is a required field. You must enter a positive whole number, less than or equal to the maximum allowed by the Forum Administrator. The maximum allowed is %u. If this value is zero, there is no limit.", $config['phpbbservices_digests_max_items']),
 	'DIGESTS_SIZE_ERROR_MIN'			=> 'You must enter a whole number or leave the field blank. If this value is zero, there is no limit.',
 	'DIGESTS_SKIP'						=> 'Skip to content',
 	'DIGESTS_SORT_BY'					=> 'Post sort order',

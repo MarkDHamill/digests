@@ -1,0 +1,84 @@
+<?php
+/**
+*
+* @package phpBB Extension - Digests
+* @copyright (c) 2016 Mark D. Hamill (mark@phpbbservices.com)
+* @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
+*
+*/
+
+if (!defined('IN_PHPBB'))
+{
+	exit;
+}
+
+if (empty($lang) || !is_array($lang))
+{
+	$lang = array();
+}
+
+global $config, $phpbb_container;
+
+$helper = $phpbb_container->get('phpbbservices.digests.common');
+
+$server_settings_url = append_sid('index.php?i=acp_board&amp;mode=server');
+
+$lang = array_merge($lang, array(
+	'ACP_CAT_DIGESTS'										=> 'Digests',
+	'ACP_DIGESTS_SETTINGS'									=> 'Digest settings',
+	'ACP_DIGESTS_GENERAL_SETTINGS'							=> 'General settings',
+	'ACP_DIGESTS_GENERAL_SETTINGS_EXPLAIN'					=> 'These are the general digests settings. Please note that if timely delivery of digests must be guaranteed then you must set up and <a href="'. $server_settings_url . '">enable</a> phpBB&apos;s <strong><a href="https://wiki.phpbb.com/Modular_cron#Use_system_cron">system cron</a></strong> feature. Otherwise the next time there is board traffic, digests for the current and previous hours will be mailed. For more information, see the FAQ for the Digests extension on the forums at phpbb.com.',
+	'ACP_DIGESTS_USER_DEFAULT_SETTINGS'						=> 'User default settings',
+	'ACP_DIGESTS_USER_DEFAULT_SETTINGS_EXPLAIN'				=> 'This settings allow administrators to set the defaults users see when they subscribe to a digest.',
+	'ACP_DIGESTS_EDIT_SUBSCRIBERS'							=> 'Edit subscribers',
+	'ACP_DIGESTS_EDIT_SUBSCRIBERS_EXPLAIN'					=> 'This page allows you to see who is or is not receiving digests. You can selectively add digest subscriptions, selectively unsubscribe members, and edit all digest details of individual subscribers. By marking rows with the checkbox in the first column, you can subscribe these members with defaults or unsubscribe them. Do this by selecting the appropriate controls near the bottom of the page then pressing Submit. Also note you can use these controls to sort and filter the list in conjunction with the Refresh button.',
+	'ACP_DIGESTS_BALANCE_LOAD'								=> 'Balance load',
+	'ACP_DIGESTS_BALANCE_LOAD_EXPLAIN'						=> 'If too many digests going out at certain hours are causing performance issues, this will rebalance digest subscriptions so that roughly the same number of digests are sent for each hour. The table below shows the current number of digest subscribers for each hour, with the hour based on the digest hour set in Digest general settings. This function updates digest send hours minimally. Changes occur only on those hours where the number of subscribers exceeds the average load, and only for subscribers that exceed the hourly average for that hour. <em>Caution</em>: subscribers may be upset that their subscription times were changed.',
+	'ACP_DIGESTS_MASS_SUBSCRIBE_UNSUBSCRIBE'				=> 'Mass subscribe/unsubscribe',
+	'ACP_DIGESTS_MASS_SUBSCRIBE_UNSUBSCRIBE_EXPLAIN'		=> 'This feature allows administrators to conveniently subscribe or unsubscribe all members of your forum at once. Digest default settings are used to subscribe members. If a member already has a digest subscription, a mass subscription will retain their digest settings. You cannot specify the forums that will be subscribed. Users will be subscribed to all forums to which they have read access. <strong>Caution</strong>: subscribers may be upset if they are subscribed or unsubscribed without their permission.',
+	'ACP_DIGESTS_RESET_CRON_RUN_TIME'						=> 'Reset mailer',
+	'ACP_DIGESTS_RESET_CRON_RUN_TIME_EXPLAIN'				=> '',
+	'ACP_DIGESTS_TEST'										=> 'Manually run the mailer',
+	'ACP_DIGESTS_TEST_EXPLAIN'								=> 'This feature allows you to manually run digests for initial testing or troubleshooting. You can also use it to recreate digests for a particular date and hour. The board timezone (currently ' . $helper->make_tz_offset($config['board_timezone']) . ' UTC) is used when calculating the date and hour. Please note that when digests are sent depends on board traffic, so digests may arrive late for some users. This can be changed if you set up <a href="https://wiki.phpbb.com/Modular_cron#Use_system_cron">a system cron</a> and <a href="'. $server_settings_url . '">enable</a> phpBB&apos;s <strong>system cron</strong> feature. For more information, see the FAQ for the Digests extension on the forums at phpbb.com.',
+
+	'LOG_CONFIG_DIGESTS_BAD_DIGEST_TYPE'					=> '<strong>Warning: subscriber %s has a bad digest type of %s. Assumed a daily digest is wanted.</strong>',
+	'LOG_CONFIG_DIGESTS_BAD_SEND_HOUR'						=> '<strong>User %s digest send hour is invalid. It is %d. The number should be >= 0 and < 24.</strong>',
+	'LOG_CONFIG_DIGESTS_BALANCE_LOAD'						=> '<strong>Digests balance load run successfully</strong>',
+	'LOG_CONFIG_DIGESTS_BOARD_DISABLED'						=> '<strong>Digest mailer run was attempted, but stopped because the board is disabled.</strong>',
+	'LOG_CONFIG_DIGESTS_CACHE_CLEARED'						=> '<strong>The cache/phpbbservices/digests directory was emptied',
+	'LOG_CONFIG_DIGESTS_CLEAR_SPOOL_ERROR'					=> '<strong>Unable to clear files in the cache/phpbbservices/digests directory. This may be due to a permissions issue or an incorrect path. The file permissions on the directory should be set to publicly writeable (777 on Unix-based systems).</strong>',
+	'LOG_CONFIG_DIGESTS_DIRECTORY_CREATE_ERROR'				=> '<strong>Unable to create a cache/phpbbservices/digests directory. This may be due to a permissions issue with your forum&apos;s store folder.</strong>',
+	'LOG_CONFIG_DIGESTS_EDIT_SUBSCRIBERS'					=> '<strong>Edited digest subscribers</strong>',
+	'LOG_CONFIG_DIGESTS_FILE_CLOSE_ERROR'					=> '<strong>Unable to close file %s</strong>',
+	'LOG_CONFIG_DIGESTS_FILE_OPEN_ERROR'					=> '<strong>Unable to open a file handler to the directory %s. This may be due to insufficient permissions. The file permissions on the directory should be set to publicly writeable (777 on Unix-based systems).</strong>',
+	'LOG_CONFIG_DIGESTS_FILE_WRITE_ERROR'					=> '<strong>Unable to write file %s. This may be due to insufficient permissions. The file permissions on the directory should be set to publicly writeable (777 on Unix-based systems).</strong>',
+	'LOG_CONFIG_DIGESTS_FILTER_ERROR'						=> '<strong>Digests mailer was called with an invalid user_digest_filter_type = %s for %s</strong>',
+	'LOG_CONFIG_DIGESTS_FORMAT_ERROR'						=> '<strong>Digests mailer was called with an invalid user_digest_format of %s for %s</strong>',
+	'LOG_CONFIG_DIGESTS_GENERAL'							=> '<strong>Altered digest general settings</strong>',
+	'LOG_CONFIG_DIGESTS_HOUR_RUN'							=> '<strong>Running digests for %s UTC</strong>',
+	'LOG_CONFIG_DIGESTS_LOG_ENTRY_BAD'						=> '<strong>Unable to send a digest to %s (%s). This problem should be investigated and fixed since it likely means there is a general emailing issue.</strong>',
+	'LOG_CONFIG_DIGESTS_LOG_ENTRY_BAD_NO_EMAIL'				=> '<strong>Unable to send a digest to %s.  This problem should be investigated and fixed since it likely means there is a general emailing issue.</strong>',
+	'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD'						=> '<strong>A digest was %s %s (%s) for date %s and hour %d UTC containing %d posts and %d private messages</strong>',
+	'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_DISK'				=> '<strong>A digest was written to the cache/phpbbservices/digests directory with a file name of %s. The digest was NOT emailed, but was placed here for analysis.</strong>',
+	'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_NO_EMAIL'			=> '<strong>A digest was %s %s for date %s and hour %d UTC containing %d posts and %d private messages</strong>',
+	'LOG_CONFIG_DIGESTS_LOG_ENTRY_NONE'						=> '<strong>A digest was NOT sent to %s (%s) because user filters and preferences meant there was nothing to send</strong>',
+	'LOG_CONFIG_DIGESTS_LOG_ENTRY_NONE_NO_EMAIL'			=> '<strong>A digest was NOT sent to %s because user filters and preferences meant there was nothing to send</strong>',
+	'LOG_CONFIG_DIGESTS_LOG_START'							=> '<strong>Starting digest mailer</strong>',
+	'LOG_CONFIG_DIGESTS_LOG_END'							=> '<strong>Ending digest mailer</strong>',
+	'LOG_CONFIG_DIGESTS_MAILER_RAN_WITH_ERROR'				=> '<strong>An error occurred while the mailer was running. One or more digests may have been successfully generated.</strong>',
+	'LOG_CONFIG_DIGESTS_MANUAL_RUN'							=> '<strong>Manual run of the mailer invoked</strong>',
+	'LOG_CONFIG_DIGESTS_MESSAGE'							=> '<strong>%s</strong>',	// Used for general debugging, otherwise hard to troubleshoot problems in cron mode.
+	'LOG_CONFIG_DIGESTS_MASS_SUBSCRIBE_UNSUBSCRIBE'			=> '<strong>Executed a digests mass subscribe or unsubscribe action</strong>',
+	'LOG_CONFIG_DIGESTS_NO_ALLOWED_FORUMS'					=> '<strong>Warning: subscriber %s does not have any forum permissions, so unless there are required forums, digests will never contain any content.</strong>',
+	'LOG_CONFIG_DIGESTS_NO_BOOKMARKS'						=> '<strong>Warning: subscriber %s wants bookmarked topics in their digest but does not have any bookmarked topics.</strong>',
+	'LOG_CONFIG_DIGESTS_NOTIFICATION_ERROR'					=> '<strong>Unable to send an administrator generated digests email notification to %s</strong>',
+	'LOG_CONFIG_DIGESTS_NOTIFICATION_SENT'					=> '<strong>An email was sent to %s (%s) indicating that their digest settings were changed</strong>',	
+	'LOG_CONFIG_DIGESTS_REGULAR_CRON_RUN'					=> '<strong>Regular (phpBB) cron run of the mailer invoked</strong>',
+	'LOG_CONFIG_DIGESTS_RESET_CRON_RUN_TIME'				=> '<strong>Digests mailing time was reset</strong>',
+	'LOG_CONFIG_DIGESTS_RUN_TOO_SOON'						=> '<strong>Less than an hour has elapsed since digests were last run. Run aborted.</strong>',
+	'LOG_CONFIG_DIGESTS_SIMULATION_DATE_TIME'				=> '<strong>Administrator chose to create digests for %s at %d:00 board time.</strong>',
+	'LOG_CONFIG_DIGESTS_SORT_BY_ERROR'						=> "<strong>Digests mailer was called with an invalid user_digest_sortby = %s for %s</strong>",
+	'LOG_CONFIG_DIGESTS_SYSTEM_CRON_RUN'					=> '<strong>System cron run of the mailer invoked</strong>',
+	'LOG_CONFIG_DIGESTS_TIMEZONE_ERROR'						=> '<strong>The user_timezone "%s" for username "%s" is invalid. Assumed a timezone of "%s". Please ask user to set a proper timezone in the User Control Panel. See http://php.net/manual/en/timezones.php for a list of valid timezones.</strong>',
+	'LOG_CONFIG_DIGESTS_USER_DEFAULTS'						=> '<strong>Altered digest user default settings</strong>',
+));

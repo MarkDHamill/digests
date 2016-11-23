@@ -1,87 +1,34 @@
 <!-- INCLUDE ucp_header.html -->
-<script type="text/javascript">
-// <![CDATA[
-<!-- IF S_DIGESTS_FORUMS_SELECTION -->
-<!-- INCLUDEJS @phpbbservices_digests/js/digests.js -->				
-function show_warning()
-{
-	<!-- IF S_DIGESTS_FORUMS_SELECTION -->
-	// If All Forums is unchecked and there are no checked forums, do not allow the form 
-	// to submit and display a message
-	var all_forums = document.getElementById('all_forums');
-	if (all_forums.checked == true)	{
-		return true;
-	}
-	
-	var x = document.getElementById('div_0').getElementsByTagName("input");
-	var element_name = new String();
-	var none_checked = true;
-	
-	for(i=0;i<x.length;i++) {
-		thisobject = x[i];
-		element_name = thisobject.id;
-		if(element_name != null) {
-			if(element_name.substr(0,4) == "elt_") {
-				if (thisobject.checked == true) {
-					none_checked = false;
-					break;
-				}
-			}
-		}					
-	}
-	
-	if (none_checked) {
-		alert('{LA_DIGESTS_NO_FORUMS_CHECKED}');
-		return false;
-	}
-
-	<!-- ENDIF -->
-	return true;
-}
-
-// ]]> 
+<!-- IF not $INCLUDED_JQUERYUIJS -->
+	<!-- INCLUDEJS @phpbbservices_digests/js/jquery-ui-1.12.1.min.js -->
+	<!-- DEFINE $INCLUDED_JQUERYUIJS = true -->
 <!-- ENDIF -->
-
+<script>
+<!-- INCLUDEJS @phpbbservices_digests/js/digests.js -->
 <!-- IF S_DIGESTS_POST_FILTERS -->
-function check_word_size (field)
-{
-	if (isNaN(field.value))	{
-		alert("{LA_DIGESTS_SIZE_ERROR}");
-		field.focus();
-		return;
-	}
-	size = parseInt(field.value);
-	if (field.defaultValue != '') {
-		max_items = parseInt(field.defaultValue);
-	}
-	else {
-		max_items = 0;
-	}
-	if (size <= 0) {
-		alert("{LA_DIGESTS_SIZE_ERROR}");
-		field.focus();
-		return;
-	}
-	if (field.defaultValue != '0') {
-		if (size > max_items) {
-			alert("{LA_DIGESTS_SIZE_ERROR}");
-			field.focus();
-		}
-	}
-}
+var adminMaxItems = {S_DIGESTS_MAX_ADMIN_ITEMS};
 <!-- ENDIF -->
-
-// ]]> 
+var dialogError = "{LA_ERROR}";
+<!-- IF S_DIGESTS_FORUMS_SELECTION -->
+var excludedForums = "{L_DIGESTS_EXCLUDED_FORUMS}"; // Note: LA_ template variable doesn't work, phpBB bug?
+var excludedForumsArray = excludedForums.split(',');
+var ignoredForums = "{L_DIGESTS_IGNORED_FORUMS}"; // Note: LA_ template variable doesn't work, phpBB bug?
+var ignoredForumsArray = ignoredForums.split(',');
+var noForumsChecked = "{LA_DIGESTS_NO_FORUMS_CHECKED}";
+<!-- ENDIF -->
+var ok = "{LA_OK}";
+var sizeError = "{LA_DIGESTS_SIZE_ERROR_MIN}";
+var sizeErrorRange = "{LA_DIGESTS_SIZE_ERROR}";
 </script>
-
+<div id="dialog" title="Dialog Title"></div>
 <h2>{L_DIGESTS_MODE}</h2>
 
-<form name="phpbbservices_digests" id="phpbbservices_digests" method="post" action="{U_DIGESTS_ACTION}" onsubmit="return show_warning();">
+<form name="phpbbservices_digests" id="phpbbservices_digests" method="post" action="{U_DIGESTS_ACTION}">
 {S_FORM_TOKEN}
 <div class="panel">
 
 	<div class="inner">
-									
+
 		<!-- IF S_DIGESTS_NO_TIMEZONE -->
 		<p>{L_DIGESTS_NO_TIMEZONE}</p>
 		<!-- ENDIF -->
@@ -129,15 +76,15 @@ function check_word_size (field)
 			<dl>
 			<dt><label>{L_DIGESTS_FILTER_TYPE}{L_COLON}</label></dt>
 			<dd>
-				<input type="radio" name="filtertype" id="all" value="ALL" onclick="disable_forums(0);" <!-- IF S_DIGESTS_POST_ANY --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_ALL_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /><label for="all">{L_DIGESTS_POSTS_TYPE_ANY}</label>
-				<input type="radio" name="filtertype" id="first" value="1ST" onclick="disable_forums(0);" <!-- IF S_DIGESTS_POST_FIRST --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_FIRST_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /><label for="first">{L_DIGESTS_POSTS_TYPE_FIRST}</label> 
-				<input type="radio" name="filtertype" id="bookmarks" value="BM" onclick="disable_forums(1);" <!-- IF S_DIGESTS_POST_BM --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_BM_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /><label for="bookmarks">{L_DIGESTS_USE_BOOKMARKS}</label> 
+				<input type="radio" name="filtertype" id="all" value="ALL" <!-- IF S_DIGESTS_POST_ANY --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_ALL_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /><label for="all">{L_DIGESTS_POSTS_TYPE_ANY}</label>
+				<input type="radio" name="filtertype" id="first" value="1ST" <!-- IF S_DIGESTS_POST_FIRST --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_FIRST_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /><label for="first">{L_DIGESTS_POSTS_TYPE_FIRST}</label>
+				<input type="radio" name="filtertype" id="bookmarks" value="BM" <!-- IF S_DIGESTS_POST_BM --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_BM_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /><label for="bookmarks">{L_DIGESTS_USE_BOOKMARKS}</label>
 			</dd>
 			</dl>
 			<dl>
 				<dt><label for="all_forums">{L_DIGESTS_SELECT_FORUMS}{L_COLON}</label><br /><span>{L_DIGESTS_SELECT_FORUMS_EXPLAIN}</span></dt>
 				<dd>
-					<input type="checkbox" name="all_forums" id="all_forums" <!-- IF S_DIGESTS_ALL_BY_DEFAULT --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_ALL_DISABLED --> disabled="disabled"<!-- ENDIF --> onclick="unCheckSubscribedForums(this);"/> <label for="all_forums"><b>{L_DIGESTS_ALL_FORUMS}</b></label><br /><br />
+					<input type="checkbox" name="all_forums" id="all_forums" <!-- IF S_DIGESTS_ALL_BY_DEFAULT --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_ALL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> <label for="all_forums"><b>{L_DIGESTS_ALL_FORUMS}</b></label><br /><br />
 					<div id="div_0">
 						<!-- BEGIN forums -->
 						<!-- IF forums.S_DIGESTS_DIV_OPEN -->
@@ -145,7 +92,7 @@ function check_word_size (field)
 						<!-- ENDIF -->
 						<!-- IF forums.S_DIGESTS_PRINT -->
 							<!-- IF forums.S_DIGESTS_IS_FORUM -->
-							<input type="checkbox" name="{forums.FORUM_NAME}" id="{forums.FORUM_NAME}"<!-- IF forums.S_DIGESTS_FORUM_SUBSCRIBED --> checked="checked"<!-- ENDIF --><!-- IF forums.S_DIGESTS_FORUM_DISABLED --> disabled="disabled"<!-- ENDIF --> onclick="unCheckAllForums();"/> <label for="{forums.FORUM_NAME}">{forums.FORUM_PREFIX}{forums.FORUM_LABEL}{forums.FORUM_SUFFIX}</label><br />
+							<input type="checkbox" name="{forums.FORUM_NAME}" id="{forums.FORUM_NAME}"<!-- IF forums.S_DIGESTS_FORUM_SUBSCRIBED --> checked="checked"<!-- ENDIF --><!-- IF forums.S_DIGESTS_FORUM_DISABLED --> disabled="disabled"<!-- ENDIF --> /> <label for="{forums.FORUM_NAME}">{forums.FORUM_PREFIX}{forums.FORUM_LABEL}{forums.FORUM_SUFFIX}</label><br />
 							<!-- ENDIF -->
 							<!-- IF not forums.S_DIGESTS_IS_FORUM -->
 							<i>{forums.FORUM_LABEL}</i><br />
@@ -164,12 +111,12 @@ function check_word_size (field)
 			{DISABLED_MESSAGE}
 			<dl>
 				<dt><label for="count_limit">{L_DIGESTS_COUNT_LIMIT}{L_COLON}</label><br /><span>{L_DIGESTS_COUNT_LIMIT_EXPLAIN}</span></dt>
-					<dd><input type="text" class="inputbox autowidth" size="5" maxlength="5" name="count_limit" id="count_limit" value="{S_DIGESTS_MAX_ITEMS}"<!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> onblur="check_word_size(this);" />
+				<dd><input type="text" class="inputbox autowidth" size="5" maxlength="5" name="count_limit" id="count_limit" value="{S_DIGESTS_MAX_ITEMS}"<!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> />
 				</dd>
 			</dl>
 			<dl>
 				<dt><label for="min_word_size">{L_DIGESTS_MIN_SIZE}{L_COLON}</label><br /><span>{L_DIGESTS_MIN_SIZE_EXPLAIN}</span></dt>
-					<dd><input type="text" class="inputbox autowidth" size="4" maxlength="4" name="min_word_size" id="min_word_size" value="{S_DIGESTS_MIN_SIZE}"<!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> onblur="check_word_size_min(this);" />
+				<dd><input type="text" class="inputbox autowidth" size="4" maxlength="4" name="min_word_size" id="min_word_size" value="{S_DIGESTS_MIN_SIZE}"<!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> />
 				</dd>
 			</dl>
 			<dl>
@@ -196,8 +143,8 @@ function check_word_size (field)
 			<dl>
 				<dt><label>{L_DIGESTS_PRIVATE_MESSAGES_IN_DIGEST}{L_COLON}</label></dt>
 				<dd>
-					<label for="pms1"><input type="radio" name="pms" id="pms1" value="1"<!-- IF S_DIGESTS_PRIVATE_MESSAGES_IN_DIGEST_YES --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> onclick="check_uncheck('mark_read', this);" /> {L_YES}</label> 
-					<label for="pms2"><input type="radio" name="pms" id="pms2" value="0"<!-- IF S_DIGESTS_PRIVATE_MESSAGES_IN_DIGEST_NO --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> onclick="check_uncheck('mark_read', this);" /> {L_NO}</label>	&nbsp;<input type="checkbox" name="mark_read" id="mark_read"<!-- IF S_DIGESTS_MARK_READ_CHECKED --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> <label for="mark_read">{L_DIGESTS_MARK_READ}</label>
+					<label for="pms1"><input type="radio" name="pms" id="pms1" value="1"<!-- IF S_DIGESTS_PRIVATE_MESSAGES_IN_DIGEST_YES --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> {L_YES}</label>
+					<label for="pms2"><input type="radio" name="pms" id="pms2" value="0"<!-- IF S_DIGESTS_PRIVATE_MESSAGES_IN_DIGEST_NO --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> {L_NO}</label>	&nbsp;<input type="checkbox" name="mark_read" id="mark_read"<!-- IF S_DIGESTS_MARK_READ_CHECKED --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> <label for="mark_read">{L_DIGESTS_MARK_READ}</label>
 				</dd>
 			</dl>
 			<!-- ENDIF -->
@@ -217,7 +164,7 @@ function check_word_size (field)
 			</dl>
 			<dl>
 				<dt><label for="max_word_size">{L_DIGESTS_MAX_DISPLAY_WORDS}{L_COLON}</label><br /><span>{L_DIGESTS_MAX_DISPLAY_WORDS_EXPLAIN}</span></dt>
-					<dd><input type="text" class="inputbox autowidth" size="4" maxlength="4" name="max_word_size" id="max_word_size" value="{DIGESTS_MAX_SIZE}"<!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> onblur="check_word_size_min(this);" /> &nbsp;<input type="checkbox" name="no_post_text" id="no_post_text"<!-- IF S_DIGESTS_NO_POST_TEXT_CHECKED --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> <label for="no_post_text">{L_DIGESTS_NO_POST_TEXT}</label>
+					<dd><input type="text" class="inputbox autowidth" size="4" maxlength="4" name="max_word_size" id="max_word_size" value="{DIGESTS_MAX_SIZE}"<!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> &nbsp;<input type="checkbox" name="no_post_text" id="no_post_text"<!-- IF S_DIGESTS_NO_POST_TEXT_CHECKED --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> <label for="no_post_text">{L_DIGESTS_NO_POST_TEXT}</label>
 				</dd>
 			</dl>
 			<dl>

@@ -30,7 +30,7 @@ class main_module
 		// Get the common functions
 		$helper = $phpbb_container->get('phpbbservices.digests.common');
 		
-		$user->add_lang_ext('phpbbservices/digests', array('info_acp_common', 'common'));
+		$user->add_lang_ext('phpbbservices/digests', array('common', 'acp/common'));
 
 		$form_key = 'phpbbservices/digests';
 		$submit = (isset($_POST['submit'])) ? true : false;
@@ -100,7 +100,7 @@ class main_module
 					$all_forums = $request->variable('all_forums', $user->data['user_digest_filter_type']);
 					$digest_type = $request->variable('digest_type', $user->data['user_digest_type']);
 					
-					// Get the POST variables as an array the phpBB approved way so they can be parse to find individual digest subscriptions
+					// Get the POST variables as an array the phpBB approved way so they can be parsed to find individual digest subscriptions
 					$request_vars = $request->get_super_global(\phpbb\request\request_interface::POST);
 
 					if (($all_forums !== 'on') && (trim($digest_type) !== constants::DIGESTS_BOOKMARKS)) 
@@ -197,12 +197,6 @@ class main_module
 		{
 			
 			case constants::DIGESTS_MODE_BASICS:
-				$display_vars = array(
-					'title'	=> 'UCP_DIGESTS_BASICS',
-					'vars'	=> array(
-						'legend1'								=> ''
-					)
-				);
 
 				// If user hasn't set their timezone, trigger an error message because to select an hour for a digest to go out it must be
 				// calculated from their timezone.
@@ -245,8 +239,7 @@ class main_module
 					{
 						$local_send_hour = $local_send_hour + 24;
 					}
-					
-	
+
 					// Set other form fields using board defaults if necessary, otherwise pull from the user's settings
 					// Note, setting an administator configured default for digest type is a bad idea because
 					// the user might think they have a digest subscription when they do not.
@@ -269,7 +262,7 @@ class main_module
 					}
 					
 					// Populated the Hour Sent select control
-					for($i=0;$i<24;$i++)
+					for($i=0; $i<24; $i++)
 					{
 						$template->assign_block_vars('hour_loop',array(
 							'COUNT' 						=>	$i,
@@ -303,16 +296,10 @@ class main_module
 			break;
 			
 			case constants::DIGESTS_MODE_FORUMS_SELECTION:
-				$display_vars = array(
-					'title'	=> 'UCP_DIGESTS_FORUMS_SELECTION',
-					'vars'	=> array(
-						'legend1'								=> ''
-					)
-				);
 
 				// Create a list of required and excluded forum_ids
-				$required_forum_ids = isset($config['phpbbservices_digests_include_forums']) ? explode(',',$config['phpbbservices_digests_include_forums']) : array();
-				$excluded_forum_ids = isset($config['phpbbservices_digests_exclude_forums']) ? explode(',',$config['phpbbservices_digests_exclude_forums']) : array();
+				$required_forum_ids = isset($config['phpbbservices_digests_include_forums']) ? explode(',', $config['phpbbservices_digests_include_forums']) : array();
+				$excluded_forum_ids = isset($config['phpbbservices_digests_exclude_forums']) ? explode(',', $config['phpbbservices_digests_exclude_forums']) : array();
 
 				// Individual forum checkboxes should be disabled if no digest is wanted or if bookmarks are requested/expected
 				if ($user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE)
@@ -599,22 +586,19 @@ class main_module
 						'S_DIGESTS_NO_FORUMS' 			=> true, 
 						)
 					);
-				}				
+				}
 
+				// Template variables used in all forum selection cases
 				$template->assign_vars(array(
-					'S_DIGESTS_FORUMS_SELECTION'							=> true,
+					'L_DIGESTS_EXCLUDED_FORUMS'			=> implode(",", $excluded_forum_ids),
+					'L_DIGESTS_IGNORED_FORUMS'			=> implode(",", array_merge($required_forum_ids, $excluded_forum_ids)),
+					'S_DIGESTS_FORUMS_SELECTION'		=> true,
 					)
 				);
 				
 			break;
 			
 			case constants::DIGESTS_MODE_POST_FILTERS:
-				$display_vars = array(
-					'title'	=> 'UCP_DIGESTS_POST_FILTERS',
-					'vars'	=> array(
-						'legend1'								=> ''
-					)
-				);
 
 				if ($config['phpbbservices_digests_max_items'] > 0)
 				{
@@ -630,6 +614,7 @@ class main_module
 					'S_DIGESTS_FILTER_FOES_CHECKED_NO' 			=> ($user->data['user_digest_remove_foes'] == 0),
 					'S_DIGESTS_FILTER_FOES_CHECKED_YES' 		=> ($user->data['user_digest_remove_foes'] == 1),
 					'S_DIGESTS_MARK_READ_CHECKED' 				=> ($user->data['user_digest_pm_mark_read'] == 1),
+					'S_DIGESTS_MAX_ADMIN_ITEMS' 				=> $config['phpbbservices_digests_max_items'],
 					'S_DIGESTS_MAX_ITEMS' 						=> $max_posts,
 					'S_DIGESTS_MIN_SIZE' 						=> ($user->data['user_digest_min_words'] == 0) ? '' : (int) $user->data['user_digest_min_words'],
 					'S_DIGESTS_NEW_POSTS_ONLY_CHECKED_NO' 		=> ($user->data['user_digest_new_posts_only'] == 0),
@@ -645,12 +630,7 @@ class main_module
 			break;
 			
 			case constants::DIGESTS_MODE_ADDITIONAL_CRITERIA:
-				$display_vars = array(
-					'title'	=> 'UCP_DIGESTS_ADDITIONAL_CRITERIA',
-					'vars'	=> array(
-						'legend1'								=> ''
-					)
-				);
+
 				$template->assign_vars(array(
 					'DIGESTS_MAX_SIZE' 								=> ($user->data['user_digest_max_display_words'] == 0) ? '' : (int) $user->data['user_digest_max_display_words'],
 					'S_DIGESTS_ADDITIONAL_CRITERIA'					=> true,
@@ -686,7 +666,6 @@ class main_module
 			'L_DIGESTS_DISABLED_MESSAGE' 	=> ($user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE) ? '<p><em>' . $user->lang('DIGESTS_DISABLED_MESSAGE') . '</em></p>' : '',
 			'L_DIGESTS_MODE'				=> $user->lang('UCP_DIGESTS_' . strtoupper($mode)),
 			'L_POWERED_BY'					=> sprintf($user->lang('POWERED_BY'), '<a href="' . $config['phpbbservices_digests_page_url'] . '" class="postlink" onclick="window.open(this.href);return false;">' . $user->lang('DIGESTS_POWERED_BY') . '</a>'),
-			'LA_DIGESTS_SIZE_ERROR'			=> sprintf($user->lang('DIGESTS_SIZE_ERROR'), $config['phpbbservices_digests_max_items']),
 			'S_DIGESTS_CONTROL_DISABLED' 	=> ($user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE),
 			'S_DIGESTS_SHOW_BUTTONS'		=> $show_buttons,
 			'U_DIGESTS_ACTION'  			=> $this->u_action,
@@ -696,4 +675,3 @@ class main_module
 	}
 
 }
-

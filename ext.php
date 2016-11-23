@@ -20,7 +20,6 @@ class ext extends \phpbb\extension\base
 		global $config;
 
 		// phpBB 3.2 is not supported. phpBB 3.1.9 and above is required.
-		return (phpbb_version_compare($config['version'], '3.1.9', '<') || phpbb_version_compare($config['version'], '3.2.0@dev', '>=')) ? false : true;
-
+		return (phpbb_version_compare($config['version'], '3.1.9', '>=') || phpbb_version_compare($config['version'], '3.2.0@dev', '<'));
 	}
 }

@@ -20,7 +20,7 @@ class main_module
 	{
 		global $db, $user, $auth, $template, $config, $phpbb_root_path, $phpEx, $phpbb_log, $phpbb_container, $table_prefix, $request;
 		
-		$user->add_lang_ext('phpbbservices/digests', array('info_acp_common'));
+		$user->add_lang_ext('phpbbservices/digests', array('acp/info_acp_common', 'acp/common'));
 
 		$submit = (isset($_POST['submit'])) ? true : false;
 
@@ -134,9 +134,8 @@ class main_module
 						$subscribe_selected = ' selected="selected"';
 						$context = $user->lang('DIGESTS_SUBSCRIBED');
 					break;
-					
+
 					case 'a':
-					default:
 						$subscribe_sql = '';
 						$all_selected = ' selected="selected"';
 						$context = $user->lang('DIGESTS_ALL');
@@ -1406,7 +1405,7 @@ class main_module
 				$all_cleared = true;
 				$directory_found = true;
 				
-				$path = $phpbb_root_path . 'store/ext/phpbbservices/digests';
+				$path = $phpbb_root_path . 'cache/phpbbservices/digests';
 				if (is_dir($path))
 				{
 					foreach (new \DirectoryIterator($path) as $file_info)
@@ -1467,21 +1466,24 @@ class main_module
 			if ($continue)
 			{
 				
-				// Must save the current state or the sidebar will disappear after the mailer call
-				$save_template = serialize($template);
-				
 				// Get the common include files, to pass the reference to mailer
 				$helper = $phpbb_container->get('phpbbservices.digests.common');
 
+				// Create a new template object to pass to the mailer since we don't want to lose the content in this one. (The mailer will overwrite it.)
+				$phpbb_path_helper = $phpbb_container->get('path_helper');
+				$phpbb_extension_manager = $phpbb_container->get('ext.manager');
+				$mailer_template = new \phpbb\template\twig\twig($phpbb_path_helper, $config, $user, new \phpbb\template\context(), $phpbb_extension_manager);
+				$mailer_template->set_style(array('./ext/phpbbservices/digests/styles', 'styles'));
+
 				// Create a mailer object and call its run method. The logic for sending a digest is embedded in this method, which is normally run as a cron task.
-				$mailer = new \phpbbservices\digests\cron\task\digests($config, $request, $user, $db, $phpEx, $phpbb_root_path, $template, $auth, $table_prefix, $phpbb_log, $helper);	
+				$mailer = new \phpbbservices\digests\cron\task\digests($config, $request, $user, $db, $phpEx, $phpbb_root_path, $mailer_template, $auth, $table_prefix, $phpbb_log, $helper);
 				$success = $mailer->run();
 				
 				if (!$success)
 				{
 					$message_type = E_USER_WARNING;
 					$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LOG_CONFIG_DIGESTS_MAILER_RAN_WITH_ERROR');
-					$message = strip_tags($user->lang('LOG_CONFIG_DIGESTS_MAILER_RAN_WITH_ERROR'));
+					$message = $user->lang('DIGESTS_MAILER_RAN_WITH_ERROR');
 				}
 				else if ($config['phpbbservices_digests_test_spool'])
 				{
@@ -1491,9 +1493,6 @@ class main_module
 				{
 					$message = $user->lang('DIGESTS_MAILER_RAN_SUCCESSFULLY');
 				}
-
-				// Restore the sidebar content
-				$template = unserialize($save_template);
 				
 			}
 			

@@ -1,9 +1,0 @@
-Dear {USERNAME},
-
-This is to notify you that an administrator of {FORUM_NAME} has subscribed you to receive a {DIGESTS_TYPE} {DIGESTS_FORMAT} digest. If you do not wish to receive the digest, you can unsubscribe by selecting the digests tab in the user control panel of the forum. Once logged in, select the unsubscribe option. It is accessible through this convenient link:
-
-{DIGESTS_UCP_LINK}
-
-Sincerely,
-
-{FORUM_NAME} Administration Team

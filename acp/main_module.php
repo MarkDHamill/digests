@@ -1377,7 +1377,7 @@ class main_module
 			$config->set('phpbbservices_digests_cron_task_last_gc', 0);
 			
 			// This resets all the date/time stamps for when a digest was last sent to a user.
-			$sql_ary = array('user_digest_last_sent', 0);
+			$sql_ary = array('user_digest_last_sent' => 0);
 			
 			$sql = 'UPDATE ' . USERS_TABLE . ' 
 				SET ' . $db->sql_build_array('UPDATE', $sql_ary);

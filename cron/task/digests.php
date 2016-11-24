@@ -799,6 +799,7 @@ class digests extends \phpbb\cron\task\base
 				'L_DIGESTS_MAIL_FREQUENCY_SETTING'			=> $digest_type,
 				'L_DIGESTS_MAX_SIZE_SETTING'				=> ($row['user_digest_max_display_words'] == 0) ? $this->user->lang['DIGESTS_NO_POST_TEXT'] : (($row['user_digest_max_display_words'] == -1) ? $this->user->lang['DIGESTS_NO_LIMIT'] : $row['user_digest_max_display_words']),
 				'L_DIGESTS_MIN_SIZE_SETTING'				=> ($row['user_digest_min_words'] == 0) ? $this->user->lang['DIGESTS_NO_CONSTRAINT'] : $row['user_digest_min_words'],
+				'L_DIGESTS_PMS_MARK_READ_SETTING'			=> ($row['user_digest_pm_mark_read'] == 0) ? $this->user->lang['NO'] : $this->user->lang['YES'],
 				'L_DIGESTS_POWERED_BY'						=> $powered_by,
 				'L_DIGESTS_REMOVE_YOURS_SETTING'			=> ($row['user_digest_show_mine'] == 0) ? $this->user->lang['YES'] : $this->user->lang['NO'],
 				'L_DIGESTS_SALUTATION_BLURB'				=> $row['username'] . $this->user->lang['DIGESTS_COMMA'],
@@ -1020,16 +1021,12 @@ class digests extends \phpbb\cron\task\base
 				$this->db->sql_query($pm_read_sql);
 
 				// Reduce the user_unread_privmsg and user_new_privmsg count by the amount of PMs in the digest.
-				// Be careful not to store a negative number in case the database is inconsistent.
+				// Be careful not to store a negative number in case the database is inconsistent. Note: the nature
+				// of this SQL is that using $db->sql_build_array won't generate the desired SQL, so we go rouge.
 
-				$sql_ary = array(
-					'user_unread_privmsg'	=> 'user_unread_privmsg - ' . min($total_pm_unread, $row['user_unread_privmsg']),
-					'user_new_privmsg'		=> 'user_new_privmsg - ' . min($total_pm_new, $row['user_new_privmsg']),
-				);
-				
 				$pm_read_sql = 'UPDATE ' . USERS_TABLE . '
-					SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
-					WHERE user_id = ' . $row['user_id'];
+					SET user_unread_privmsg = user_unread_privmsg - ' . min($total_pm_unread, $row['user_unread_privmsg']) . ', 
+						user_new_privmsg = user_new_privmsg - ' . min($total_pm_new, $row['user_new_privmsg']).
 
 				$this->db->sql_query($pm_read_sql);
 

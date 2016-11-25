@@ -25,7 +25,18 @@ class main_module
 	*/
 	function main($id, $mode)
 	{
-		global $config, $db, $user, $auth, $template, $table_prefix, $request, $phpbb_root_path, $phpEx, $phpbb_container;
+		global $phpbb_container;
+
+		// Get global variables as containers to minimize security issues
+		$auth = $phpbb_container->get('auth');
+		$config = $phpbb_container->get('config');
+		$db = $phpbb_container->get('dbal.conn');
+		$phpbb_root_path = $phpbb_container->getParameter('core.root_path');
+		$phpEx= $phpbb_container->getParameter('core.php_ext');
+		$request = $phpbb_container->get('request');
+		$table_prefix = $phpbb_container->getParameter('core.table_prefix');
+		$template = $phpbb_container->get('template');
+		$user = $phpbb_container->get('user');
 
 		// Get the common functions
 		$helper = $phpbb_container->get('phpbbservices.digests.common');

@@ -17,9 +17,25 @@ class main_module
 	var $new_config = array();
 
 	function main($id, $mode)
+
 	{
-		global $db, $user, $auth, $template, $config, $phpbb_root_path, $phpEx, $phpbb_log, $phpbb_container, $table_prefix, $request;
-		
+
+		global $phpbb_container;
+
+		// Get global variables as containers to minimize security issues
+		$auth = $phpbb_container->get('auth');
+		$config = $phpbb_container->get('config');
+		$db = $phpbb_container->get('dbal.conn');
+		$phpbb_extension_manager = $phpbb_container->get('ext.manager');
+		$phpbb_log = $phpbb_container->get('log');
+		$phpbb_path_helper = $phpbb_container->get('path_helper');
+		$phpbb_root_path = $phpbb_container->getParameter('core.root_path');
+		$phpEx= $phpbb_container->getParameter('core.php_ext');
+		$request = $phpbb_container->get('request');
+		$table_prefix = $phpbb_container->getParameter('core.table_prefix');
+		$template = $phpbb_container->get('template');
+		$user = $phpbb_container->get('user');
+
 		$user->add_lang_ext('phpbbservices/digests', array('acp/info_acp_common', 'acp/common'));
 
 		$submit = (isset($_POST['submit'])) ? true : false;
@@ -1470,8 +1486,6 @@ class main_module
 				$helper = $phpbb_container->get('phpbbservices.digests.common');
 
 				// Create a new template object to pass to the mailer since we don't want to lose the content in this one. (The mailer will overwrite it.)
-				$phpbb_path_helper = $phpbb_container->get('path_helper');
-				$phpbb_extension_manager = $phpbb_container->get('ext.manager');
 				$mailer_template = new \phpbb\template\twig\twig($phpbb_path_helper, $config, $user, new \phpbb\template\context(), $phpbb_extension_manager);
 				$mailer_template->set_style(array('./ext/phpbbservices/digests/styles', 'styles'));
 

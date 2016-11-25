@@ -83,7 +83,6 @@ $lang = array_merge($lang, array(
 	'DIGESTS_NONE'						=> 'None (unsubscribe)',
 	'DIGESTS_ON'						=> 'on',
 	'DIGESTS_OPEN_QUOTE'				=> '"',
-	'DIGESTS_PMS_MARK_READ'				=> 'Mark my private messages read if in digest',
 	'DIGESTS_POST_IMAGE_TEXT'			=> '<br />(Click on the image to see it full size.)',
 	'DIGESTS_POST_TEXT'					=> 'Post Text', 
 	'DIGESTS_POST_TIME'					=> 'Post Time', 

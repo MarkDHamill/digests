@@ -8,7 +8,7 @@ $(document).ready(function(){
 			{
 				text: ok,
 				click: function() {
-					$( this ).dialog("close");
+					$(this).dialog("close");
 				}
 			}
 		]
@@ -108,17 +108,19 @@ $(document).ready(function(){
 	});
 
 	function exclude_forum(forumId) {
-		// Returns true if the forum representing forumId should be excluded. Pattern is elt_1_2 where 1 is the forum_id.
+		// Returns true if the forum representing forumId should be excluded. Pattern is elt_1_2 where 1 is the forum_id
+		// and 2 is the parent forum_id.
 		start=forumId.indexOf('_');
 		end = forumId.lastIndexOf('_');
-		return excludedForumsArray.indexOf(forumId.substring(start+1,end)) == -1 ? false : true;
+		return excludedForumsArray.indexOf(forumId.substring(start+1,end)) === -1 ? false : true;
 	}
 
 	function ignore_forum(forumId) {
-		// Returns true the forum representing forumId should be ignored. Pattern is elt_1_2 where 1 is the forum_id.
+		// Returns true the forum representing forumId should be ignored. Pattern is elt_1_2 where 1 is the forum_id
+		// and 2 is the parent forum_id.
 		start=forumId.indexOf('_');
 		end = forumId.lastIndexOf('_');
-		return ignoredForumsArray.indexOf(forumId.substring(start+1,end)) == -1 ? false : true;
+		return ignoredForumsArray.indexOf(forumId.substring(start+1,end)) === -1 ? false : true;
 	}
 
 });

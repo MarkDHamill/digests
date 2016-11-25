@@ -77,6 +77,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_NO_MASS_ACTION'								=> 'No action was taken, because you did not enable the feature',
 	'DIGESTS_NOTIFY_ON_ADMIN_CHANGES'						=> 'Notify member via email of administrator digest changes',
 	'DIGESTS_NOTIFY_ON_ADMIN_CHANGES_EXPLAIN'				=> 'Edit subscribers, balance load and mass subscribe/unsubscribe allow the administrator to change a user&apos;s digest settings. If yes, emails will be sent to subscribers when any aspect of their subscription is changed by an administrator.',
+	'DIGESTS_PMS_MARK_READ'									=> 'Mark my private messages read if in digest',
 	'DIGESTS_RANDOM_HOUR'									=> 'Random hour',
 	'DIGESTS_REBALANCED'									=> 'During this rebalancing, a total of %d digests subscribers had their digest send hour changed.',
 	'DIGESTS_REFRESH'										=> 'Refresh',

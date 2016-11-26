@@ -17,6 +17,8 @@ if (empty($lang) || !is_array($lang))
 	$lang = array();
 }
 
+global $config;
+
 $lang = array_merge($lang, array(
 	'DIGESTS_ALL_FORUMS'				=> 'Alle zugriffsberechtigten Themenbereiche auswählen',
 	'DIGESTS_AUTHOR'					=> 'Autor',
@@ -26,6 +28,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_BOARD_LIMIT'				=> '%s (Board limit)',
 	'DIGESTS_BY'						=> 'Von',
 	'DIGESTS_CLOSED_QUOTE'				=> '"',
+	'DIGESTS_COMMA'						=> ',',		// wird für Anreden benötigt
 	'DIGESTS_COUNT_LIMIT'				=> 'Höchstzahl von Beiträgen innerhalb einer Zusammenfassung',
 	'DIGESTS_COUNT_LIMIT_EXPLAIN'		=> 'Gib einen Wert >0 ein, um die Anzahl der in einer Zusammenfassung angezeigten Beiträge zu begrenzen.',
 	'DIGESTS_DAILY'						=> 'Tägliche Zusammenfassung',
@@ -36,7 +39,6 @@ $lang = array_merge($lang, array(
 	'DIGESTS_FILTER_ERROR'				=> 'Der Digest Mailer wurde mit einem ungültigen user_digest_filter_type = %s aufgerufen',
 	'DIGESTS_FILTER_FOES'				=> 'Beiträge von \'ignorierten Mitgliedern\' entfernen',
 	'DIGESTS_FILTER_TYPE'				=> 'Vorauswahl',
-	'DIGESTS_FORMAT_FOOTER' 			=> 'Zusammenfassungsformat:',
 	'DIGESTS_FORMAT_HTML'				=> 'HTML',
 	'DIGESTS_FORMAT_HTML_EXPLAIN'		=> 'HTML liefert grafisch formatierte Zusammenfassungen mit BBCode und Signaturen (wenn zugelassen). Auch Formatvorlagen (Stylesheets) werden mit eingebunden, wenn dein eMail-Program das ermöglicht.',
 	'DIGESTS_FORMAT_HTML_CLASSIC'		=> 'HTML mit klassischem Tabellen-Layout',
@@ -59,7 +61,6 @@ $lang = array_merge($lang, array(
 	'DIGESTS_LASTVISIT_RESET'			=> 'Gespeicherten Zeitpunkt des letzten Forumsbesuches beim Versand der Zusammenfassung aktualisieren',
 	'DIGESTS_LASTVISIT_RESET_EXPLAIN'	=> 'Beim Aktivieren dieser Option werden alle Beiträge, die vor dem Versandzeitpunkt veröffentlicht worden sind, evtl. als gelesen markiert. Das bedeuted, dass aus Sicht der Forumssoftware diese Beiträge von dir bereits gelesen worden sind, obwohl du die Zusammenfassungsemail vielleicht noch gar nicht wirklich gelesen hast.',
 	'DIGESTS_LINK'						=> 'Link',
-	'DIGESTS_MAIL_FREQUENCY' 			=> 'Versandfrequenz',
 	'DIGESTS_MARK_READ'					=> 'Beiträge als gelesen markieren, wenn sie in der Zusammenfassung aufgeführt werden',
 	'DIGESTS_MAX_DISPLAY_WORDS'			=> 'Maximal angezeigte Wortanzahl in den Beiträgen',
 	'DIGESTS_MAX_DISPLAY_WORDS_EXPLAIN'	=> 'Um Ausgabefehler beim Kürzen eines Beitrags zu vermeiden, muss die HTML-Formatierung ganz entfernt werden. Um den kompletten Text anzuzeigen, bitte das Feld leer lassen. Wenn die &quot;Keine Beitragsinhalte anzeigen&quot;-Option mit ausgewählt wurde, wird dieses Feld nicht berücksichtigt.',
@@ -82,6 +83,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_NONE'						=> 'Keine eMail-Zusammenfassung',
 	'DIGESTS_ON'						=> 'aktiviert',
 	'DIGESTS_OPEN_QUOTE'				=> '"',
+	'DIGESTS_PMS_MARK_READ'				=> 'Meine privaten Mitteilungen (PMs) als gelesen markieren, wenn sie in der Zusammenfassung enthalten waren.',
 	'DIGESTS_POST_IMAGE_TEXT'			=> '<br />(Grafik zum vergrößern anklicken.)',
 	'DIGESTS_POST_TEXT'					=> 'Beitragstext', 
 	'DIGESTS_POST_TIME'					=> 'Veröffentlichungszeitpunkt', 
@@ -90,7 +92,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_POSTS_TYPE_ANY'			=> 'Alle Beiträge',
 	'DIGESTS_POSTS_TYPE_FIRST'			=> 'Nur den ersten Beitrag eines Themas anzeigen',
 	'DIGESTS_POWERED_BY'				=> 'phpbbservices.com',
-	'DIGESTS_POWERED_BY_TEXT'			=> 'Digests extension for phpBB 3.1 created by',
+	'DIGESTS_POWERED_BY_TEXT'			=> 'Digests extension für phpBB 3.1 von',
 	'DIGESTS_PRIVATE_MESSAGES_IN_DIGEST'	=> 'Meine ungelesenen Privaten Nachrichten mit anzeigen',
 	'DIGESTS_PUBLISH_DATE'				=> 'Persönliche Zusammenfassung für %s vom %s',
 	'DIGESTS_REGISTER'					=> 'Emfange regelmäßig eMail-Zusammenstellungen',
@@ -141,15 +143,15 @@ $lang = array_merge($lang, array(
 	'DIGESTS_WEEKLY'					=> 'Wöchentliche Zusammenfassung',
 	'DIGESTS_YOU_HAVE_PRIVATE_MESSAGES' => '%s hat Private Nachrichten erhalten',
 	'DIGESTS_YOUR_DIGEST_OPTIONS' 		=> '%s\'s persönliche Einstellungen:',
-	'UCP_DIGESTS'						=> 'eMail-Zusammenfassungen',
-	'UCP_DIGESTS_ADDITIONAL_CRITERIA'	=> 'Weitere Optionen',
+	
+	'UCP_DIGESTS'								=> 'eMail-Zusammenfassungen',
+	'UCP_DIGESTS_ADDITIONAL_CRITERIA'			=> 'Weitere Optionen',
 	'UCP_DIGESTS_ADDITIONAL_CRITERIA_OPTIONS'	=> 'Weitere Optionen',
-	'UCP_DIGESTS_BASICS'				=> 'Grundeinstellungen',
+	'UCP_DIGESTS_BASICS'						=> 'Grundeinstellungen',
 	'UCP_DIGESTS_BASICS_OPTIONS'				=> 'Grundeinstellungen',
-	'UCP_DIGESTS_FORUMS_SELECTION'		=> 'Themenbereichsauswahl',
+	'UCP_DIGESTS_FORUMS_SELECTION'				=> 'Themenbereichsauswahl',
 	'UCP_DIGESTS_FORUMS_SELECTION_OPTIONS'		=> 'Themenbereichsauswahl',
-	'UCP_DIGESTS_MODE_ERROR'			=> 'Fehlerhafter Zusammenfassungsmodus-Aufruf von %s',
-	'UCP_DIGESTS_POST_FILTERS'			=> 'Beitragsfilter',
+	'UCP_DIGESTS_MODE_ERROR'					=> 'Fehlerhafter Zusammenfassungsmodus-Aufruf von %s',
+	'UCP_DIGESTS_POST_FILTERS'					=> 'Beitragsfilter',
 	'UCP_DIGESTS_POST_FILTERS_OPTIONS'			=> 'Beitragsfilter',
-				
 ));

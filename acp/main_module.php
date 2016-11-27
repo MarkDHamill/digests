@@ -111,7 +111,6 @@ class main_module
 				$display_vars = array(
 					'title'	=> 'ACP_DIGESTS_EDIT_SUBSCRIBERS',
 					'vars'	=> array(
-						'legend1'											=> '',
 					)
 				);
 
@@ -679,7 +678,6 @@ class main_module
 				$display_vars = array(
 					'title'	=> 'ACP_DIGESTS_BALANCE_LOAD',
 					'vars'	=> array(
-					'legend1'								=> '',
 					)
 				);
 

@@ -73,35 +73,33 @@ function inStack(name) {
 <!-- ENDIF -->
 
 <form id="acp_digests" method="post" <!-- IF S_EDIT_SUBSCRIBERS -->onsubmit="return beforeSubmit();" <!-- ENDIF -->action="{U_ACTION}">
-
 <!-- BEGIN options -->
-	<!-- IF options.S_LEGEND -->
-		<!-- IF not options.S_FIRST_ROW -->
-			</fieldset>
-		<!-- ENDIF -->
-		<fieldset>
-			<legend>{options.LEGEND}</legend>
+<!-- IF options.S_LEGEND -->
+<!-- IF not options.S_FIRST_ROW -->
+</fieldset>
+<!-- ENDIF -->
+<fieldset <!-- IF S_EDIT_SUBSCRIBERS -->id="digests"<!-- ENDIF -->>
+	<legend>{options.LEGEND}</legend>
 	<!-- ELSE -->
 
-		<dl>
-			<dt><label for="{options.KEY}">{options.TITLE}{L_COLON}</label><!-- IF options.S_EXPLAIN --><br /><span>{options.TITLE_EXPLAIN}</span><!-- ENDIF --></dt>
-			<dd>{options.CONTENT}</dd>
-		</dl>
+	<dl>
+		<dt><label for="{options.KEY}">{options.TITLE}{L_COLON}</label><!-- IF options.S_EXPLAIN --><br /><span>{options.TITLE_EXPLAIN}</span><!-- ENDIF --></dt>
+		<dd>{options.CONTENT}</dd>
+	</dl>
 
 	<!-- ENDIF -->
-<!-- END options -->
+	<!-- END options -->
 
-<!-- IF S_AUTH -->
-	</fieldset>
-	<!-- BEGIN auth_tpl -->
-		<!-- INCLUDE {auth_tpl.TEMPLATE_FILE} -->
-	<!-- END auth_tpl -->
-	<fieldset>
-		<legend>{L_ACP_SUBMIT_CHANGES}</legend>
+	<!-- IF S_AUTH -->
+</fieldset>
+<!-- BEGIN auth_tpl -->
+<!-- INCLUDE {auth_tpl.TEMPLATE_FILE} -->
+<!-- END auth_tpl -->
+<fieldset>
+	<legend>{L_ACP_SUBMIT_CHANGES}</legend>
 <!-- ENDIF -->
 
 <!-- IF S_EDIT_SUBSCRIBERS -->
-	<fieldset id="digests">
     	<dl>
         	<dt style="border-right-style:none"><label for="member">{L_DIGESTS_SEARCH_FOR_MEMBER}{L_COLON}</label><br />{L_DIGESTS_SEARCH_FOR_MEMBER_EXPLAIN}</dt>
         	<dd style="text-align:left;"><input type="text" id="member" name="member" size="30" maxlength="255" value="{MEMBER}" onchange="addToStack(this.name);" /></dd>
@@ -336,7 +334,6 @@ function inStack(name) {
             <p class="small"><a href="#" onclick="marklist('acp_digests', 'user-', true);">{L_MARK_ALL}</a> &bull; <a href="#" onclick="marklist('acp_digests', 'user-', false);">{L_UNMARK_ALL}</a></p>
             {S_FORM_TOKEN}
         </fieldset>
-	</fieldset>
 <!-- ENDIF -->
 
 <!-- IF S_BALANCE_LOAD -->
@@ -370,6 +367,7 @@ function inStack(name) {
 	</p>
 <!-- ENDIF -->
 	{S_FORM_TOKEN}
+	</fieldset>
 </form>
 
 <!-- INCLUDE overall_footer.html -->

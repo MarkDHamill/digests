@@ -74,7 +74,7 @@ class main_module
 				$display_vars = array(
 					'title'	=> 'ACP_DIGESTS_GENERAL_SETTINGS',
 					'vars'	=> array(
-						'legend1'								=> '',
+						'legend1'								=> 'ACP_DIGESTS_GENERAL_SETTINGS',
 						'phpbbservices_digests_enable_log'					=> array('lang' => 'DIGESTS_ENABLE_LOG',						'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_show_email'					=> array('lang' => 'DIGESTS_SHOW_EMAIL',						'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_enable_auto_subscriptions'	=> array('lang' => 'DIGESTS_ENABLE_AUTO_SUBSCRIPTIONS',			'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
@@ -101,7 +101,7 @@ class main_module
 				$display_vars = array(
 					'title'	=> 'ACP_DIGESTS_USER_DEFAULT_SETTINGS',
 					'vars'	=> array(						
-						'legend1'											=> '',
+						'legend1'											=> 'ACP_DIGESTS_USER_DEFAULT_SETTINGS',
 						'phpbbservices_digests_user_digest_registration'	=> array('lang' => 'DIGESTS_USER_DIGESTS_REGISTRATION',		'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_user_digest_type'			=> array('lang' => 'DIGESTS_USER_DIGESTS_TYPE',					'validate' => 'string',	'type' => 'select', 'method' => 'digest_type_select', 'explain' => false),
 						'phpbbservices_digests_user_digest_format'			=> array('lang' => 'DIGESTS_USER_DIGESTS_STYLE',					'validate' => 'string',	'type' => 'select', 'method' => 'digest_style_select', 'explain' 		=> false),
@@ -130,6 +130,7 @@ class main_module
 				$display_vars = array(
 					'title'	=> 'ACP_DIGESTS_EDIT_SUBSCRIBERS',
 					'vars'	=> array(
+						'legend1'											=> 'ACP_DIGESTS_EDIT_SUBSCRIBERS',
 					)
 				);
 
@@ -695,6 +696,7 @@ class main_module
 				$display_vars = array(
 					'title'	=> 'ACP_DIGESTS_BALANCE_LOAD',
 					'vars'	=> array(
+						'legend1'								=> 'ACP_DIGESTS_BALANCE_LOAD',
 					)
 				);
 
@@ -765,7 +767,7 @@ class main_module
 				$display_vars = array(
 					'title'	=> 'ACP_DIGESTS_MASS_SUBSCRIBE_UNSUBSCRIBE',
 					'vars'	=> array(
-						'legend1'								=> '',
+						'legend1'								=> 'ACP_DIGESTS_MASS_SUBSCRIBE_UNSUBSCRIBE',
 						'phpbbservices_digests_enable_subscribe_unsubscribe'	=> array('lang' => 'DIGESTS_ENABLE_SUBSCRIBE_UNSUBSCRIBE',	'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_subscribe_all'					=> array('lang' => 'DIGESTS_SUBSCRIBE_ALL',				'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_include_admins'					=> array('lang' => 'DIGESTS_INCLUDE_ADMINS',				'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
@@ -777,7 +779,7 @@ class main_module
 				$display_vars = array(
 					'title'	=> 'ACP_DIGESTS_RESET_CRON_RUN_TIME',
 					'vars'	=> array(
-						'legend1'								=> '',
+						'legend1'								=> 'ACP_DIGESTS_RESET_CRON_RUN_TIME',
 						'phpbbservices_digests_enable_subscribe_unsubscribe'	=> array('lang' => 'DIGESTS_RESET_CRON_RUN_TIME',	'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 					)
 				);
@@ -1608,8 +1610,6 @@ class main_module
 
 	function dow_select()
 	{
-		//global $config, $this->user;
-		
 		$dow_options = '';
 		$index = 0;
 		foreach ($this->user->lang['DIGESTS_WEEKDAY'] as $key => $value)
@@ -1624,8 +1624,6 @@ class main_module
 
 	function digest_type_select()
 	{
-		//global $this->config, $this->user;
-		
 		$selected = ($this->config['phpbbservices_digests_user_digest_type'] == constants::DIGESTS_DAILY_VALUE) ? ' selected="selected"' : '';
 		$digest_types = '<option value="' . constants::DIGESTS_DAILY_VALUE . '"' . $selected. '>' . $this->user->lang('DIGESTS_DAILY') . '</option>';
 		$selected = ($this->config['phpbbservices_digests_user_digest_type'] == constants::DIGESTS_WEEKLY_VALUE) ? ' selected="selected"' : '';
@@ -1638,8 +1636,6 @@ class main_module
 
 	function digest_style_select()
 	{
-		//global $this->config, $this->user;
-		
 		$selected = ($this->config['phpbbservices_digests_user_digest_format'] == constants::DIGESTS_HTML_VALUE) ? ' selected="selected"' : '';
 		$digest_styles = '<option value="' . constants::DIGESTS_HTML_VALUE . '"' . $selected . '>' . $this->user->lang('DIGESTS_FORMAT_HTML') . '</option>';
 		$selected = ($this->config['phpbbservices_digests_user_digest_format'] == constants::DIGESTS_HTML_CLASSIC_VALUE) ? ' selected="selected"' : '';
@@ -1656,8 +1652,6 @@ class main_module
 
 	function digest_send_hour_gmt()
 	{
-		//global $this->config, $this->user;
-		
 		$digest_send_hour_gmt = '';
 		
 		// Populate the Hour Sent select control
@@ -1674,8 +1668,6 @@ class main_module
 
 	function digest_filter_type ()
 	{
-		//global $this->config, $this->user;
-		
 		$selected = ($this->config['phpbbservices_digests_user_digest_filter_type'] == constants::DIGESTS_ALL) ? ' selected="selected"' : '';
 		$digest_filter_types = '<option value="' . constants::DIGESTS_ALL . '"' . $selected. '>' . $this->user->lang('DIGESTS_ALL_FORUMS') . '</option>';
 		$selected = ($this->config['phpbbservices_digests_user_digest_filter_type'] == constants::DIGESTS_FIRST) ? ' selected="selected"' : '';
@@ -1688,8 +1680,7 @@ class main_module
 
 	function digest_post_sort_order ()
 	{
-		//global $this->config, $this->user;
-		
+
 		$selected = ($this->config['phpbbservices_digests_user_digest_sortby'] == constants::DIGESTS_SORTBY_BOARD) ? ' selected="selected"' : '';
 		$digest_sort_order = '<option value="' . constants::DIGESTS_SORTBY_BOARD . '"' . $selected . '>' . $this->user->lang('DIGESTS_SORT_USER_ORDER') . '</option>';
 		$selected = ($this->config['phpbbservices_digests_user_digest_sortby'] == constants::DIGESTS_SORTBY_STANDARD) ? ' selected="selected"' : '';
@@ -1709,8 +1700,6 @@ class main_module
 		
 		// This function parses $digest_notify_list, an array of user_ids that represent users that had their digest subscriptions changed, and sends them an email
 		// letting them know an action has occurred.
-		
-		//global $this->phpbb_root_path, $this->phpEx, $this->db, $this->phpbb_log;
 		
 		$emails_sent = 0;
 		

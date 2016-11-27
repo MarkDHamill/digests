@@ -192,7 +192,6 @@ class main_module
 					SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
 					WHERE user_id = ' . (int) $this->user->data['user_id'];
 				$this->db->sql_query($sql);
-				$this->db->sql_query($sql);
 			}
 			
 			// Send a confirmation message

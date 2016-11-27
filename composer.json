@@ -1,7 +1,7 @@
 {
 	"name": "phpbbservices/digests",
 	"type": "phpbb-extension",
-	"description": "Sends daily, weekly or monthly digests of posts to subscribers via email.",
+	"description": "Sends daily, weekly or monthly digests of posts or bookmarked topics to subscribers via email.",
 	"homepage": "https://phpbbservices.com/digests_wp",
 	"version": "3.0.7-RC6",
 	"license": "GPL-2.0",
@@ -23,7 +23,7 @@
 			"phpbb/phpbb": ">=3.1.9,<3.2.0@dev"
 		},
 		"version-check": {
-			"host": "phpbbservices.com",
+			"host": "www.phpbbservices.com",
 			"directory": "/digests/updatecheck/",
 			"filename": "3.1.json"
 		}

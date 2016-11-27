@@ -13,30 +13,49 @@ use phpbbservices\digests\constants\constants;
 
 class main_module
 {
-	var $u_action;
-	var $new_config = array();
 
-	function main($id, $mode)
+	private $auth;
+	private $config;
+	private $db;
+	private $helper;
+	private $pagination;
+	private $phpbb_extension_manager;
+	private $phpbb_log;
+	private $phpbb_path_helper;
+	private $phpbb_root_path;
+	private $phpEx;
+	private $request;
+	private $table_prefix;
+	private $template;
+	private $user;
 
+	function __construct()
 	{
-
 		global $phpbb_container;
 
-		// Get global variables as containers to minimize security issues
-		$auth = $phpbb_container->get('auth');
-		$config = $phpbb_container->get('config');
-		$db = $phpbb_container->get('dbal.conn');
-		$phpbb_extension_manager = $phpbb_container->get('ext.manager');
-		$phpbb_log = $phpbb_container->get('log');
-		$phpbb_path_helper = $phpbb_container->get('path_helper');
-		$phpbb_root_path = $phpbb_container->getParameter('core.root_path');
-		$phpEx= $phpbb_container->getParameter('core.php_ext');
-		$request = $phpbb_container->get('request');
-		$table_prefix = $phpbb_container->getParameter('core.table_prefix');
-		$template = $phpbb_container->get('template');
-		$user = $phpbb_container->get('user');
+		// Get global variables via containers to minimize security issues
+		$this->phpbb_root_path = $phpbb_container->getParameter('core.root_path');
+		$this->phpEx= $phpbb_container->getParameter('core.php_ext');
+		$this->table_prefix = $phpbb_container->getParameter('core.table_prefix');
 
-		$user->add_lang_ext('phpbbservices/digests', array('acp/info_acp_common', 'acp/common'));
+		// Encapsulate certain phpBB objects inside this class to minimize security issues
+		$this->auth = $phpbb_container->get('auth');
+		$this->config = $phpbb_container->get('config');
+		$this->db = $phpbb_container->get('dbal.conn');
+		$this->helper = $phpbb_container->get('phpbbservices.digests.common');
+		$this->pagination = $phpbb_container->get('pagination');
+		$this->phpbb_extension_manager = $phpbb_container->get('ext.manager');
+		$this->phpbb_log = $phpbb_container->get('log');
+		$this->phpbb_path_helper = $phpbb_container->get('path_helper');
+		$this->request = $phpbb_container->get('request');
+		$this->template = $phpbb_container->get('template');
+		$this->user = $phpbb_container->get('user');
+	}
+
+	function main($id, $mode)
+	{
+
+		$this->user->add_lang_ext('phpbbservices/digests', array('acp/info_acp_common', 'acp/common'));
 
 		$submit = (isset($_POST['submit'])) ? true : false;
 
@@ -115,16 +134,16 @@ class main_module
 				);
 
 				// Grab some URL parameters
-				$member = $request->variable('member', '', true);
-				$start = $request->variable('start', 0);
-				$subscribe = $request->variable('subscribe', 'a', true);
-				$sortby = $request->variable('sortby', 'u', true);
-				$sortorder = $request->variable('sortorder', 'a', true);
+				$member = $this->request->variable('member', '', true);
+				$start = $this->request->variable('start', 0);
+				$subscribe = $this->request->variable('subscribe', 'a', true);
+				$sortby = $this->request->variable('sortby', 'u', true);
+				$sortorder = $this->request->variable('sortorder', 'a', true);
 				
 				// Translate time zone information
-				$template->assign_vars(array(
-					'L_DIGESTS_HOUR_SENT'               			=> $user->lang('DIGESTS_HOUR_SENT', $config['phpbbservices_digests_time_zone']),
-					'L_DIGESTS_BASED_ON'							=> $user->lang('DIGESTS_BASED_ON', $config['phpbbservices_digests_time_zone']),
+				$this->template->assign_vars(array(
+					'L_DIGESTS_HOUR_SENT'               			=> $this->user->lang('DIGESTS_HOUR_SENT', $this->config['phpbbservices_digests_time_zone']),
+					'L_DIGESTS_BASED_ON'							=> $this->user->lang('DIGESTS_BASED_ON', $this->config['phpbbservices_digests_time_zone']),
 					'S_EDIT_SUBSCRIBERS'							=> true,
 				));
 
@@ -135,25 +154,25 @@ class main_module
 					case 'u':
 						$subscribe_sql = "user_digest_type = 'NONE' AND user_digest_has_unsubscribed = 0 AND ";
 						$unsubscribe_selected = ' selected="selected"';
-						$context = $user->lang('DIGESTS_UNSUBSCRIBED');
+						$context = $this->user->lang('DIGESTS_UNSUBSCRIBED');
 					break;
 					
 					case 't':
 						$subscribe_sql = "user_digest_type = 'NONE' AND user_digest_has_unsubscribed = 1 AND";
 						$stopped_subscribing = ' selected="selected"';
-						$context = $user->lang('DIGESTS_STOPPED_SUBSCRIBING');
+						$context = $this->user->lang('DIGESTS_STOPPED_SUBSCRIBING');
 					break;
 					
 					case 's':
 						$subscribe_sql = "user_digest_type <> 'NONE' AND user_digest_send_hour_gmt >= 0 AND user_digest_send_hour_gmt < 24 AND user_digest_has_unsubscribed = 0 AND";
 						$subscribe_selected = ' selected="selected"';
-						$context = $user->lang('DIGESTS_SUBSCRIBED');
+						$context = $this->user->lang('DIGESTS_SUBSCRIBED');
 					break;
 
 					case 'a':
 						$subscribe_sql = '';
 						$all_selected = ' selected="selected"';
-						$context = $user->lang('DIGESTS_ALL');
+						$context = $this->user->lang('DIGESTS_ALL');
 					break;
 				}
 
@@ -220,8 +239,8 @@ class main_module
 				}
 				
 				// Set up member search SQL
-				$match_any_chars = $db->get_any_char();
-				$member_sql = ($member <> '') ? " username_clean " . $db->sql_like_expression($match_any_chars . utf8_case_fold_nfc($member) . $match_any_chars) . " AND " : '';
+				$match_any_chars = $this->db->get_any_char();
+				$member_sql = ($member <> '') ? " username_clean " . $this->db->sql_like_expression($match_any_chars . utf8_case_fold_nfc($member) . $match_any_chars) . " AND " : '';
 
 				// Get the total rows for pagination purposes
 				$sql_array = array(
@@ -234,20 +253,18 @@ class main_module
 					'WHERE'		=> "$subscribe_sql $member_sql user_type <> " . USER_IGNORE,
 				);
 				
-				$sql = $db->sql_build_query('SELECT', $sql_array);
-				$result = $db->sql_query($sql);
+				$sql = $this->db->sql_build_query('SELECT', $sql_array);
+				$result = $this->db->sql_query($sql);
 
 				// Get the total users, this is a single row, single field.
-				$total_users = $db->sql_fetchfield('total_users');
+				$total_users = $this->db->sql_fetchfield('total_users');
 				
 				// Free the result
-				$db->sql_freeresult($result);
+				$this->db->sql_freeresult($result);
 				
 				// Create pagination logic
-				$pagination = $phpbb_container->get('pagination');
-
-				$this->u_action = append_sid("index.$phpEx?i=-phpbbservices-digests-acp-main_module&amp;mode=digests_edit_subscribers&amp;sortby=$sortby");	
-				$pagination->generate_template_pagination($this->u_action, 'pagination', 'start', $total_users, $config['phpbbservices_digests_users_per_page'], $start);
+				$this->u_action = append_sid("index.$this->phpEx?i=-phpbbservices-digests-acp-main_module&amp;mode=digests_edit_subscribers&amp;sortby=$sortby");
+				$this->pagination->generate_template_pagination($this->u_action, 'pagination', 'start', $total_users, $this->config['phpbbservices_digests_users_per_page'], $start);
 								
 				// Stealing some code from my Smartfeed extension so I can get a list of forums that a particular user can access
 				
@@ -261,14 +278,14 @@ class main_module
 						ACL_OPTIONS_TABLE		=> 'o',
 					),
 				
-					'WHERE'		=> $db->sql_in_set('auth_option', $auth_options),
+					'WHERE'		=> $this->db->sql_in_set('auth_option', $auth_options),
 				);
 				
-				$sql = $db->sql_build_query('SELECT', $sql_array);
+				$sql = $this->db->sql_build_query('SELECT', $sql_array);
 
-				$result = $db->sql_query($sql);
+				$result = $this->db->sql_query($sql);
 				$read_id = '';
-				while ($row = $db->sql_fetchrow($result))
+				while ($row = $this->db->sql_fetchrow($result))
 				{
 					if ($row['auth_option'] == 'f_read')
 					{
@@ -276,10 +293,10 @@ class main_module
 					}
 
 				}
-				$db->sql_freeresult($result); // Query be gone!
+				$this->db->sql_freeresult($result); // Query be gone!
 				
 				// Fill in some non-block template variables
-				$template->assign_vars(array(
+				$this->template->assign_vars(array(
 					'ALL_SELECTED'				=> $all_selected,
 					'ASCENDING_SELECTED'		=> $ascending_selected,
 					'DESCENDING_SELECTED'		=> $descending_selected,
@@ -293,19 +310,19 @@ class main_module
 					'FREQUENCY_SELECTED'		=> $frequency_selected,
 					'HAS_UNSUBSCRIBED_SELECTED'	=> $has_unsubscribed_selected,
 					'HOUR_SELECTED'				=> $hour_selected,
-					'IMAGE_PATH'				=> $phpbb_root_path . 'ext/phpbbservices/digests/adm/images/',
+					'IMAGE_PATH'				=> $this->phpbb_root_path . 'ext/phpbbservices/digests/adm/images/',
 					'LAST_SENT_SELECTED'		=> $last_sent_selected,
 					'LASTVISIT_SELECTED'		=> $lastvisit_selected,
 					'L_CONTEXT'					=> $context,
 					'MEMBER'					=> $member,
 					'STOPPED_SUBSCRIBING_SELECTED'	=> $stopped_subscribing,
 					'SUBSCRIBE_SELECTED'		=> $subscribe_selected,
-					'TOTAL_USERS'       		=> $user->lang('DIGESTS_LIST_USERS', (int) $total_users),
+					'TOTAL_USERS'       		=> $this->user->lang('DIGESTS_LIST_USERS', (int) $total_users),
 					'UNSUBSCRIBE_SELECTED'		=> $unsubscribe_selected,
 					'USERNAME_SELECTED'			=> $username_selected,
 				));
 	
-				$board_offset_hours = (int) $config['phpbbservices_digests_time_zone'];
+				$board_offset_hours = (int) $this->config['phpbbservices_digests_time_zone'];
 				
 				$sql_array = array(
 					'SELECT'	=> '*, CASE
@@ -325,56 +342,56 @@ class main_module
 					'ORDER_BY'	=> sprintf($sort_by_sql, $order_by_sql, $order_by_sql),
 				);
 				
-				$sql = $db->sql_build_query('SELECT', $sql_array);
-				$result = $db->sql_query_limit($sql, $config['phpbbservices_digests_users_per_page'], $start);
+				$sql = $this->db->sql_build_query('SELECT', $sql_array);
+				$result = $this->db->sql_query_limit($sql, $this->config['phpbbservices_digests_users_per_page'], $start);
 	
-				while ($row = $db->sql_fetchrow($result))
+				while ($row = $this->db->sql_fetchrow($result))
 				{
 					
 					// Make some translations into something more readable
 					switch($row['user_digest_type'])
 					{
 						case 'DAY':
-							$digest_type = $user->lang('DIGESTS_DAILY');
+							$digest_type = $this->user->lang('DIGESTS_DAILY');
 						break;
 						
 						case 'WEEK':
-							$digest_type = $user->lang('DIGESTS_WEEKLY');
+							$digest_type = $this->user->lang('DIGESTS_WEEKLY');
 						break;
 						
 						case 'MNTH':
-							$digest_type = $user->lang('DIGESTS_MONTHLY');
+							$digest_type = $this->user->lang('DIGESTS_MONTHLY');
 						break;
 						
 						default:
-							$digest_type = $user->lang('DIGESTS_UNKNOWN');
+							$digest_type = $this->user->lang('DIGESTS_UNKNOWN');
 						break;
 					}
 					
 					switch($row['user_digest_format'])
 					{
 						case constants::DIGESTS_HTML_VALUE:
-							$digest_format = $user->lang('DIGESTS_FORMAT_HTML');
+							$digest_format = $this->user->lang('DIGESTS_FORMAT_HTML');
 						break;
 						
 						case constants::DIGESTS_HTML_CLASSIC_VALUE:
-							$digest_format = $user->lang('DIGESTS_FORMAT_HTML_CLASSIC');
+							$digest_format = $this->user->lang('DIGESTS_FORMAT_HTML_CLASSIC');
 						break;
 						
 						case constants::DIGESTS_PLAIN_VALUE:
-							$digest_format = $user->lang('DIGESTS_FORMAT_PLAIN');
+							$digest_format = $this->user->lang('DIGESTS_FORMAT_PLAIN');
 						break;
 						
 						case constants::DIGESTS_PLAIN_CLASSIC_VALUE:
-							$digest_format = $user->lang('DIGESTS_FORMAT_PLAIN_CLASSIC');
+							$digest_format = $this->user->lang('DIGESTS_FORMAT_PLAIN_CLASSIC');
 						break;
 						
 						case constants::DIGESTS_TEXT_VALUE:
-							$digest_format = $user->lang('DIGESTS_FORMAT_TEXT');
+							$digest_format = $this->user->lang('DIGESTS_FORMAT_TEXT');
 						break;
 						
 						default:
-							$digest_format = $user->lang('DIGESTS_UNKNOWN');
+							$digest_format = $this->user->lang('DIGESTS_UNKNOWN');
 						break;
 					}
 					
@@ -411,21 +428,21 @@ class main_module
 						'SELECT'	=> 'forum_id ',
 					
 						'FROM'		=> array(
-							$table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE => 'sf',
+							$this->table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE => 'sf',
 						),
 					
 						'WHERE'		=> 'user_id = ' . (int) $row['user_id'],
 					);
 					
-					$sql2 = $db->sql_build_query('SELECT', $sql_array);
+					$sql2 = $this->db->sql_build_query('SELECT', $sql_array);
 
-					$result2 = $db->sql_query($sql2);
-					$subscribed_forums = $db->sql_fetchrowset($result2);
-					$db->sql_freeresult($result2);
+					$result2 = $this->db->sql_query($sql2);
+					$subscribed_forums = $this->db->sql_fetchrowset($result2);
+					$this->db->sql_freeresult($result2);
 
 					$all_by_default = (sizeof($subscribed_forums) == 0) ? true : false;
 					
-					$template->assign_block_vars('digests_edit_subscribers', array(
+					$this->template->assign_block_vars('digests_edit_subscribers', array(
 						'1ST'								=> ($row['user_digest_filter_type'] == constants::DIGESTS_FIRST),
 						'ALL'								=> ($row['user_digest_filter_type'] == constants::DIGESTS_ALL),
 						'BM'								=> ($row['user_digest_filter_type'] == constants::DIGESTS_BOOKMARKS),
@@ -454,7 +471,7 @@ class main_module
 						'BOARD_OFFSET_22'					=> $board_offset[22],
 						'BOARD_OFFSET_23'					=> $board_offset[23],
 						'DIGEST_MAX_SIZE' 					=> $row['user_digest_max_display_words'],
-						'L_DIGEST_CHANGE_SUBSCRIPTION' 		=> ($row['user_digest_type'] != 'NONE') ? $user->lang('DIGESTS_UNSUBSCRIBE') : $user->lang('DIGESTS_SUBSCRIBE_LITERAL'),
+						'L_DIGEST_CHANGE_SUBSCRIPTION' 		=> ($row['user_digest_type'] != 'NONE') ? $this->user->lang('DIGESTS_UNSUBSCRIBE') : $this->user->lang('DIGESTS_SUBSCRIBE_LITERAL'),
 						'S_ALL_BY_DEFAULT'					=> $all_by_default,
 						'S_ATTACHMENTS_NO_CHECKED' 			=> ($row['user_digest_attachments'] == 0),
 						'S_ATTACHMENTS_YES_CHECKED' 		=> ($row['user_digest_attachments'] == 1),
@@ -522,14 +539,14 @@ class main_module
 						'USERNAME'							=> $row['username'],
 						'USER_DIGEST_FORMAT'				=> $digest_format,
 						'USER_DIGEST_HAS_UNSUBSCRIBED'		=> ($row['user_digest_has_unsubscribed']) ? 'x' : '-',
-						'USER_DIGEST_LAST_SENT'				=> ($row['user_digest_last_sent'] == 0) ? $user->lang('DIGESTS_NO_DIGESTS_SENT') : date($config['default_dateformat'], $row['user_digest_last_sent'] + (60 * 60 * ($config['phpbbservices_digests_time_zone'] - (date('O')/100)))),
+						'USER_DIGEST_LAST_SENT'				=> ($row['user_digest_last_sent'] == 0) ? $this->user->lang('DIGESTS_NO_DIGESTS_SENT') : date($this->config['default_dateformat'], $row['user_digest_last_sent'] + (60 * 60 * ($this->config['phpbbservices_digests_time_zone'] - (date('O')/100)))),
 						'USER_DIGEST_MAX_DISPLAY_WORDS'		=> $row['user_digest_max_display_words'],
 						'USER_DIGEST_MAX_POSTS'				=> $row['user_digest_max_posts'],
 						'USER_DIGEST_MIN_WORDS'				=> $row['user_digest_min_words'],
 						'USER_DIGEST_TYPE'					=> $digest_type,
 						'USER_EMAIL'						=> $row['user_email'],
 						'USER_ID'							=> $row['user_id'],
-						'USER_LAST_VISIT'					=> ($row['user_lastvisit'] == 0) ? $user->lang('DIGESTS_NEVER_VISITED') : date($config['default_dateformat'], $row['user_lastvisit'] + (60 * 60 * ($config['phpbbservices_digests_time_zone'] - (date('O')/100)))),
+						'USER_LAST_VISIT'					=> ($row['user_lastvisit'] == 0) ? $this->user->lang('DIGESTS_NEVER_VISITED') : date($this->config['default_dateformat'], $row['user_lastvisit'] + (60 * 60 * ($this->config['phpbbservices_digests_time_zone'] - (date('O')/100)))),
 						'USER_SUBSCRIBE_UNSUBSCRIBE_FLAG'	=> ($row['user_digest_type'] != 'NONE') ? 'u' : 's')
 					);
 
@@ -538,7 +555,7 @@ class main_module
 					
 					unset($allowed_forums, $forum_array, $parent_stack);
 					
-					$forum_array = $auth->acl_raw_data_single_user($row['user_id']);
+					$forum_array = $this->auth->acl_raw_data_single_user($row['user_id']);
 					
 					foreach ($forum_array as $key => $value)
 					{
@@ -569,21 +586,21 @@ class main_module
 								FORUMS_TABLE		=> 'f',
 							),
 						
-							'WHERE'		=> $db->sql_in_set('forum_id', $allowed_forums) . ' AND forum_type <> ' . FORUM_LINK . "
+							'WHERE'		=> $this->db->sql_in_set('forum_id', $allowed_forums) . ' AND forum_type <> ' . FORUM_LINK . "
 									AND forum_password = ''",
 						
 							'ORDER_BY'	=> 'left_id ASC',
 						);
 						
-						$sql2 = $db->sql_build_query('SELECT', $sql_array);
+						$sql2 = $this->db->sql_build_query('SELECT', $sql_array);
 
-						$result2 = $db->sql_query($sql2);
+						$result2 = $this->db->sql_query($sql2);
 						
 						$current_level = 0;			// How deeply nested are we at the moment
 						$parent_stack = array();	// Holds a stack showing the current parent_id of the forum
 						$parent_stack[] = 0;		// 0, the first value in the stack, represents the <div_0> element, a container holding all the categories and forums in the template
 						
-						while ($row2 = $db->sql_fetchrow($result2))
+						while ($row2 = $this->db->sql_fetchrow($result2))
 						{
 							if ((int) $row2['parent_id'] != (int) end($parent_stack) || (end($parent_stack) == 0))
 							{
@@ -595,7 +612,7 @@ class main_module
 										array_pop($parent_stack);
 										$current_level--;
 										// Need to close a category level here
-										$template->assign_block_vars('digests_edit_subscribers.forums', array( 
+										$this->template->assign_block_vars('digests_edit_subscribers.forums', array(
 											'S_DIV_CLOSE' 	=> true,
 											'S_DIV_OPEN' 	=> false,
 											'S_PRINT' 		=> false,
@@ -609,7 +626,7 @@ class main_module
 									array_push($parent_stack, (int) $row2['parent_id']);
 									$current_level++;
 									// Need to add a category level here
-									$template->assign_block_vars('digests_edit_subscribers.forums', array( 
+									$this->template->assign_block_vars('digests_edit_subscribers.forums', array(
 										'CAT_ID' 			=> 'div_' . $row2['parent_id'],
 										'S_DIV_CLOSE' 		=> false,
 										'S_DIV_OPEN' 		=> true,
@@ -639,7 +656,7 @@ class main_module
 								$check = true;
 							}
 							
-							$template->assign_block_vars('digests_edit_subscribers.forums', array(
+							$this->template->assign_block_vars('digests_edit_subscribers.forums', array(
 								'FORUM_LABEL' 			=> $row2['forum_name'],
 								'FORUM_NAME' 			=> 'elt_' . (int) $row2['forum_id'] . '_' . (int) $row2['parent_id'],
 								'S_FORUM_SUBSCRIBED' 	=> $check,
@@ -650,7 +667,7 @@ class main_module
 							
 						}
 					
-						$db->sql_freeresult($result2);
+						$this->db->sql_freeresult($result2);
 					
 						// Now out of the loop, it is important to remember to close any open <div> tags. Typically there is at least one.
 						while ((int) $row2['parent_id'] != (int) end($parent_stack))
@@ -658,7 +675,7 @@ class main_module
 							array_pop($parent_stack);
 							$current_level--;
 							// Need to close the <div> tag
-							$template->assign_block_vars('digests_edit_subscribers.forums', array( 
+							$this->template->assign_block_vars('digests_edit_subscribers.forums', array(
 								'S_DIV_CLOSE' 	=> true,
 								'S_DIV_OPEN' 	=> false,
 								'S_PRINT' 		=> false,
@@ -670,7 +687,7 @@ class main_module
 					
 				}
 		
-				$db->sql_freeresult($result); // Query be gone!
+				$this->db->sql_freeresult($result); // Query be gone!
 					
 			break;
 
@@ -682,8 +699,8 @@ class main_module
 				);
 
 				// Translate time zone information
-				$template->assign_vars(array(
-					'L_DIGESTS_HOUR_SENT'               		=> $user->lang('DIGESTS_HOUR_SENT', $config['phpbbservices_digests_time_zone']),
+				$this->template->assign_vars(array(
+					'L_DIGESTS_HOUR_SENT'               		=> $this->user->lang('DIGESTS_HOUR_SENT', $this->config['phpbbservices_digests_time_zone']),
 					'S_BALANCE_LOAD'							=> true,
 				));
 
@@ -701,16 +718,16 @@ class main_module
 					'ORDER_BY'	=> '1',
 				);
 				
-				$sql = $db->sql_build_query('SELECT', $sql_array);
+				$sql = $this->db->sql_build_query('SELECT', $sql_array);
 
-				$result = $db->sql_query($sql);
-				$rowset = $db->sql_fetchrowset($result);
+				$result = $this->db->sql_query($sql);
+				$rowset = $this->db->sql_fetchrowset($result);
 				
 				for($i=0;$i<24;$i++)
 				{
 				
 					// Convert digest hour to GMT
-					$hour_gmt = floor($i - $config['phpbbservices_digests_time_zone']);
+					$hour_gmt = floor($i - $this->config['phpbbservices_digests_time_zone']);
 					
 					if ($hour_gmt < 0)
 					{
@@ -735,13 +752,13 @@ class main_module
 						}
 					}
 					
-					$template->assign_block_vars('digests_balance_load', array(
+					$this->template->assign_block_vars('digests_balance_load', array(
 						'HOUR'               => $i,
 						'HOUR_COUNT'         => $hour_count,
 					));
 				
 				}				
-				$db->sql_freeresult($result); // Query be gone!
+				$this->db->sql_freeresult($result); // Query be gone!
 			break;
 
 			case 'digests_mass_subscribe_unsubscribe':
@@ -792,8 +809,8 @@ class main_module
 				
 		}
 
-		$this->new_config = $config;
-		$cfg_array = (isset($_REQUEST['config'])) ? $request->variable('config', array('' => ''), true) : $this->new_config;
+		$this->new_config = $this->config;
+		$cfg_array = (isset($_REQUEST['config'])) ? $this->request->variable('config', array('' => ''), true) : $this->new_config;
 		$error = array();
 
 		// We validate the complete config if wished
@@ -801,7 +818,7 @@ class main_module
 
 		if ($submit && !check_form_key($form_key))
 		{
-			$error[] = $user->lang('FORM_INVALID');
+			$error[] = $this->user->lang('FORM_INVALID');
 		}
 		
 		// Do not write values if there is an error
@@ -823,7 +840,7 @@ class main_module
 
 			if ($submit)
 			{
-				$config->set($config_name, $config_value);
+				$this->config->set($config_name, $config_value);
 			}
 		}
 
@@ -832,7 +849,7 @@ class main_module
 			
 			// The "selected" input control indicates whether to do mass actions or not. With mass actions only the select control and
 			// the mark checkboxes matter. Other controls are ignored.
-			$selected = $request->variable('selected', 'IGNORE', true);
+			$selected = $this->request->variable('selected', 'IGNORE', true);
 			$mass_action = ($selected == 'IGNORE') ? false : true;
 			$use_defaults = false;
 			$use_defaults_pass = false;
@@ -840,7 +857,7 @@ class main_module
 			
 			// Get the entire request variables as an array for parsing
 			unset($requests_vars);
-			$request_vars = $request->get_super_global(\phpbb\request\request_interface::POST);
+			$request_vars = $this->request->get_super_global(\phpbb\request\request_interface::POST);
 			
 			// If a mass action, we want to remove all post variables with the user-99-col_name pattern. It makes the logic easier by effectively ignoring them.
 			if ($mass_action)
@@ -889,20 +906,20 @@ class main_module
 						if (isset($sql_ary) && sizeof($sql_ary) > 0)
 						{
 							$sql = 'UPDATE ' . USERS_TABLE . ' 
-								SET ' . $db->sql_build_array('UPDATE', $sql_ary) . '
+								SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
 								WHERE user_id = ' . (int) $current_user_id;
-							$db->sql_query($sql);
+							$this->db->sql_query($sql);
 						}
 						
 						// If there are any individual forum subscriptions for this user, remove the old ones. 
-						$sql = 'DELETE FROM ' . $table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' 
+						$sql = 'DELETE FROM ' . $this->table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' 
 								WHERE user_id = ' . (int) $current_user_id;
-						$db->sql_query($sql);
+						$this->db->sql_query($sql);
 		
 						// Now save the individual forum subscriptions, if any
 						if (!$mass_action && isset($sql_ary2) && sizeof($sql_ary2) > 0)
 						{
-							$db->sql_multi_insert($table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE, $sql_ary2);
+							$this->db->sql_multi_insert($this->table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE, $sql_ary2);
 						}
 
 						// Also want to save some information to an array to be used for sending emails to affected users.
@@ -928,7 +945,7 @@ class main_module
 							{
 								case constants::DIGESTS_DEFAULT_VALUE:
 									// Use the default digest type
-									$sql_ary['user_digest_type'] = $config['phpbbservices_digests_user_digest_type'];
+									$sql_ary['user_digest_type'] = $this->config['phpbbservices_digests_user_digest_type'];
 								break;
 								
 								case constants::DIGESTS_NONE_VALUE;
@@ -941,24 +958,24 @@ class main_module
 							}
 							
 							// Create a digest subscription using board defaults
-							$sql_ary['user_digest_format'] 				= $config['phpbbservices_digests_user_digest_format'];
-							$sql_ary['user_digest_show_mine'] 			= ($config['phpbbservices_digests_user_digest_show_mine'] == 1) ? 0 : 1;
-							$sql_ary['user_digest_send_on_no_posts'] 	= $config['phpbbservices_digests_user_digest_send_on_no_posts'];
-							$sql_ary['user_digest_send_hour_gmt'] 		= ($config['phpbbservices_digests_user_digest_send_hour_gmt'] == -1) ? rand(0,23) : $config['phpbbservices_digests_user_digest_send_hour_gmt'];
-							$sql_ary['user_digest_show_pms'] 			= $config['phpbbservices_digests_user_digest_show_pms'];
-							$sql_ary['user_digest_max_posts'] 			= $config['phpbbservices_digests_user_digest_max_posts'];
-							$sql_ary['user_digest_min_words'] 			= $config['phpbbservices_digests_user_digest_min_words'];
-							$sql_ary['user_digest_remove_foes'] 		= $config['phpbbservices_digests_user_digest_remove_foes'];
-							$sql_ary['user_digest_sortby'] 				= $config['phpbbservices_digests_user_digest_sortby'];
-							$sql_ary['user_digest_max_display_words'] 	= ($config['phpbbservices_digests_user_digest_max_display_words'] == -1) ? 0 : $config['phpbbservices_digests_user_digest_max_display_words'];
-							$sql_ary['user_digest_reset_lastvisit'] 	= $config['phpbbservices_digests_user_digest_reset_lastvisit'];
-							$sql_ary['user_digest_filter_type'] 		= $config['phpbbservices_digests_user_digest_filter_type'];
-							$sql_ary['user_digest_pm_mark_read'] 		= $config['phpbbservices_digests_user_digest_pm_mark_read'];
-							$sql_ary['user_digest_new_posts_only'] 		= $config['phpbbservices_digests_user_digest_new_posts_only'];
-							$sql_ary['user_digest_no_post_text']		= ($config['phpbbservices_digests_user_digest_max_display_words'] == 0) ? 1 : 0;
-							$sql_ary['user_digest_attachments'] 		= $config['phpbbservices_digests_user_digest_attachments'];
-							$sql_ary['user_digest_block_images']		= $config['phpbbservices_digests_user_digest_block_images'];
-							$sql_ary['user_digest_toc']					= $config['phpbbservices_digests_user_digest_toc'];
+							$sql_ary['user_digest_format'] 				= $this->config['phpbbservices_digests_user_digest_format'];
+							$sql_ary['user_digest_show_mine'] 			= ($this->config['phpbbservices_digests_user_digest_show_mine'] == 1) ? 0 : 1;
+							$sql_ary['user_digest_send_on_no_posts'] 	= $this->config['phpbbservices_digests_user_digest_send_on_no_posts'];
+							$sql_ary['user_digest_send_hour_gmt'] 		= ($this->config['phpbbservices_digests_user_digest_send_hour_gmt'] == -1) ? rand(0,23) : $this->config['phpbbservices_digests_user_digest_send_hour_gmt'];
+							$sql_ary['user_digest_show_pms'] 			= $this->config['phpbbservices_digests_user_digest_show_pms'];
+							$sql_ary['user_digest_max_posts'] 			= $this->config['phpbbservices_digests_user_digest_max_posts'];
+							$sql_ary['user_digest_min_words'] 			= $this->config['phpbbservices_digests_user_digest_min_words'];
+							$sql_ary['user_digest_remove_foes'] 		= $this->config['phpbbservices_digests_user_digest_remove_foes'];
+							$sql_ary['user_digest_sortby'] 				= $this->config['phpbbservices_digests_user_digest_sortby'];
+							$sql_ary['user_digest_max_display_words'] 	= ($this->config['phpbbservices_digests_user_digest_max_display_words'] == -1) ? 0 : $this->config['phpbbservices_digests_user_digest_max_display_words'];
+							$sql_ary['user_digest_reset_lastvisit'] 	= $this->config['phpbbservices_digests_user_digest_reset_lastvisit'];
+							$sql_ary['user_digest_filter_type'] 		= $this->config['phpbbservices_digests_user_digest_filter_type'];
+							$sql_ary['user_digest_pm_mark_read'] 		= $this->config['phpbbservices_digests_user_digest_pm_mark_read'];
+							$sql_ary['user_digest_new_posts_only'] 		= $this->config['phpbbservices_digests_user_digest_new_posts_only'];
+							$sql_ary['user_digest_no_post_text']		= ($this->config['phpbbservices_digests_user_digest_max_display_words'] == 0) ? 1 : 0;
+							$sql_ary['user_digest_attachments'] 		= $this->config['phpbbservices_digests_user_digest_attachments'];
+							$sql_ary['user_digest_block_images']		= $this->config['phpbbservices_digests_user_digest_block_images'];
+							$sql_ary['user_digest_toc']					= $this->config['phpbbservices_digests_user_digest_toc'];
 						}
 						
 					}
@@ -969,9 +986,9 @@ class main_module
 						
 						// We need to get these variables so we can detect if individual forum subscriptions will need to be processed.
 						$var = 'user-' . $current_user_id . '-all_forums';
-						$all_forums = $request->variable($var, '', true);
+						$all_forums = $this->request->variable($var, '', true);
 						$var = 'user-' . $current_user_id . '-filter_type';
-						$filter_type = $request->variable($var, '', true);
+						$filter_type = $this->request->variable($var, '', true);
 						
 						// No mass action, so associate the database columns with its requested value
 						if (!$use_defaults && ($var_part == 'digest_type') && ($value == constants::DIGESTS_DEFAULT_VALUE))
@@ -985,25 +1002,25 @@ class main_module
 							if (!$use_defaults_pass)
 							{
 								// Create a digest subscription using board defaults. but do it only once for the user_id
-								$sql_ary['user_digest_type'] 				= $config['phpbbservices_digests_user_digest_type'];
-								$sql_ary['user_digest_format'] 				= $config['phpbbservices_digests_user_digest_format'];
-								$sql_ary['user_digest_show_mine'] 			= ($config['phpbbservices_digests_user_digest_show_mine'] == 1) ? 0 : 1;
-								$sql_ary['user_digest_send_on_no_posts'] 	= $config['phpbbservices_digests_user_digest_send_on_no_posts'];
-								$sql_ary['user_digest_send_hour_gmt'] 		= ($config['phpbbservices_digests_user_digest_send_hour_gmt'] == -1) ? rand(0,23) : $config['phpbbservices_digests_user_digest_send_hour_gmt'];
-								$sql_ary['user_digest_show_pms'] 			= $config['phpbbservices_digests_user_digest_show_pms'];
-								$sql_ary['user_digest_max_posts'] 			= $config['phpbbservices_digests_user_digest_max_posts'];
-								$sql_ary['user_digest_min_words'] 			= $config['phpbbservices_digests_user_digest_min_words'];
-								$sql_ary['user_digest_remove_foes'] 		= $config['phpbbservices_digests_user_digest_remove_foes'];
-								$sql_ary['user_digest_sortby'] 				= $config['phpbbservices_digests_user_digest_sortby'];
-								$sql_ary['user_digest_max_display_words'] 	= ($config['phpbbservices_digests_user_digest_max_display_words'] == -1) ? 0 : $config['phpbbservices_digests_user_digest_max_display_words'];
-								$sql_ary['user_digest_reset_lastvisit'] 	= $config['phpbbservices_digests_user_digest_reset_lastvisit'];
-								$sql_ary['user_digest_filter_type'] 		= $config['phpbbservices_digests_user_digest_filter_type'];
-								$sql_ary['user_digest_pm_mark_read'] 		= $config['phpbbservices_digests_user_digest_pm_mark_read'];
-								$sql_ary['user_digest_new_posts_only'] 		= $config['phpbbservices_digests_user_digest_new_posts_only'];
-								$sql_ary['user_digest_no_post_text']		= ($config['phpbbservices_digests_user_digest_max_display_words'] == 0) ? 1 : 0;
-								$sql_ary['user_digest_attachments'] 		= $config['phpbbservices_digests_user_digest_attachments'];
-								$sql_ary['user_digest_block_images']		= $config['phpbbservices_digests_user_digest_block_images'];
-								$sql_ary['user_digest_toc']					= $config['phpbbservices_digests_user_digest_toc'];
+								$sql_ary['user_digest_type'] 				= $this->config['phpbbservices_digests_user_digest_type'];
+								$sql_ary['user_digest_format'] 				= $this->config['phpbbservices_digests_user_digest_format'];
+								$sql_ary['user_digest_show_mine'] 			= ($this->config['phpbbservices_digests_user_digest_show_mine'] == 1) ? 0 : 1;
+								$sql_ary['user_digest_send_on_no_posts'] 	= $this->config['phpbbservices_digests_user_digest_send_on_no_posts'];
+								$sql_ary['user_digest_send_hour_gmt'] 		= ($this->config['phpbbservices_digests_user_digest_send_hour_gmt'] == -1) ? rand(0,23) : $this->config['phpbbservices_digests_user_digest_send_hour_gmt'];
+								$sql_ary['user_digest_show_pms'] 			= $this->config['phpbbservices_digests_user_digest_show_pms'];
+								$sql_ary['user_digest_max_posts'] 			= $this->config['phpbbservices_digests_user_digest_max_posts'];
+								$sql_ary['user_digest_min_words'] 			= $this->config['phpbbservices_digests_user_digest_min_words'];
+								$sql_ary['user_digest_remove_foes'] 		= $this->config['phpbbservices_digests_user_digest_remove_foes'];
+								$sql_ary['user_digest_sortby'] 				= $this->config['phpbbservices_digests_user_digest_sortby'];
+								$sql_ary['user_digest_max_display_words'] 	= ($this->config['phpbbservices_digests_user_digest_max_display_words'] == -1) ? 0 : $this->config['phpbbservices_digests_user_digest_max_display_words'];
+								$sql_ary['user_digest_reset_lastvisit'] 	= $this->config['phpbbservices_digests_user_digest_reset_lastvisit'];
+								$sql_ary['user_digest_filter_type'] 		= $this->config['phpbbservices_digests_user_digest_filter_type'];
+								$sql_ary['user_digest_pm_mark_read'] 		= $this->config['phpbbservices_digests_user_digest_pm_mark_read'];
+								$sql_ary['user_digest_new_posts_only'] 		= $this->config['phpbbservices_digests_user_digest_new_posts_only'];
+								$sql_ary['user_digest_no_post_text']		= ($this->config['phpbbservices_digests_user_digest_max_display_words'] == 0) ? 1 : 0;
+								$sql_ary['user_digest_attachments'] 		= $this->config['phpbbservices_digests_user_digest_attachments'];
+								$sql_ary['user_digest_block_images']		= $this->config['phpbbservices_digests_user_digest_block_images'];
+								$sql_ary['user_digest_toc']					= $this->config['phpbbservices_digests_user_digest_toc'];
 								$use_defaults_pass = true;
 							}
 						}
@@ -1125,35 +1142,35 @@ class main_module
 			if (isset($sql_ary) && sizeof($sql_ary) > 0)
 			{
 				$sql = 'UPDATE ' . USERS_TABLE . ' 
-					SET ' . $db->sql_build_array('UPDATE', $sql_ary) . '
+					SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
 					WHERE user_id = ' . (int) $current_user_id;
-				$db->sql_query($sql);
+				$this->db->sql_query($sql);
 			}
 			
 			// If there are any individual forum subscriptions for this user, remove the old ones. 
 			if (!is_null($current_user_id))
 			{
-				$sql = 'DELETE FROM ' . $table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' 
+				$sql = 'DELETE FROM ' . $this->table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' 
 						WHERE user_id = ' . (int) $current_user_id;
-				$db->sql_query($sql);
+				$this->db->sql_query($sql);
 			}
 
 			// Now save the individual forum subscriptions, if any
 			if (!$mass_action && isset($sql_ary2) && sizeof($sql_ary2) > 0)
 			{
-				$db->sql_multi_insert($table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE, $sql_ary2);
+				$this->db->sql_multi_insert($this->table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE, $sql_ary2);
 			}
 
 			// Also want to save some information to an array to be used for sending emails to affected users.
 			$digest_notify_list[] = $current_user_id;
 
 			// Notify users whose subscriptions were changed
-			if ($config['phpbbservices_digests_notify_on_admin_changes'])
+			if ($this->config['phpbbservices_digests_notify_on_admin_changes'])
 			{
 				$this->notify_subscribers($digest_notify_list, 'digests_subscription_edited');
 			}
 				
-			$message = $user->lang('CONFIG_UPDATED');
+			$message = $this->user->lang('CONFIG_UPDATED');
 				
 		}
 
@@ -1171,10 +1188,10 @@ class main_module
 					AND user_type <> " . USER_IGNORE,
 			);
 			
-			$sql = $db->sql_build_query('SELECT', $sql_array);
+			$sql = $this->db->sql_build_query('SELECT', $sql_array);
 
-			$result = $db->sql_query($sql);
-			$row = $db->sql_fetchrow($result);
+			$result = $this->db->sql_query($sql);
+			$row = $this->db->sql_fetchrow($result);
 			
 			// Determine the average number of subscribers per hour. We need to assume at least one subscriber per hour to avoid 
 			// resetting user's preferred digest time unnecessarily. If the average is 3 per hour, the first 3 already subscribed 
@@ -1182,7 +1199,7 @@ class main_module
 			
 			$avg_subscribers_per_hour = max(floor($row['digests_count']/24), 1);
 			
-			$db->sql_freeresult($result);
+			$this->db->sql_freeresult($result);
 			
 			// Get oversubscribed hours, place in an array
 
@@ -1202,16 +1219,16 @@ class main_module
 				'ORDER_BY'	=> '1',
 			);
 			
-			$sql = $db->sql_build_query('SELECT', $sql_array);
+			$sql = $this->db->sql_build_query('SELECT', $sql_array);
 
-			$result = $db->sql_query($sql);
-			$rowset = $db->sql_fetchrowset($result);
+			$result = $this->db->sql_query($sql);
+			$rowset = $this->db->sql_fetchrowset($result);
 			$oversubscribed_hours = array();
 			foreach ($rowset as $row)
 			{
 				$oversubscribed_hours[] = $row['hour'];
 			}
-			$db->sql_freeresult($result);
+			$this->db->sql_freeresult($result);
 			
 			// Get a list of subscribers whose hour to get digest should be changed because they exceed the average number of subscribers 
 			// allowed in that hour. We will ignore the first $oversubscribed_hours subscribers.
@@ -1229,15 +1246,15 @@ class main_module
 					),
 				
 					'WHERE'		=> "user_digest_type <> '" . constants::DIGESTS_NONE_VALUE . "' AND user_type <> " . USER_IGNORE . '
-						AND ' . $db->sql_in_set('user_digest_send_hour_gmt', $oversubscribed_hours),
+						AND ' . $this->db->sql_in_set('user_digest_send_hour_gmt', $oversubscribed_hours),
 				
 					'ORDER_BY'	=> '1, 2',
 				);
 				
-				$sql = $db->sql_build_query('SELECT', $sql_array);
+				$sql = $this->db->sql_build_query('SELECT', $sql_array);
 
-				$result = $db->sql_query_limit($sql, 100000, $avg_subscribers_per_hour - 1); // Result sets start with array indexed at zero
-				$rowset = $db->sql_fetchrowset($result);
+				$result = $this->db->sql_query_limit($sql, 100000, $avg_subscribers_per_hour - 1); // Result sets start with array indexed at zero
+				$rowset = $this->db->sql_fetchrowset($result);
 
 				$current_hour = -1;
 				$counted_for_this_hour= 0;
@@ -1261,25 +1278,25 @@ class main_module
 						);
 						
 						$sql2 = 'UPDATE ' . USERS_TABLE . '
-							SET ' . $db->sql_build_array('UPDATE', $sql_ary) . '
+							SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
 							WHERE user_id = ' . (int)  $row['user_id'];
 							
-						$db->sql_query($sql2);
+						$this->db->sql_query($sql2);
 						$rebalanced++;
 					}
 				}
 				
-				$db->sql_freeresult($result);
+				$this->db->sql_freeresult($result);
 			
 				// Notify users whose subscriptions were changed
-				if ($config['phpbbservices_digests_notify_on_admin_changes'])
+				if ($this->config['phpbbservices_digests_notify_on_admin_changes'])
 				{
 					$this->notify_subscribers($digest_notify_list, 'digests_subscription_edited');
 				}
 				
 			}
 			
-			$message = $user->lang('DIGESTS_REBALANCED', $rebalanced);
+			$message = $this->user->lang('DIGESTS_REBALANCED', $rebalanced);
 
 		}
 
@@ -1287,12 +1304,12 @@ class main_module
 		{
 			
 			// Did the admin explicitly request a mass subscription or unsubscription action?
-			if ($config['phpbbservices_digests_enable_subscribe_unsubscribe'])
+			if ($this->config['phpbbservices_digests_enable_subscribe_unsubscribe'])
 			{
 				
 				// Determine which user types are to be updated
 				$user_types = array(USER_NORMAL);
-				if ($config['phpbbservices_digests_include_admins'])
+				if ($this->config['phpbbservices_digests_include_admins'])
 				{
 					$user_types[] = USER_FOUNDER;
 				}
@@ -1300,10 +1317,10 @@ class main_module
 				// If doing a mass subscription, we don't want to mess up digest subscriptions already in place, so we need to create a snippet of SQL.
 				// If doing a mass unsubscribe, all qualified subscriptions are removed. Note however that except for the digest type, all other settings 
 				// are retained.
-				$sql_qualifier = ($config['phpbbservices_digests_subscribe_all']) ? " AND user_digest_type = '" . constants::DIGESTS_NONE_VALUE . "'": " AND user_digest_type != '" . constants::DIGESTS_NONE_VALUE . "'";
+				$sql_qualifier = ($this->config['phpbbservices_digests_subscribe_all']) ? " AND user_digest_type = '" . constants::DIGESTS_NONE_VALUE . "'": " AND user_digest_type != '" . constants::DIGESTS_NONE_VALUE . "'";
 				$digest_notify_list = array();
 
-				if ($config['phpbbservices_digests_notify_on_admin_changes'])
+				if ($this->config['phpbbservices_digests_notify_on_admin_changes'])
 				{
 
 					$sql_array = array(
@@ -1313,74 +1330,74 @@ class main_module
 							USERS_TABLE	=> 'u',
 						),
 					
-						'WHERE'		=> $db->sql_in_set('user_type', $user_types) . $sql_qualifier,
+						'WHERE'		=> $this->db->sql_in_set('user_type', $user_types) . $sql_qualifier,
 					);
 					
-					$sql = $db->sql_build_query('SELECT', $sql_array);
+					$sql = $this->db->sql_build_query('SELECT', $sql_array);
 
-					$result = $db->sql_query($sql);
-					$rowset = $db->sql_fetchrowset($result);
+					$result = $this->db->sql_query($sql);
+					$rowset = $this->db->sql_fetchrowset($result);
 
 					foreach ($rowset as $row)
 					{
 						$digest_notify_list[] = $row['user_id'];
 					}
 							
-					$db->sql_freeresult($result); // Query be gone!
+					$this->db->sql_freeresult($result); // Query be gone!
 					
 				}
 					
 				// Set columns in user table to be updated
 				$sql_ary = array(
-					'user_digest_type' 				=> ($config['phpbbservices_digests_subscribe_all']) ? $config['phpbbservices_digests_user_digest_type'] : constants::DIGESTS_NONE_VALUE,
-					'user_digest_format' 			=> $config['phpbbservices_digests_user_digest_format'],
-					'user_digest_show_mine' 		=> ($config['phpbbservices_digests_user_digest_show_mine'] == 1) ? 0 : 1,
-					'user_digest_send_on_no_posts' 	=> $config['phpbbservices_digests_user_digest_send_on_no_posts'],
-					'user_digest_send_hour_gmt' 	=> ($config['phpbbservices_digests_user_digest_send_hour_gmt'] == -1) ? rand(0,23) : $config['phpbbservices_digests_user_digest_send_hour_gmt'],
-					'user_digest_show_pms' 			=> $config['phpbbservices_digests_user_digest_show_pms'],
-					'user_digest_max_posts' 		=> $config['phpbbservices_digests_user_digest_max_posts'],
-					'user_digest_min_words' 		=> $config['phpbbservices_digests_user_digest_min_words'],
-					'user_digest_remove_foes' 		=> $config['phpbbservices_digests_user_digest_remove_foes'],
-					'user_digest_sortby' 			=> $config['phpbbservices_digests_user_digest_sortby'],
-					'user_digest_max_display_words' => ($config['phpbbservices_digests_user_digest_max_display_words'] == -1) ? 0 : $config['phpbbservices_digests_user_digest_max_display_words'],
-					'user_digest_reset_lastvisit' 	=> $config['phpbbservices_digests_user_digest_reset_lastvisit'],
-					'user_digest_filter_type' 		=> $config['phpbbservices_digests_user_digest_filter_type'],
-					'user_digest_pm_mark_read' 		=> $config['phpbbservices_digests_user_digest_pm_mark_read'],
-					'user_digest_new_posts_only' 	=> $config['phpbbservices_digests_user_digest_new_posts_only'],
-					'user_digest_no_post_text'		=> ($config['phpbbservices_digests_user_digest_max_display_words'] == 0) ? 1 : 0,
-					'user_digest_attachments' 		=> $config['phpbbservices_digests_user_digest_attachments'],
-					'user_digest_block_images'		=> $config['phpbbservices_digests_user_digest_block_images'],
-					'user_digest_toc'				=> $config['phpbbservices_digests_user_digest_toc'],
+					'user_digest_type' 				=> ($this->config['phpbbservices_digests_subscribe_all']) ? $this->config['phpbbservices_digests_user_digest_type'] : constants::DIGESTS_NONE_VALUE,
+					'user_digest_format' 			=> $this->config['phpbbservices_digests_user_digest_format'],
+					'user_digest_show_mine' 		=> ($this->config['phpbbservices_digests_user_digest_show_mine'] == 1) ? 0 : 1,
+					'user_digest_send_on_no_posts' 	=> $this->config['phpbbservices_digests_user_digest_send_on_no_posts'],
+					'user_digest_send_hour_gmt' 	=> ($this->config['phpbbservices_digests_user_digest_send_hour_gmt'] == -1) ? rand(0,23) : $this->config['phpbbservices_digests_user_digest_send_hour_gmt'],
+					'user_digest_show_pms' 			=> $this->config['phpbbservices_digests_user_digest_show_pms'],
+					'user_digest_max_posts' 		=> $this->config['phpbbservices_digests_user_digest_max_posts'],
+					'user_digest_min_words' 		=> $this->config['phpbbservices_digests_user_digest_min_words'],
+					'user_digest_remove_foes' 		=> $this->config['phpbbservices_digests_user_digest_remove_foes'],
+					'user_digest_sortby' 			=> $this->config['phpbbservices_digests_user_digest_sortby'],
+					'user_digest_max_display_words' => ($this->config['phpbbservices_digests_user_digest_max_display_words'] == -1) ? 0 : $this->config['phpbbservices_digests_user_digest_max_display_words'],
+					'user_digest_reset_lastvisit' 	=> $this->config['phpbbservices_digests_user_digest_reset_lastvisit'],
+					'user_digest_filter_type' 		=> $this->config['phpbbservices_digests_user_digest_filter_type'],
+					'user_digest_pm_mark_read' 		=> $this->config['phpbbservices_digests_user_digest_pm_mark_read'],
+					'user_digest_new_posts_only' 	=> $this->config['phpbbservices_digests_user_digest_new_posts_only'],
+					'user_digest_no_post_text'		=> ($this->config['phpbbservices_digests_user_digest_max_display_words'] == 0) ? 1 : 0,
+					'user_digest_attachments' 		=> $this->config['phpbbservices_digests_user_digest_attachments'],
+					'user_digest_block_images'		=> $this->config['phpbbservices_digests_user_digest_block_images'],
+					'user_digest_toc'				=> $this->config['phpbbservices_digests_user_digest_toc'],
 				);
 					
 				$sql = 'UPDATE ' . USERS_TABLE . ' 
-						SET ' . $db->sql_build_array('UPDATE', $sql_ary) . '
-						WHERE ' . $db->sql_in_set('user_type', $user_types) . $sql_qualifier;
+						SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
+						WHERE ' . $this->db->sql_in_set('user_type', $user_types) . $sql_qualifier;
 					
-				$result = $db->sql_query($sql);
+				$result = $this->db->sql_query($sql);
 					
-				$db->sql_freeresult($result); // Query be gone!
+				$this->db->sql_freeresult($result); // Query be gone!
 				
 				// Notify users or subscription or unsubscription if directed
-				if ($config['phpbbservices_digests_notify_on_admin_changes'])
+				if ($this->config['phpbbservices_digests_notify_on_admin_changes'])
 				{
 					$this->notify_subscribers($digest_notify_list);
 				}
 				
-				if ($config['phpbbservices_digests_subscribe_all'])
+				if ($this->config['phpbbservices_digests_subscribe_all'])
 				{
-					$message = $user->lang('DIGESTS_ALL_SUBSCRIBED', sizeof($digest_notify_list));
+					$message = $this->user->lang('DIGESTS_ALL_SUBSCRIBED', sizeof($digest_notify_list));
 				}
 				else
 				{
-					$message = $user->lang('DIGESTS_ALL_UNSUBSCRIBED', sizeof($digest_notify_list));
+					$message = $this->user->lang('DIGESTS_ALL_UNSUBSCRIBED', sizeof($digest_notify_list));
 				}
 				
 			}
 			else
 			{
 				// show no update message
-				$message = $user->lang('DIGESTS_NO_MASS_ACTION');
+				$message = $this->user->lang('DIGESTS_NO_MASS_ACTION');
 			}
 
 		}
@@ -1388,16 +1405,16 @@ class main_module
 		if ($submit && $mode == 'digests_reset_cron_run_time')
 		{
 			// This allows the digests to go out next time cron.php is run.
-			$config->set('phpbbservices_digests_cron_task_last_gc', 0);
+			$this->config->set('phpbbservices_digests_cron_task_last_gc', 0);
 			
 			// This resets all the date/time stamps for when a digest was last sent to a user.
 			$sql_ary = array('user_digest_last_sent' => 0);
 			
 			$sql = 'UPDATE ' . USERS_TABLE . ' 
-				SET ' . $db->sql_build_array('UPDATE', $sql_ary);
-			$db->sql_query($sql);
+				SET ' . $this->db->sql_build_array('UPDATE', $sql_ary);
+			$this->db->sql_query($sql);
 			
-			$sql = $db->sql_build_query('UPDATE', $sql_array);
+			$sql = $this->db->sql_build_query('UPDATE', $sql_array);
 		}
 
 		if ($submit && $mode == 'digests_test')
@@ -1406,20 +1423,20 @@ class main_module
 			define('IN_DIGESTS_TEST', true);
 			$continue = true;
 
-			if (!$config['phpbbservices_digests_test'] && !$config['phpbbservices_digests_test_clear_spool'])
+			if (!$this->config['phpbbservices_digests_test'] && !$this->config['phpbbservices_digests_test_clear_spool'])
 			{
-				$message = $user->lang('DIGESTS_MAILER_NOT_RUN');
+				$message = $this->user->lang('DIGESTS_MAILER_NOT_RUN');
 				$continue = false;
 			}
 			
-			if ($continue && $config['phpbbservices_digests_test_clear_spool'])
+			if ($continue && $this->config['phpbbservices_digests_test_clear_spool'])
 			{
 				
 				// Clear the digests cache folder of .txt and .html files, if so instructed
 				$all_cleared = true;
 				$directory_found = true;
 				
-				$path = $phpbb_root_path . 'cache/phpbbservices/digests';
+				$path = $this->phpbb_root_path . 'cache/phpbbservices/digests';
 				if (is_dir($path))
 				{
 					foreach (new \DirectoryIterator($path) as $file_info)
@@ -1441,36 +1458,36 @@ class main_module
 					$directory_found = false;
 				}
 					
-				if ($config['phpbbservices_digests_enable_log'] && $directory_found)
+				if ($this->config['phpbbservices_digests_enable_log'] && $directory_found)
 				{
 					if ($all_cleared)
 					{
-						$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LOG_CONFIG_DIGESTS_CACHE_CLEARED');
+						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_CACHE_CLEARED');
 					}
 					else
 					{
-						$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LOG_CONFIG_DIGESTS_CLEAR_SPOOL_ERROR');
+						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_CLEAR_SPOOL_ERROR');
 					}
 				}
 			
 				if (!$all_cleared)
 				{
 					$message_type = E_USER_WARNING;
-					$message = $user->lang('DIGESTS_RUN_TEST_CLEAR_SPOOL_ERROR');
+					$message = $this->user->lang('DIGESTS_RUN_TEST_CLEAR_SPOOL_ERROR');
 					$continue = false;
 				}
 
 			}
 			
-			if ($continue && $config['phpbbservices_digests_test_time_use'])
+			if ($continue && $this->config['phpbbservices_digests_test_time_use'])
 			{
 				
 				// Make sure run date is valid, if a run date was requested.
-				$good_date = checkdate($config['phpbbservices_digests_test_month'], $config['phpbbservices_digests_test_day'], $config['phpbbservices_digests_test_year']);
+				$good_date = checkdate($this->config['phpbbservices_digests_test_month'], $this->config['phpbbservices_digests_test_day'], $this->config['phpbbservices_digests_test_year']);
 				if (!$good_date)
 				{
 					$message_type = E_USER_WARNING;
-					$message = $user->lang('DIGESTS_ILLOGICAL_DATE');
+					$message = $this->user->lang('DIGESTS_ILLOGICAL_DATE');
 					$continue = false;
 				}
 
@@ -1479,31 +1496,28 @@ class main_module
 			// Get ready to manually mail digests
 			if ($continue)
 			{
-				
-				// Get the common include files, to pass the reference to mailer
-				$helper = $phpbb_container->get('phpbbservices.digests.common');
 
 				// Create a new template object to pass to the mailer since we don't want to lose the content in this one. (The mailer will overwrite it.)
-				$mailer_template = new \phpbb\template\twig\twig($phpbb_path_helper, $config, $user, new \phpbb\template\context(), $phpbb_extension_manager);
+				$mailer_template = new \phpbb\template\twig\twig($this->phpbb_path_helper, $this->config, $this->user, new \phpbb\template\context(), $this->phpbb_extension_manager);
 				$mailer_template->set_style(array('./ext/phpbbservices/digests/styles', 'styles'));
 
 				// Create a mailer object and call its run method. The logic for sending a digest is embedded in this method, which is normally run as a cron task.
-				$mailer = new \phpbbservices\digests\cron\task\digests($config, $request, $user, $db, $phpEx, $phpbb_root_path, $mailer_template, $auth, $table_prefix, $phpbb_log, $helper);
+				$mailer = new \phpbbservices\digests\cron\task\digests($this->config, $this->request, $this->user, $this->db, $this->phpEx, $this->phpbb_root_path, $mailer_template, $this->auth, $this->table_prefix, $this->phpbb_log, $this->helper);
 				$success = $mailer->run();
 				
 				if (!$success)
 				{
 					$message_type = E_USER_WARNING;
-					$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LOG_CONFIG_DIGESTS_MAILER_RAN_WITH_ERROR');
-					$message = $user->lang('DIGESTS_MAILER_RAN_WITH_ERROR');
+					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_MAILER_RAN_WITH_ERROR');
+					$message = $this->user->lang('DIGESTS_MAILER_RAN_WITH_ERROR');
 				}
-				else if ($config['phpbbservices_digests_test_spool'])
+				else if ($this->config['phpbbservices_digests_test_spool'])
 				{
-					$message = $user->lang('DIGESTS_MAILER_SPOOLED');
+					$message = $this->user->lang('DIGESTS_MAILER_SPOOLED');
 				}
 				else
 				{
-					$message = $user->lang('DIGESTS_MAILER_RAN_SUCCESSFULLY');
+					$message = $this->user->lang('DIGESTS_MAILER_RAN_SUCCESSFULLY');
 				}
 				
 			}
@@ -1519,11 +1533,11 @@ class main_module
 			}
 			if (!isset($message))
 			{
-				$message = $user->lang('CONFIG_UPDATED');
+				$message = $this->user->lang('CONFIG_UPDATED');
 			}
 			if ($mode !== 'digests_test')
 			{
-				$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LOG_CONFIG_' . strtoupper($mode));
+				$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_' . strtoupper($mode));
 			}
 			trigger_error($message . adm_back_link($this->u_action), $message_type);
 				
@@ -1532,11 +1546,11 @@ class main_module
 		$this->tpl_name = 'acp_digests';
 		$this->page_title = $display_vars['title'];
 
-		$template->assign_vars(array(
+		$this->template->assign_vars(array(
 			'ERROR_MSG'			=> (is_array($error) ? implode('<br />', $error) : $error),
 			'L_MESSAGE'			=> $error,
-			'L_TITLE'			=> $user->lang($display_vars['title']),
-			'L_TITLE_EXPLAIN'	=> $user->lang($display_vars['title'] . '_EXPLAIN'),
+			'L_TITLE'			=> $this->user->lang($display_vars['title']),
+			'L_TITLE_EXPLAIN'	=> $this->user->lang($display_vars['title'] . '_EXPLAIN'),
 			'S_ERROR'			=> (sizeof($error)) ? true : false,
 			'U_ACTION'			=> $this->u_action)
 		);
@@ -1551,8 +1565,8 @@ class main_module
 
 			if (strpos($config_key, 'legend') !== false)
 			{
-				$template->assign_block_vars('options', array(
-					'LEGEND'		=> (isset($user->lang[$vars])) ? $user->lang($vars) : $vars,
+				$this->template->assign_block_vars('options', array(
+					'LEGEND'		=> (isset($this->user->lang[$vars])) ? $this->user->lang($vars) : $vars,
 					'S_LEGEND'		=> true)
 				);
 
@@ -1564,11 +1578,11 @@ class main_module
 			$l_explain = '';
 			if ($vars['explain'] && isset($vars['lang_explain']))
 			{
-				$l_explain = (isset($user->lang[$vars['lang_explain']])) ? $user->lang($vars['lang_explain']) : $vars['lang_explain'];
+				$l_explain = (isset($this->user->lang[$vars['lang_explain']])) ? $this->user->lang($vars['lang_explain']) : $vars['lang_explain'];
 			}
 			else if ($vars['explain'])
 			{
-				$l_explain = (isset($user->lang[$vars['lang'] . '_EXPLAIN'])) ? $user->lang($vars['lang'] . '_EXPLAIN') : '';
+				$l_explain = (isset($this->user->lang[$vars['lang'] . '_EXPLAIN'])) ? $this->user->lang($vars['lang'] . '_EXPLAIN') : '';
 			}
 
 			$content = build_cfg_template($type, $config_key, $this->new_config, $config_key, $vars);
@@ -1578,10 +1592,10 @@ class main_module
 				continue;
 			}
 
-			$template->assign_block_vars('options', array(
+			$this->template->assign_block_vars('options', array(
 				'CONTENT'		=> $content,
 				'KEY'			=> $config_key,
-				'TITLE'			=> (isset($user->lang[$vars['lang']])) ? $user->lang($vars['lang']) : $vars['lang'],
+				'TITLE'			=> (isset($this->user->lang[$vars['lang']])) ? $this->user->lang($vars['lang']) : $vars['lang'],
 				'S_EXPLAIN'		=> $vars['explain'],
 				'TITLE_EXPLAIN'	=> $l_explain,
 				)
@@ -1594,13 +1608,13 @@ class main_module
 
 	function dow_select()
 	{
-		global $config, $user;
+		//global $config, $this->user;
 		
 		$dow_options = '';
 		$index = 0;
-		foreach ($user->lang['DIGESTS_WEEKDAY'] as $key => $value)
+		foreach ($this->user->lang['DIGESTS_WEEKDAY'] as $key => $value)
 		{
-			$selected = ($index == $config['phpbbservices_digests_weekly_digest_day']) ? ' selected="selected"' : '';
+			$selected = ($index == $this->config['phpbbservices_digests_weekly_digest_day']) ? ' selected="selected"' : '';
 			$dow_options .= '<option value="' . $index . '"' . $selected . '>' . $value . '</option>';
 			$index++;
 		}
@@ -1610,47 +1624,47 @@ class main_module
 
 	function digest_type_select()
 	{
-		global $config, $user;
+		//global $this->config, $this->user;
 		
-		$selected = ($config['phpbbservices_digests_user_digest_type'] == constants::DIGESTS_DAILY_VALUE) ? ' selected="selected"' : '';
-		$digest_types = '<option value="' . constants::DIGESTS_DAILY_VALUE . '"' . $selected. '>' . $user->lang('DIGESTS_DAILY') . '</option>';
-		$selected = ($config['phpbbservices_digests_user_digest_type'] == constants::DIGESTS_WEEKLY_VALUE) ? ' selected="selected"' : '';
-		$digest_types .= '<option value="' . constants::DIGESTS_WEEKLY_VALUE . '"' . $selected . '>' . $user->lang('DIGESTS_WEEKLY') . '</option>';
-		$selected = ($config['phpbbservices_digests_user_digest_type'] == constants::DIGESTS_MONTHLY_VALUE) ? ' selected="selected"' : '';
-		$digest_types .= '<option value="' . constants::DIGESTS_MONTHLY_VALUE . '"' . $selected . '>' . $user->lang('DIGESTS_MONTHLY') . '</option>';
+		$selected = ($this->config['phpbbservices_digests_user_digest_type'] == constants::DIGESTS_DAILY_VALUE) ? ' selected="selected"' : '';
+		$digest_types = '<option value="' . constants::DIGESTS_DAILY_VALUE . '"' . $selected. '>' . $this->user->lang('DIGESTS_DAILY') . '</option>';
+		$selected = ($this->config['phpbbservices_digests_user_digest_type'] == constants::DIGESTS_WEEKLY_VALUE) ? ' selected="selected"' : '';
+		$digest_types .= '<option value="' . constants::DIGESTS_WEEKLY_VALUE . '"' . $selected . '>' . $this->user->lang('DIGESTS_WEEKLY') . '</option>';
+		$selected = ($this->config['phpbbservices_digests_user_digest_type'] == constants::DIGESTS_MONTHLY_VALUE) ? ' selected="selected"' : '';
+		$digest_types .= '<option value="' . constants::DIGESTS_MONTHLY_VALUE . '"' . $selected . '>' . $this->user->lang('DIGESTS_MONTHLY') . '</option>';
 		
 		return $digest_types;
 	}
 
 	function digest_style_select()
 	{
-		global $config, $user;
+		//global $this->config, $this->user;
 		
-		$selected = ($config['phpbbservices_digests_user_digest_format'] == constants::DIGESTS_HTML_VALUE) ? ' selected="selected"' : '';
-		$digest_styles = '<option value="' . constants::DIGESTS_HTML_VALUE . '"' . $selected . '>' . $user->lang('DIGESTS_FORMAT_HTML') . '</option>';
-		$selected = ($config['phpbbservices_digests_user_digest_format'] == constants::DIGESTS_HTML_CLASSIC_VALUE) ? ' selected="selected"' : '';
-		$digest_styles .= '<option value="' . constants::DIGESTS_HTML_CLASSIC_VALUE . '"' . $selected . '>' . $user->lang('DIGESTS_FORMAT_HTML_CLASSIC') . '</option>';
-		$selected = ($config['phpbbservices_digests_user_digest_format'] == constants::DIGESTS_PLAIN_VALUE) ? ' selected="selected"' : '';
-		$digest_styles .= '<option value="' . constants::DIGESTS_PLAIN_VALUE . '"' . $selected . '>' . $user->lang('DIGESTS_FORMAT_PLAIN') . '</option>';
-		$selected = ($config['phpbbservices_digests_user_digest_format'] == constants::DIGESTS_PLAIN_CLASSIC_VALUE) ? ' selected="selected"' : '';
-		$digest_styles .= '<option value="' . constants::DIGESTS_PLAIN_CLASSIC_VALUE . '"' . $selected . '>' . $user->lang('DIGESTS_FORMAT_PLAIN_CLASSIC') . '</option>';
-		$selected = ($config['phpbbservices_digests_user_digest_format'] == constants::DIGESTS_TEXT_VALUE) ? ' selected="selected"' : '';
-		$digest_styles .= '<option value="' . constants::DIGESTS_TEXT_VALUE . '"' . $selected  . '>' . $user->lang('DIGESTS_FORMAT_TEXT') . '</option>';
+		$selected = ($this->config['phpbbservices_digests_user_digest_format'] == constants::DIGESTS_HTML_VALUE) ? ' selected="selected"' : '';
+		$digest_styles = '<option value="' . constants::DIGESTS_HTML_VALUE . '"' . $selected . '>' . $this->user->lang('DIGESTS_FORMAT_HTML') . '</option>';
+		$selected = ($this->config['phpbbservices_digests_user_digest_format'] == constants::DIGESTS_HTML_CLASSIC_VALUE) ? ' selected="selected"' : '';
+		$digest_styles .= '<option value="' . constants::DIGESTS_HTML_CLASSIC_VALUE . '"' . $selected . '>' . $this->user->lang('DIGESTS_FORMAT_HTML_CLASSIC') . '</option>';
+		$selected = ($this->config['phpbbservices_digests_user_digest_format'] == constants::DIGESTS_PLAIN_VALUE) ? ' selected="selected"' : '';
+		$digest_styles .= '<option value="' . constants::DIGESTS_PLAIN_VALUE . '"' . $selected . '>' . $this->user->lang('DIGESTS_FORMAT_PLAIN') . '</option>';
+		$selected = ($this->config['phpbbservices_digests_user_digest_format'] == constants::DIGESTS_PLAIN_CLASSIC_VALUE) ? ' selected="selected"' : '';
+		$digest_styles .= '<option value="' . constants::DIGESTS_PLAIN_CLASSIC_VALUE . '"' . $selected . '>' . $this->user->lang('DIGESTS_FORMAT_PLAIN_CLASSIC') . '</option>';
+		$selected = ($this->config['phpbbservices_digests_user_digest_format'] == constants::DIGESTS_TEXT_VALUE) ? ' selected="selected"' : '';
+		$digest_styles .= '<option value="' . constants::DIGESTS_TEXT_VALUE . '"' . $selected  . '>' . $this->user->lang('DIGESTS_FORMAT_TEXT') . '</option>';
 		
 		return $digest_styles;
 	} 
 
 	function digest_send_hour_gmt()
 	{
-		global $config, $user;
+		//global $this->config, $this->user;
 		
 		$digest_send_hour_gmt = '';
 		
 		// Populate the Hour Sent select control
 		for($i=-1;$i<24;$i++)
 		{
-			$selected = ($i == $config['phpbbservices_digests_user_digest_send_hour_gmt']) ? ' selected="selected"' : '';
-			$display_text = ($i == -1) ? $user->lang('DIGESTS_RANDOM_HOUR') : $i;
+			$selected = ($i == $this->config['phpbbservices_digests_user_digest_send_hour_gmt']) ? ' selected="selected"' : '';
+			$display_text = ($i == -1) ? $this->user->lang('DIGESTS_RANDOM_HOUR') : $i;
 			$digest_send_hour_gmt .= '<option value="' . $i . '"' . $selected . '>' . $display_text . '</option>';
 		}
 		
@@ -1660,32 +1674,32 @@ class main_module
 
 	function digest_filter_type ()
 	{
-		global $config, $user;
+		//global $this->config, $this->user;
 		
-		$selected = ($config['phpbbservices_digests_user_digest_filter_type'] == constants::DIGESTS_ALL) ? ' selected="selected"' : '';
-		$digest_filter_types = '<option value="' . constants::DIGESTS_ALL . '"' . $selected. '>' . $user->lang('DIGESTS_ALL_FORUMS') . '</option>';
-		$selected = ($config['phpbbservices_digests_user_digest_filter_type'] == constants::DIGESTS_FIRST) ? ' selected="selected"' : '';
-		$digest_filter_types .= '<option value="' . constants::DIGESTS_FIRST . '"' . $selected . '>' . $user->lang('DIGESTS_POSTS_TYPE_FIRST') . '</option>';
-		$selected = ($config['phpbbservices_digests_user_digest_filter_type'] == constants::DIGESTS_BOOKMARKS) ? ' selected="selected"' : '';
-		$digest_filter_types .= '<option value="' . constants::DIGESTS_BOOKMARKS . '"' . $selected. '>' . $user->lang('DIGESTS_USE_BOOKMARKS') . '</option>';
+		$selected = ($this->config['phpbbservices_digests_user_digest_filter_type'] == constants::DIGESTS_ALL) ? ' selected="selected"' : '';
+		$digest_filter_types = '<option value="' . constants::DIGESTS_ALL . '"' . $selected. '>' . $this->user->lang('DIGESTS_ALL_FORUMS') . '</option>';
+		$selected = ($this->config['phpbbservices_digests_user_digest_filter_type'] == constants::DIGESTS_FIRST) ? ' selected="selected"' : '';
+		$digest_filter_types .= '<option value="' . constants::DIGESTS_FIRST . '"' . $selected . '>' . $this->user->lang('DIGESTS_POSTS_TYPE_FIRST') . '</option>';
+		$selected = ($this->config['phpbbservices_digests_user_digest_filter_type'] == constants::DIGESTS_BOOKMARKS) ? ' selected="selected"' : '';
+		$digest_filter_types .= '<option value="' . constants::DIGESTS_BOOKMARKS . '"' . $selected. '>' . $this->user->lang('DIGESTS_USE_BOOKMARKS') . '</option>';
 		
 		return $digest_filter_types;
 	} 
 
 	function digest_post_sort_order ()
 	{
-		global $config, $user;
+		//global $this->config, $this->user;
 		
-		$selected = ($config['phpbbservices_digests_user_digest_sortby'] == constants::DIGESTS_SORTBY_BOARD) ? ' selected="selected"' : '';
-		$digest_sort_order = '<option value="' . constants::DIGESTS_SORTBY_BOARD . '"' . $selected . '>' . $user->lang('DIGESTS_SORT_USER_ORDER') . '</option>';
-		$selected = ($config['phpbbservices_digests_user_digest_sortby'] == constants::DIGESTS_SORTBY_STANDARD) ? ' selected="selected"' : '';
-		$digest_sort_order .= '<option value="' . constants::DIGESTS_SORTBY_STANDARD . '"' . $selected .  '>' . $user->lang('DIGESTS_SORT_FORUM_TOPIC') . '</option>';
-		$selected = ($config['phpbbservices_digests_user_digest_sortby'] == constants::DIGESTS_SORTBY_STANDARD_DESC) ? ' selected="selected"' : '';
-		$digest_sort_order .= '<option value="' . constants::DIGESTS_SORTBY_STANDARD_DESC . '"' . $selected. '>' . $user->lang('DIGESTS_SORT_FORUM_TOPIC_DESC') . '</option>';
-		$selected = ($config['phpbbservices_digests_user_digest_sortby'] == constants::DIGESTS_SORTBY_POSTDATE) ? ' selected="selected"' : '';
-		$digest_sort_order .= '<option value="' . constants::DIGESTS_SORTBY_POSTDATE . '"' . $selected. '>' . $user->lang('DIGESTS_SORT_POST_DATE') . '</option>';
-		$selected = ($config['phpbbservices_digests_user_digest_sortby'] == constants::DIGESTS_SORTBY_POSTDATE_DESC) ? ' selected="selected"' : '';
-		$digest_sort_order .= '<option value="' . constants::DIGESTS_SORTBY_POSTDATE_DESC . '"' . $selected. '>' . $user->lang('DIGESTS_SORT_POST_DATE_DESC') . '</option>';
+		$selected = ($this->config['phpbbservices_digests_user_digest_sortby'] == constants::DIGESTS_SORTBY_BOARD) ? ' selected="selected"' : '';
+		$digest_sort_order = '<option value="' . constants::DIGESTS_SORTBY_BOARD . '"' . $selected . '>' . $this->user->lang('DIGESTS_SORT_USER_ORDER') . '</option>';
+		$selected = ($this->config['phpbbservices_digests_user_digest_sortby'] == constants::DIGESTS_SORTBY_STANDARD) ? ' selected="selected"' : '';
+		$digest_sort_order .= '<option value="' . constants::DIGESTS_SORTBY_STANDARD . '"' . $selected .  '>' . $this->user->lang('DIGESTS_SORT_FORUM_TOPIC') . '</option>';
+		$selected = ($this->config['phpbbservices_digests_user_digest_sortby'] == constants::DIGESTS_SORTBY_STANDARD_DESC) ? ' selected="selected"' : '';
+		$digest_sort_order .= '<option value="' . constants::DIGESTS_SORTBY_STANDARD_DESC . '"' . $selected. '>' . $this->user->lang('DIGESTS_SORT_FORUM_TOPIC_DESC') . '</option>';
+		$selected = ($this->config['phpbbservices_digests_user_digest_sortby'] == constants::DIGESTS_SORTBY_POSTDATE) ? ' selected="selected"' : '';
+		$digest_sort_order .= '<option value="' . constants::DIGESTS_SORTBY_POSTDATE . '"' . $selected. '>' . $this->user->lang('DIGESTS_SORT_POST_DATE') . '</option>';
+		$selected = ($this->config['phpbbservices_digests_user_digest_sortby'] == constants::DIGESTS_SORTBY_POSTDATE_DESC) ? ' selected="selected"' : '';
+		$digest_sort_order .= '<option value="' . constants::DIGESTS_SORTBY_POSTDATE_DESC . '"' . $selected. '>' . $this->user->lang('DIGESTS_SORT_POST_DATE_DESC') . '</option>';
 		
 		return $digest_sort_order;
 	}
@@ -1696,7 +1710,7 @@ class main_module
 		// This function parses $digest_notify_list, an array of user_ids that represent users that had their digest subscriptions changed, and sends them an email
 		// letting them know an action has occurred.
 		
-		global $phpbb_root_path, $phpEx, $config, $user, $db, $phpbb_log;
+		//global $this->phpbb_root_path, $this->phpEx, $this->db, $this->phpbb_log;
 		
 		$emails_sent = 0;
 		
@@ -1705,7 +1719,7 @@ class main_module
 			
 			if (!class_exists('messenger'))
 			{
-				include($phpbb_root_path . 'includes/functions_messenger.' . $phpEx); // Used to send emails
+				include($this->phpbb_root_path . 'includes/functions_messenger.' . $this->phpEx); // Used to send emails
 			}
 			
 			$sql_array = array(
@@ -1715,13 +1729,13 @@ class main_module
 					USERS_TABLE	=> 'u',
 				),
 			
-				'WHERE'		=> $db->sql_in_set('user_id', $digest_notify_list),
+				'WHERE'		=> $this->db->sql_in_set('user_id', $digest_notify_list),
 			);
 			
-			$sql = $db->sql_build_query('SELECT', $sql_array);
+			$sql = $this->db->sql_build_query('SELECT', $sql_array);
 			
-			$result = $db->sql_query($sql);
-			$rowset = $db->sql_fetchrowset($result);
+			$result = $this->db->sql_query($sql);
+			$rowset = $this->db->sql_fetchrowset($result);
 			
 			foreach ($rowset as $row)
 			{
@@ -1733,13 +1747,13 @@ class main_module
 				{
 					case 'digests_subscription_edited':
 						$digest_notify_template = $email_template;
-						$digest_email_subject = $user->lang('DIGESTS_SUBSCRIBE_EDITED');
+						$digest_email_subject = $this->user->lang('DIGESTS_SUBSCRIBE_EDITED');
 					break;
 					
 					default:
 						// Mass subscribe/unsubscribe
-						$digest_notify_template = ($config['phpbbservices_digests_subscribe_all']) ? 'digests_subscribe' : 'digests_unsubscribe';
-						$digest_email_subject = ($config['phpbbservices_digests_subscribe_all']) ? $user->lang('DIGESTS_SUBSCRIBE_SUBJECT') : $user->lang('DIGESTS_UNSUBSCRIBE_SUBJECT');
+						$digest_notify_template = ($this->config['phpbbservices_digests_subscribe_all']) ? 'digests_subscribe' : 'digests_unsubscribe';
+						$digest_email_subject = ($this->config['phpbbservices_digests_subscribe_all']) ? $this->user->lang('DIGESTS_SUBSCRIBE_SUBJECT') : $this->user->lang('DIGESTS_UNSUBSCRIBE_SUBJECT');
 					break;
 				}
 				
@@ -1747,23 +1761,23 @@ class main_module
 				switch ($row['user_digest_type'])
 				{
 					case constants::DIGESTS_DAILY_VALUE:
-						$digest_type_text = strtolower($user->lang('DIGESTS_DAILY'));
+						$digest_type_text = strtolower($this->user->lang('DIGESTS_DAILY'));
 					break;
 					
 					case constants::DIGESTS_WEEKLY_VALUE:
-						$digest_type_text = strtolower($user->lang('DIGESTS_WEEKLY'));
+						$digest_type_text = strtolower($this->user->lang('DIGESTS_WEEKLY'));
 					break;
 					
 					case constants::DIGESTS_MONTHLY_VALUE:
-						$digest_type_text = strtolower($user->lang('DIGESTS_MONTHLY'));
+						$digest_type_text = strtolower($this->user->lang('DIGESTS_MONTHLY'));
 					break;
 					
 					case constants::DIGESTS_NONE_VALUE:
-						$digest_type_text = strtolower($user->lang('DIGESTS_NONE'));
+						$digest_type_text = strtolower($this->user->lang('DIGESTS_NONE'));
 					break;
 
 					default:
-						$digest_type_text = strtolower($user->lang('DIGESTS_DAILY'));
+						$digest_type_text = strtolower($this->user->lang('DIGESTS_DAILY'));
 					break;
 				}
 				
@@ -1771,38 +1785,38 @@ class main_module
 				switch ($row['user_digest_format'])
 				{
 					case constants::DIGESTS_HTML_VALUE:
-						$digest_format_text = $user->lang('DIGESTS_FORMAT_HTML');
+						$digest_format_text = $this->user->lang('DIGESTS_FORMAT_HTML');
 					break;
 					
 					case constants::DIGESTS_HTML_CLASSIC_VALUE:
-						$digest_format_text = $user->lang('DIGESTS_FORMAT_HTML_CLASSIC');
+						$digest_format_text = $this->user->lang('DIGESTS_FORMAT_HTML_CLASSIC');
 					break;
 					
 					case constants::DIGESTS_PLAIN_VALUE:
-						$digest_format_text = $user->lang('DIGESTS_FORMAT_PLAIN');
+						$digest_format_text = $this->user->lang('DIGESTS_FORMAT_PLAIN');
 					break;
 					
 					case constants::DIGESTS_PLAIN_CLASSIC_VALUE:
-						$digest_format_text = $user->lang('DIGESTS_FORMAT_PLAIN_CLASSIC');
+						$digest_format_text = $this->user->lang('DIGESTS_FORMAT_PLAIN_CLASSIC');
 					break;
 					
 					case constants::DIGESTS_TEXT_VALUE:
-						$digest_format_text = strtolower($user->lang('DIGESTS_FORMAT_TEXT'));
+						$digest_format_text = strtolower($this->user->lang('DIGESTS_FORMAT_TEXT'));
 					break;
 					
 					default:
-						$digest_format_text = $user->lang('DIGESTS_FORMAT_HTML');
+						$digest_format_text = $this->user->lang('DIGESTS_FORMAT_HTML');
 					break;
 				}
 					
 				$messenger->template('@phpbbservices_digests/' . $digest_notify_template, $row['user_lang']);
 				$messenger->to($row['user_email']);
 				
-				$from_addr = ($config['phpbbservices_digests_from_email_address'] == '') ? $config['board_email'] : $config['phpbbservices_digests_from_email_address'];
-				$from_name = ($config['phpbbservices_digests_from_email_name'] == '') ? $config['board_contact'] : $config['phpbbservices_digests_from_email_name'];
+				$from_addr = ($this->config['phpbbservices_digests_from_email_address'] == '') ? $this->config['board_email'] : $this->config['phpbbservices_digests_from_email_address'];
+				$from_name = ($this->config['phpbbservices_digests_from_email_name'] == '') ? $this->config['board_contact'] : $this->config['phpbbservices_digests_from_email_name'];
 					
 				// SMTP delivery must strip text names due to likely bug in messenger class
-				if ($config['smtp_delivery'])
+				if ($this->config['smtp_delivery'])
 				{
 					$messenger->from($from_addr);
 				}
@@ -1817,8 +1831,8 @@ class main_module
 				$messenger->assign_vars(array(
 					'DIGESTS_FORMAT'		=> $digest_format_text,
 					'DIGESTS_TYPE'			=> $digest_type_text,
-					'DIGESTS_UCP_LINK'		=> generate_board_url() . '/' . 'ucp.' . $phpEx,
-					'FORUM_NAME'			=> $config['sitename'],
+					'DIGESTS_UCP_LINK'		=> generate_board_url() . '/' . 'ucp.' . $this->phpEx,
+					'FORUM_NAME'			=> $this->config['sitename'],
 					'USERNAME'				=> $row['username'],
 					)
 				);
@@ -1827,11 +1841,11 @@ class main_module
 				
 				if (!$mail_sent)
 				{
-					$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LOG_CONFIG_DIGESTS_NOTIFICATION_ERROR', false, array($row['user_email']));
+					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_NOTIFICATION_ERROR', false, array($row['user_email']));
 				}
 				else
 				{
-					$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LOG_CONFIG_DIGESTS_NOTIFICATION_SENT', false, array($row['user_email'], $row['username']));
+					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_NOTIFICATION_SENT', false, array($row['user_email'], $row['username']));
 					$emails_sent++;
 				}
 				
@@ -1839,7 +1853,7 @@ class main_module
 				
 			}
 	
-			$db->sql_freeresult($result); // Query be gone!
+			$this->db->sql_freeresult($result); // Query be gone!
 			
 		}
 		

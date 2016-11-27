@@ -107,13 +107,10 @@ function inStack(name) {
         	<dd style="text-align:left;"><input type="text" id="member" name="member" size="30" maxlength="255" value="{MEMBER}" onchange="addToStack(this.name);" /></dd>
         </dl>
         <hr />
-		<div style="text-align:right; padding-bottom: 5px;"><span style="
-		<font-size:.85em;">&bull; {TOTAL_USERS}</span>
-			<ul class="pagination" style="display:inline;">
-				<!-- IF .pagination -->
-					<!-- INCLUDE pagination.html -->
-				<!-- ENDIF -->
-			</ul>
+		<div class="pagination">
+			<!-- IF .pagination -->
+			<!-- INCLUDE pagination.html -->
+			<!-- ENDIF -->
 		</div>
 		<table id="down">
         <thead>
@@ -330,14 +327,12 @@ function inStack(name) {
             </select>&nbsp;
             <input class="button2" type="submit" name="sort" id="sort" value="{L_DIGESTS_REFRESH}" />
         </p>
-		<div style="text-align:right;"><span style="font-size:.85em;">&bull; {TOTAL_USERS}</span>
-			<ul class="pagination" style="display:inline;">
-				<!-- IF .pagination -->
-					<!-- INCLUDE pagination.html -->
-				<!-- ENDIF -->
-			</ul>
+		<div class="pagination">
+			<!-- IF .pagination -->
+			<!-- INCLUDE pagination.html -->
+			<!-- ENDIF -->
 		</div>
-        <fieldset class="quick">
+		<fieldset class="quick">
             <p class="small"><a href="#" onclick="marklist('acp_digests', 'user-', true);">{L_MARK_ALL}</a> &bull; <a href="#" onclick="marklist('acp_digests', 'user-', false);">{L_UNMARK_ALL}</a></p>
             {S_FORM_TOKEN}
         </fieldset>

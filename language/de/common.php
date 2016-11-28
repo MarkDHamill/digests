@@ -17,7 +17,9 @@ if (empty($lang) || !is_array($lang))
 	$lang = array();
 }
 
-global $config;
+global $phpbb_container;
+
+$config = $phpbb_container->get('config');
 
 $lang = array_merge($lang, array(
 	'DIGESTS_ALL_FORUMS'				=> 'Alle zugriffsberechtigten Themenbereiche auswählen',

@@ -82,5 +82,4 @@ $lang = array_merge($lang, array(
 	'LOG_CONFIG_DIGESTS_SYSTEM_CRON_RUN'						=> '<strong>Mailer durch externen System-Cronjob gestartet.</strong>',
 	'LOG_CONFIG_DIGESTS_TIMEZONE_ERROR'				=> '<strong>Die user_timezone "%s" für Nutzer "%s" ist fehlerhaft. Die Zeitzone lautet "%s". Bitte den Nutzer seine Zeitenzoneneinstellung im UCP zu korrigieren. Siehe dazu auch die Liste erlaubter Einstellungen unter http://php.net/manual/de/timezones.php.</strong>',
 	'LOG_CONFIG_DIGESTS_USER_DEFAULTS'						=> '<strong>Standard-Nutzereinstellungen geändert</strong>',
-
 ));

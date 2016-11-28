@@ -17,8 +17,9 @@ if (empty($lang) || !is_array($lang))
 	$lang = array();
 }
 
-global $config, $phpbb_container;
-
+global $phpbb_container;
+ 
+$config = $phpbb_container->get('config');
 $helper = $phpbb_container->get('phpbbservices.digests.common');
 
 $lang = array_merge($lang, array(

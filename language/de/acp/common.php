@@ -18,8 +18,8 @@ if (empty($lang) || !is_array($lang))
 }
 
 global $phpbb_container;
- 
-$config = $phpbb_container->get('config');
+
+$config = $phpbb_container->get('config'); 
 $helper = $phpbb_container->get('phpbbservices.digests.common');
 
 $lang = array_merge($lang, array(
@@ -45,13 +45,13 @@ $lang = array_merge($lang, array(
 	'DIGESTS_EXCLUDE_FORUMS'								=> 'Diese Themenbereiche immer ausschließen',
 	'DIGESTS_EXCLUDE_FORUMS_EXPLAIN'						=> 'Hier können die IDs der Themenbereiche ausgewählt werden, die von allen Zusammenfassungen generell ausgeschlossen werden sollen. Mehrere Forum-IDs können, durch Kommas getrennt, zusammen angegeben werden. 0 bedeutet, dass gar keine Themenbereich ausgeschlossen werden. Um die Themenbereichs-ID herauszufinden, muss man nach dem \'F=\'-Parameter in den URL-Feldern suchen. Beispiel: http://www.example.com/phpBB3/viewforum.php?f=1. Bitte nicht die IDs von Kategorien verwenden! <i>Diese Option wird ignoriert, wenn nur die Lesezeichen-Themen vom Nutzer ausgewählt wurden.</i>',
 	'DIGESTS_EXPAND'										=> 'Ausklappen',
-	'DIGESTS_FORMAT_FOOTER' 								=> 'Digest format',
+	'DIGESTS_FORMAT_FOOTER' 								=> 'Digest-Format',
 	'DIGESTS_FROM_EMAIL_ADDRESS'							=> 'Absendeemailadresse',
 	'DIGESTS_FROM_EMAIL_ADDRESS_EXPLAIN'					=> 'Wenn die eMail-Zusammenfassung beim Nutzer eintrifft, erscheint diese Emaildresse im Absender-Feld (From). Wird das Feld leer gelassen, so wird automatisch die Kontakt-Emailadsresse des Boards verwendet. Diese Adresse sollte mit Bedacht gewählt werden, da Adressen von einer fremden Domain schon vom absendenden Mailserver oder dann vom empfangeneden Server leicht als spamverdächtig eingestuft und herausgefiltert werden könnten.',
 	'DIGESTS_FROM_EMAIL_NAME'								=> 'Absendername',
 	'DIGESTS_FROM_EMAIL_NAME_EXPLAIN'						=> 'Hier kann der Name festgelegt werden, der beim Empfänger als Absender der eMail-Zusammenfassungen angezeigt werden soll. Wenn das Feld frei gelassen wird, identifiziert der Mailer sich als Mail-Robot.',
 	'DIGESTS_HAS_UNSUBSCRIBED'								=> 'Abonnement eigenhändig beendet',
-	'DIGESTS_HOUR_SENT'										=> 'Sendeuhrzeit<br />(UTC [+] %s)',
+	'DIGESTS_HOUR_SENT'										=> 'Sendeuhrzeit (UTC [+] %s)',
 	'DIGESTS_IGNORE'										=> 'Keine globale Änderung vornehmen',
 	'DIGESTS_ILLOGICAL_DATE'								=> 'Dein Simulationsdatum ist unlogisch (z.B. 31. Februar). Bitte korrigieren und erneut absenden.',
 	'DIGESTS_INCLUDE_ADMINS'								=> 'Schließe Administratoren mit ein',

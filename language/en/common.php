@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Digests
-* @copyright (c) 2016 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2017 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -93,7 +93,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_POSTS_TYPE_ANY'			=> 'All posts',
 	'DIGESTS_POSTS_TYPE_FIRST'			=> 'First posts of topics only',
 	'DIGESTS_POWERED_BY'				=> 'phpbbservices.com',
-	'DIGESTS_POWERED_BY_TEXT'			=> 'Digests extension for phpBB 3.1 created by',
+	'DIGESTS_POWERED_BY_TEXT'			=> 'Digests extension for phpBB created by',
 	'DIGESTS_PRIVATE_MESSAGES_IN_DIGEST'	=> 'Add my unread private messages',
 	'DIGESTS_PUBLISH_DATE'				=> 'The digest was published specifically for %s on %s',
 	'DIGESTS_REGISTER'					=> 'Receive digests',
@@ -127,20 +127,16 @@ $lang = array_merge($lang, array(
 	'DIGESTS_SORT_USER_ORDER'			=> 'Use my board display preferences',
 	'DIGESTS_SUBJECT_TITLE'				=> '%s %s Digest',
 	'DIGESTS_TITLE'						=> 'Digests',
+	'DIGESTS_TRANSLATED_BY'				=> 'translated by',
+	'DIGESTS_TRANSLATOR_NAME'			=> '',	// Leave null string to suppress translator name
+	'DIGESTS_TRANSLATOR_CONTACT'		=> '',	// Leave null string to suppress contact info, if used use: mailto:name@emailaddress.com or a URL if you have a website.
 	'DIGESTS_TOC'						=> 'Table of contents',
 	'DIGESTS_TOC_EXPLAIN'				=> 'If the board is active, you might want to include a table of contents in your digest. In HTML digests, the table of contents includes links that let you jump to a particular post or private message in the digest.',
 	'DIGESTS_UNKNOWN'					=> 'Unknown',
 	'DIGESTS_UNREAD'					=> 'Unread',
 	'DIGESTS_UPDATED'					=> 'Your digest settings were saved',
 	'DIGESTS_USE_BOOKMARKS'				=> 'Bookmarked topics only',
-	'DIGESTS_WEEKDAY' => array(
-		0	=> 'Sunday',
-		1 	=> 'Monday',
-		2	=> 'Tuesday',
-		3	=> 'Wednesday',
-		4	=> 'Thursday',
-		5	=> 'Friday',
-		6	=> 'Saturday'),
+	'DIGESTS_WEEKDAY' => 'Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday',
 	'DIGESTS_WEEKLY'					=> 'Weekly',
 	'DIGESTS_YOU_HAVE_PRIVATE_MESSAGES' => '%s has private messages',
 	'DIGESTS_YOUR_DIGEST_OPTIONS' 		=> '%s&apos;s digest options:',

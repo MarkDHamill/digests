@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - digests
-* @copyright (c) 2016 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2017 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -13,7 +13,7 @@ global $phpbb_root_path, $phpEx;
 include($phpbb_root_path . 'includes/functions_messenger.' . $phpEx); // Used to send emails
 
 // The purpose of this class is to override the messenger class so HTML can be sent in email. The code is a copy and paste for the relevant events
-// from the 3.1.6 source for /includes/functions_messenger.php with minimal changes needed to add this functionality. I made one major change from
+// from the 3.2.0 source for /includes/functions_messenger.php with minimal changes needed to add this functionality. I made one major change from
 // the way phpBB works by default: to bypass the queue altogether as the expectation is that a digest will be delivered promptly.
 
 class html_messenger extends \messenger
@@ -89,7 +89,7 @@ class html_messenger extends \messenger
 	*/
 	function build_header($to, $cc, $bcc, $is_html = false)
 	{
-		global $config;
+		global $config, $phpbb_dispatcher;
 
 		// We could use keys here, but we won't do this for 3.0.x to retain backwards compatibility
 		$headers = array();
@@ -120,6 +120,16 @@ class html_messenger extends \messenger
 		$headers[] = 'X-Mailer: phpBB3';
 		$headers[] = 'X-MimeOLE: phpBB3';
 		$headers[] = 'X-phpBB-Origin: phpbb://' . str_replace(array('http://', 'https://'), array('', ''), generate_board_url());
+
+		/**
+		 * Event to modify email header entries
+		 *
+		 * @event core.modify_email_headers
+		 * @var	array	headers	Array containing email header entries
+		 * @since 3.1.11-RC1
+		 */
+		$vars = array('headers');
+		extract($phpbb_dispatcher->trigger_event('core.modify_email_headers', compact($vars)));
 
 		if (sizeof($this->extra_headers))
 		{
@@ -161,7 +171,7 @@ class html_messenger extends \messenger
 			$this->from = $board_contact;
 		}
 
-		$encode_eol = ($config['smtp_delivery']) ? "\r\n" : $this->eol;
+		$encode_eol = ($config['smtp_delivery']) ? "\r\n" : PHP_EOL;
 
 		// Build to, cc and bcc strings
 		$to = $cc = $bcc = '';
@@ -191,7 +201,7 @@ class html_messenger extends \messenger
 		}
 		else
 		{
-			$result = phpbb_mail($mail_to, $this->subject, $this->msg, $headers, $this->eol, $err_msg);
+			$result = phpbb_mail($mail_to, $this->subject, $this->msg, $headers, PHP_EOL, $err_msg);
 		}
 
 		if (!$result)

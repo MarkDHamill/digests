@@ -1,5 +1,5 @@
 # Digests
-Digests extension for phpBB 3.1
+Digests extension for phpBB 3.2
 Please note that when deployed the extension will go under ext/phpbbservices/digests. Only the digests tree is shown here.
 
 If you are upgrading from the digests mod for phpBB 3.0, please remove the cron job that you created. 

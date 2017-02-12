@@ -2,10 +2,10 @@ services:
     phpbbservices.digests.listener:
         class: phpbbservices\digests\event\main_listener
         arguments:
-            - @config
-            - @controller.helper
-            - @template
-            - @request
+            - '@config'
+            - '@controller.helper'
+            - '@template'
+            - '@request'
         tags:
             - { name: event.listener }
     phpbbservices.digests.common:
@@ -14,17 +14,18 @@ services:
     phpbbservices.digests.cron.task.cron_task:
         class: phpbbservices\digests\cron\task\digests
         arguments:
-            - @config
-            - @request
-            - @user
-            - @dbal.conn
-            - %core.php_ext%
-            - %core.root_path%
-            - @template
-            - @auth
-            - %core.table_prefix%
-            - @log
+            - '@config'
+            - '@request'
+            - '@user'
+            - '@dbal.conn'
+            - '%core.php_ext%'
+            - '%core.root_path%'
+            - '@template'
+            - '@auth'
+            - '%core.table_prefix%'
+            - '@log'
             - '@phpbbservices.digests.common'
+            - '@language'
         calls:
             - [set_name, [cron.task.cron_task]]
         tags:

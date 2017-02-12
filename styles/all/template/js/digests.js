@@ -21,7 +21,7 @@ $(document).ready(function(){
 		if ((size == '') || (size == 0)){
 			return;
 		}
-		if ((size < 0) || ($(this).attr('id') == 'count_limit' && size > adminMaxItems) || (isNaN(size)) || size.indexOf('.')) {
+		if ((size < 0) || ($(this).attr('id') == 'count_limit' && size > adminMaxItems) || (isNaN(size)) || size.indexOf('.') !== -1) {
 			$("#dialog").text(message);
 			$("#dialog").dialog("open");
 			$(this).val($(this).prop('defaultValue'));

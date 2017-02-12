@@ -3,7 +3,7 @@
 	"type": "phpbb-extension",
 	"description": "Sends daily, weekly or monthly digests of posts or bookmarked topics to subscribers via email.",
 	"homepage": "https://phpbbservices.com/digests_wp",
-	"version": "3.0.7-RC6",
+	"version": "3.2.0-RC7",
 	"license": "GPL-2.0",
 	"authors": [
 		{
@@ -14,18 +14,18 @@
 		}
 	],
 	"require": {
-		"php": ">=5.3.3",
+		"php": ">=5.4,<=7.1",
 		"composer/installers": "~1.0"
 	},
 	"extra": {
 		"display-name": "Digests",
 		"soft-require": {
-			"phpbb/phpbb": ">=3.1.9,<3.2.0@dev"
+			"phpbb/phpbb": ">=3.2.0,<3.3"
 		},
 		"version-check": {
 			"host": "www.phpbbservices.com",
 			"directory": "/digests/updatecheck/",
-			"filename": "3.1.json"
+			"filename": "3.2.json"
 		}
 	}
 }

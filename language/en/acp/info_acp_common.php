@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Digests
-* @copyright (c) 2016 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2017 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -60,7 +60,7 @@ $lang = array_merge($lang, array(
 	'LOG_CONFIG_DIGESTS_LOG_ENTRY_BAD'						=> '<strong>Unable to send a digest to %s (%s). This problem should be investigated and fixed since it likely means there is a general emailing issue.</strong>',
 	'LOG_CONFIG_DIGESTS_LOG_ENTRY_BAD_NO_EMAIL'				=> '<strong>Unable to send a digest to %s.  This problem should be investigated and fixed since it likely means there is a general emailing issue.</strong>',
 	'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD'						=> '<strong>A digest was %s %s (%s) for date %s and hour %d UTC containing %d posts and %d private messages</strong>',
-	'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_DISK'				=> '<strong>A digest was written to the cache/phpbbservices/digests directory with a file name of %s. The digest was NOT emailed, but was placed here for analysis.</strong>',
+	'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_DISK'				=> '<strong>A digest was written to cache/phpbbservices/digests/%s. The digest was NOT emailed, but was placed here for analysis.</strong>',
 	'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_NO_EMAIL'			=> '<strong>A digest was %s %s for date %s and hour %d UTC containing %d posts and %d private messages</strong>',
 	'LOG_CONFIG_DIGESTS_LOG_ENTRY_NONE'						=> '<strong>A digest was NOT sent to %s (%s) because user filters and preferences meant there was nothing to send</strong>',
 	'LOG_CONFIG_DIGESTS_LOG_ENTRY_NONE_NO_EMAIL'			=> '<strong>A digest was NOT sent to %s because user filters and preferences meant there was nothing to send</strong>',
@@ -73,7 +73,7 @@ $lang = array_merge($lang, array(
 	'LOG_CONFIG_DIGESTS_NO_ALLOWED_FORUMS'					=> '<strong>Warning: subscriber %s does not have any forum permissions, so unless there are required forums, digests will never contain any content.</strong>',
 	'LOG_CONFIG_DIGESTS_NO_BOOKMARKS'						=> '<strong>Warning: subscriber %s wants bookmarked topics in their digest but does not have any bookmarked topics.</strong>',
 	'LOG_CONFIG_DIGESTS_NOTIFICATION_ERROR'					=> '<strong>Unable to send an administrator generated digests email notification to %s</strong>',
-	'LOG_CONFIG_DIGESTS_NOTIFICATION_SENT'					=> '<strong>An email was sent to %s (%s) indicating that their digest settings were changed</strong>',	
+	'LOG_CONFIG_DIGESTS_NOTIFICATION_SENT'					=> '<strong>An email was sent to %s (%s) indicating that their digest settings were changed</strong>',
 	'LOG_CONFIG_DIGESTS_REGULAR_CRON_RUN'					=> '<strong>Regular (phpBB) cron run of the mailer invoked</strong>',
 	'LOG_CONFIG_DIGESTS_RESET_CRON_RUN_TIME'				=> '<strong>Digests mailing time was reset</strong>',
 	'LOG_CONFIG_DIGESTS_RUN_TOO_SOON'						=> '<strong>Less than an hour has elapsed since digests were last run. Run aborted.</strong>',

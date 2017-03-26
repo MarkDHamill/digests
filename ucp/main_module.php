@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Digests
-* @copyright (c) 2016 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2017 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -18,6 +18,7 @@ class main_module
 	private $config;
 	private $db;
 	private $helper;
+	private $language;
 	private $phpbb_root_path;
 	private $phpEx;
 	private $request;
@@ -44,6 +45,7 @@ class main_module
 		$this->config = $phpbb_container->get('config');
 		$this->db = $phpbb_container->get('dbal.conn');
 		$this->helper = $phpbb_container->get('phpbbservices.digests.common');
+		$this->language = $phpbb_container->get('language');
 		$this->request = $phpbb_container->get('request');
 		$this->template = $phpbb_container->get('template');
 		$this->user = $phpbb_container->get('user');
@@ -52,14 +54,14 @@ class main_module
 	function main($id, $mode)
 	{
 
-		$this->user->add_lang_ext('phpbbservices/digests', array('common', 'acp/common'));
+		$this->language->add_lang(array('common', 'acp/common'), 'phpbbservices/digests');
 
 		$form_key = 'phpbbservices/digests';
 		$submit = (isset($_POST['submit'])) ? true : false;
 
 		if ($submit && !check_form_key($form_key))
 		{
-			$message = $this->user->lang('FORM_INVALID') . '<br /><br />' . $this->user->lang('RETURN_UCP', '<a href="' . $this->u_action . '">', '</a>');
+			$message = $this->language->lang('FORM_INVALID') . '<br /><br />' . $this->language->lang('RETURN_UCP', '<a href="' . $this->u_action . '">', '</a>');
 			trigger_error($message);	// Program exits
 		}
 		
@@ -180,7 +182,7 @@ class main_module
 				break;
 					
 				default:
-					trigger_error($this->user->lang('UCP_DIGESTS_MODE_ERROR', $mode) . '<br /><br />' . $this->user->lang('RETURN_UCP', '<a href="' . $this->u_action . '">', '</a>'));
+					trigger_error($this->language->lang('UCP_DIGESTS_MODE_ERROR', $mode) . '<br /><br />' . $this->language->lang('RETURN_UCP', '<a href="' . $this->u_action . '">', '</a>'));
 				break;
 				
 			}
@@ -196,7 +198,7 @@ class main_module
 			
 			// Send a confirmation message
 			meta_refresh(3, $this->u_action);
-			$message = $this->user->lang('DIGESTS_UPDATED') . '<br /><br />' . $this->user->lang('RETURN_UCP', '<a href="' . $this->u_action . '">', '</a>');
+			$message = $this->language->lang('DIGESTS_UPDATED') . '<br /><br />' . $this->language->lang('RETURN_UCP', '<a href="' . $this->u_action . '">', '</a>');
 			trigger_error($message);	// Program exits
 			
 		}
@@ -224,7 +226,7 @@ class main_module
 				if ($this->user->data['user_timezone'] == '')
 				{
 					$this->template->assign_vars(array(
-						'L_DIGESTS_NO_TIMEZONE'		=> $this->user->lang('DIGESTS_NO_TIMEZONE', append_sid($this->phpbb_root_path . "ucp.$this->phpEx?i=ucp_prefs&mode=personal")),
+						'L_DIGESTS_NO_TIMEZONE'		=> $this->language->lang('DIGESTS_NO_TIMEZONE', append_sid($this->phpbb_root_path . "ucp.$this->phpEx?i=ucp_prefs&mode=personal")),
 						'S_DIGESTS_NO_TIMEZONE'		=> true,
 					));
 				}
@@ -291,9 +293,10 @@ class main_module
 							'DISPLAY_HOUR'					=>	$this->helper->make_hour_string($i, $this->user->data['user_dateformat']),
 						));
 					}
-		
+
+					$weekdays = explode(',', $this->language->lang('DIGESTS_WEEKDAY'));
 					$this->template->assign_vars(array(
-						'L_DIGESTS_FREQUENCY_EXPLAIN'		=> $this->user->lang('DIGESTS_FREQUENCY_EXPLAIN', $this->user->lang['DIGESTS_WEEKDAY'][$this->config['phpbbservices_digests_weekly_digest_day']]),
+						'L_DIGESTS_FREQUENCY_EXPLAIN'		=> $this->language->lang('DIGESTS_FREQUENCY_EXPLAIN', $weekdays[$this->config['phpbbservices_digests_weekly_digest_day']]),
 						'L_DIGESTS_HTML_CLASSIC_VALUE'		=> constants::DIGESTS_HTML_CLASSIC_VALUE,
 						'L_DIGESTS_HTML_VALUE'				=> constants::DIGESTS_HTML_VALUE,
 						'L_DIGESTS_PLAIN_CLASSIC_VALUE'		=> constants::DIGESTS_PLAIN_CLASSIC_VALUE,
@@ -360,7 +363,7 @@ class main_module
 
 				$result = $this->db->sql_query($sql);
 				$rowset = $this->db->sql_fetchrowset($result);
-				$this->db->sql_freeresult();
+				$this->db->sql_freeresult($result);
 
 				$all_by_default = ((sizeof($rowset) == 0) && $this->config['phpbbservices_digests_user_check_all_forums']) ? true : false;
 
@@ -388,7 +391,7 @@ class main_module
 				{
 					$parent_array[$row['forum_id']] = $row['parent_id'];
 				}
-				$this->db->sql_freeresult();
+				$this->db->sql_freeresult($result);
 
 				foreach ($forum_read_ary as $forum_id => $allowed)
 				{
@@ -603,7 +606,7 @@ class main_module
 				{
 					// No forums to show!
 					$this->template->assign_vars(array(
-						'L_DIGESTS_NO_FORUMS_MESSAGE' 	=> $this->user->lang('DIGESTS_NO_FORUMS_AVAILABLE'),
+						'L_DIGESTS_NO_FORUMS_MESSAGE' 	=> $this->language->lang('DIGESTS_NO_FORUMS_AVAILABLE'),
 						'S_DIGESTS_NO_FORUMS' 			=> true, 
 						)
 					);
@@ -631,7 +634,7 @@ class main_module
 				}
 				
 				$this->template->assign_vars(array(
-					'L_DIGEST_COUNT_LIMIT_EXPLAIN'				=> $this->user->lang('DIGESTS_SIZE_ERROR', $this->config['phpbbservices_digests_max_items']),
+					'L_DIGEST_COUNT_LIMIT_EXPLAIN'				=> $this->language->lang('DIGESTS_SIZE_ERROR', $this->config['phpbbservices_digests_max_items']),
 					'S_DIGESTS_FILTER_FOES_CHECKED_NO' 			=> ($this->user->data['user_digest_remove_foes'] == 0),
 					'S_DIGESTS_FILTER_FOES_CHECKED_YES' 		=> ($this->user->data['user_digest_remove_foes'] == 1),
 					'S_DIGESTS_MARK_READ_CHECKED' 				=> ($this->user->data['user_digest_pm_mark_read'] == 1),
@@ -682,11 +685,23 @@ class main_module
 			
 		}
 
+		// Identify the language translator, if one exists and they choose to identify his/herself
+		if (trim($this->language->lang('DIGESTS_TRANSLATOR_NAME') == ''))
+		{
+			$translator = '';
+		}
+		else
+		{
+			$translator = $this->language->lang('DIGESTS_COMMA') . ' ' . strtolower($this->language->lang('DIGESTS_TRANSLATED_BY')) . ' ';
+			$translator .= ($this->language->lang('DIGESTS_TRANSLATOR_CONTACT') == '') ? $this->language->lang('DIGESTS_TRANSLATOR_NAME') : '<a href="' . $this->language->lang('DIGESTS_TRANSLATOR_CONTACT') . '" class="postlink">' . $this->language->lang('DIGESTS_TRANSLATOR_NAME') . '</a>';
+		}
+
 		// These template variables are used on all the pages
 		$this->template->assign_vars(array(
-			'L_DIGESTS_DISABLED_MESSAGE' 	=> ($this->user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE) ? '<p><em>' . $this->user->lang('DIGESTS_DISABLED_MESSAGE') . '</em></p>' : '',
-			'L_DIGESTS_MODE'				=> $this->user->lang('UCP_DIGESTS_' . strtoupper($mode)),
-			'L_POWERED_BY'					=> sprintf($this->user->lang('POWERED_BY'), '<a href="' . $this->config['phpbbservices_digests_page_url'] . '" class="postlink" onclick="window.open(this.href);return false;">' . $this->user->lang('DIGESTS_POWERED_BY') . '</a>'),
+			'L_DIGESTS_DISABLED_MESSAGE' 	=> ($this->user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE) ? '<p><em>' . $this->language->lang('DIGESTS_DISABLED_MESSAGE') . '</em></p>' : '',
+			'L_DIGESTS_MODE'				=> $this->language->lang('UCP_DIGESTS_' . strtoupper($mode)),
+			'L_DIGESTS_TRANSLATOR'			=> $translator,
+			'L_POWERED_BY'					=> sprintf($this->language->lang('POWERED_BY'), '<a href="' . $this->config['phpbbservices_digests_page_url'] . '" class="postlink" onclick="window.open(this.href);return false;">' . $this->language->lang('DIGESTS_POWERED_BY') . '</a>'),
 			'S_DIGESTS_CONTROL_DISABLED' 	=> ($this->user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE),
 			'S_DIGESTS_SHOW_BUTTONS'		=> $show_buttons,
 			'U_DIGESTS_ACTION'  			=> $this->u_action,

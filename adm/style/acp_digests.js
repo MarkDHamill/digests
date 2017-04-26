@@ -8,17 +8,22 @@ $(document).ready(function() {
 		var id = $(this).attr('id');
 		var start = id.indexOf('-');
 		var rowId = id.substring(start + 1);
-		var displayStyle = $('#user-' + rowId + '-detail').css('display');
+		var selector = '#user-' + rowId + '-detail';
+		var displayStyle = $(selector).css('display');
 		if (displayStyle === 'none') {
-			$('#user-' + rowId + '-detail').css('display', 'table-row');
-			$('#plusminus-' + rowId).attr('src', collapseImageIdSrc);
-			$('#plusminus-' + rowId).attr('alt', collapseImageIdAlt);
-			$('#plusminus-' + rowId).attr('title', collapseImageIdTitle);
+			$(selector).css('display', 'table-row');
+			$('#plusminus-' + rowId).attr({
+				'src': collapseImageIdSrc,
+				'alt': collapseImageIdAlt,
+				'title': collapseImageIdTitle
+			});
 		} else {
-			$('#user-' + rowId + '-detail').css('display', 'none');
-			$('#plusminus-' + rowId).attr('src', expandImageIdSrc);
-			$('#plusminus-' + rowId).attr('alt', expandImageIdAlt);
-			$('#plusminus-' + rowId).attr('title', expandImageIdTitle);
+			$(selector).css('display', 'none');
+			$('#plusminus-' + rowId).attr({
+				'src' : expandImageIdSrc,
+				'alt' : expandImageIdAlt,
+				'title' : expandImageIdTitle
+			});
 		}
 	});
 
@@ -65,30 +70,23 @@ $(document).ready(function() {
 		}
 	});
 
+	// If a field was not changed, disable it so it won't be sent to the web server. This helps get around PHP's
+	// max_input_var resource limitation on the Edit subscribers screen.
+	$('#acp_digests').submit(function() {
+		if ($('#digests').length === 1) {
+			// Logic only applies on edit subscribers screen because stack won't exist otherwise. #digests is an
+			// ID only on the edit subscribers screen.
+			$('input, select').each(function() {
+				if (!inStack($(this).attr('name'))) {
+					$(this).prop('disabled', true);
+				}
+			});
+		}
+	});
+
 	function getRowId(id) {
 		var end = id.indexOf('-', 5);
-		var rowId = id.substring(5, end);
-		return rowId;
-	}
-
-	function beforeSubmit() {
-		// Disables a form field if it was not changed. Disabled fields are not submitted to the web server.
-		var allInputs = document.getElementsByTagName("input");
-		var allSelects = document.getElementsByTagName("select");
-		for (var k = 0; k < allInputs.length; k++) {
-			var name = allInputs[k].name;
-			if (!inStack(name)) {
-				allInputs[k].disabled = true;
-			}
-		}
-
-		for(var k = 0; k < allSelects.length; k++) {
-			var name = allSelects[k].name;
-			if (!inStack(name)) {
-				allSelects[k].disabled = true;
-			}
-		}
-		return true;
+		return id.substring(5, end);
 	}
 
 });

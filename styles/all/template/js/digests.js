@@ -17,13 +17,12 @@ $(document).ready(function(){
 	// Ensure certain numeric fields must be a whole number or blank, or less than a maximum amount (if id=count_limit)
 	$("#min_word_size, #max_word_size, #count_limit").blur(function() {
 		var size = $(this).val();
-		var message = ($(this).attr('id') == 'count_limit') ? sizeErrorRange : sizeError;
-		if ((size == '') || (size == 0)){
+		var message = ($(this).attr('id') === 'count_limit') ? sizeErrorRange : sizeError;
+		if ((size === '') || (size === 0)){
 			return;
 		}
-		if ((size < 0) || ($(this).attr('id') == 'count_limit' && size > adminMaxItems) || (isNaN(size)) || size.indexOf('.') !== -1) {
-			$("#dialog").text(message);
-			$("#dialog").dialog("open");
+		if ((size < 0) || ($(this).attr('id') === 'count_limit' && size > adminMaxItems) || (isNaN(size)) || size.indexOf('.') !== -1) {
+			$("#dialog").text(message).dialog("open");
 			$(this).val($(this).prop('defaultValue'));
 			$(this).focus();
 		}
@@ -100,8 +99,7 @@ $(document).ready(function(){
 				}
 			});
 			if (!anyChecked) {
-				$("#dialog").text(noForumsChecked);
-				$("#dialog").dialog("open");
+				$("#dialog").text(noForumsChecked).dialog("open");
 				event.preventDefault();
 			}
 		}
@@ -112,7 +110,7 @@ $(document).ready(function(){
 		// and 2 is the parent forum_id.
 		start=forumId.indexOf('_');
 		end = forumId.lastIndexOf('_');
-		return excludedForumsArray.indexOf(forumId.substring(start+1,end)) === -1 ? false : true;
+		return excludedForumsArray.indexOf(forumId.substring(start+1,end)) !== -1;
 	}
 
 	function ignore_forum(forumId) {
@@ -120,7 +118,7 @@ $(document).ready(function(){
 		// and 2 is the parent forum_id.
 		start=forumId.indexOf('_');
 		end = forumId.lastIndexOf('_');
-		return ignoredForumsArray.indexOf(forumId.substring(start+1,end)) === -1 ? false : true;
+		return ignoredForumsArray.indexOf(forumId.substring(start+1,end)) !== -1;
 	}
 
 });

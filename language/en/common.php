@@ -22,21 +22,24 @@ global $phpbb_container;
 $config = $phpbb_container->get('config');
 
 $lang = array_merge($lang, array(
+	'PLURAL_RULE'						=> 1,
+
 	'DIGESTS_ALL_FORUMS'				=> 'All',
+	'DIGESTS_AM'						=> ' AM', // not used if date/time formats do not permit AM and PM
 	'DIGESTS_AUTHOR'					=> 'Author',
-	'DIGESTS_BAD_SEND_HOUR'				=> 'User %s digest send hour is invalid. It is %d. The number should be >= 0 and < 24.',
+	'DIGESTS_BAD_SEND_HOUR'				=> 'User %1$s digest send hour is invalid. It is %2$d. The number should be >= 0 and < 24.',
 	'DIGESTS_BLOCK_IMAGES'				=> 'Block images',
 	'DIGESTS_BLOCK_IMAGES_EXPLAIN'		=> 'Prohibits all images from appearing in your digests, including smilies and images attached to posts or private messages. This can be useful for slower connections, if minimizing bandwidth is a concern or for active boards with lots of images. Text digests never show images.',
 	'DIGESTS_BOARD_LIMIT'				=> '%d (Board limit)',
 	'DIGESTS_BY'						=> 'By',
 	'DIGESTS_CLOSED_QUOTE'				=> '"',
-	'DIGESTS_COMMA'						=> ',',		// Used  in salutations
 	'DIGESTS_COUNT_LIMIT'				=> 'Maximum number of posts in the digest',
 	'DIGESTS_COUNT_LIMIT_EXPLAIN'		=> 'Enter a number greater than zero if you want to limit the number of posts in the digest.',
 	'DIGESTS_DAILY'						=> 'Daily',
 	'DIGESTS_DATE'						=> 'Date',
+	'DIGESTS_DELIMITER'					=> ' :: ', // Used to help show the hierarchy of forum names from the index on down
 	'DIGESTS_DISABLED_MESSAGE'			=> 'To enable fields, select Basics and select a digest type',
-	'DIGESTS_DISCLAIMER'				=> 'This digest is being sent to registered members of <a href="%s">%s</a> forums. You can change or delete your subscription from the forum&apos;s <a href="%sucp.%s">User Control Panel</a>. If you have questions or feedback on your digests please send it to the <a href="mailto:%s?subject=Digests">%s webmaster</a>.',
+	'DIGESTS_DISCLAIMER'				=> 'This digest is being sent to registered members of <a href="%1$s">%2$s</a> forums. You can change or delete your subscription from the forum&apos;s <a href="%1$sucp.%2$s">User Control Panel</a>. If you have questions or feedback on your digests please send it to the <a href="mailto:%1$s?subject=Digests">%2$s webmaster</a>.',
 	'DIGESTS_EXPLANATION'				=> 'Digests are email summaries of posts that are sent to you periodically. Digests can be sent daily, weekly or monthly at an hour of the day you select. You can specify those particular forums for which you want posts or by default you can elect to receive all posts for all forums for which you can read. You can cancel your digest subscription at any time by simply coming back to this page. Most users find digests to be very useful. We encourage you to give them a try!',
 	'DIGESTS_FILTER_ERROR'				=> 'Digests mailer was called with an invalid user_digest_filter_type = %s',
 	'DIGESTS_FILTER_FOES'				=> 'Remove posts from my foes',
@@ -57,8 +60,9 @@ $lang = array_merge($lang, array(
 	'DIGESTS_FREQUENCY'					=> 'Type of digest wanted',
 	'DIGESTS_FREQUENCY_EXPLAIN'			=> 'Weekly digests are sent on %s. Monthly digests are sent on the first of the month. Coordinated Universal Time (UTC) is used for determining the day of the week.',
 	'DIGESTS_FREQUENCY_SHORT'			=> 'Digest type',
-	'DIGESTS_INTRODUCTION' 				=> 'Here is the latest digest of post from %s forums. Please visit the forum and join the discussion!',
-	'DIGESTS_JUMP_TO_MSG'				=> 'Msg ID', 
+	'DIGESTS_HOURS_ABBREVIATION' 		=> ' h',	// see: http://www.scienceeditingexperts.com/which-is-the-correct-abbreviation-for-hours-2h-2-h-2hs-2-hs-2hrs-or-2-hrs, DIGESTS_AM and DIGESTS_PM are used instead if specified in user_dateformat
+	'DIGESTS_INTRODUCTION' 				=> 'Here is the latest digest of post from %s forums. Do <em>not</em> reply to this email to reply to topics, posts or private messages. But please <em>do</em> visit the forum and join the discussion! (If the format of the digest looks off, make sure to download all remote content.)',
+	'DIGESTS_JUMP_TO_MSG'				=> 'Msg ID',
 	'DIGESTS_JUMP_TO_POST'				=> 'Post ID', 
 	'DIGESTS_LASTVISIT_RESET'			=> 'Reset my last visit date when I am sent a digest',
 	'DIGESTS_LASTVISIT_RESET_EXPLAIN'	=> 'If enabled, posts on the forum should appear as read if they were posted before the date and time your digest was created. Selecting this option effectively tells the forum that reading your digest substitutes for reading posts on the forum.',
@@ -85,6 +89,8 @@ $lang = array_merge($lang, array(
 	'DIGESTS_NONE'						=> 'None (unsubscribe)',
 	'DIGESTS_ON'						=> 'on',
 	'DIGESTS_OPEN_QUOTE'				=> '"',
+	'DIGESTS_PM'						=> ' PM', // not used if date/time formats do not permit AM and PM
+	'DIGESTS_PM_SUBJECT'				=> 'Private message subject',
 	'DIGESTS_POST_IMAGE_TEXT'			=> '<br />(Click on the image to see it full size.)',
 	'DIGESTS_POST_TEXT'					=> 'Post Text', 
 	'DIGESTS_POST_TIME'					=> 'Post Time', 
@@ -95,7 +101,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_POWERED_BY'				=> 'phpbbservices.com',
 	'DIGESTS_POWERED_BY_TEXT'			=> 'Digests extension for phpBB created by',
 	'DIGESTS_PRIVATE_MESSAGES_IN_DIGEST'	=> 'Add my unread private messages',
-	'DIGESTS_PUBLISH_DATE'				=> 'The digest was published specifically for %s on %s',
+	'DIGESTS_PUBLISH_DATE'				=> 'The digest was published specifically for %1$s on %2$s',
 	'DIGESTS_REGISTER'					=> 'Receive digests',
 	'DIGESTS_REGISTER_EXPLAIN'			=> 'The board&apos;s defaults will be used. You can adjust digest settings or unsubscribe after completing registration.',
 	'DIGESTS_REMOVE_YOURS'				=> 'Remove my posts',
@@ -125,7 +131,8 @@ $lang = array_merge($lang, array(
 	'DIGESTS_SORT_POST_DATE'			=> 'From oldest to newest',
 	'DIGESTS_SORT_POST_DATE_DESC'		=> 'From newest to oldest',
 	'DIGESTS_SORT_USER_ORDER'			=> 'Use my board display preferences',
-	'DIGESTS_SUBJECT_TITLE'				=> '%s %s Digest',
+	'DIGESTS_SUBJECT_TITLE'				=> '%1$s %2$s Digest',
+	'DIGESTS_TAG_REPLACED'				=> '<strong>Notice: content removed for security purposes. Click on the post or topic link to see the complete post content.</strong>',
 	'DIGESTS_TITLE'						=> 'Digests',
 	'DIGESTS_TRANSLATED_BY'				=> 'translated by',
 	'DIGESTS_TRANSLATOR_NAME'			=> '',	// Leave null string to suppress translator name
@@ -136,7 +143,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_UNREAD'					=> 'Unread',
 	'DIGESTS_UPDATED'					=> 'Your digest settings were saved',
 	'DIGESTS_USE_BOOKMARKS'				=> 'Bookmarked topics only',
-	'DIGESTS_WEEKDAY' => 'Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday',
+	'DIGESTS_WEEKDAY' 					=> 'Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday',
 	'DIGESTS_WEEKLY'					=> 'Weekly',
 	'DIGESTS_YOU_HAVE_PRIVATE_MESSAGES' => '%s has private messages',
 	'DIGESTS_YOUR_DIGEST_OPTIONS' 		=> '%s&apos;s digest options:',

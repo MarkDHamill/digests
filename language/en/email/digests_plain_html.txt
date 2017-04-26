@@ -4,13 +4,13 @@
 	<meta charset="utf-8">
 	<title>{S_DIGESTS_TITLE}</title>
 	<style type="text/css">
+		.box { margin:5px; padding:5px; border-style:dashed; border-width:1px; }
 		ol,ul { list-style-position: inside; }
+		.postbody { float: none; }
 		table { border-collapse: collapse; border: 1px solid black}
 		td,th { border: 1px solid black; padding: 3px; }
 		th { font-weight:800; }
 		#wrap {padding-right: 5px; padding-left: 5px;}
-		.box { margin:5px; padding:5px; border-style:dashed; border-width:1px; }
-		.postbody { float: none; }
 	</style>
 </head>
 <body dir="{S_CONTENT_DIRECTION}">
@@ -68,7 +68,7 @@
 		<hr />
 		<p><span class="copyright"><em>{S_DIGESTS_PUBLISH_DATE}</em></span></p>
 		<p>{S_DIGESTS_DISCLAIMER}</p>
-		<p><span class="copyright">{L_DIGESTS_POWERED_BY_TEXT} {S_DIGESTS_POWERED_BY}</span></p>
+		<p><span class="copyright">{L_DIGESTS_POWERED_BY_TEXT} {S_DIGESTS_POWERED_BY} {S_DIGESTS_TRANSLATOR}</span></p>
 
 	</div>
 </div>

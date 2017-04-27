@@ -74,10 +74,10 @@ class main_listener implements EventSubscriberInterface
 		// the option to subscribe on registration and they select yes.
 		
 		$subscribe_on_registration = ($this->request->variable('digest', '0') == '1') ? true : false;	// Test if user wanted to subscribe to digests on registration
-		
-		if ($this->config['phpbbservices_digests_enable_auto_subscriptions'] == 1 || $subscribe_on_registration)
+
+		$is_human = ($event['sql_ary']['user_type'] == USER_IGNORE) ? false : true;
+		if ($is_human && ($this->config['phpbbservices_digests_enable_auto_subscriptions'] == 1 || $subscribe_on_registration))
 		{
-			$sql_ary = $event['sql_ary'];
 			$sql_ary['user_digest_attachments'] 		= $this->config['phpbbservices_digests_user_digest_attachments'];
 			$sql_ary['user_digest_block_images'] 		= $this->config['phpbbservices_digests_user_digest_block_images'];
 			$sql_ary['user_digest_filter_type'] 		= $this->config['phpbbservices_digests_user_digest_filter_type'];
@@ -97,7 +97,7 @@ class main_listener implements EventSubscriberInterface
 			$sql_ary['user_digest_sortby'] 				= $this->config['phpbbservices_digests_user_digest_sortby'];
 			$sql_ary['user_digest_toc'] 				= $this->config['phpbbservices_digests_user_digest_toc'];
 			$sql_ary['user_digest_type'] 				= $this->config['phpbbservices_digests_user_digest_type'];
-			$event['sql_ary'] = $sql_ary;
+			$event['sql_ary'] = array_merge($event['sql_ary'], $sql_ary);
 		}
 		
 	}

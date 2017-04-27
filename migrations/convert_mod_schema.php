@@ -64,7 +64,8 @@ class convert_mod_schema extends \phpbb\db\migration\migration
 		$found_digest_columns = array();
 
 		// The tools class has some convenient methods we will use to add and remove columns
-		$tools = new \phpbb\db\tools($this->db);
+		$tools_factory = new \phpbb\db\tools\factory();
+		$tools = $tools_factory->get($this->db);
 
 		// Get a list of the current columns in the phpbb_users table.
 		$user_table_columns = array_keys($tools->sql_list_columns($this->table_prefix . 'users'));

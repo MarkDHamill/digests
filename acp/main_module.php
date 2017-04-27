@@ -65,6 +65,7 @@ class main_module
 
 		$form_key = 'phpbbservices/digests';
 		add_form_key($form_key);
+		$my_time_zone = (int) $this->helper->make_tz_offset($this->user->data['user_timezone']);
 
 		/**
 		*	Validation types are:
@@ -85,7 +86,7 @@ class main_module
 						'phpbbservices_digests_registration_field'			=> array('lang' => 'DIGESTS_REGISTRATION_FIELD',				'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_block_images'				=> array('lang' => 'DIGESTS_BLOCK_IMAGES',						'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_notify_on_admin_changes'		=> array('lang' => 'DIGESTS_NOTIFY_ON_ADMIN_CHANGES',			'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
-						'phpbbservices_digests_weekly_digest_day'			=> array('lang' => 'DIGESTS_WEEKLY_DIGESTS_DAY',				'validate' => 'int:0:6',	'type' => 'select', 'method' => 'dow_select', 'explain' => false),
+						'phpbbservices_digests_weekly_digest_day'			=> array('lang' => 'DIGESTS_WEEKLY_DIGESTS_DAY',				'validate' => 'int:0:6',	'type' => 'select', 'method' => 'dow_select', 'explain' => true),
 						'phpbbservices_digests_max_cron_hrs'				=> array('lang' => 'DIGESTS_MAX_CRON_HOURS',					'validate' => 'int:0:24',	'type' => 'text:5:5', 'explain' => true),
 						'phpbbservices_digests_max_items'					=> array('lang' => 'DIGESTS_MAX_ITEMS',							'validate' => 'int:0',	'type' => 'text:5:5', 'explain' => true),
 						'phpbbservices_digests_enable_custom_stylesheets'	=> array('lang' => 'DIGESTS_ENABLE_CUSTOM_STYLESHEET',			'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
@@ -96,7 +97,9 @@ class main_module
 						'phpbbservices_digests_users_per_page'				=> array('lang' => 'DIGESTS_USERS_PER_PAGE',					'validate' => 'int:0',	'type' => 'text:4:4', 'explain' => true),
 						'phpbbservices_digests_include_forums'				=> array('lang' => 'DIGESTS_INCLUDE_FORUMS',					'validate' => 'string',	'type' => 'text:15:255', 'explain' => true),
 						'phpbbservices_digests_exclude_forums'				=> array('lang' => 'DIGESTS_EXCLUDE_FORUMS',					'validate' => 'string',	'type' => 'text:15:255', 'explain' => true),
-						'phpbbservices_digests_time_zone'					=> array('lang' => 'DIGESTS_TIME_ZONE',							'validate' => 'int:-12:12',	'type' => 'text:5:5', 'explain' => true),
+						'phpbbservices_digests_strip_tags'					=> array('lang' => 'DIGESTS_STRIP_TAGS',						'validate' => 'string',	'type' => 'textarea:3:85', 'explain' => true),
+						'phpbbservices_digests_show_forum_path'				=> array('lang' => 'DIGESTS_SHOW_FORUM_PATH',					'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
+						'phpbbservices_digests_lowercase_digest_type'		=> array('lang' => 'DIGESTS_LOWERCASE_DIGEST_TYPE',				'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 					)
 				);
 			break;
@@ -106,26 +109,26 @@ class main_module
 					'title'	=> 'ACP_DIGESTS_USER_DEFAULT_SETTINGS',
 					'vars'	=> array(						
 						'legend1'											=> 'ACP_DIGESTS_USER_DEFAULT_SETTINGS',
-						'phpbbservices_digests_user_digest_registration'	=> array('lang' => 'DIGESTS_USER_DIGESTS_REGISTRATION',		'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
-						'phpbbservices_digests_user_digest_type'			=> array('lang' => 'DIGESTS_USER_DIGESTS_TYPE',					'validate' => 'string',	'type' => 'select', 'method' => 'digest_type_select', 'explain' => false),
-						'phpbbservices_digests_user_digest_format'			=> array('lang' => 'DIGESTS_USER_DIGESTS_STYLE',					'validate' => 'string',	'type' => 'select', 'method' => 'digest_style_select', 'explain' 		=> false),
-						'phpbbservices_digests_user_digest_send_hour_gmt'	=> array('lang' => 'DIGESTS_USER_DIGESTS_SEND_HOUR_GMT',			'validate' => 'int:-1:23',	'type' => 'select', 'method' => 'digest_send_hour_gmt', 'explain' => false),
-						'phpbbservices_digests_user_digest_filter_type'		=> array('lang' => 'DIGESTS_USER_DIGESTS_FILTER_TYPE',			'validate' => 'string',	'type' => 'select', 'method' => 'digest_filter_type', 'explain' => false),
-						'phpbbservices_digests_user_check_all_forums'		=> array('lang' => 'DIGESTS_USER_DIGESTS_CHECK_ALL_FORUMS',		'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
-						'phpbbservices_digests_user_digest_max_posts'		=> array('lang' => 'DIGESTS_USER_DIGESTS_MAX_POSTS',				'validate' => 'int:0',	'type' => 'text:5:5', 'explain' => true),
-						'phpbbservices_digests_user_digest_min_words'		=> array('lang' => 'DIGESTS_USER_DIGESTS_MIN_POSTS',				'validate' => 'int:0',	'type' => 'text:5:5', 'explain' => true),
-						'phpbbservices_digests_user_digest_new_posts_only'	=> array('lang' => 'DIGESTS_USER_DIGESTS_NEW_POSTS_ONLY',			'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
-						'phpbbservices_digests_user_digest_show_mine'		=> array('lang' => 'DIGESTS_USER_DIGESTS_SHOW_MINE',				'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
-						'phpbbservices_digests_user_digest_remove_foes'		=> array('lang' => 'DIGESTS_USER_DIGESTS_SHOW_FOES',				'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
-						'phpbbservices_digests_user_digest_show_pms'		=> array('lang' => 'DIGESTS_USER_DIGESTS_SHOW_PMS',				'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
-						'phpbbservices_digests_user_digest_pm_mark_read'	=> array('lang' => 'DIGESTS_USER_DIGESTS_PM_MARK_READ',			'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
-						'phpbbservices_digests_user_digest_sortby'			=> array('lang' => 'DIGESTS_USER_DIGESTS_SORT_ORDER',				'validate' => 'string',	'type' => 'select', 'method' => 'digest_post_sort_order', 'explain' 	=> false),
-						'phpbbservices_digests_user_digest_max_display_words'	=> array('lang' => 'DIGESTS_USER_DIGESTS_MAX_DISPLAY_WORDS',		'validate' => 'int:-1',	'type' => 'text:5:5', 'explain' => true),
-						'phpbbservices_digests_user_digest_send_on_no_posts'	=> array('lang' => 'DIGESTS_USER_DIGESTS_SEND_ON_NO_POSTS',		'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
-						'phpbbservices_digests_user_digest_reset_lastvisit'	=> array('lang' => 'DIGESTS_USER_DIGESTS_RESET_LASTVISIT',		'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
-						'phpbbservices_digests_user_digest_attachments'		=> array('lang' => 'DIGESTS_USER_DIGESTS_ATTACHMENTS',			'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
-						'phpbbservices_digests_user_digest_block_images'	=> array('lang' => 'DIGESTS_USER_DIGESTS_BLOCK_IMAGES',			'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
-						'phpbbservices_digests_user_digest_toc'				=> array('lang' => 'DIGESTS_USER_DIGESTS_TOC',					'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
+						'phpbbservices_digests_user_digest_registration'	=> array('lang' => 'DIGESTS_USER_DIGESTS_REGISTRATION',	'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
+						'phpbbservices_digests_user_digest_type'			=> array('lang' => 'DIGESTS_FREQUENCY',					'validate' => 'string',	'type' => 'select', 'method' => 'digest_type_select', 'explain' => true),
+						'phpbbservices_digests_user_digest_format'			=> array('lang' => 'DIGESTS_FORMAT_STYLING',			'validate' => 'string',	'type' => 'select', 'method' => 'digest_style_select', 'explain' => true),
+						'phpbbservices_digests_user_digest_send_hour_gmt'	=> array('lang' => 'DIGESTS_SEND_HOUR',					'validate' => 'int:-1:23',	'type' => 'select', 'method' => 'digest_send_hour_gmt', 'explain' => true),
+						'phpbbservices_digests_user_digest_filter_type'		=> array('lang' => 'DIGESTS_FILTER_TYPE',				'validate' => 'string',	'type' => 'select', 'method' => 'digest_filter_type', 'explain' => false),
+						'phpbbservices_digests_user_check_all_forums'		=> array('lang' => 'DIGESTS_USER_DIGESTS_CHECK_ALL_FORUMS',	'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
+						'phpbbservices_digests_user_digest_max_posts'		=> array('lang' => 'DIGESTS_COUNT_LIMIT',				'validate' => 'int:0',	'type' => 'text:5:5', 'explain' => true),
+						'phpbbservices_digests_user_digest_min_words'		=> array('lang' => 'DIGESTS_MIN_SIZE',					'validate' => 'int:0',	'type' => 'text:5:5', 'explain' => true),
+						'phpbbservices_digests_user_digest_new_posts_only'	=> array('lang' => 'DIGESTS_NEW_POSTS_ONLY',			'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
+						'phpbbservices_digests_user_digest_show_mine'		=> array('lang' => 'DIGESTS_REMOVE_YOURS',				'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
+						'phpbbservices_digests_user_digest_remove_foes'		=> array('lang' => 'DIGESTS_FILTER_FOES',				'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
+						'phpbbservices_digests_user_digest_show_pms'		=> array('lang' => 'DIGESTS_SHOW_PMS',					'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
+						'phpbbservices_digests_user_digest_pm_mark_read'	=> array('lang' => 'DIGESTS_USER_DIGESTS_PM_MARK_READ',	'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
+						'phpbbservices_digests_user_digest_sortby'			=> array('lang' => 'DIGESTS_SORT_BY',					'validate' => 'string',	'type' => 'select', 'method' => 'digest_post_sort_order', 'explain' 	=> true),
+						'phpbbservices_digests_user_digest_max_display_words'	=> array('lang' => 'DIGESTS_MAX_DISPLAY_WORDS',		'validate' => 'int:-1',	'type' => 'text:5:5', 'explain' => true),
+						'phpbbservices_digests_user_digest_send_on_no_posts'	=> array('lang' => 'DIGESTS_SEND_ON_NO_POSTS',		'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
+						'phpbbservices_digests_user_digest_reset_lastvisit'	=> array('lang' => 'DIGESTS_LASTVISIT_RESET',			'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
+						'phpbbservices_digests_user_digest_attachments'		=> array('lang' => 'DIGESTS_SHOW_ATTACHMENTS',			'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
+						'phpbbservices_digests_user_digest_block_images'	=> array('lang' => 'DIGESTS_BLOCK_IMAGES',				'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
+						'phpbbservices_digests_user_digest_toc'				=> array('lang' => 'DIGESTS_TOC',						'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 					)
 				);
 			break;
@@ -147,8 +150,8 @@ class main_module
 
 				// Translate time zone information
 				$this->template->assign_vars(array(
-					'L_DIGESTS_HOUR_SENT'               			=> $this->language->lang('DIGESTS_HOUR_SENT', $this->config['phpbbservices_digests_time_zone']),
-					'L_DIGESTS_BASED_ON'							=> $this->language->lang('DIGESTS_BASED_ON', $this->config['phpbbservices_digests_time_zone']),
+					'L_DIGESTS_HOUR_SENT'               			=> $this->language->lang('DIGESTS_HOUR_SENT', $my_time_zone),
+					'L_DIGESTS_BASED_ON'							=> $this->language->lang('DIGESTS_BASED_ON', $my_time_zone),
 					'S_EDIT_SUBSCRIBERS'							=> true,
 				));
 
@@ -334,15 +337,13 @@ class main_module
 					'USERNAME_SELECTED'			=> $username_selected,
 				));
 	
-				$board_offset_hours = (int) $this->config['phpbbservices_digests_time_zone'];
-				
 				$sql_array = array(
 					'SELECT'	=> '*, CASE
-										WHEN user_digest_send_hour_gmt + ' . $board_offset_hours . ' >= 24 THEN
-						 					user_digest_send_hour_gmt + ' . $board_offset_hours . ' - 24  
-										WHEN user_digest_send_hour_gmt + ' . $board_offset_hours . ' < 0 THEN
-						 					user_digest_send_hour_gmt + ' . $board_offset_hours . ' + 24 
-										ELSE user_digest_send_hour_gmt + ' . $board_offset_hours . '
+										WHEN user_digest_send_hour_gmt + ' . $my_time_zone . ' >= 24 THEN
+						 					user_digest_send_hour_gmt + ' . $my_time_zone . ' - 24  
+										WHEN user_digest_send_hour_gmt + ' . $my_time_zone . ' < 0 THEN
+						 					user_digest_send_hour_gmt + ' . $my_time_zone . ' + 24 
+										ELSE user_digest_send_hour_gmt + ' . $my_time_zone . '
 										END AS send_hour_board',
 				
 					'FROM'		=> array(
@@ -356,8 +357,6 @@ class main_module
 				
 				$sql = $this->db->sql_build_query('SELECT', $sql_array);
 				$result = $this->db->sql_query_limit($sql, $this->config['phpbbservices_digests_users_per_page'], $start);
-				//echo $sql;
-				//exit;
 				while ($row = $this->db->sql_fetchrow($result))
 				{
 					
@@ -409,7 +408,7 @@ class main_module
 					}
 					
 					// Calculate a digest send hour in board time
-					$send_hour_board = str_replace('.',':', floor($row['user_digest_send_hour_gmt']) + $board_offset_hours);
+					$send_hour_board = str_replace('.',':', floor($row['user_digest_send_hour_gmt']) + $my_time_zone);
 					if ($send_hour_board >= 24)
 					{
 						$send_hour_board = $send_hour_board - 24;
@@ -423,17 +422,17 @@ class main_module
 					$board_offset = array();
 					for($i=0; $i<24; $i++)
 					{
-						if (($i - $board_offset_hours) < 0)
+						if (($i - $my_time_zone) < 0)
 						{
-							$board_offset[$i] = $i - $board_offset_hours + 24;
+							$board_offset[$i] = $i - $my_time_zone + 24;
 						}
-						else if (($i - $board_offset_hours) > 23)
+						else if (($i - $my_time_zone) > 23)
 						{
-							$board_offset[$i] = $i - $board_offset_hours - 24;
+							$board_offset[$i] = $i - $my_time_zone - 24;
 						}
 						else
 						{
-							$board_offset[$i] = $i - $board_offset_hours;
+							$board_offset[$i] = $i - $my_time_zone;
 						}
 					}
 
@@ -455,26 +454,17 @@ class main_module
 
 					$all_by_default = (sizeof($subscribed_forums) == 0) ? true : false;
 
-					// Certain dates must be translated so months and days of week are translated in the proper
+					// Certain dates must be translated so months and days of week are translated in the proper language
 					// which may not be English.
-					if (substr($this->config['default_lang'],0,2) == 'en')
+					if (substr($this->user->data['user_lang'],0,2) == 'en')
 					{
-						$user_lastvisit = ($row['user_lastvisit'] == 0) ? $this->language->lang('DIGESTS_NEVER_VISITED') : date($this->config['default_dateformat'], $row['user_lastvisit'] + (60 * 60 * ($this->config['phpbbservices_digests_time_zone'] - (date('O')/100))));
-						$user_digest_last_sent = ($row['user_digest_last_sent'] == 0) ? $this->language->lang('DIGESTS_NO_DIGESTS_SENT') : date($this->config['default_dateformat'], $row['user_digest_last_sent'] + (60 * 60 * ($this->config['phpbbservices_digests_time_zone'] - (date('O')/100))));
+						$user_lastvisit = ($row['user_lastvisit'] == 0) ? $this->language->lang('DIGESTS_NEVER_VISITED') : date($this->user->data['user_dateformat'], $row['user_lastvisit'] + (60 * 60 * ($my_time_zone - (date('O')/100))));
+						$user_digest_last_sent = ($row['user_digest_last_sent'] == 0) ? $this->language->lang('DIGESTS_NO_DIGESTS_SENT') : date($this->user->data['user_dateformat'], $row['user_digest_last_sent'] + (60 * 60 * ($my_time_zone - (date('O')/100))));
 					}
 					else
 					{
-						if (strlen($this->config['default_lang']) == 2)
-						{
-							$locale = trim($this->config['default_lang']) . '_' . strtoupper($this->config['default_lang']);
-						}
-						else
-						{
-							$locale = $this->config['default_lang'];
-						}
-						setlocale(LC_ALL, $locale);
-						$user_lastvisit = ($row['user_lastvisit'] == 0) ? $this->language->lang('DIGESTS_NEVER_VISITED') : strftime($this->dateFormatToStrftime($this->config['default_dateformat']), $row['user_lastvisit'] + (60 * 60 * ($this->config['phpbbservices_digests_time_zone'] - (date('O')/100))));
-						$user_digest_last_sent = ($row['user_digest_last_sent'] == 0) ? $this->language->lang('DIGESTS_NO_DIGESTS_SENT') : strftime($this->dateFormatToStrftime($this->config['default_dateformat']), $row['user_digest_last_sent'] + (60 * 60 * ($this->config['phpbbservices_digests_time_zone'] - (date('O')/100))));
+						$user_lastvisit = ($row['user_lastvisit'] == 0) ? $this->language->lang('DIGESTS_NEVER_VISITED') : strftime($this->helper->dateFormatToStrftime($this->user->data['user_dateformat'], $this->user->data['user_lang']), $row['user_lastvisit'] + (60 * 60 * ($my_time_zone - (date('O')/100))));
+						$user_digest_last_sent = ($row['user_digest_last_sent'] == 0) ? $this->language->lang('DIGESTS_NO_DIGESTS_SENT') : strftime($this->helper->dateFormatToStrftime($this->user->data['user_dateformat'], $this->user->data['user_lang']), $row['user_digest_last_sent'] + (60 * 60 * ($my_time_zone - (date('O')/100))));
 					}
 
 					$this->template->assign_block_vars('digests_edit_subscribers', array(
@@ -730,14 +720,17 @@ class main_module
 				$display_vars = array(
 					'title'	=> 'ACP_DIGESTS_BALANCE_LOAD',
 					'vars'	=> array(
-						'legend1'								=> 'ACP_DIGESTS_BALANCE_LOAD',
+						'legend1'								=> 'ACP_DIGESTS_BALANCE_OPTIONS',
 					)
 				);
 
+				$avg_per_hour = $this->average_subscribers_per_hour();
+
 				// Translate time zone information
 				$this->template->assign_vars(array(
-					'L_DIGESTS_HOUR_SENT'               		=> $this->language->lang('DIGESTS_HOUR_SENT', $this->config['phpbbservices_digests_time_zone']),
+					'L_DIGESTS_HOUR_SENT'               		=> $this->language->lang('DIGESTS_HOUR_SENT', $this->user->data['user_timezone']),
 					'S_BALANCE_LOAD'							=> true,
+					'S_DIGESTS_AVERAGE'							=> $avg_per_hour,
 				));
 
 				$sql_array = array(
@@ -763,7 +756,7 @@ class main_module
 				{
 				
 					// Convert digest hour to GMT
-					$hour_gmt = floor($i - $this->config['phpbbservices_digests_time_zone']);
+					$hour_gmt = floor($i - $my_time_zone);
 					
 					if ($hour_gmt < 0)
 					{
@@ -787,10 +780,59 @@ class main_module
 							}
 						}
 					}
-					
+
+					$hour_subscribers = $this->get_subscribers_for_hour($i, $this->user->data['user_timezone']);
+
+					$daily_subscribers = array();
+					$weekly_subscribers = array();
+					$monthly_subscribers = array();
+
+					foreach ($hour_subscribers as $hour_subscriber)
+					{
+
+						if (key($hour_subscriber) == constants::DIGESTS_DAILY_VALUE)
+						{
+							$daily_subscribers[] = current($hour_subscriber);
+						}
+						if (key($hour_subscriber) == constants::DIGESTS_WEEKLY_VALUE)
+						{
+							$weekly_subscribers[] = current($hour_subscriber);
+						}
+						if (key($hour_subscriber) == constants::DIGESTS_MONTHLY_VALUE)
+						{
+							$monthly_subscribers[] = current($hour_subscriber);
+						}
+
+					}
+
+					$daily_subscribers_str = (count($daily_subscribers) > 0 ) ? implode($this->language->lang('DIGESTS_COMMA'), $daily_subscribers) : '';
+					$weekly_subscribers_str = (count($weekly_subscribers) > 0 ) ? '<em>' . implode($this->language->lang('DIGESTS_COMMA'), $weekly_subscribers) . '</em>': '';
+					$monthly_subscribers_str = (count($monthly_subscribers) > 0 ) ? '<strong>' . implode($this->language->lang('DIGESTS_COMMA'), $monthly_subscribers) . '</strong>': '';
+
+					// Comma separate the digest types for display
+					$hourly_subscribers = $daily_subscribers_str;
+					if (strlen($hourly_subscribers) > 0 && strlen($weekly_subscribers_str) > 0)
+					{
+						$hourly_subscribers .= $this->language->lang('DIGESTS_COMMA') . $weekly_subscribers_str;
+					}
+					else
+					{
+						$hourly_subscribers .= $weekly_subscribers_str;
+					}
+					if (strlen($hourly_subscribers) > 0 && strlen($monthly_subscribers_str) > 0)
+					{
+						$hourly_subscribers .= $this->language->lang('DIGESTS_COMMA') . $monthly_subscribers_str;
+					}
+					else
+					{
+						$hourly_subscribers .= $monthly_subscribers_str;
+					}
+
 					$this->template->assign_block_vars('digests_balance_load', array(
-						'HOUR'               => $i,
-						'HOUR_COUNT'         => $hour_count,
+						'HOUR'              => $this->helper->make_hour_string($i, $this->user->data['user_dateformat']),
+						'HOUR_COUNT'        => ($hour_count > $avg_per_hour) ? '<strong>' . $hour_count . '</strong>' : $hour_count,
+						'HOUR_GMT'        	=> $hour_gmt,
+						'SUBSCRIBERS'		=> $hourly_subscribers,
 					));
 				
 				}				
@@ -803,7 +845,7 @@ class main_module
 					'vars'	=> array(
 						'legend1'								=> 'ACP_DIGESTS_MASS_SUBSCRIBE_UNSUBSCRIBE',
 						'phpbbservices_digests_enable_subscribe_unsubscribe'	=> array('lang' => 'DIGESTS_ENABLE_SUBSCRIBE_UNSUBSCRIBE',	'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
-						'phpbbservices_digests_subscribe_all'					=> array('lang' => 'DIGESTS_SUBSCRIBE_ALL',				'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
+						'phpbbservices_digests_subscribe_all'					=> array('lang' => 'DIGESTS_SUBSCRIBE_ALL',					'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_include_admins'					=> array('lang' => 'DIGESTS_INCLUDE_ADMINS',				'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 					)
 				);
@@ -882,7 +924,7 @@ class main_module
 
 		if ($submit && $mode == 'digests_edit_subscribers')
 		{
-			
+
 			// The "selected" input control indicates whether to do mass actions or not. With mass actions only the select control and
 			// the mark checkboxes matter. Other controls are ignored.
 			$selected = $this->request->variable('selected', 'IGNORE', true);
@@ -1213,29 +1255,23 @@ class main_module
 		if ($submit && $mode == 'digests_balance_load')
 		{
 
-			$sql_array = array(
-				'SELECT'	=> 'COUNT(user_id) AS digests_count',
-			
-				'FROM'		=> array(
-					USERS_TABLE		=> 'u',
-				),
-			
-				'WHERE'		=> "user_digest_type <> '" . constants::DIGESTS_NONE_VALUE . "' 
-					AND user_type <> " . USER_IGNORE,
-			);
-			
-			$sql = $this->db->sql_build_query('SELECT', $sql_array);
+			// Get the balance type: all, daily, weekly or monthly. Only these digest types will be balanced.
+			$balance = $this->request->variable('balance', constants::DIGESTS_ALL);
+			$balance_sql = ($balance == constants::DIGESTS_ALL) ?
+				"user_digest_type <> '" . constants::DIGESTS_NONE_VALUE . "'" :
+				"user_digest_type = '" . $balance . "'";
 
-			$result = $this->db->sql_query($sql);
-			$row = $this->db->sql_fetchrow($result);
-			
-			// Determine the average number of subscribers per hour. We need to assume at least one subscriber per hour to avoid 
+			// Get the hours to balance. If -1 is among those hours returned, all hours are wanted. Others that may be selected are ignored.
+ 			$for_hours = $this->request->variable('for_hrs', array('' => 0));
+			$for_hours_sql = (in_array(-1, $for_hours)) ? '' : ' AND ' . $this->db->sql_in_set('user_digest_send_hour_gmt', $for_hours);
+
+ 			// Get the hours to apply the balance to. If -1 is among those hours returned, all hours are candidates for being used.
+  			$to_hours = $this->request->variable('to_hrs', array('' => 0));
+
+			// Determine the average number of subscribers per hour. We need to assume at least one subscriber per hour to avoid
 			// resetting user's preferred digest time unnecessarily. If the average is 3 per hour, the first 3 already subscribed 
 			// will not have their digest arrival time changed.
-			
-			$avg_subscribers_per_hour = max(floor($row['digests_count']/24), 1);
-			
-			$this->db->sql_freeresult($result);
+			$avg_subscribers_per_hour = max($avg_per_hour, 1);
 			
 			// Get oversubscribed hours, place in an array
 
@@ -1246,7 +1282,7 @@ class main_module
 					USERS_TABLE		=> 'u',
 				),
 			
-				'WHERE'		=> "user_digest_type <> 'NONE' AND user_type <> " . USER_IGNORE,
+				'WHERE'		=> $balance_sql . $for_hours_sql . ' AND user_type <> ' . USER_IGNORE,
 			
 				'GROUP_BY'	=> 'user_digest_send_hour_gmt',
 				
@@ -1262,7 +1298,7 @@ class main_module
 			$oversubscribed_hours = array();
 			foreach ($rowset as $row)
 			{
-				$oversubscribed_hours[] = $row['hour'];
+				$oversubscribed_hours[] = (int) $row['hour'];
 			}
 			$this->db->sql_freeresult($result);
 			
@@ -1271,6 +1307,7 @@ class main_module
 
 			$rebalanced = 0;
 			$digest_notify_list = array();
+
 			if (sizeof($oversubscribed_hours) > 0)
 			{
 				
@@ -1281,7 +1318,7 @@ class main_module
 						USERS_TABLE	=> 'u',
 					),
 				
-					'WHERE'		=> "user_digest_type <> '" . constants::DIGESTS_NONE_VALUE . "' AND user_type <> " . USER_IGNORE . '
+					'WHERE'		=> $balance_sql . $for_hours_sql . ' AND user_type <> ' . USER_IGNORE . '
 						AND ' . $this->db->sql_in_set('user_digest_send_hour_gmt', $oversubscribed_hours),
 				
 					'ORDER_BY'	=> '1, 2',
@@ -1293,33 +1330,48 @@ class main_module
 				$rowset = $this->db->sql_fetchrowset($result);
 
 				$current_hour = -1;
-				$counted_for_this_hour= 0;
+				$counted_for_this_hour = 0;
 
-				// Finally, change the digest send hour for these subscribers to a random hour between 0 and 24.
+				// Finally, change the digest send hour for these subscribers to a random hour between 0 and 23 (if all from hours specified)
+				// or a random hour from those the user wants the hour to be chose from (if some hours specified).
 				foreach ($rowset as $row)
 				{
 
 					$digest_notify_list[] = $row['user_id'];
 
-					if ($current_hour <> $row['user_digest_send_hour_gmt'])
+					if ($current_hour != $row['user_digest_send_hour_gmt'])
 					{
 						$current_hour = $row['user_digest_send_hour_gmt'];
 						$counted_for_this_hour = 0;
 					}
 					$counted_for_this_hour++;
+
 					if ($counted_for_this_hour > $avg_subscribers_per_hour)
 					{
+
+						// Assign a new hour for this subscriber to receive the digest.
+						if (in_array(-1, $to_hours))
+						{
+							$new_hour = rand(0, 23);	// No constraint on the hour to assign
+						}
+						else
+						{
+							$new_hour = $to_hours[rand(0, count($to_hours) - 1)]; // Assign only to an hour that the user has specified.
+						}
+
 						$sql_ary = array(
-							'user_digest_send_hour_gmt'		=> rand(0, 23),
+							'user_digest_send_hour_gmt'		=> $new_hour,
 						);
 						
 						$sql2 = 'UPDATE ' . USERS_TABLE . '
 							SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
 							WHERE user_id = ' . (int)  $row['user_id'];
-							
+
 						$this->db->sql_query($sql2);
 						$rebalanced++;
+
 					}
+
 				}
 				
 				$this->db->sql_freeresult($result);
@@ -1349,71 +1401,93 @@ class main_module
 				{
 					$user_types[] = USER_FOUNDER;
 				}
-				
-				// If doing a mass subscription, we don't want to mess up digest subscriptions already in place, so we need to create a snippet of SQL.
-				// If doing a mass unsubscribe, all qualified subscriptions are removed. Note however that except for the digest type, all other settings 
+
+				// If doing a mass subscription, we don't want to mess up digest subscriptions already in place, so we need to get just those users unsubscribed.
+				// If doing a mass unsubscribe, all qualified subscriptions are removed. Note however that except for the digest type, all other settings
 				// are retained.
-				$sql_qualifier = ($this->config['phpbbservices_digests_subscribe_all']) ? " AND user_digest_type = '" . constants::DIGESTS_NONE_VALUE . "'": " AND user_digest_type != '" . constants::DIGESTS_NONE_VALUE . "'";
+				$sql_qualifier = ($this->config['phpbbservices_digests_subscribe_all']) ? " AND user_digest_type = '" . constants::DIGESTS_NONE_VALUE . "'" : " AND user_digest_type <> '" . constants::DIGESTS_NONE_VALUE . "'";
+
 				$digest_notify_list = array();
 
-				if ($this->config['phpbbservices_digests_notify_on_admin_changes'])
-				{
+				// Get a list of users to be mass subscribed or unsubscribed. This will be used to send them email
+				// notifications if this feature is enabled, but also to update the database.
 
-					$sql_array = array(
-						'SELECT'	=> 'user_id',
-					
-						'FROM'		=> array(
-							USERS_TABLE	=> 'u',
-						),
-					
-						'WHERE'		=> $this->db->sql_in_set('user_type', $user_types) . $sql_qualifier,
+				$sql_array = array(
+					'SELECT'	=> 'user_id',
+
+					'FROM'		=> array(
+						USERS_TABLE	=> 'u',
+					),
+
+					'WHERE'		=> $this->db->sql_in_set('user_type', $user_types) . $sql_qualifier,
+				);
+
+				$sql = $this->db->sql_build_query('SELECT', $sql_array);
+
+				$result = $this->db->sql_query($sql);
+				$rowset = $this->db->sql_fetchrowset($result);
+
+				foreach ($rowset as $row)
+				{
+					$digest_notify_list[] = $row['user_id'];
+				}
+
+				$this->db->sql_freeresult($result); // Query be gone!
+
+				// Set columns in users table to be updated
+				if ($this->config['phpbbservices_digests_subscribe_all'])	// subscribe
+				{
+					$sql_ary = array(
+						'user_digest_type' 				=> $this->config['phpbbservices_digests_user_digest_type'],
+						'user_digest_format' 			=> $this->config['phpbbservices_digests_user_digest_format'],
+						'user_digest_show_mine' 		=> ($this->config['phpbbservices_digests_user_digest_show_mine'] == 1) ? 0 : 1,
+						'user_digest_send_on_no_posts' 	=> $this->config['phpbbservices_digests_user_digest_send_on_no_posts'],
+						'user_digest_show_pms' 			=> $this->config['phpbbservices_digests_user_digest_show_pms'],
+						'user_digest_max_posts' 		=> $this->config['phpbbservices_digests_user_digest_max_posts'],
+						'user_digest_min_words' 		=> $this->config['phpbbservices_digests_user_digest_min_words'],
+						'user_digest_remove_foes' 		=> $this->config['phpbbservices_digests_user_digest_remove_foes'],
+						'user_digest_sortby' 			=> $this->config['phpbbservices_digests_user_digest_sortby'],
+						'user_digest_max_display_words' => ($this->config['phpbbservices_digests_user_digest_max_display_words'] == -1) ? 0 : $this->config['phpbbservices_digests_user_digest_max_display_words'],
+						'user_digest_reset_lastvisit' 	=> $this->config['phpbbservices_digests_user_digest_reset_lastvisit'],
+						'user_digest_filter_type' 		=> $this->config['phpbbservices_digests_user_digest_filter_type'],
+						'user_digest_pm_mark_read' 		=> $this->config['phpbbservices_digests_user_digest_pm_mark_read'],
+						'user_digest_new_posts_only' 	=> $this->config['phpbbservices_digests_user_digest_new_posts_only'],
+						'user_digest_no_post_text'		=> ($this->config['phpbbservices_digests_user_digest_max_display_words'] == 0) ? 1 : 0,
+						'user_digest_attachments' 		=> $this->config['phpbbservices_digests_user_digest_attachments'],
+						'user_digest_block_images'		=> $this->config['phpbbservices_digests_user_digest_block_images'],
+						'user_digest_toc'				=> $this->config['phpbbservices_digests_user_digest_toc'],
 					);
-					
-					$sql = $this->db->sql_build_query('SELECT', $sql_array);
+				}
+				else	// unsubscribe
+				{
+					$sql_ary = array(
+						'user_digest_type' 				=> constants::DIGESTS_NONE_VALUE,
+					);
+				}
+
+				foreach ($digest_notify_list as $user_id)
+				{
+					if ($this->config['phpbbservices_digests_subscribe_all'])
+					{
+						// Add the hour of the subscription to the end of $sql_ary, using a random hour if that setting exists
+						$sql_ary['user_digest_send_hour_gmt'] = ($this->config['phpbbservices_digests_user_digest_send_hour_gmt'] == -1) ? rand(0,23) : $this->config['phpbbservices_digests_user_digest_send_hour_gmt'];
+					}
+
+					$sql = 'UPDATE ' . USERS_TABLE . ' 
+						SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
+						WHERE ' . $this->db->sql_in_set('user_id', $user_id);
 
 					$result = $this->db->sql_query($sql);
-					$rowset = $this->db->sql_fetchrowset($result);
 
-					foreach ($rowset as $row)
-					{
-						$digest_notify_list[] = $row['user_id'];
-					}
-							
 					$this->db->sql_freeresult($result); // Query be gone!
-					
+
+					if ($this->config['phpbbservices_digests_subscribe_all'])
+					{
+						array_pop($sql_ary);	// Remove $sql_ary['user_digest_send_hour_gmt'] since it may change for each subscriber
+					}
+
 				}
-					
-				// Set columns in user table to be updated
-				$sql_ary = array(
-					'user_digest_type' 				=> ($this->config['phpbbservices_digests_subscribe_all']) ? $this->config['phpbbservices_digests_user_digest_type'] : constants::DIGESTS_NONE_VALUE,
-					'user_digest_format' 			=> $this->config['phpbbservices_digests_user_digest_format'],
-					'user_digest_show_mine' 		=> ($this->config['phpbbservices_digests_user_digest_show_mine'] == 1) ? 0 : 1,
-					'user_digest_send_on_no_posts' 	=> $this->config['phpbbservices_digests_user_digest_send_on_no_posts'],
-					'user_digest_send_hour_gmt' 	=> ($this->config['phpbbservices_digests_user_digest_send_hour_gmt'] == -1) ? rand(0,23) : $this->config['phpbbservices_digests_user_digest_send_hour_gmt'],
-					'user_digest_show_pms' 			=> $this->config['phpbbservices_digests_user_digest_show_pms'],
-					'user_digest_max_posts' 		=> $this->config['phpbbservices_digests_user_digest_max_posts'],
-					'user_digest_min_words' 		=> $this->config['phpbbservices_digests_user_digest_min_words'],
-					'user_digest_remove_foes' 		=> $this->config['phpbbservices_digests_user_digest_remove_foes'],
-					'user_digest_sortby' 			=> $this->config['phpbbservices_digests_user_digest_sortby'],
-					'user_digest_max_display_words' => ($this->config['phpbbservices_digests_user_digest_max_display_words'] == -1) ? 0 : $this->config['phpbbservices_digests_user_digest_max_display_words'],
-					'user_digest_reset_lastvisit' 	=> $this->config['phpbbservices_digests_user_digest_reset_lastvisit'],
-					'user_digest_filter_type' 		=> $this->config['phpbbservices_digests_user_digest_filter_type'],
-					'user_digest_pm_mark_read' 		=> $this->config['phpbbservices_digests_user_digest_pm_mark_read'],
-					'user_digest_new_posts_only' 	=> $this->config['phpbbservices_digests_user_digest_new_posts_only'],
-					'user_digest_no_post_text'		=> ($this->config['phpbbservices_digests_user_digest_max_display_words'] == 0) ? 1 : 0,
-					'user_digest_attachments' 		=> $this->config['phpbbservices_digests_user_digest_attachments'],
-					'user_digest_block_images'		=> $this->config['phpbbservices_digests_user_digest_block_images'],
-					'user_digest_toc'				=> $this->config['phpbbservices_digests_user_digest_toc'],
-				);
-					
-				$sql = 'UPDATE ' . USERS_TABLE . ' 
-						SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
-						WHERE ' . $this->db->sql_in_set('user_type', $user_types) . $sql_qualifier;
-					
-				$result = $this->db->sql_query($sql);
-					
-				$this->db->sql_freeresult($result); // Query be gone!
-				
+
 				// Notify users or subscription or unsubscription if directed
 				if ($this->config['phpbbservices_digests_notify_on_admin_changes'])
 				{
@@ -1665,6 +1739,9 @@ class main_module
 
 	function dow_select()
 	{
+		// Returns a string containing HTML that gives the days of the week as <option> tags inside a <select> tag
+		// with the day of the week used for sending weekly digests selected.
+
 		$dow_options = '';
 		$index = 0;
 		$weekdays = explode(',', $this->language->lang('DIGESTS_WEEKDAY'));
@@ -1680,6 +1757,9 @@ class main_module
 
 	function digest_type_select()
 	{
+		// Returns a string containing HTML, basically a set of option tags so the admin can pick daily, weekly
+		// or monthly digests as the default digest type.
+
 		$selected = ($this->config['phpbbservices_digests_user_digest_type'] == constants::DIGESTS_DAILY_VALUE) ? ' selected="selected"' : '';
 		$digest_types = '<option value="' . constants::DIGESTS_DAILY_VALUE . '"' . $selected. '>' . $this->language->lang('DIGESTS_DAILY') . '</option>';
 		$selected = ($this->config['phpbbservices_digests_user_digest_type'] == constants::DIGESTS_WEEKLY_VALUE) ? ' selected="selected"' : '';
@@ -1692,6 +1772,8 @@ class main_module
 
 	function digest_style_select()
 	{
+		// Returns a string containing HTML, basically a set of option tags so the admin can pick the default digest format.
+
 		$selected = ($this->config['phpbbservices_digests_user_digest_format'] == constants::DIGESTS_HTML_VALUE) ? ' selected="selected"' : '';
 		$digest_styles = '<option value="' . constants::DIGESTS_HTML_VALUE . '"' . $selected . '>' . $this->language->lang('DIGESTS_FORMAT_HTML') . '</option>';
 		$selected = ($this->config['phpbbservices_digests_user_digest_format'] == constants::DIGESTS_HTML_CLASSIC_VALUE) ? ' selected="selected"' : '';
@@ -1704,10 +1786,13 @@ class main_module
 		$digest_styles .= '<option value="' . constants::DIGESTS_TEXT_VALUE . '"' . $selected  . '>' . $this->language->lang('DIGESTS_FORMAT_TEXT') . '</option>';
 		
 		return $digest_styles;
-	} 
+	}
 
 	function digest_send_hour_gmt()
 	{
+		// Returns a set of option tags for all the hours of the day selecting a send hour for digests including the default
+		// to assign a random hour. The values should be interpreted as GMT hour.
+
 		$digest_send_hour_gmt = '';
 		
 		// Populate the Hour Sent select control
@@ -1717,13 +1802,13 @@ class main_module
 			$display_text = ($i == -1) ? $this->language->lang('DIGESTS_RANDOM_HOUR') : $i;
 			$digest_send_hour_gmt .= '<option value="' . $i . '"' . $selected . '>' . $display_text . '</option>';
 		}
-		
-		
 		return $digest_send_hour_gmt;
 	} 
 
 	function digest_filter_type ()
 	{
+		// Returns a set of option tags so the default filter type can be set
+
 		$selected = ($this->config['phpbbservices_digests_user_digest_filter_type'] == constants::DIGESTS_ALL) ? ' selected="selected"' : '';
 		$digest_filter_types = '<option value="' . constants::DIGESTS_ALL . '"' . $selected. '>' . $this->language->lang('DIGESTS_ALL_FORUMS') . '</option>';
 		$selected = ($this->config['phpbbservices_digests_user_digest_filter_type'] == constants::DIGESTS_FIRST) ? ' selected="selected"' : '';
@@ -1736,6 +1821,7 @@ class main_module
 
 	function digest_post_sort_order ()
 	{
+		// Returns a set of option tags so teh default digest sorting in digests can be set
 
 		$selected = ($this->config['phpbbservices_digests_user_digest_sortby'] == constants::DIGESTS_SORTBY_BOARD) ? ' selected="selected"' : '';
 		$digest_sort_order = '<option value="' . constants::DIGESTS_SORTBY_BOARD . '"' . $selected . '>' . $this->language->lang('DIGESTS_SORT_USER_ORDER') . '</option>';
@@ -1906,38 +1992,75 @@ class main_module
 	
 	}
 
-	/*
-	* Convert a date format to a strftime format
-	*
-	* Timezone conversion is done for unix. Windows users must exchange %z and %Z.
-	*
-	* Unsupported date formats : S, n, t, L, B, G, u, e, I, P, Z, c, r
-	* Unsupported strftime formats : %U, %W, %C, %g, %r, %R, %T, %X, %c, %D, %F, %x
-	*
-	* @param string $dateFormat a date format
-	* @return string
-	*/
+	function average_subscribers_per_hour ()
+	{
 
-	function dateFormatToStrftime($dateFormat) {
+		// This function returns the average number of digest subscribers per hour.
 
-		$caracs = array(
-			// Day - no strf eq : S
-			'd' => '%d', 'D' => '%a', 'j' => '%e', 'l' => '%A', 'N' => '%u', 'w' => '%w', 'z' => '%j',
-			// Week - no date eq : %U, %W
-			'W' => '%V',
-			// Month - no strf eq : n, t
-			'F' => '%B', 'm' => '%m', 'M' => '%b',
-			// Year - no strf eq : L; no date eq : %C, %g
-			'o' => '%G', 'Y' => '%Y', 'y' => '%y',
-			// Time - no strf eq : B, G, u; no date eq : %r, %R, %T, %X
-			'a' => '%P', 'A' => '%p', 'g' => '%l', 'h' => '%I', 'H' => '%H', 'i' => '%M', 's' => '%S',
-			// Timezone - no strf eq : e, I, P, Z
-			'O' => '%z', 'T' => '%Z',
-			// Full Date / Time - no strf eq : c, r; no date eq : %c, %D, %F, %x
-			'U' => '%s'
+		$sql_array = array(
+			'SELECT'	=> 'COUNT(user_id) AS digests_count',
+
+			'FROM'		=> array(
+				USERS_TABLE		=> 'u',
+			),
+
+			'WHERE'		=> "user_digest_type <> '" . constants::DIGESTS_NONE_VALUE . "' 
+					AND user_type <> " . USER_IGNORE,
 		);
 
-		return strtr((string)$dateFormat, $caracs);
+		$sql = $this->db->sql_build_query('SELECT', $sql_array);
+
+		$result = $this->db->sql_query($sql);
+		$row = $this->db->sql_fetchrow($result);
+
+		$avg_subscribers_per_hour = round((float) $row['digests_count']/24);
+		$this->db->sql_freeresult($result);
+
+		return $avg_subscribers_per_hour;
+
+	}
+
+	function get_subscribers_for_hour ($hour, $tz_text)
+	{
+
+		// Returns an array of subscribers for a given hour, keyed by digest type
+
+		$subscribers = array();
+
+		$hour_gmt = $hour - $this->helper->make_tz_offset($tz_text);
+		if ($hour_gmt < 0)
+		{
+			$hour_gmt = $hour_gmt + 24;
+		}
+		else if ($hour_gmt > 23)
+		{
+			$hour_gmt = $hour_gmt - 24;
+		}
+
+		$sql_array = array(
+			'SELECT'	=> 'username, user_digest_type',
+
+			'FROM'		=> array(
+				USERS_TABLE		=> 'u',
+			),
+
+			'WHERE' 	=> $this->db->sql_in_set('user_digest_send_hour_gmt', $hour_gmt),
+
+			'ORDER_BY'	=> 'username'
+		);
+
+		$sql = $this->db->sql_build_query('SELECT', $sql_array);
+
+		$result = $this->db->sql_query($sql);
+		$rowset = $this->db->sql_fetchrowset($result);
+
+		foreach ($rowset as $row)
+		{
+			$subscribers[][$row['user_digest_type']] = $row['username'];
+		}
+
+		return $subscribers;
+
 	}
 
 }

@@ -6,19 +6,31 @@
 	<link href="{T_THEME_PATH}/print.css" rel="stylesheet" type="text/css" media="print" title="printonly" />
 	<link href="{T_STYLESHEET_LINK}" rel="stylesheet" type="text/css" media="screen" />
 	<style type="text/css">
-		blockquote { background-image: none; }
-		h1,h3,p,div { margin-top:5px; margin-bottom:5px; }
+		.postbody h3 { float: none; color:#000000; padding-bottom: 15px; }
+		.author { clear: both; float: left; }
+		blockquote { background-image: none; margin-left: 10px; clear: both; float: left;}
+		.box { margin:5px; padding:5px; border-style:dashed; border-width:1px; }
+		body { background: white; }
+		.copyright { padding:0px; }
+		.content { clear: both; float: left; }
+		.forum { clear: both; float: left; }
+		h1 { color:#000000; margin-bottom: 20px; };
+		h1,h3,p,div { margin-top:10px; margin-bottom:10px; clear: both; float: left; }
+		h4 { clear: both; float: left; }
 		ol,ul { list-style-position: inside; }
-		table { border-collapse: collapse; border: 1px solid black}
+		.post { padding-left: 5px; border-radius: 0px; }
+		.postbody { width: 100%; }
+		#skip { background: white; }
+		table { border-collapse: collapse; border: 1px solid black; }
 		td,th { border: 1px solid black; padding: 3px; }
 		th { font-weight:800; }
-		#wrap {padding-right: 5px; padding-left: 5px;}
-		h1 {color:#000000};
-		.box { margin:5px; padding:5px; border-style:dashed; border-width:1px; }
-		.copyright { padding:0px; }
-		.post { padding: 0px; }
-		.postbody { width: 100%; }
-		.postbody h3 { float: none; }
+		.toc { margin-left: 5px; }
+		.topic { background: #EBEADD; padding: 5px; clear: both; float: left;}
+		tr:nth-child(even), .post:nth-child(even) { background: #FFF; }
+		tr:nth-child(odd), .post:nth-child(odd) { background: #EBEADD; }
+		.post:nth-child(even) { clear: both; float: left; }
+		.post:nth-child(odd) { clear: both; float: left; }
+		#wrap { padding-right: 5px; padding-left: 5px; }
 	</style>
 </head>
 <body dir="{S_CONTENT_DIRECTION}">
@@ -76,7 +88,7 @@
 		<hr />
 		<p><span class="copyright"><em>{S_DIGESTS_PUBLISH_DATE}</em></span></p>
 		<p>{S_DIGESTS_DISCLAIMER}</p>
-		<p><span class="copyright">{L_DIGESTS_POWERED_BY_TEXT} {S_DIGESTS_POWERED_BY}</span></p>
+		<p><span class="copyright">{L_DIGESTS_POWERED_BY_TEXT} {S_DIGESTS_POWERED_BY}{S_DIGESTS_TRANSLATOR}</span></p>
 		
 	</div>
 </div>

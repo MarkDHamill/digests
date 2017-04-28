@@ -728,7 +728,7 @@ class main_module
 
 				// Translate time zone information
 				$this->template->assign_vars(array(
-					'L_DIGESTS_HOUR_SENT'               		=> $this->language->lang('DIGESTS_HOUR_SENT', $this->user->data['user_timezone']),
+					'L_DIGESTS_HOUR_SENT'               		=> $this->language->lang('DIGESTS_HOUR_SENT', $my_time_zone),
 					'S_BALANCE_LOAD'							=> true,
 					'S_DIGESTS_AVERAGE'							=> $avg_per_hour,
 				));
@@ -781,7 +781,7 @@ class main_module
 						}
 					}
 
-					$hour_subscribers = $this->get_subscribers_for_hour($i, $this->user->data['user_timezone']);
+					$hour_subscribers = $this->get_subscribers_for_hour($i, $my_time_zone);
 
 					$daily_subscribers = array();
 					$weekly_subscribers = array();

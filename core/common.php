@@ -28,7 +28,7 @@ class common
 		
 		// This function returns a string representing an hour (0-23) for display. It attempts to be smart by looking at 
 		// the user's date format and determining whether it supports AM/PM or not.
-		
+
 		static $display_hour_array_am_pm = array(12,1,2,3,4,5,6,7,8,9,10,11,12,1,2,3,4,5,6,7,8,9,10,11);
 
 		// Is AM/PM expected?
@@ -42,10 +42,10 @@ class common
 		}
 		else
 		{
-			$am_pm = ($hour < 12) ? strtolower($this->language->lang('DIGESTS_AM')) : strtolower($this->language->lang('DIGESTS_PM'));
+			$am_pm = ($hour < 12) ? $this->language->lang('DIGESTS_AM') : $this->language->lang('DIGESTS_PM');
 			if ($use_uppercase_am_pm)
 			{
-				return $display_hour_array_am_pm[$hour] . $am_pm;
+				return $display_hour_array_am_pm[$hour] . strtoupper($am_pm);
 			}
 			else
 			{

@@ -408,20 +408,16 @@ class main_module
 					}
 					
 					// Calculate a digest send hour in administrator's time zone
-					$send_hour_offset = str_replace('.',':', floor($row['user_digest_send_hour_gmt']) + $my_time_zone);
+					$send_hour_admin_offset = str_replace('.',':', floor($row['user_digest_send_hour_gmt']) + $my_time_zone);
 
-					if ($send_hour_offset >= 24)
+					if ($send_hour_admin_offset >= 24)
 					{
-						$send_hour_offset = $send_hour_offset - 24;
+						$send_hour_admin_offset = $send_hour_admin_offset - 24;
 					}
-					else if ($send_hour_offset < 0)
+					else if ($send_hour_admin_offset < 0)
 					{
-						$send_hour_offset = $send_hour_offset + 24;
+						$send_hour_admin_offset = $send_hour_admin_offset + 24;
 					}
-					/*else
-					{
-						$send_hour_offset = $send_hour_offset + $my_time_zone;
-					}*/
 
 					// Create an array of GMT offsets from board time zone. Also create the display hour format.
 					$admin_hour_offset = array();
@@ -431,12 +427,12 @@ class main_module
 						if ($i < 0)
 						{
 							$admin_hour_offset[$i] = $i - $my_time_zone + 24;
-							$display_hour[$i] = $this->helper->make_hour_string((($i - $my_time_zone) + 24), $this->user->data['user_dateformat']);
+							$display_hour[$i] = $this->helper->make_hour_string($i - $my_time_zone + 24, $this->user->data['user_dateformat']);
 						}
 						else if ($i > 23)
 						{
 							$admin_hour_offset[$i] = $i - $my_time_zone - 24;
-							$display_hour[$i] = $this->helper->make_hour_string((($i - $my_time_zone) - 24), $this->user->data['user_dateformat']);
+							$display_hour[$i] = $this->helper->make_hour_string($i - $my_time_zone - 24, $this->user->data['user_dateformat']);
 						}
 						else
 						{
@@ -556,30 +552,30 @@ class main_module
 						'S_DIGEST_POST_FIRST'				=> ($row['user_digest_filter_type'] == constants::DIGESTS_FIRST),
 						'S_DIGEST_PRIVATE_MESSAGES_IN_DIGEST_NO' 	=> ($row['user_digest_show_pms'] == 0),
 						'S_DIGEST_PRIVATE_MESSAGES_IN_DIGEST_YES' 	=> ($row['user_digest_show_pms'] == 1),
-						'S_DIGEST_SEND_HOUR_0_CHECKED'		=> ($send_hour_offset == 0),
-						'S_DIGEST_SEND_HOUR_1_CHECKED'		=> ($send_hour_offset == 1),
-						'S_DIGEST_SEND_HOUR_2_CHECKED'		=> ($send_hour_offset == 2),
-						'S_DIGEST_SEND_HOUR_3_CHECKED'		=> ($send_hour_offset == 3),
-						'S_DIGEST_SEND_HOUR_4_CHECKED'		=> ($send_hour_offset == 4),
-						'S_DIGEST_SEND_HOUR_5_CHECKED'		=> ($send_hour_offset == 5),
-						'S_DIGEST_SEND_HOUR_6_CHECKED'		=> ($send_hour_offset == 6),
-						'S_DIGEST_SEND_HOUR_7_CHECKED'		=> ($send_hour_offset == 7),
-						'S_DIGEST_SEND_HOUR_8_CHECKED'		=> ($send_hour_offset == 8),
-						'S_DIGEST_SEND_HOUR_9_CHECKED'		=> ($send_hour_offset == 9),
-						'S_DIGEST_SEND_HOUR_10_CHECKED'		=> ($send_hour_offset == 10),
-						'S_DIGEST_SEND_HOUR_11_CHECKED'		=> ($send_hour_offset == 11),
-						'S_DIGEST_SEND_HOUR_12_CHECKED'		=> ($send_hour_offset == 12),
-						'S_DIGEST_SEND_HOUR_13_CHECKED'		=> ($send_hour_offset == 13),
-						'S_DIGEST_SEND_HOUR_14_CHECKED'		=> ($send_hour_offset == 14),
-						'S_DIGEST_SEND_HOUR_15_CHECKED'		=> ($send_hour_offset == 15),
-						'S_DIGEST_SEND_HOUR_16_CHECKED'		=> ($send_hour_offset == 16),
-						'S_DIGEST_SEND_HOUR_17_CHECKED'		=> ($send_hour_offset == 17),
-						'S_DIGEST_SEND_HOUR_18_CHECKED'		=> ($send_hour_offset == 18),
-						'S_DIGEST_SEND_HOUR_19_CHECKED'		=> ($send_hour_offset == 19),
-						'S_DIGEST_SEND_HOUR_20_CHECKED'		=> ($send_hour_offset == 20),
-						'S_DIGEST_SEND_HOUR_21_CHECKED'		=> ($send_hour_offset == 21),
-						'S_DIGEST_SEND_HOUR_22_CHECKED'		=> ($send_hour_offset == 22),
-						'S_DIGEST_SEND_HOUR_23_CHECKED'		=> ($send_hour_offset == 23),
+						'S_DIGEST_SEND_HOUR_0_CHECKED'		=> ($send_hour_admin_offset == 0),
+						'S_DIGEST_SEND_HOUR_1_CHECKED'		=> ($send_hour_admin_offset == 1),
+						'S_DIGEST_SEND_HOUR_2_CHECKED'		=> ($send_hour_admin_offset == 2),
+						'S_DIGEST_SEND_HOUR_3_CHECKED'		=> ($send_hour_admin_offset == 3),
+						'S_DIGEST_SEND_HOUR_4_CHECKED'		=> ($send_hour_admin_offset == 4),
+						'S_DIGEST_SEND_HOUR_5_CHECKED'		=> ($send_hour_admin_offset == 5),
+						'S_DIGEST_SEND_HOUR_6_CHECKED'		=> ($send_hour_admin_offset == 6),
+						'S_DIGEST_SEND_HOUR_7_CHECKED'		=> ($send_hour_admin_offset == 7),
+						'S_DIGEST_SEND_HOUR_8_CHECKED'		=> ($send_hour_admin_offset == 8),
+						'S_DIGEST_SEND_HOUR_9_CHECKED'		=> ($send_hour_admin_offset == 9),
+						'S_DIGEST_SEND_HOUR_10_CHECKED'		=> ($send_hour_admin_offset == 10),
+						'S_DIGEST_SEND_HOUR_11_CHECKED'		=> ($send_hour_admin_offset == 11),
+						'S_DIGEST_SEND_HOUR_12_CHECKED'		=> ($send_hour_admin_offset == 12),
+						'S_DIGEST_SEND_HOUR_13_CHECKED'		=> ($send_hour_admin_offset == 13),
+						'S_DIGEST_SEND_HOUR_14_CHECKED'		=> ($send_hour_admin_offset == 14),
+						'S_DIGEST_SEND_HOUR_15_CHECKED'		=> ($send_hour_admin_offset == 15),
+						'S_DIGEST_SEND_HOUR_16_CHECKED'		=> ($send_hour_admin_offset == 16),
+						'S_DIGEST_SEND_HOUR_17_CHECKED'		=> ($send_hour_admin_offset == 17),
+						'S_DIGEST_SEND_HOUR_18_CHECKED'		=> ($send_hour_admin_offset == 18),
+						'S_DIGEST_SEND_HOUR_19_CHECKED'		=> ($send_hour_admin_offset == 19),
+						'S_DIGEST_SEND_HOUR_20_CHECKED'		=> ($send_hour_admin_offset == 20),
+						'S_DIGEST_SEND_HOUR_21_CHECKED'		=> ($send_hour_admin_offset == 21),
+						'S_DIGEST_SEND_HOUR_22_CHECKED'		=> ($send_hour_admin_offset == 22),
+						'S_DIGEST_SEND_HOUR_23_CHECKED'		=> ($send_hour_admin_offset == 23),
 						'S_DIGEST_SEND_ON_NO_POSTS_NO_CHECKED' 	=> ($row['user_digest_send_on_no_posts'] == 0),
 						'S_DIGEST_SEND_ON_NO_POSTS_YES_CHECKED' => ($row['user_digest_send_on_no_posts'] == 1),
 						'S_DIGEST_SHOW_MINE_CHECKED_YES' 	=> ($row['user_digest_show_mine'] == 1),

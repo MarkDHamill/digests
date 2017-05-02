@@ -160,7 +160,10 @@ class digests extends \phpbb\cron\task\base
 			$this->user->style['style_parent_id'] = 0;
 			$this->user->style['bbcode_bitfield'] = 'kNg=';
 
-			// phpBB cron and a system cron assumes an interface where styles won't be needed, so it must be told where to find them.
+			// phpBB cron and a system cron assumes an interface where language variables and styles won't be needed, so it must be told where to find them.
+			$this->language->set_user_language($this->config['default_lang'], true); // before user context, use board language
+			$this->language->add_lang('common');
+			$this->language->add_lang(array('common', 'acp/common'), 'phpbbservices/digests');
 			$this->template->set_style(array($this->path_prefix . 'ext/phpbbservices/digests/styles', 'styles'));
 			
 			// How many hours of digests are wanted? We want to do it for the number of hours between now and when digests were last ran successfully.
@@ -284,7 +287,7 @@ class digests extends \phpbb\cron\task\base
 		}
 		if ($this->system_cron)
 		{
-			include($this->path_prefix . 'includes/functions_content.' . $this->phpEx);	// Otherwise censor_text won't be found.
+			require_once $this->path_prefix . 'includes/functions_content.' . $this->phpEx;	// Otherwise censor_text won't be found.
 			$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_SYSTEM_CRON_RUN');
 		}
 		
@@ -589,11 +592,9 @@ class digests extends \phpbb\cron\task\base
 			// If in cron mode, no language files are loaded. Load the appropriate language files based on the user's
 			// preferred language. The board default language is probably English, which may not be what we want since
 			// phpBB supports multiple languages depending on the language packs installed and what the user chooses.
-			if (!$this->manual_mode)
+			if (!$this->manual_mode && $this->user_language != $row['user_lang'])
 			{
 				$this->language->set_user_language($row['user_lang'], true);
-				$this->language->add_lang('common');
-				$this->language->add_lang(array('common', 'acp/common'), 'phpbbservices/digests');
 			}
 
 			$this->toc = array();		// Create or empty the array containing table of contents information

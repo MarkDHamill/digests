@@ -85,11 +85,12 @@
 			{L_DIGESTS_BLOCK_IMAGES}{L_COLON} <!-- IF S_DIGESTS_BLOCK_IMAGES -->{L_YES}<!-- ELSE-->{L_NO}<!-- ENDIF--><br />
 			{L_DIGESTS_TOC}{L_COLON} <!-- IF S_DIGESTS_TOC -->{L_YES}<!-- ELSE-->{L_NO}<!-- ENDIF-->
 		</div></blockquote>
-		<hr />
-		<p><span class="copyright"><em>{S_DIGESTS_PUBLISH_DATE}</em></span></p>
-		<p>{S_DIGESTS_DISCLAIMER}</p>
-		<p><span class="copyright">{L_DIGESTS_POWERED_BY_TEXT} {S_DIGESTS_POWERED_BY}{S_DIGESTS_TRANSLATOR}</span></p>
-		
+		<div class="author">
+			<hr />
+			<p><span class="copyright"><em>{S_DIGESTS_PUBLISH_DATE}</em></span></p>
+			<p>{S_DIGESTS_DISCLAIMER}</p>
+			<p><span class="copyright">{L_DIGESTS_POWERED_BY_TEXT} {S_DIGESTS_POWERED_BY}{S_DIGESTS_TRANSLATOR}</span></p>
+		</div>
 	</div>
 </div>
 </body>

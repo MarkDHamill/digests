@@ -36,7 +36,7 @@ class main_module
 
 		// Get global variables via containers to minimize security issues
 		$this->phpbb_root_path = $phpbb_container->getParameter('core.root_path');
-		$this->phpEx= $phpbb_container->getParameter('core.php_ext');
+		$this->phpEx = $phpbb_container->getParameter('core.php_ext');
 		$this->table_prefix = $phpbb_container->getParameter('core.table_prefix');
 
 		// Encapsulate certain phpBB objects inside this class to minimize security issues
@@ -1311,7 +1311,7 @@ class main_module
 					USERS_TABLE		=> 'u',
 				),
 			
-				'WHERE'		=> $balance_sql . $for_hours_sql . ' AND user_type <> ' . USER_IGNORE,
+				'WHERE'		=> $balance_sql . $for_hours_sql . ' AND ' . $this->db->sql_in_set('user_type', array(USER_NORMAL, USER_FOUNDER)),
 			
 				'GROUP_BY'	=> 'user_digest_send_hour_gmt',
 				

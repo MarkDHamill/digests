@@ -58,9 +58,17 @@ class common
 	public function make_tz_offset ($tz_text, $show_sign = false)
 	{
 		// This function translates a text timezone (like America/New_York) to an hour offset from GMT, doing magic like figuring out DST
-		$tz = new \DateTimeZone($tz_text);
-		$datetime_tz = new \DateTime('now', $tz);
-		$timeOffset = $tz->getOffset($datetime_tz) / 3600;
+		if (!$this->validateDate($tz_text))
+		{
+			// Date string is invalid so assume UTC
+			$timeOffset = 0;
+		}
+		else
+		{
+			$tz = new \DateTimeZone($tz_text);
+			$datetime_tz = new \DateTime('now', $tz);
+			$timeOffset = $tz->getOffset($datetime_tz) / 3600;
+		}
 		return ($show_sign && $timeOffset >= 0) ? '+' . $timeOffset : $timeOffset;
 	}
 
@@ -71,7 +79,7 @@ class common
 		*
 		* Timezone conversion is done for unix. Windows users must exchange %z and %Z.
 		*
-		* Unsupported date formats : n, t, L, B, G, u, e, I, P, Z, c, r
+		* Unsupported date formats : t, L, B, u, e, I, P, Z, c, r
 		* Unsupported strftime formats : %U, %W, %C, %g, %r, %R, %T, %X, %c, %D, %F, %x
 		*
 		* @param string $dateFormat a date format
@@ -83,12 +91,12 @@ class common
 			'd' => '%d', 'D' => '%a', 'j' => '%e', 'l' => '%A', 'N' => '%u', 'w' => '%w', 'z' => '%j', 'S' => '',
 			// Week - no date eq : %U, %W
 			'W' => '%V',
-			// Month - no strf eq : n, t
-			'F' => '%B', 'm' => '%m', 'M' => '%b',
+			// Month - no strf eq : t
+			'F' => '%B', 'm' => '%m', 'M' => '%b', 'n' => '%m',
 			// Year - no strf eq : L; no date eq : %C, %g
 			'o' => '%G', 'Y' => '%Y', 'y' => '%y',
-			// Time - no strf eq : B, G, u; no date eq : %r, %R, %T, %X
-			'a' => '%P', 'A' => '%p', 'g' => '%l', 'h' => '%I', 'H' => '%H', 'i' => '%M', 's' => '%S',
+			// Time - no strf eq : B, u; no date eq : %r, %R, %T, %X
+			'a' => '%P', 'A' => '%p', 'g' => '%l', 'h' => '%I', 'H' => '%H', 'i' => '%M', 's' => '%S', 'G' => '%k',
 			// Timezone - no strf eq : e, I, P, Z
 			'O' => '%z', 'T' => '%Z',
 			// Full Date / Time - no strf eq : c, r; no date eq : %c, %D, %F, %x
@@ -105,6 +113,12 @@ class common
 		}
 		setlocale(LC_ALL, $locale);
 		return strtr((string)$dateFormat, $caracs);
+	}
+
+	private function validateDate($date)
+	{
+		$d = \DateTime::createFromFormat('Y-m-d', $date);
+		return $d && $d->format('Y-m-d') === $date;
 	}
 
 }

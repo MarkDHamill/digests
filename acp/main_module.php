@@ -468,8 +468,8 @@ class main_module
 					}
 					else
 					{
-						$user_lastvisit = ($row['user_lastvisit'] == 0) ? $this->language->lang('DIGESTS_NEVER_VISITED') : strftime($this->helper->dateFormatToStrftime($this->user->data['user_dateformat'], $this->user->data['user_lang']), $row['user_lastvisit'] + (60 * 60 * ($my_time_zone - (date('O')/100))));
-						$user_digest_last_sent = ($row['user_digest_last_sent'] == 0) ? $this->language->lang('DIGESTS_NO_DIGESTS_SENT') : strftime($this->helper->dateFormatToStrftime($this->user->data['user_dateformat'], $this->user->data['user_lang']), $row['user_digest_last_sent'] + (60 * 60 * ($my_time_zone - (date('O')/100))));
+						$user_lastvisit = ($row['user_lastvisit'] == 0) ? $this->language->lang('DIGESTS_NEVER_VISITED') : $this->helper->date_loc($this->user->data['user_dateformat'], $row['user_lastvisit'] + (60 * 60 * ($my_time_zone - (date('O')/100))));
+						$user_digest_last_sent = ($row['user_digest_last_sent'] == 0) ? $this->language->lang('DIGESTS_NO_DIGESTS_SENT') : $this->helper->date_loc($this->user->data['user_dateformat'], $row['user_digest_last_sent'] + (60 * 60 * ($my_time_zone - (date('O')/100))));
 					}
 
 					$this->template->assign_block_vars('digests_edit_subscribers', array(

@@ -37,6 +37,8 @@ $lang = array_merge($lang, array(
 	'DIGESTS_COUNT_LIMIT_EXPLAIN'		=> 'Enter a number greater than zero if you want to limit the number of posts in the digest.',
 	'DIGESTS_DAILY'						=> 'Daily',
 	'DIGESTS_DATE'						=> 'Date',
+	'DIGESTS_DAYS_LONG'					=> 'Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
+	'DIGESTS_DAYS_SHORT'				=> 'Mon,Tue,Wed,Thu,Fri,Sat,Sun',
 	'DIGESTS_DELIMITER'					=> ' :: ', // Used to help show the hierarchy of forum names from the index on down
 	'DIGESTS_DISABLED_MESSAGE'			=> 'To enable fields, select Basics and select a digest type',
 	'DIGESTS_DISCLAIMER'				=> 'This digest is being sent to registered members of <a href="%1$s">%2$s</a> forums. You can change or delete your subscription from the forum&apos;s <a href="%1$sucp.%2$s">User Control Panel</a>. If you have questions or feedback on your digests please send it to the <a href="mailto:%1$s?subject=Digests">%2$s webmaster</a>.',
@@ -75,6 +77,8 @@ $lang = array_merge($lang, array(
 	'DIGESTS_MIN_SIZE'					=> 'Minimum words required in post for the post to appear in a digest',
 	'DIGESTS_MIN_SIZE_EXPLAIN'			=> 'If you leave this blank or set to 0, posts with text of any number of words are included.',
 	'DIGESTS_MONTHLY'					=> 'Monthly',
+	'DIGESTS_MONTHS_LONG'				=> 'January,February,March,April,May,June,July,August,September,October,November,December',
+	'DIGESTS_MONTHS_SHORT'				=> 'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec',
 	'DIGESTS_NEW'						=> 'New',
 	'DIGESTS_NEW_POSTS_ONLY'			=> 'Show new posts only',
 	'DIGESTS_NEW_POSTS_ONLY_EXPLAIN'	=> 'This will filter out any posts posted prior to the date and time you last visited this board. If you visit the board frequently and read most of the posts, this will keep redundant posts from appearing in your digest. It may also mean that you will miss some posts in forums that you did not read.',

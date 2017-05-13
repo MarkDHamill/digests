@@ -841,7 +841,7 @@ class digests extends \phpbb\cron\task\base
 			// because the messenger class is too dumb to do more than basic templating. Note: most language variables are handled automatically by the templating
 			// system.
 
-			$publish_date = (substr($row['user_lang'],0,2) == 'en') ? $this->language->lang('DIGESTS_PUBLISH_DATE', $row['username'], date(str_replace('|','',$row['user_dateformat']), $recipient_time)) : $this->language->lang('DIGESTS_PUBLISH_DATE', $row['username'], strftime($this->helper->dateFormatToStrftime($row['user_dateformat'], $row['user_lang']), $recipient_time));
+			$publish_date = $this->language->lang('DIGESTS_PUBLISH_DATE', $row['username'], $this->helper->date_loc($row['user_dateformat'], $recipient_time));
 
 			$html_messenger->assign_vars(array(
 				'S_CONTENT_DIRECTION'					=> $this->language->lang('DIRECTION'),
@@ -1295,7 +1295,7 @@ class digests extends \phpbb\cron\task\base
 				$pm_time_offset = ((int) $this->helper->make_tz_offset($user_row['user_timezone']) - (int) $this->server_timezone) * 60 * 60;
 				$recipient_time = $pm_row['message_time'] + $pm_time_offset;
 
-				$message_datetime = (substr($user_row['user_lang'],0,2) == 'en') ? date(str_replace('|', '', $user_row['user_dateformat']), $recipient_time) : strftime($this->helper->dateFormatToStrftime($user_row['user_dateformat'], $user_row['user_lang']), $recipient_time);
+				$message_datetime = $this->helper->date_loc($user_row['user_dateformat'], $recipient_time);
 
 				// Add to table of contents array
 				$this->toc['pms'][$this->toc_pm_count]['message_id'] = html_entity_decode($pm_row['msg_id']);
@@ -1919,7 +1919,7 @@ class digests extends \phpbb\cron\task\base
 				$post_time_offset = ((int) $this->helper->make_tz_offset($user_row['user_timezone']) - (int) $this->server_timezone) * 60 * 60;
 				$recipient_time = $post_row['post_time'] + $post_time_offset;
 
-				$post_datetime = (substr($user_row['user_lang'],0,2) == 'en') ? date(str_replace('|', '', $user_row['user_dateformat']), $recipient_time) : strftime($this->helper->dateFormatToStrftime($user_row['user_dateformat'], $user_row['user_lang']), $recipient_time);
+				$post_datetime = $this->helper->date_loc($user_row['user_dateformat'], $recipient_time);
 
 				// Add to table of contents array
 				$this->toc['posts'][$this->toc_post_count]['post_id'] = html_entity_decode($post_row['post_id']);

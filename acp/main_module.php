@@ -459,18 +459,8 @@ class main_module
 
 					$all_by_default = (sizeof($subscribed_forums) == 0) ? true : false;
 
-					// Certain dates must be translated so months and days of week are translated in the proper language
-					// which may not be English.
-					if (substr($this->user->data['user_lang'],0,2) == 'en')
-					{
-						$user_lastvisit = ($row['user_lastvisit'] == 0) ? $this->language->lang('DIGESTS_NEVER_VISITED') : date($this->user->data['user_dateformat'], $row['user_lastvisit'] + (60 * 60 * ($my_time_zone - (date('O')/100))));
-						$user_digest_last_sent = ($row['user_digest_last_sent'] == 0) ? $this->language->lang('DIGESTS_NO_DIGESTS_SENT') : date($this->user->data['user_dateformat'], $row['user_digest_last_sent'] + (60 * 60 * ($my_time_zone - (date('O')/100))));
-					}
-					else
-					{
-						$user_lastvisit = ($row['user_lastvisit'] == 0) ? $this->language->lang('DIGESTS_NEVER_VISITED') : strftime($this->helper->dateFormatToStrftime($this->user->data['user_dateformat'], $this->user->data['user_lang']), $row['user_lastvisit'] + (60 * 60 * ($my_time_zone - (date('O')/100))));
-						$user_digest_last_sent = ($row['user_digest_last_sent'] == 0) ? $this->language->lang('DIGESTS_NO_DIGESTS_SENT') : strftime($this->helper->dateFormatToStrftime($this->user->data['user_dateformat'], $this->user->data['user_lang']), $row['user_digest_last_sent'] + (60 * 60 * ($my_time_zone - (date('O')/100))));
-					}
+					$user_lastvisit = ($row['user_lastvisit'] == 0) ? $this->language->lang('DIGESTS_NEVER_VISITED') : $this->user->format_date($row['user_lastvisit'] + (60 * 60 * ($my_time_zone - (date('O')/100))), $this->user->data['user_dateformat']);
+					$user_digest_last_sent = ($row['user_digest_last_sent'] == 0) ? $this->language->lang('DIGESTS_NO_DIGESTS_SENT') : $this->user->format_date($row['user_digest_last_sent'] + (60 * 60 * ($my_time_zone - (date('O')/100))), $this->user->data['user_dateformat']);
 
 					$this->template->assign_block_vars('digests_edit_subscribers', array(
 						'1ST'								=> ($row['user_digest_filter_type'] == constants::DIGESTS_FIRST),
@@ -1347,7 +1337,7 @@ class main_module
 						USERS_TABLE	=> 'u',
 					),
 				
-					'WHERE'		=> $balance_sql . $for_hours_sql . ' AND user_type <> ' . USER_IGNORE . '
+					'WHERE'		=> $balance_sql . $for_hours_sql . ' AND ' . $this->db->sql_in_set('user_type', array(USER_NORMAL, USER_FOUNDER)) . '
 						AND ' . $this->db->sql_in_set('user_digest_send_hour_gmt', $oversubscribed_hours),
 				
 					'ORDER_BY'	=> '1, 2',

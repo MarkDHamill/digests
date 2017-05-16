@@ -82,7 +82,7 @@ function inStack(name) {
 	<!-- ELSE -->
 
 	<dl>
-		<dt><label for="{options.KEY}">{options.TITLE}{L_COLON}</label><!-- IF options.S_EXPLAIN --><br /><span>{options.TITLE_EXPLAIN}</span><!-- ENDIF --></dt>
+		<dt><label for="{options.KEY}">{options.TITLE}{L_COLON}</label><!-- IF options.S_EXPLAIN --><br><span>{options.TITLE_EXPLAIN}</span><!-- ENDIF --></dt>
 		<dd>{options.CONTENT}</dd>
 	</dl>
 
@@ -100,7 +100,7 @@ function inStack(name) {
 
 <!-- IF S_EDIT_SUBSCRIBERS -->
     	<dl>
-        	<dt style="border-right-style:none"><label for="member">{L_DIGESTS_SEARCH_FOR_MEMBER}{L_COLON}</label><br />{L_DIGESTS_SEARCH_FOR_MEMBER_EXPLAIN}</dt>
+        	<dt style="border-right-style:none"><label for="member">{L_DIGESTS_SEARCH_FOR_MEMBER}{L_COLON}</label><br>{L_DIGESTS_SEARCH_FOR_MEMBER_EXPLAIN}</dt>
         	<dd style="text-align:left;"><input type="text" id="member" name="member" size="30" maxlength="255" value="{MEMBER}" onchange="addToStack(this.name);" /></dd>
         </dl>
         <hr />
@@ -119,8 +119,8 @@ function inStack(name) {
                 <th style="text-align:center;">{L_DIGESTS_FORMAT_STYLING}</th>
                 <th style="text-align:center;">{L_DIGESTS_HOUR_SENT}</th>
                 <th style="text-align:center;">{L_DIGESTS_HAS_UNSUBSCRIBED}</th>
-                <th style="text-align:center;">{L_LAST_VISIT}<br />{L_DIGESTS_BASED_ON}</th>
-                <th style="text-align:center;">{L_DIGESTS_LAST_SENT}<br />{L_DIGESTS_BASED_ON}</th>
+                <th style="text-align:center;">{L_LAST_VISIT}<br>{L_DIGESTS_BASED_ON}</th>
+                <th style="text-align:center;">{L_DIGESTS_LAST_SENT}<br>{L_DIGESTS_BASED_ON}</th>
             </tr>
         </thead>
         <tbody>
@@ -188,9 +188,9 @@ function inStack(name) {
                             </select></dd>
                         </dl>
                         <dl>
-                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-all_forums">{L_DIGESTS_SELECT_FORUMS}{L_COLON}</label><br />{L_DIGESTS_SELECT_FORUMS_ADMIN_EXPLAIN}</dt>
+                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-all_forums">{L_DIGESTS_SELECT_FORUMS}{L_COLON}</label><br>{L_DIGESTS_SELECT_FORUMS_ADMIN_EXPLAIN}</dt>
                             <dd>
-                                <input type="checkbox" name="user-{digests_edit_subscribers.USER_ID}-all_forums" id="user-{digests_edit_subscribers.USER_ID}-all_forums" <!-- IF digests_edit_subscribers.S_ALL_BY_DEFAULT --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> <label for="user-{digests_edit_subscribers.USER_ID}-all_forums"><b>{L_DIGESTS_ALL_ALLOWED_FORUMS}</b></label><br /><br />
+                                <input type="checkbox" name="user-{digests_edit_subscribers.USER_ID}-all_forums" id="user-{digests_edit_subscribers.USER_ID}-all_forums" <!-- IF digests_edit_subscribers.S_ALL_BY_DEFAULT --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> <label for="user-{digests_edit_subscribers.USER_ID}-all_forums"><b>{L_DIGESTS_ALL_ALLOWED_FORUMS}</b></label><br><br>
                                 <div id="user-{digests_edit_subscribers.USER_ID}-div_0">
                                     <!-- BEGIN forums -->
                                     <!-- IF digests_edit_subscribers.forums.S_DIV_OPEN -->
@@ -198,10 +198,10 @@ function inStack(name) {
                                     <!-- ENDIF -->
                                     <!-- IF digests_edit_subscribers.forums.S_PRINT -->
                                         <!-- IF digests_edit_subscribers.forums.S_IS_FORUM -->
-                                        <input type="checkbox" name="user-{digests_edit_subscribers.USER_ID}-{digests_edit_subscribers.forums.FORUM_NAME}" id="user-{digests_edit_subscribers.USER_ID}-{digests_edit_subscribers.forums.FORUM_NAME}"<!-- IF digests_edit_subscribers.forums.S_FORUM_SUBSCRIBED --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);"/> <label for="user-{digests_edit_subscribers.USER_ID}-{digests_edit_subscribers.forums.FORUM_NAME}"><span style="font-size:.8em;">{digests_edit_subscribers.forums.FORUM_LABEL}</span></label><br />
+                                        <input type="checkbox" name="user-{digests_edit_subscribers.USER_ID}-{digests_edit_subscribers.forums.FORUM_NAME}" id="user-{digests_edit_subscribers.USER_ID}-{digests_edit_subscribers.forums.FORUM_NAME}"<!-- IF digests_edit_subscribers.forums.S_FORUM_SUBSCRIBED --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);"/> <label for="user-{digests_edit_subscribers.USER_ID}-{digests_edit_subscribers.forums.FORUM_NAME}"><span style="font-size:.8em;">{digests_edit_subscribers.forums.FORUM_LABEL}</span></label><br>
                                         <!-- ENDIF -->
                                         <!-- IF not digests_edit_subscribers.forums.S_IS_FORUM -->
-                                        <span style="font-size:.8em;"><i>{digests_edit_subscribers.forums.FORUM_LABEL}</i></span><br />
+                                        <span style="font-size:.8em;"><i>{digests_edit_subscribers.forums.FORUM_LABEL}</i></span><br>
                                         <!-- ENDIF -->
                                     <!-- ENDIF -->
                                     <!-- IF digests_edit_subscribers.forums.S_DIV_CLOSE -->

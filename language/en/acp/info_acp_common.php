@@ -92,6 +92,7 @@ $lang = array_merge($lang, array(
 	'LOG_CONFIG_DIGESTS_SIMULATION_DATE_TIME'				=> '<strong>Administrator chose to create digests for %1$s at %2$d:00 board time.</strong>',
 	'LOG_CONFIG_DIGESTS_SORT_BY_ERROR'						=> '<strong>Digests mailer was called with an invalid user_digest_sortby = %1$s for %2$s</strong>',
 	'LOG_CONFIG_DIGESTS_SYSTEM_CRON_RUN'					=> '<strong>System cron run of the mailer invoked</strong>',
+	'LOG_CONFIG_DIGESTS_TEST'								=> '<strong>%s</strong>',	// Used for general troubleshooting, please keep as is in all translations.
 	'LOG_CONFIG_DIGESTS_TIMEZONE_ERROR'						=> '<strong>The user_timezone "%1$s" for username "%2$s" is invalid. Assumed a timezone of "%3$s". Please ask user to set a proper timezone in the User Control Panel. See http://php.net/manual/en/timezones.php for a list of valid timezones.</strong>',
 	'LOG_CONFIG_DIGESTS_USER_DEFAULTS'						=> '<strong>Altered digest user default settings</strong>',
 ));

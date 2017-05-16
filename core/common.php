@@ -72,53 +72,11 @@ class common
 		return ($show_sign && $timeOffset >= 0) ? '+' . $timeOffset : $timeOffset;
 	}
 
-	public function dateFormatToStrftime($dateFormat, $lang="en") {
-
-		/*
-		* Convert a date format to a strftime format
-		*
-		* Timezone conversion is done for unix. Windows users must exchange %z and %Z.
-		*
-		* Unsupported date formats : t, L, B, u, e, I, P, Z, c, r
-		* Unsupported strftime formats : %U, %W, %C, %g, %r, %R, %T, %X, %c, %D, %F, %x
-		*
-		* @param string $dateFormat a date format
-		* @param strong $lang a language, like en or fr_FR
-		* @return string
-		*/
-		$caracs = array(
-			// Day - no strf eq : S
-			'd' => '%d', 'D' => '%a', 'j' => '%e', 'l' => '%A', 'N' => '%u', 'w' => '%w', 'z' => '%j', 'S' => '',
-			// Week - no date eq : %U, %W
-			'W' => '%V',
-			// Month - no strf eq : t
-			'F' => '%B', 'm' => '%m', 'M' => '%b', 'n' => '%m',
-			// Year - no strf eq : L; no date eq : %C, %g
-			'o' => '%G', 'Y' => '%Y', 'y' => '%y',
-			// Time - no strf eq : B, u; no date eq : %r, %R, %T, %X
-			'a' => '%P', 'A' => '%p', 'g' => '%l', 'h' => '%I', 'H' => '%H', 'i' => '%M', 's' => '%S', 'G' => '%k',
-			// Timezone - no strf eq : e, I, P, Z
-			'O' => '%z', 'T' => '%Z',
-			// Full Date / Time - no strf eq : c, r; no date eq : %c, %D, %F, %x
-			'U' => '%s'
-		);
-
-		if (strlen($lang) == 2)
-		{
-			$locale = trim($lang) . '_' . strtoupper($lang);
-		}
-		else
-		{
-			$locale = $lang;
-		}
-		setlocale(LC_ALL, $locale);
-		return strtr((string)$dateFormat, $caracs);
-	}
-
 	private function validateDate($date)
 	{
-		$d = \DateTime::createFromFormat('Y-m-d', $date);
-		return $d && $d->format('Y-m-d') === $date;
+		// This functions checks to see if a date format (like America/New_York) is valid. If not, it returns false.
+		$d = \DateTime::createFromFormat('e', $date);
+		return $d && $d->format('e') === $date;
 	}
 
 }

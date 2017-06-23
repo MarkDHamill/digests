@@ -286,9 +286,11 @@ class digests extends \phpbb\cron\task\base
 		}
 		if ($this->system_cron)
 		{
-			if (!in_array($this->path_prefix . 'includes/functions_content.' . $this->phpEx, get_included_files()))
+			$functions_content_file = realpath($this->path_prefix . "/includes/functions_content." . $this->phpEx);
+				
+			if (!in_array($functions_content_file, get_included_files()))
 			{
-				 include($this->path_prefix . 'includes/functions_content.' . $this->phpEx);	// Otherwise censor_text won't be found.
+				 include($functions_content_file);	// Otherwise censor_text won't be found.
 			}
 			$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_SYSTEM_CRON_RUN');
 		}
@@ -549,6 +551,11 @@ class digests extends \phpbb\cron\task\base
 		{
 			// Each traverse through this loop sends out exactly one digest
 
+			// Emulate basic user's settings
+			$this->user->data['user_timezone'] = $row['user_timezone'];
+			$this->user->data['user_dateformat'] = $row['user_dateformat'];
+			$this->user->timezone = new \DateTimeZone($row['user_timezone']);
+			
 			// While it shouldn't happen, we need a circuit breaker to prevent duplicate digests from going out
 			// for the same hour for the same subscriber. So if the day and hour for the last time the digest was sent
 			// for this user is the same as the current day and hour, presumably the subscriber has already received a
@@ -662,7 +669,7 @@ class digests extends \phpbb\cron\task\base
 					$format = $this->language->lang('DIGESTS_FORMAT_TEXT');
 					$html_messenger->template('digests_text', '', $this->email_templates_path);
 					$is_html = false;
-					$disclaimer = str_replace('&rsquo;', "'", strip_tags($this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->board_url, $this->phpEx, $this->config['board_contact'], $this->config['sitename'])));
+					$disclaimer = str_replace('&rsquo;', "'", strip_tags($this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx, $this->config['board_contact'])));
 					$powered_by = $this->config['phpbbservices_digests_host'];
 					$this->layout_with_html_tables = false;
 				break;
@@ -671,7 +678,7 @@ class digests extends \phpbb\cron\task\base
 					$format = $this->language->lang('DIGESTS_FORMAT_PLAIN');
 					$html_messenger->template('digests_plain_html', '', $this->email_templates_path);
 					$is_html = true;
-					$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->board_url, $this->phpEx, $this->config['board_contact'], $this->config['sitename']);
+					$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx, $this->config['board_contact']);
 					$powered_by = sprintf("<a href=\"%s\">%s</a>", $this->config['phpbbservices_digests_page_url'], $this->config['phpbbservices_digests_host']);
 					$this->layout_with_html_tables = false;
 				break;
@@ -680,7 +687,7 @@ class digests extends \phpbb\cron\task\base
 					$format = $this->language->lang('DIGESTS_FORMAT_PLAIN_CLASSIC');
 					$html_messenger->template('digests_plain_html', '', $this->email_templates_path);
 					$is_html = true;
-					$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->board_url, $this->phpEx, $this->config['board_contact'], $this->config['sitename']);
+					$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx, $this->config['board_contact']);
 					$powered_by = sprintf("<a href=\"%s\">%s</a>", $this->config['phpbbservices_digests_page_url'], $this->config['phpbbservices_digests_host']);
 					$this->layout_with_html_tables = true;
 				break;
@@ -689,7 +696,7 @@ class digests extends \phpbb\cron\task\base
 					$format = $this->language->lang('DIGESTS_FORMAT_HTML');
 					$html_messenger->template('digests_html', '', $this->email_templates_path);
 					$is_html = true;
-					$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->board_url, $this->phpEx, $this->config['board_contact'], $this->config['sitename']);
+					$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx, $this->config['board_contact']);
 					$powered_by = sprintf("<a href=\"%s\">%s</a>", $this->config['phpbbservices_digests_page_url'], $this->config['phpbbservices_digests_host']);
 					$this->layout_with_html_tables = false;
 				break;
@@ -698,7 +705,7 @@ class digests extends \phpbb\cron\task\base
 					$format = $this->language->lang('DIGESTS_FORMAT_HTML_CLASSIC');
 					$html_messenger->template('digests_html', '', $this->email_templates_path);
 					$is_html = true;
-					$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->board_url, $this->phpEx, $this->config['board_contact'], $this->config['sitename']);
+					$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx, $this->config['board_contact']);
 					$powered_by = sprintf("<a href=\"%s\">%s</a>", $this->config['phpbbservices_digests_page_url'], $this->config['phpbbservices_digests_host']);
 					$this->layout_with_html_tables = true;
 				break;

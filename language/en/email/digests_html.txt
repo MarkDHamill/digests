@@ -17,6 +17,7 @@
 		h1 { color:#000000; margin-bottom: 20px; };
 		h1,h3,p,div { margin-top:10px; margin-bottom:10px; clear: both; float: left; }
 		h4 { clear: both; float: left; }
+		.newline { clear: both; float: none; }
 		ol,ul { list-style-position: inside; }
 		.post { padding-left: 5px; border-radius: 0px; }
 		.postbody { width: 100%; }
@@ -52,6 +53,7 @@
 		
 		{DIGESTS_CONTENT}
 		<br />
+		<div class="newline">
 		<hr />
 		<h3>{S_DIGESTS_YOUR_DIGEST_OPTIONS}</h3>
 		<h4>{L_UCP_DIGESTS_BASICS_OPTIONS}{L_COLON}</h4>
@@ -85,8 +87,7 @@
 			{L_DIGESTS_BLOCK_IMAGES}{L_COLON} <!-- IF S_DIGESTS_BLOCK_IMAGES -->{L_YES}<!-- ELSE-->{L_NO}<!-- ENDIF--><br />
 			{L_DIGESTS_TOC}{L_COLON} <!-- IF S_DIGESTS_TOC -->{L_YES}<!-- ELSE-->{L_NO}<!-- ENDIF-->
 		</div></blockquote>
-		<div class="author">
-		<hr />
+		<hr class="newline" />
 			<p><span class="copyright"><em>{S_DIGESTS_PUBLISH_DATE}</em></span></p>
 			<p>{S_DIGESTS_DISCLAIMER}</p>
 			<p><span class="copyright">{L_DIGESTS_POWERED_BY_TEXT} {S_DIGESTS_POWERED_BY}{S_DIGESTS_TRANSLATOR}</span></p>

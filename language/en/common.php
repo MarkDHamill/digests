@@ -40,7 +40,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_DATE'						=> 'Date',
 	'DIGESTS_DELIMITER'					=> ' :: ', // Used to help show the hierarchy of forum names from the index on down
 	'DIGESTS_DISABLED_MESSAGE'			=> 'To enable fields, select Basics and select a digest type',
-	'DIGESTS_DISCLAIMER'				=> 'This digest is being sent to registered members of <a href="%1$s">%2$s</a> forums. You can change or delete your subscription from the forum&rsquo;s <a href="%1$sucp.%2$s">User Control Panel</a>. If you have questions or feedback on your digests please send it to the <a href="mailto:%1$s?subject=Digests">%2$s webmaster</a>.',
+	'DIGESTS_DISCLAIMER'				=> 'This digest is being sent to registered members of <a href="%1$s">%2$s</a> forums. You can change or delete your subscription from the forum&rsquo;s <a href="%1$sucp.%3$s">User Control Panel</a>. If you have questions or feedback on your digests please send it to the <a href="mailto:%4$s?subject=Digests">%2$s webmaster</a>.',
 	'DIGESTS_EXPLANATION'				=> 'Digests are email summaries of posts that are sent to you periodically. Digests can be sent daily, weekly or monthly at an hour of the day you select. You can specify those particular forums for which you want posts or by default you can elect to receive all posts for all forums for which you can read. You can cancel your digest subscription at any time by simply coming back to this page. Most users find digests to be very useful. We encourage you to give them a try!',
 	'DIGESTS_FILTER_ERROR'				=> 'Digests mailer was called with an invalid user_digest_filter_type = %s',
 	'DIGESTS_FILTER_FOES'				=> 'Remove posts from my foes',

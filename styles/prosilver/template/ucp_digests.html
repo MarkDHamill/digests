@@ -38,26 +38,26 @@ var sizeErrorRange = "{LA_DIGESTS_SIZE_ERROR}";
 		<fieldset>
 			<!-- IF S_DIGESTS_BASICS -->
 			<dl>
-				<dt><label>{L_DIGESTS_FREQUENCY}{L_COLON}</label><br /><span>{L_DIGESTS_FREQUENCY_EXPLAIN}</span></dt>
+				<dt><label>{L_DIGESTS_FREQUENCY}{L_COLON}</label><br><span>{L_DIGESTS_FREQUENCY_EXPLAIN}</span></dt>
 				<dd>
-					<label for="none"><input type="radio" name="digest_type" id="none" style="margin-top: 3px;" value="NONE"<!-- IF S_DIGESTS_NONE_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_DIGESTS_NONE}</label><br />
-					<label for="daily"><input type="radio" name="digest_type" id="daily" style="margin-top: 3px;" value="DAY"<!-- IF S_DIGESTS_DAY_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_DIGESTS_DAILY}</label><br />
-					<label for="week"><input type="radio" name="digest_type" id="week" style="margin-top: 3px;" value="WEEK"<!-- IF S_DIGESTS_WEEK_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_DIGESTS_WEEKLY}</label><br />
+					<label for="none"><input type="radio" name="digest_type" id="none" style="margin-top: 3px;" value="NONE"<!-- IF S_DIGESTS_NONE_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_DIGESTS_NONE}</label><br>
+					<label for="daily"><input type="radio" name="digest_type" id="daily" style="margin-top: 3px;" value="DAY"<!-- IF S_DIGESTS_DAY_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_DIGESTS_DAILY}</label><br>
+					<label for="week"><input type="radio" name="digest_type" id="week" style="margin-top: 3px;" value="WEEK"<!-- IF S_DIGESTS_WEEK_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_DIGESTS_WEEKLY}</label><br>
 					<label for="month"><input type="radio" name="digest_type" id="month" style="margin-top: 3px;" value="MNTH"<!-- IF S_DIGESTS_MONTH_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_DIGESTS_MONTHLY}</label>
 				</dd>
 			</dl>
 			<dl>
-				<dt><label>{L_DIGESTS_FORMAT_STYLING}{L_COLON}</label><br /><span>{L_DIGESTS_FORMAT_STYLING_EXPLAIN}</span></dt>
+				<dt><label>{L_DIGESTS_FORMAT_STYLING}{L_COLON}</label><br><span>{L_DIGESTS_FORMAT_STYLING_EXPLAIN}</span></dt>
 				<dd>
-					<label for="style1" title="{L_DIGESTS_FORMAT_HTML_EXPLAIN}"><input type="radio" name="style" id="style1" style="margin-top: 3px;" value="{L_DIGESTS_HTML_VALUE}"<!-- IF S_DIGESTS_HTML_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_DIGESTS_FORMAT_HTML}</label><br />
-					<label for="style4" title="{L_DIGESTS_FORMAT_HTML_CLASSIC_EXPLAIN}"><input type="radio" name="style" id="style4" style="margin-top: 3px;" value="{L_DIGESTS_HTML_CLASSIC_VALUE}"<!-- IF S_DIGESTS_HTML_CLASSIC_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_DIGESTS_FORMAT_HTML_CLASSIC}</label><br />
-					<label for="style2" title="{L_DIGESTS_FORMAT_PLAIN_EXPLAIN}"><input type="radio" name="style" id="style2" style="margin-top: 3px;" value="{L_DIGESTS_PLAIN_VALUE}"<!-- IF S_DIGESTS_PLAIN_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_DIGESTS_FORMAT_PLAIN}</label><br />
-					<label for="style5" title="{L_DIGESTS_FORMAT_PLAIN_CLASSIC_EXPLAIN}"><input type="radio" name="style" id="style5" style="margin-top: 3px;" value="{L_DIGESTS_PLAIN_CLASSIC_VALUE}"<!-- IF S_DIGESTS_PLAIN_CLASSIC_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_DIGESTS_FORMAT_PLAIN_CLASSIC}</label><br />
+					<label for="style1" title="{L_DIGESTS_FORMAT_HTML_EXPLAIN}"><input type="radio" name="style" id="style1" style="margin-top: 3px;" value="{L_DIGESTS_HTML_VALUE}"<!-- IF S_DIGESTS_HTML_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_DIGESTS_FORMAT_HTML}</label><br>
+					<label for="style4" title="{L_DIGESTS_FORMAT_HTML_CLASSIC_EXPLAIN}"><input type="radio" name="style" id="style4" style="margin-top: 3px;" value="{L_DIGESTS_HTML_CLASSIC_VALUE}"<!-- IF S_DIGESTS_HTML_CLASSIC_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_DIGESTS_FORMAT_HTML_CLASSIC}</label><br>
+					<label for="style2" title="{L_DIGESTS_FORMAT_PLAIN_EXPLAIN}"><input type="radio" name="style" id="style2" style="margin-top: 3px;" value="{L_DIGESTS_PLAIN_VALUE}"<!-- IF S_DIGESTS_PLAIN_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_DIGESTS_FORMAT_PLAIN}</label><br>
+					<label for="style5" title="{L_DIGESTS_FORMAT_PLAIN_CLASSIC_EXPLAIN}"><input type="radio" name="style" id="style5" style="margin-top: 3px;" value="{L_DIGESTS_PLAIN_CLASSIC_VALUE}"<!-- IF S_DIGESTS_PLAIN_CLASSIC_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_DIGESTS_FORMAT_PLAIN_CLASSIC}</label><br>
 					<label for="style3" title="{L_DIGESTS_FORMAT_TEXT_EXPLAIN}"><input type="radio" name="style" id="style3" style="margin-top: 3px;" value="{L_DIGESTS_TEXT_VALUE}"<!-- IF S_DIGESTS_TEXT_CHECKED --> checked="checked"<!-- ENDIF --> /> {L_DIGESTS_FORMAT_TEXT}</label>
 				</dd>
 			</dl>
 			<dl>
-				<dt><label for="send_hour">{L_DIGESTS_SEND_HOUR}{L_COLON}</label><br /><span>{L_DIGESTS_SEND_HOUR_EXPLAIN}</span></dt>
+				<dt><label for="send_hour">{L_DIGESTS_SEND_HOUR}{L_COLON}</label><br><span>{L_DIGESTS_SEND_HOUR_EXPLAIN}</span></dt>
 				<dd>
 					<select name="send_hour" id="send_hour">
 						<!-- BEGIN hour_loop -->
@@ -82,9 +82,9 @@ var sizeErrorRange = "{LA_DIGESTS_SIZE_ERROR}";
 			</dd>
 			</dl>
 			<dl>
-				<dt><label for="all_forums">{L_DIGESTS_SELECT_FORUMS}{L_COLON}</label><br /><span>{L_DIGESTS_SELECT_FORUMS_EXPLAIN}</span></dt>
+				<dt><label for="all_forums">{L_DIGESTS_SELECT_FORUMS}{L_COLON}</label><br><span>{L_DIGESTS_SELECT_FORUMS_EXPLAIN}</span></dt>
 				<dd>
-					<input type="checkbox" name="all_forums" id="all_forums" <!-- IF S_DIGESTS_ALL_BY_DEFAULT --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_ALL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> <label for="all_forums"><b>{L_DIGESTS_ALL_FORUMS}</b></label><br /><br />
+					<input type="checkbox" name="all_forums" id="all_forums" <!-- IF S_DIGESTS_ALL_BY_DEFAULT --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_ALL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> <label for="all_forums"><b>{L_DIGESTS_ALL_FORUMS}</b></label><br><br>
 					<div id="div_0">
 						<!-- BEGIN forums -->
 						<!-- IF forums.S_DIGESTS_DIV_OPEN -->
@@ -92,10 +92,10 @@ var sizeErrorRange = "{LA_DIGESTS_SIZE_ERROR}";
 						<!-- ENDIF -->
 						<!-- IF forums.S_DIGESTS_PRINT -->
 							<!-- IF forums.S_DIGESTS_IS_FORUM -->
-							<input type="checkbox" name="{forums.FORUM_NAME}" id="{forums.FORUM_NAME}"<!-- IF forums.S_DIGESTS_FORUM_SUBSCRIBED --> checked="checked"<!-- ENDIF --><!-- IF forums.S_DIGESTS_FORUM_DISABLED --> disabled="disabled"<!-- ENDIF --> /> <label for="{forums.FORUM_NAME}">{forums.FORUM_PREFIX}{forums.FORUM_LABEL}{forums.FORUM_SUFFIX}</label><br />
+							<input type="checkbox" name="{forums.FORUM_NAME}" id="{forums.FORUM_NAME}"<!-- IF forums.S_DIGESTS_FORUM_SUBSCRIBED --> checked="checked"<!-- ENDIF --><!-- IF forums.S_DIGESTS_FORUM_DISABLED --> disabled="disabled"<!-- ENDIF --> /> <label for="{forums.FORUM_NAME}">{forums.FORUM_PREFIX}{forums.FORUM_LABEL}{forums.FORUM_SUFFIX}</label><br>
 							<!-- ENDIF -->
 							<!-- IF not forums.S_DIGESTS_IS_FORUM -->
-							<i>{forums.FORUM_LABEL}</i><br />
+							<i>{forums.FORUM_LABEL}</i><br>
 							<!-- ENDIF -->
 						<!-- ENDIF -->
 						<!-- IF forums.S_DIGESTS_DIV_CLOSE -->
@@ -110,17 +110,17 @@ var sizeErrorRange = "{LA_DIGESTS_SIZE_ERROR}";
 			<!-- IF S_DIGESTS_POST_FILTERS -->
 			{DISABLED_MESSAGE}
 			<dl>
-				<dt><label for="count_limit">{L_DIGESTS_COUNT_LIMIT}{L_COLON}</label><br /><span>{L_DIGESTS_COUNT_LIMIT_EXPLAIN}</span></dt>
+				<dt><label for="count_limit">{L_DIGESTS_COUNT_LIMIT}{L_COLON}</label><br><span>{L_DIGESTS_COUNT_LIMIT_EXPLAIN}</span></dt>
 				<dd><input type="text" class="inputbox autowidth" size="5" maxlength="5" name="count_limit" id="count_limit" value="{S_DIGESTS_MAX_ITEMS}"<!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> />
 				</dd>
 			</dl>
 			<dl>
-				<dt><label for="min_word_size">{L_DIGESTS_MIN_SIZE}{L_COLON}</label><br /><span>{L_DIGESTS_MIN_SIZE_EXPLAIN}</span></dt>
+				<dt><label for="min_word_size">{L_DIGESTS_MIN_SIZE}{L_COLON}</label><br><span>{L_DIGESTS_MIN_SIZE_EXPLAIN}</span></dt>
 				<dd><input type="text" class="inputbox autowidth" size="4" maxlength="4" name="min_word_size" id="min_word_size" value="{S_DIGESTS_MIN_SIZE}"<!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> />
 				</dd>
 			</dl>
 			<dl>
-				<dt><label>{L_DIGESTS_NEW_POSTS_ONLY}{L_COLON}</label><br /><span>{L_DIGESTS_NEW_POSTS_ONLY_EXPLAIN}</span></dt>
+				<dt><label>{L_DIGESTS_NEW_POSTS_ONLY}{L_COLON}</label><br><span>{L_DIGESTS_NEW_POSTS_ONLY_EXPLAIN}</span></dt>
 				<dd>
 					<label for="new_posts1"><input type="radio" name="new_posts" id="new_posts1" value="1"<!-- IF S_DIGESTS_NEW_POSTS_ONLY_CHECKED_YES --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> {L_YES}</label> 
 					<label for="new_posts2"><input type="radio" name="new_posts" id="new_posts2" value="0"<!-- IF S_DIGESTS_NEW_POSTS_ONLY_CHECKED_NO --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> {L_NO}</label>
@@ -151,7 +151,7 @@ var sizeErrorRange = "{LA_DIGESTS_SIZE_ERROR}";
 			<!-- IF S_DIGESTS_ADDITIONAL_CRITERIA -->
 			{DISABLED_MESSAGE}
 			<dl>
-				<dt><label for="sort_by">{L_DIGESTS_SORT_BY}{L_COLON}</label><br /><span>{L_DIGESTS_SORT_BY_EXPLAIN}</span></dt>
+				<dt><label for="sort_by">{L_DIGESTS_SORT_BY}{L_COLON}</label><br><span>{L_DIGESTS_SORT_BY_EXPLAIN}</span></dt>
 				<dd>
 					<select name="sort_by" id="sort_by"<!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF -->>
 						<option value="board"<!-- IF S_DIGESTS_BOARD_SELECTED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_SORT_USER_ORDER}</option>
@@ -163,7 +163,7 @@ var sizeErrorRange = "{LA_DIGESTS_SIZE_ERROR}";
 				</dd>
 			</dl>
 			<dl>
-				<dt><label for="max_word_size">{L_DIGESTS_MAX_DISPLAY_WORDS}{L_COLON}</label><br /><span>{L_DIGESTS_MAX_DISPLAY_WORDS_EXPLAIN}</span></dt>
+				<dt><label for="max_word_size">{L_DIGESTS_MAX_DISPLAY_WORDS}{L_COLON}</label><br><span>{L_DIGESTS_MAX_DISPLAY_WORDS_EXPLAIN}</span></dt>
 					<dd><input type="text" class="inputbox autowidth" size="4" maxlength="4" name="max_word_size" id="max_word_size" value="{DIGESTS_MAX_SIZE}"<!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> &nbsp;<input type="checkbox" name="no_post_text" id="no_post_text"<!-- IF S_DIGESTS_NO_POST_TEXT_CHECKED --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> <label for="no_post_text">{L_DIGESTS_NO_POST_TEXT}</label>
 				</dd>
 			</dl>
@@ -175,14 +175,14 @@ var sizeErrorRange = "{LA_DIGESTS_SIZE_ERROR}";
 				</dd>
 			</dl>
 			<dl>
-				<dt><label>{L_DIGESTS_LASTVISIT_RESET}{L_COLON}</label><br /><span>{L_DIGESTS_LASTVISIT_RESET_EXPLAIN}</span></dt>
+				<dt><label>{L_DIGESTS_LASTVISIT_RESET}{L_COLON}</label><br><span>{L_DIGESTS_LASTVISIT_RESET_EXPLAIN}</span></dt>
 				<dd>
 					<label for="lastvisit1"><input type="radio" name="lastvisit" id="lastvisit1" value="1"<!-- IF S_DIGESTS_LASTVISIT_YES_CHECKED --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> {L_YES}</label> 
 					<label for="lastvisit2"><input type="radio" name="lastvisit" id="lastvisit2" value="0"<!-- IF S_DIGESTS_LASTVISIT_NO_CHECKED --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> {L_NO}</label>
 				</dd>
 			</dl>
 			<dl>
-				<dt><label>{L_DIGESTS_SHOW_ATTACHMENTS}{L_COLON}</label><br /><span>{L_DIGESTS_SHOW_ATTACHMENTS_EXPLAIN}</span></dt>
+				<dt><label>{L_DIGESTS_SHOW_ATTACHMENTS}{L_COLON}</label><br><span>{L_DIGESTS_SHOW_ATTACHMENTS_EXPLAIN}</span></dt>
 				<dd>
 					<label for="attachments1"><input type="radio" name="attachments" id="attachments1" value="1"<!-- IF S_DIGESTS_ATTACHMENTS_YES_CHECKED --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> {L_YES}</label> 
 					<label for="attachments2"><input type="radio" name="attachments" id="attachments2" value="0"<!-- IF S_DIGESTS_ATTACHMENTS_NO_CHECKED --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> {L_NO}</label>
@@ -190,7 +190,7 @@ var sizeErrorRange = "{LA_DIGESTS_SIZE_ERROR}";
 			</dl>
 			<!-- IF not S_DIGESTS_BLOCK_IMAGES -->
 			<dl>
-				<dt><label>{L_DIGESTS_BLOCK_IMAGES}{L_COLON}</label><br /><span>{L_DIGESTS_BLOCK_IMAGES_EXPLAIN}</span></dt>
+				<dt><label>{L_DIGESTS_BLOCK_IMAGES}{L_COLON}</label><br><span>{L_DIGESTS_BLOCK_IMAGES_EXPLAIN}</span></dt>
 				<dd>
 					<label for="blockimages1"><input type="radio" name="blockimages" id="blockimages1" value="1"<!-- IF S_DIGESTS_BLOCK_IMAGES_YES_CHECKED --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> {L_YES}</label> 
 					<label for="blockimages2"><input type="radio" name="blockimages" id="blockimages2" value="0"<!-- IF S_DIGESTS_BLOCK_IMAGES_NO_CHECKED --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> {L_NO}</label>
@@ -198,7 +198,7 @@ var sizeErrorRange = "{LA_DIGESTS_SIZE_ERROR}";
 			</dl>
 			<!-- ENDIF -->
 			<dl>
-				<dt><label>{L_DIGESTS_TOC}{L_COLON}</label><br /><span>{L_DIGESTS_TOC_EXPLAIN}</span></dt>
+				<dt><label>{L_DIGESTS_TOC}{L_COLON}</label><br><span>{L_DIGESTS_TOC_EXPLAIN}</span></dt>
 				<dd>
 					<label for="toc1"><input type="radio" name="toc" id="toc1" value="1"<!-- IF S_DIGESTS_TOC_YES_CHECKED --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> {L_YES}</label> 
 					<label for="toc2"><input type="radio" name="toc" id="toc2" value="0"<!-- IF S_DIGESTS_TOC_NO_CHECKED --> checked="checked"<!-- ENDIF --><!-- IF S_DIGESTS_CONTROL_DISABLED --> disabled="disabled"<!-- ENDIF --> /> {L_NO}</label>

@@ -21,7 +21,11 @@ class html_messenger extends \messenger
 
 	/**
 	* Send the mail out to the recipients set previously in var $this->addresses
+	*
+	* $is_html 		true if you want HTML email headers because the content contains HTML, false assumes content is text
+	* $is_digest	true if sending a digest
 	*/
+
 	function send($method = NOTIFY_EMAIL, $break = false, $is_html = false, $is_digest = false)
 	{
 		global $config, $user;
@@ -29,7 +33,7 @@ class html_messenger extends \messenger
 		// We add some standard variables we always use, no need to specify them always
 		$this->assign_vars(array(
 			'U_BOARD'	=> generate_board_url(),
-			'EMAIL_SIG'	=> str_replace('<br />', "\n", "-- \n" . htmlspecialchars_decode($config['board_email_sig'])),
+			'EMAIL_SIG'	=> str_replace('<br>', "\n", "-- \n" . htmlspecialchars_decode($config['board_email_sig'])),
 			'SITENAME'	=> htmlspecialchars_decode($config['sitename']),
 		));
 

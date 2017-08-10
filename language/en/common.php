@@ -40,7 +40,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_DATE'						=> 'Date',
 	'DIGESTS_DELIMITER'					=> ' :: ', // Used to help show the hierarchy of forum names from the index on down
 	'DIGESTS_DISABLED_MESSAGE'			=> 'To enable fields, select Basics and select a digest type',
-	'DIGESTS_DISCLAIMER'				=> 'This digest is being sent to registered members of <a href="%1$s">%2$s</a> forums. You can change or delete your subscription from the forum&rsquo;s <a href="%1$sucp.%2$s">User Control Panel</a>. If you have questions or feedback on your digests please send it to the <a href="mailto:%1$s?subject=Digests">%2$s webmaster</a>.',
+	'DIGESTS_DISCLAIMER'				=> 'This digest is being sent to registered members of <a href="%1$s">%2$s</a> forums. You can change or delete your subscription from the forum&rsquo;s <a href="%1$sucp.%3$s">User Control Panel</a>. If you have questions or feedback on your digests please send it to the <a href="mailto:%4$s?subject=Digests">%2$s webmaster</a>.',
 	'DIGESTS_EXPLANATION'				=> 'Digests are email summaries of posts that are sent to you periodically. Digests can be sent daily, weekly or monthly at an hour of the day you select. You can specify those particular forums for which you want posts or by default you can elect to receive all posts for all forums for which you can read. You can cancel your digest subscription at any time by simply coming back to this page. Most users find digests to be very useful. We encourage you to give them a try!',
 	'DIGESTS_FILTER_ERROR'				=> 'Digests mailer was called with an invalid user_digest_filter_type = %s',
 	'DIGESTS_FILTER_FOES'				=> 'Remove posts from my foes',
@@ -93,10 +93,10 @@ $lang = array_merge($lang, array(
 	'DIGESTS_OPEN_QUOTE_TEXT'			=> '"',
 	'DIGESTS_PM'						=> ' PM', // not used if date/time formats do not permit AM and PM
 	'DIGESTS_PM_SUBJECT'				=> 'Private message subject',
-	'DIGESTS_POST_IMAGE_TEXT'			=> '<br />(Click on the image to see it full size.)',
+	'DIGESTS_POST_IMAGE_TEXT'			=> '<br>(Click on the image to see it full size.)',
 	'DIGESTS_POST_TEXT'					=> 'Post Text', 
 	'DIGESTS_POST_TIME'					=> 'Post Time', 
-	'DIGESTS_POST_SIGNATURE_DELIMITER'	=> '<br />____________________<br />', // Place here whatever code (make sure it is valid HTML) you want to use to distinguish the end of a post from the beginning of the signature line
+	'DIGESTS_POST_SIGNATURE_DELIMITER'	=> '<br>____________________<br>', // Place here whatever code (make sure it is valid HTML) you want to use to distinguish the end of a post from the beginning of the signature line
 	'DIGESTS_POSTED_TO_THE_TOPIC'		=> 'posted to the topic',
 	'DIGESTS_POSTS_TYPE_ANY'			=> 'All posts',
 	'DIGESTS_POSTS_TYPE_FIRST'			=> 'First posts of topics only',
@@ -111,7 +111,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_ROBOT'						=> 'Robot',
 	'DIGESTS_SALUTATION' 				=> 'Dear',
 	'DIGESTS_SELECT_FORUMS'				=> 'Include posts for these forums',
-	'DIGESTS_SELECT_FORUMS_EXPLAIN'		=> 'Please note the categories and forums shown are for those you are allowed to read only. Forum selection is disabled when you select bookmarked topics only. Password protected forums are not shown and cannot be selected. If All is unchecked and bookmarks are not selected, then you must select at least one forum to submit successfully.<br /><br />Bolded forum names (if any) are forums that the administrator requires to be presented in any digest (other than for bookmarked topics only). You cannot unselect these forums. Forum names that have strikethrough text are disallowed by the administrator for presentation in any digest (other than for bookmarked topics only) and are thus unselected.',
+	'DIGESTS_SELECT_FORUMS_EXPLAIN'		=> 'Please note the categories and forums shown are for those you are allowed to read only. Forum selection is disabled when you select bookmarked topics only. Password protected forums are not shown and cannot be selected. If All is unchecked and bookmarks are not selected, then you must select at least one forum to submit successfully.<br><br>Bolded forum names (if any) are forums that the administrator requires to be presented in any digest (other than for bookmarked topics only). You cannot unselect these forums. Forum names that have strikethrough text are disallowed by the administrator for presentation in any digest (other than for bookmarked topics only) and are thus unselected.',
 	'DIGESTS_SEND_HOUR' 				=> 'Hour sent',
 	'DIGESTS_SEND_HOUR_EXPLAIN'			=> 'The digest arrival time is the time based on the timezone you set in your board preferences.',
 	'DIGESTS_SEND_IF_NO_NEW_MESSAGES'	=> 'Send digest if no new messages:',

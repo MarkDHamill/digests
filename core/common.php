@@ -57,8 +57,8 @@ class common
 
 	public function make_tz_offset ($tz_text, $show_sign = false)
 	{
-		// This function translates a text timezone (like America/New_York) to an hour offset from GMT, doing magic like figuring out DST
-		if (!$this->validateDate($tz_text))
+		// This function translates a text timezone (like America/New_York) to an hour offset from UTC, doing magic like figuring out if DST applies
+		if (!$this->validate_date($tz_text))
 		{
 			// Date string is invalid so assume UTC
 			$timeOffset = 0;
@@ -72,11 +72,28 @@ class common
 		return ($show_sign && $timeOffset >= 0) ? '+' . $timeOffset : $timeOffset;
 	}
 
-	private function validateDate($date)
+	public function validate_date($date)
 	{
 		// This functions checks to see if a date format (like America/New_York) is valid. If not, it returns false.
 		$d = \DateTime::createFromFormat('e', $date);
 		return $d && $d->format('e') === $date;
+	}
+
+	public function check_send_hour($hour)
+	{
+		// Ensures an hour falls between 0 and 24, adjusts if outside the range.
+		if ($hour >= 24)
+		{
+			return (float) ($hour - 24);
+		}
+		else if ($hour < 0)
+		{
+			return (float) ($hour + 24);
+		}
+		else
+		{
+			return (float) $hour;
+		}
 	}
 
 }

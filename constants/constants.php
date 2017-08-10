@@ -26,6 +26,9 @@ class constants {
 	const DIGESTS_NONE_VALUE = 'NONE';
 	const DIGESTS_PLAIN_VALUE = 'PHTM';
 	const DIGESTS_PLAIN_CLASSIC_VALUE = 'PHTC';
+	const DIGESTS_RUN_MANUAL = 3;
+	const DIGESTS_RUN_REGULAR = 1;
+	const DIGESTS_RUN_SYSTEM = 2;
 	const DIGESTS_SORTBY_BOARD = 'board';
 	const DIGESTS_SORTBY_POSTDATE = 'postdate';
 	const DIGESTS_SORTBY_POSTDATE_DESC = 'postdate_desc';

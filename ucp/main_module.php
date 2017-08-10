@@ -61,7 +61,7 @@ class main_module
 
 		if ($submit && !check_form_key($form_key))
 		{
-			$message = $this->language->lang('FORM_INVALID') . '<br /><br />' . $this->language->lang('RETURN_UCP', '<a href="' . $this->u_action . '">', '</a>');
+			$message = $this->language->lang('FORM_INVALID') . '<br><br>' . $this->language->lang('RETURN_UCP', '<a href="' . $this->u_action . '">', '</a>');
 			trigger_error($message);	// Program exits
 		}
 		
@@ -96,17 +96,11 @@ class main_module
 			
 					// Note: user_digest_send_hour_gmt is stored in UTC and translated to local time (as set in the profile). 
 					// This is different than in phpBB 2, when all times were stored in server time.
-					
-					$local_send_hour = $this->request->variable('send_hour', (int) $this->user->data['user_digest_send_hour_gmt']) - ((int) $this->helper->make_tz_offset($this->user->data['user_timezone']));
-					if ($local_send_hour >= 24)
-					{
-						$local_send_hour = $local_send_hour - 24;
-					}
-					else if ($local_send_hour < 0)
-					{
-						$local_send_hour = $local_send_hour + 24;
-					}
-					
+
+
+					$local_send_hour = $this->request->variable('send_hour', (float) $this->user->data['user_digest_send_hour_gmt']) - ((float) $this->helper->make_tz_offset($this->user->data['user_timezone']));
+					$local_send_hour = $this->helper->check_send_hour($local_send_hour);
+
 					$sql_ary['user_digest_type']			= $this->request->variable('digest_type', $this->user->data['user_digest_type']);
 					$sql_ary['user_digest_format']			= $this->request->variable('style', $this->user->data['user_digest_format']);
 					$sql_ary['user_digest_send_hour_gmt']	= $local_send_hour;
@@ -182,7 +176,7 @@ class main_module
 				break;
 					
 				default:
-					trigger_error($this->language->lang('UCP_DIGESTS_MODE_ERROR', $mode) . '<br /><br />' . $this->language->lang('RETURN_UCP', '<a href="' . $this->u_action . '">', '</a>'));
+					trigger_error($this->language->lang('UCP_DIGESTS_MODE_ERROR', $mode) . '<br><br>' . $this->language->lang('RETURN_UCP', '<a href="' . $this->u_action . '">', '</a>'));
 				break;
 				
 			}
@@ -198,7 +192,7 @@ class main_module
 			
 			// Send a confirmation message
 			meta_refresh(3, $this->u_action);
-			$message = $this->language->lang('DIGESTS_UPDATED') . '<br /><br />' . $this->language->lang('RETURN_UCP', '<a href="' . $this->u_action . '">', '</a>');
+			$message = $this->language->lang('DIGESTS_UPDATED') . '<br><br>' . $this->language->lang('RETURN_UCP', '<a href="' . $this->u_action . '">', '</a>');
 			trigger_error($message);	// Program exits
 			
 		}
@@ -249,19 +243,12 @@ class main_module
 					}
 					else
 					{
-						// Translate the digests send hour (in GMT) to the local timezone, based on the timezone set in the user's profile.
-						$local_send_hour = (int) $this->user->data['user_digest_send_hour_gmt'] + (int) $this->helper->make_tz_offset($this->user->data['user_timezone']);
+						// Translate the digests send hour (in UTC) to the local timezone, based on the timezone set in the user's profile.
+						$local_send_hour = (float) $this->user->data['user_digest_send_hour_gmt'] + (float) $this->helper->make_tz_offset($this->user->data['user_timezone']);
 					}
 					
 					// Adjust time if outside of hour range
-					if ($local_send_hour >= 24)
-					{
-						$local_send_hour = $local_send_hour - 24;
-					}
-					else if ($local_send_hour < 0)
-					{
-						$local_send_hour = $local_send_hour + 24;
-					}
+					$local_send_hour = $this->helper->check_send_hour($local_send_hour);
 
 					// Set other form fields using board defaults if necessary, otherwise pull from the user's settings
 					// Note, setting an administator configured default for digest type is a bad idea because

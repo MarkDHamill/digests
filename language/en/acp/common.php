@@ -23,6 +23,12 @@ $config = $phpbb_container->get('config');
 $helper = $phpbb_container->get('phpbbservices.digests.common');
 
 $lang = array_merge($lang, array(
+	'DIGESTS_WEEKDAY' 					=> 'Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday',
+));
+
+$weekdays = explode(',', $lang['DIGESTS_WEEKDAY']);
+
+$lang = array_merge($lang, array(
 	'PLURAL_RULE'											=> 1,
 
 	'DIGESTS_ALL'											=> 'All',
@@ -55,12 +61,13 @@ $lang = array_merge($lang, array(
 	'DIGESTS_ENABLE_CUSTOM_STYLESHEET'						=> 'Enable custom stylesheet',
 	'DIGESTS_ENABLE_CUSTOM_STYLESHEET_EXPLAIN'				=> 'If not enabled, the default stylesheet for the style selected in the user&rsquo;s profile is applied to HTML versions of their digests.',
 	'DIGESTS_ENABLE_LOG'									=> 'Write all digest actions to the admin log',
-	'DIGESTS_ENABLE_LOG_EXPLAIN'							=> 'If this is enabled, all digest actions will be written to the admin log (found on the Maintenance tab). This is helpful for answering digest questions since it indicates what the digests mailer did, when and for which subscribers. Enabling this will quickly result in a very long Admin log since at least two entries will be written every hour to the log. Note: errors, exceptions and warnings are always written to the log.',
+	'DIGESTS_ENABLE_LOG_EXPLAIN'							=> 'If this is enabled, all digest actions will be written to the admin log (found on the Maintenance tab). This is helpful for answering digest questions since it indicates what the digests&rsquo; mailer did, when and for which subscribers. Enabling this will quickly result in a very long Admin log since at least two entries will be written every hour to the log. Note: errors, exceptions and warnings are always written to the log.',
 	'DIGESTS_ENABLE_SUBSCRIBE_UNSUBSCRIBE'					=> 'Enable mass subscribe or unsubscribe',
 	'DIGESTS_ENABLE_SUBSCRIBE_UNSUBSCRIBE_EXPLAIN'			=> 'If you say yes, when you press Submit the mass subscribe or unsubscribe action will occur. Enable with care!',
 	'DIGESTS_EXCLUDE_FORUMS'								=> 'Always exclude these forums',
 	'DIGESTS_EXCLUDE_FORUMS_EXPLAIN'						=> 'Enter the forum_ids for forums that must never appear in a digest. Separate the forum_ids with commas. If set to 0, no forums have to be excluded. To determine the forum_ids, when browsing a forum observe the &ldquo;f&rdquo; parameter on the URL field. This is the forum_id. Example: http://www.example.com/phpBB3/viewforum.php?f=1. Do not use forum_ids that correspond to categories. <i>This setting is ignored if bookmarked topics only are requested by a subscriber.</i>',
 	'DIGESTS_EXPAND'										=> 'Expand',
+	'DIGESTS_FREQUENCY_EXPLAIN'								=> 'Weekly digests are sent on ' . $weekdays[$config['phpbbservices_digests_weekly_digest_day']] . '. Monthly digests are sent on the first of the month. Coordinated Universal Time (UTC) is used for determining the day of the week.',
 	'DIGESTS_FORMAT_FOOTER' 								=> 'Digest format',
 	'DIGESTS_FROM_EMAIL_ADDRESS'							=> 'From email address',
 	'DIGESTS_FROM_EMAIL_ADDRESS_EXPLAIN'					=> 'When users receive a digest, this email address will appear in the FROM field. If left blank it will default to your board&rsquo;s email contract address. Use caution if using an email address with a domain other than the one the digest is hosted on, as your mail server or the user&rsquo;s email server may interpret the email as spam.',
@@ -113,7 +120,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_RESET_CRON_RUN_TIME_EXPLAIN'					=> 'If reset, when the mailer is next run it will create digests for the current hour only. Any digests in the queue are removed. Resetting can be useful when you are done testing digests or if phpBB&rsquo;s cron has not been run in a long while.',
 	'DIGESTS_RUN_TEST'										=> 'Run the mailer',
 	'DIGESTS_RUN_TEST_CLEAR_SPOOL'							=> 'Clear the cache/phpbbservices/digests directory',
-	'DIGESTS_RUN_TEST_CLEAR_SPOOL_ERROR'					=> 'Could not remove all the files in the cache/phpbbservices/digests directory. This may be due to a permissions issue. The file permissions on the directory should be set to publicly writeable (777 on Unix-based systems).',
+	'DIGESTS_RUN_TEST_CLEAR_SPOOL_ERROR'					=> 'Could not remove all the files in the cache/phpbbservices/digests directory. This may be due to a permissions issue or the directory was deleted. The file permissions on the directory should be set to publicly writeable (777 on Unix-based systems).',
 	'DIGESTS_RUN_TEST_CLEAR_SPOOL_EXPLAIN'					=> 'If Yes, any files in the cache/phpbbservices/digests directory will be erased. This is a good thing to do to ensure previous digest files are not accessible. This action is done before any new digests are written to this directory.',
 	'DIGESTS_RUN_TEST_DAY'									=> 'Simulation day in the month',
 	'DIGESTS_RUN_TEST_DAY_EXPLAIN'							=> 'Enter a whole number from 1 to 31. If the year, month and day are in the future of course no digests will be created. Don&rsquo;t use a day that does not logically belong in the month, like February 31.',
@@ -155,6 +162,8 @@ $lang = array_merge($lang, array(
 	'DIGESTS_UNSUBSCRIBE_SUBJECT'							=> 'You have been unsubscribed from receiving email digests',
 	'DIGESTS_UNSUBSCRIBED'									=> 'Has not subscribed',
 	'DIGESTS_USER_DIGESTS_CHECK_ALL_FORUMS'					=> 'All forums to be selected by default',
+	'DIGESTS_USER_DIGESTS_MAX_DISPLAY_WORDS'				=> 'Maximum words to display in a post',
+	'DIGESTS_USER_DIGESTS_MAX_DISPLAY_WORDS_EXPLAIN'		=> 'Set to -1 to show the full post text by default. Setting at zero (0) means by default  the user will see no post text at all.',
 	'DIGESTS_USER_DIGESTS_PM_MARK_READ'						=> 'Mark private messages as read when they appear in the digest',
 	'DIGESTS_USER_DIGESTS_REGISTRATION'						=> 'Allow user to subscribe to digests during registration',
 	'DIGESTS_USERS_PER_PAGE'								=> 'Subscribers per page',

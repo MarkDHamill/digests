@@ -103,7 +103,7 @@ function inStack(name) {
         	<dt style="border-right-style:none"><label for="member">{L_DIGESTS_SEARCH_FOR_MEMBER}{L_COLON}</label><br>{L_DIGESTS_SEARCH_FOR_MEMBER_EXPLAIN}</dt>
         	<dd style="text-align:left;"><input type="text" id="member" name="member" size="30" maxlength="255" value="{MEMBER}" onchange="addToStack(this.name);" /></dd>
         </dl>
-        <hr />
+        <hr>
 		<div class="pagination">
 			<!-- IF .pagination -->
 			<!-- INCLUDE pagination.html -->
@@ -348,14 +348,14 @@ function inStack(name) {
 			<select id="for_hrs" name="for_hrs[]" multiple="multiple">
 				<option value="-1" selected="selected">{L_DIGESTS_ALL_HOURS}</option>
 				<!-- BEGIN digests_balance_load -->
-				<option value="{digests_balance_load.HOUR_GMT}">{digests_balance_load.HOUR}</option>
+				<option value="{digests_balance_load.HOUR_UTC}">{digests_balance_load.HOUR}</option>
 				<!-- END digests_balance_load -->
 			</select>&nbsp;
 			<label for="to_hrs"><strong>{L_DIGESTS_BALANCE_APPLY_HOURS}{L_COLON}</strong></label>
 			<select id="to_hrs" name="to_hrs[]" multiple="multiple">
 				<option value="-1" selected="selected">{L_DIGESTS_ALL_HOURS}</option>
 				<!-- BEGIN digests_balance_load -->
-				<option value="{digests_balance_load.HOUR_GMT}">{digests_balance_load.HOUR}</option>
+				<option value="{digests_balance_load.HOUR_UTC}">{digests_balance_load.HOUR}</option>
 				<!-- END digests_balance_load -->
 			</select>
 		</p>

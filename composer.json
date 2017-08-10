@@ -3,7 +3,7 @@
 	"type": "phpbb-extension",
 	"description": "Sends daily, weekly or monthly digests of posts or bookmarked topics to subscribers via email.",
 	"homepage": "https://phpbbservices.com/digests_wp",
-	"version": "3.2.3-RC10",
+	"version": "3.2.4-RC11",
 	"license": "GPL-2.0",
 	"authors": [
 		{
@@ -25,7 +25,7 @@
 		"version-check": {
 			"host": "www.phpbbservices.com",
 			"directory": "/digests/updatecheck/",
-			"filename": "3.1.json"
+			"filename": "3.2.json"
 		}
 	}
 }

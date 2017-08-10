@@ -57,15 +57,13 @@ class main_module
 	function main($id, $mode)
 	{
 
-		global $phpbb_container;
-
 		$this->language->add_lang(array('acp/info_acp_common', 'acp/common'), 'phpbbservices/digests');
 
 		$submit = (isset($_POST['submit'])) ? true : false;
 
 		$form_key = 'phpbbservices/digests';
 		add_form_key($form_key);
-		$my_time_zone = (int) $this->helper->make_tz_offset($this->user->data['user_timezone']);
+		$my_time_zone = (float) $this->helper->make_tz_offset($this->user->data['user_timezone']);
 
 		/**
 		*	Validation types are:
@@ -112,7 +110,7 @@ class main_module
 						'phpbbservices_digests_user_digest_registration'	=> array('lang' => 'DIGESTS_USER_DIGESTS_REGISTRATION',	'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
 						'phpbbservices_digests_user_digest_type'			=> array('lang' => 'DIGESTS_FREQUENCY',					'validate' => 'string',	'type' => 'select', 'method' => 'digest_type_select', 'explain' => true),
 						'phpbbservices_digests_user_digest_format'			=> array('lang' => 'DIGESTS_FORMAT_STYLING',			'validate' => 'string',	'type' => 'select', 'method' => 'digest_style_select', 'explain' => true),
-						'phpbbservices_digests_user_digest_send_hour_gmt'	=> array('lang' => 'DIGESTS_SEND_HOUR',					'validate' => 'int:-1:23',	'type' => 'select', 'method' => 'digest_send_hour_gmt', 'explain' => true),
+						'phpbbservices_digests_user_digest_send_hour_gmt'	=> array('lang' => 'DIGESTS_SEND_HOUR',					'validate' => 'int:-1:23',	'type' => 'select', 'method' => 'digest_send_hour_utc', 'explain' => true),
 						'phpbbservices_digests_user_digest_filter_type'		=> array('lang' => 'DIGESTS_FILTER_TYPE',				'validate' => 'string',	'type' => 'select', 'method' => 'digest_filter_type', 'explain' => false),
 						'phpbbservices_digests_user_check_all_forums'		=> array('lang' => 'DIGESTS_USER_DIGESTS_CHECK_ALL_FORUMS',	'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
 						'phpbbservices_digests_user_digest_max_posts'		=> array('lang' => 'DIGESTS_COUNT_LIMIT',				'validate' => 'int:0',	'type' => 'text:5:5', 'explain' => true),
@@ -123,7 +121,7 @@ class main_module
 						'phpbbservices_digests_user_digest_show_pms'		=> array('lang' => 'DIGESTS_SHOW_PMS',					'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
 						'phpbbservices_digests_user_digest_pm_mark_read'	=> array('lang' => 'DIGESTS_USER_DIGESTS_PM_MARK_READ',	'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
 						'phpbbservices_digests_user_digest_sortby'			=> array('lang' => 'DIGESTS_SORT_BY',					'validate' => 'string',	'type' => 'select', 'method' => 'digest_post_sort_order', 'explain' 	=> true),
-						'phpbbservices_digests_user_digest_max_display_words'	=> array('lang' => 'DIGESTS_MAX_DISPLAY_WORDS',		'validate' => 'int:-1',	'type' => 'text:5:5', 'explain' => true),
+						'phpbbservices_digests_user_digest_max_display_words'	=> array('lang' => 'DIGESTS_USER_DIGESTS_MAX_DISPLAY_WORDS',		'validate' => 'int:-1',	'type' => 'text:5:5', 'explain' => true),
 						'phpbbservices_digests_user_digest_send_on_no_posts'	=> array('lang' => 'DIGESTS_SEND_ON_NO_POSTS',		'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
 						'phpbbservices_digests_user_digest_reset_lastvisit'	=> array('lang' => 'DIGESTS_LASTVISIT_RESET',			'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_user_digest_attachments'		=> array('lang' => 'DIGESTS_SHOW_ATTACHMENTS',			'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
@@ -409,17 +407,9 @@ class main_module
 					
 					// Calculate a digest send hour in administrator's time zone
 					$send_hour_admin_offset = str_replace('.',':', floor($row['user_digest_send_hour_gmt']) + $my_time_zone);
+					$send_hour_admin_offset = $this->helper->check_send_hour($send_hour_admin_offset);
 
-					if ($send_hour_admin_offset >= 24)
-					{
-						$send_hour_admin_offset = $send_hour_admin_offset - 24;
-					}
-					else if ($send_hour_admin_offset < 0)
-					{
-						$send_hour_admin_offset = $send_hour_admin_offset + 24;
-					}
-
-					// Create an array of GMT offsets from board time zone. Also create the display hour format.
+					// Create an array of UTC offsets from board time zone. Also create the display hour format.
 					$admin_hour_offset = array();
 					$display_hour = array();
 					for($i=0; $i<24; $i++)
@@ -774,25 +764,17 @@ class main_module
 				for($i=0;$i<24;$i++)
 				{
 				
-					// Convert digest hour to GMT
-					$hour_gmt = floor($i - $my_time_zone);
-					
-					if ($hour_gmt < 0)
-					{
-						$hour_gmt = $hour_gmt + 24;
-					}
-					else if ($hour_gmt > 23)
-					{
-						$hour_gmt = $hour_gmt - 24;
-					}
-							   
-					// If there are digest counts for this GMT hour, show it, otherwise show zero (no digests for this GMT hour)
+					// Convert digest hour to UTC
+					$hour_utc = floor($i - $my_time_zone);
+					$hour_utc = $this->helper->check_send_hour($hour_utc);
+
+					// If there are digest counts for this UTC hour, show it, otherwise show zero (no digests for this UTC hour)
 					$hour_count = 0;
 					if (isset($rowset))
 					{
 						foreach ($rowset as $row)
 						{
-							if (floor($row['hour']) == $hour_gmt)
+							if (floor($row['hour']) == $hour_utc)
 							{
 								$hour_count = $row['hour_count'];
 								break;
@@ -850,7 +832,7 @@ class main_module
 					$this->template->assign_block_vars('digests_balance_load', array(
 						'HOUR'              => $this->helper->make_hour_string($i, $this->user->data['user_dateformat']),
 						'HOUR_COUNT'        => ($hour_count > $avg_per_hour) ? '<strong>' . $hour_count . '</strong>' : $hour_count,
-						'HOUR_GMT'        	=> $hour_gmt,
+						'HOUR_UTC'        	=> $hour_utc,
 						'SUBSCRIBERS'		=> $hourly_subscribers,
 					));
 				
@@ -1543,7 +1525,7 @@ class main_module
 				SET ' . $this->db->sql_build_array('UPDATE', $sql_ary);
 			$this->db->sql_query($sql);
 			
-			$sql = $this->db->sql_build_query('UPDATE', $sql_ary);
+			$this->db->sql_build_query('UPDATE', $sql_ary);
 		}
 
 		if ($submit && $mode == 'digests_test')
@@ -1563,8 +1545,7 @@ class main_module
 				
 				// Clear the digests cache folder of .txt and .html files, if so instructed
 				$all_cleared = true;
-				$directory_found = true;
-				
+
 				$path = $this->phpbb_root_path . 'cache/phpbbservices/digests';
 				if (is_dir($path))
 				{
@@ -1582,12 +1563,13 @@ class main_module
 						}
 					}
 				}
-				else	// Directory not found, which is generally okay. If it's missing it will get recreated.
+				else	// Digests cache directory not found, which is not good. It is created in ext.php when the extension is enabled, so something destroyed it.
 				{
-					$directory_found = false;
+					$continue = false;
+					$all_cleared = false;
 				}
 					
-				if ($this->config['phpbbservices_digests_enable_log'] && $directory_found)
+				if ($continue && $this->config['phpbbservices_digests_enable_log'])
 				{
 					if ($all_cleared)
 					{
@@ -1626,8 +1608,9 @@ class main_module
 			if ($continue)
 			{
 
-				// Create a new template object for the mailer to use since we don't want to lose the content in this one. (The mailer will overwrite it.) With phpBB 3.2 this
-				// first requires creating a template environment object.
+				// Create a new template object for the mailer to use since we don't want to lose the content in this one. (The mailer will overwrite it and
+				// remove the sidebars.) With phpBB 3.2 this first requires creating a template environment object. Note: similar code used to work in 3.1, but
+				// doesn't in 3.2. I've looked at it and tried various things but so far it results in a TWIG error. Keeping it around for future attempts.
 				/*$mailer_template = new \phpbb\template\twig\twig(
 					$this->phpbb_path_helper,
 					$this->config,
@@ -1644,14 +1627,11 @@ class main_module
 					),
 					$phpbb_container->getParameter('core.cache_dir'),
 					$this->user
-				);
+				);*/
 
-				$mailer_template->set_style(array('./ext/phpbbservices/digests/styles', 'styles'));*/
+				//$mailer_template->set_style(array('./ext/phpbbservices/digests/styles', 'styles'));
 
 				// Create a mailer object and call its run method. The logic for sending a digest is embedded in this method, which is normally run as a cron task.
-				$this->language->add_lang('common','phpbbservices/digests');
-				//$mailer = new \phpbbservices\digests\cron\task\digests($this->config, $this->request, $this->user, $this->db, $this->phpEx, $this->phpbb_root_path, $mailer_template, $this->auth, $this->table_prefix, $this->phpbb_log, $this->helper, $this->language);
-
 				$mailer = new \phpbbservices\digests\cron\task\digests($this->config, $this->request, $this->user, $this->db, $this->phpEx, $this->phpbb_root_path, $this->template, $this->auth, $this->table_prefix, $this->phpbb_log, $this->helper, $this->language);
 				$success = $mailer->run();
 				
@@ -1697,7 +1677,7 @@ class main_module
 		$this->page_title = $display_vars['title'];
 
 		$this->template->assign_vars(array(
-			'ERROR_MSG'			=> (is_array($error) ? implode('<br />', $error) : $error),
+			'ERROR_MSG'			=> (is_array($error) ? implode('<br>', $error) : $error),
 			'L_MESSAGE'			=> $error,
 			'L_TITLE'			=> $this->language->lang($display_vars['title']),
 			'L_TITLE_EXPLAIN'	=> $this->language->lang($display_vars['title'] . '_EXPLAIN'),
@@ -1807,21 +1787,21 @@ class main_module
 		return $digest_styles;
 	}
 
-	function digest_send_hour_gmt()
+	function digest_send_hour_utc()
 	{
 		// Returns a set of option tags for all the hours of the day selecting a send hour for digests including the default
-		// to assign a random hour. The values should be interpreted as GMT hour.
+		// to assign a random hour. The values should be interpreted as UTC hour.
 
-		$digest_send_hour_gmt = '';
+		$digest_send_hour_utc = '';
 		
 		// Populate the Hour Sent select control
 		for($i=-1;$i<24;$i++)
 		{
 			$selected = ($i == $this->config['phpbbservices_digests_user_digest_send_hour_gmt']) ? ' selected="selected"' : '';
 			$display_text = ($i == -1) ? $this->language->lang('DIGESTS_RANDOM_HOUR') : $i;
-			$digest_send_hour_gmt .= '<option value="' . $i . '"' . $selected . '>' . $display_text . '</option>';
+			$digest_send_hour_utc .= '<option value="' . $i . '"' . $selected . '>' . $display_text . '</option>';
 		}
-		return $digest_send_hour_gmt;
+		return $digest_send_hour_utc;
 	} 
 
 	function digest_filter_type ()
@@ -2046,15 +2026,8 @@ class main_module
 
 		$subscribers = array();
 
-		$hour_gmt = $hour - $this->helper->make_tz_offset($tz_text);
-		if ($hour_gmt < 0)
-		{
-			$hour_gmt = $hour_gmt + 24;
-		}
-		else if ($hour_gmt > 23)
-		{
-			$hour_gmt = $hour_gmt - 24;
-		}
+		$hour_utc = $hour - $this->helper->make_tz_offset($tz_text);
+		$hour_utc = $this->helper->check_send_hour($hour_utc);
 
 		$sql_array = array(
 			'SELECT'	=> 'username, user_digest_type',
@@ -2063,7 +2036,7 @@ class main_module
 				USERS_TABLE		=> 'u',
 			),
 
-			'WHERE' 	=> $this->db->sql_in_set('user_digest_send_hour_gmt', $hour_gmt),
+			'WHERE' 	=> $this->db->sql_in_set('user_digest_send_hour_gmt', $hour_utc),
 
 			'ORDER_BY'	=> 'username'
 		);

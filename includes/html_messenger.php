@@ -9,6 +9,14 @@
 
 namespace phpbbservices\digests\includes;
 
+/**
+ * @ignore
+ */
+if (!defined('IN_PHPBB'))
+{
+	exit;
+}
+
 global $phpbb_root_path, $phpEx;
 include($phpbb_root_path . 'includes/functions_messenger.' . $phpEx); // Used to send emails
 
@@ -28,14 +36,38 @@ class html_messenger extends \messenger
 
 	function send($method = NOTIFY_EMAIL, $break = false, $is_html = false, $is_digest = false)
 	{
-		global $config, $user;
+		global $config, $user, $phpbb_dispatcher;;
 
 		// We add some standard variables we always use, no need to specify them always
 		$this->assign_vars(array(
 			'U_BOARD'	=> generate_board_url(),
-			'EMAIL_SIG'	=> str_replace('<br>', "\n", "-- \n" . htmlspecialchars_decode($config['board_email_sig'])),
+			'EMAIL_SIG'	=> str_replace('<br />', "\n", "-- \n" . htmlspecialchars_decode($config['board_email_sig'])),
 			'SITENAME'	=> htmlspecialchars_decode($config['sitename']),
 		));
+
+		$subject = $this->subject;
+		$message = $this->msg;
+		/**
+		* Event to modify notification message text before parsing
+		*
+		* @event phpbbservices.digests.modify_notification_message
+		* @var	int		method	User notification method NOTIFY_EMAIL|NOTIFY_IM|NOTIFY_BOTH
+		* @var	bool	break	Flag indicating if the function only formats the subject
+		*						and the message without sending it
+		* @var	string	subject	The message subject
+		* @var	string	message	The message text
+		* @since 3.1.11-RC1
+		*/
+		$vars = array(
+			'method',
+			'break',
+			'subject',
+			'message',
+		);
+		extract($phpbb_dispatcher->trigger_event('phpbbservices.digests.modify_notification_message', compact($vars)));
+		$this->subject = $subject;
+		$this->msg = $message;
+		unset($subject, $message);
 
 		// Parse message through template
 		$this->msg = trim($this->template->assign_display('body'));
@@ -128,12 +160,12 @@ class html_messenger extends \messenger
 		/**
 		 * Event to modify email header entries
 		 *
-		 * @event core.modify_email_headers
+		 * @event phpbbservices.digests.modify_email_headers
 		 * @var	array	headers	Array containing email header entries
 		 * @since 3.1.11-RC1
 		 */
 		$vars = array('headers');
-		extract($phpbb_dispatcher->trigger_event('core.modify_email_headers', compact($vars)));
+		extract($phpbb_dispatcher->trigger_event('phpbbservices.digests.modify_email_headers', compact($vars)));
 
 		if (sizeof($this->extra_headers))
 		{
@@ -160,6 +192,17 @@ class html_messenger extends \messenger
 		{
 			// Send was successful. ;)
 			return true;
+		}
+
+		$use_queue = false;
+		if ($config['email_package_size'] && $this->use_queue)
+		{
+			if (empty($this->queue))
+			{
+				$this->queue = new \queue();
+				$this->queue->init('email', $config['email_package_size']);
+			}
+			$use_queue = true;
 		}
 
 		$contact_name = htmlspecialchars_decode($config['board_contact_name']);
@@ -196,23 +239,37 @@ class html_messenger extends \messenger
 		$headers = $this->build_header($to, $cc, $bcc, $is_html);
 
 		// Send message ...
-		$mail_to = ($to == '') ? 'undisclosed-recipients:;' : $to;
-		$err_msg = '';
-
-		if ($config['smtp_delivery'])
+		if (!$use_queue)
 		{
-			$result = smtpmail($this->addresses, mail_encode($this->subject), wordwrap(utf8_wordwrap($this->msg), 997, "\n", true), $err_msg, $headers);
+			$mail_to = ($to == '') ? 'undisclosed-recipients:;' : $to;
+			$err_msg = '';
+
+			if ($config['smtp_delivery'])
+			{
+				$result = smtpmail($this->addresses, mail_encode($this->subject), wordwrap(utf8_wordwrap($this->msg), 997, "\n", true), $err_msg, $headers);
+			}
+			else
+			{
+				$result = phpbb_mail($mail_to, $this->subject, $this->msg, $headers, PHP_EOL, $err_msg);
+			}
+
+			if (!$result)
+			{
+				$this->error('EMAIL', $err_msg);
+				return false;
+			}
 		}
 		else
 		{
-			$result = phpbb_mail($mail_to, $this->subject, $this->msg, $headers, PHP_EOL, $err_msg);
+			$this->queue->put('email', array(
+				'to'			=> $to,
+				'addresses'		=> $this->addresses,
+				'subject'		=> $this->subject,
+				'msg'			=> $this->msg,
+				'headers'		=> $headers)
+			);
 		}
 
-		if (!$result)
-		{
-			$this->error('EMAIL', $err_msg);
-			return false;
-		}
 
 		return true;
 	}

@@ -8,3 +8,10 @@
 .ui-dialog-titlebar {
 	background-color: #CADCEB;
 }
+.top-3px {
+	margin-top: 3px;
+}
+.position-relative {
+	position:relative;
+	left: 20px;
+}

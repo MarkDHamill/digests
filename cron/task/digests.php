@@ -444,11 +444,11 @@ class digests extends \phpbb\cron\task\base
 					STYLES_TABLE	=> 's',
 				),
 			
-				'WHERE'		=> 's.style_id = ' . $this->config['default_style'] . ' 
+				'WHERE'		=> 's.style_id = ' . (int) $this->config['default_style'] . ' 
 								AND (' . 
 									$daily_digest_sql . $weekly_digest_sql . $monthly_digest_sql . 
 								") 
-								AND (user_digest_send_hour_gmt = $current_hour_utc OR user_digest_send_hour_gmt = $current_hour_utc_plus_30) 
+								AND (user_digest_send_hour_gmt = " . (int) $current_hour_utc . " OR user_digest_send_hour_gmt = " . (float) $current_hour_utc_plus_30 . ") 
 								AND user_inactive_reason = 0 " . $allowed_user_types . "
 								AND user_digest_type <> '" . constants::DIGESTS_NONE_VALUE . "'",
 			
@@ -471,7 +471,7 @@ class digests extends \phpbb\cron\task\base
 								AND (' . 
 									$daily_digest_sql . $weekly_digest_sql . $monthly_digest_sql . 
 								") 
-								AND (user_digest_send_hour_gmt = $current_hour_utc OR user_digest_send_hour_gmt = $current_hour_utc_plus_30) 
+								AND (user_digest_send_hour_gmt = " . (int) $current_hour_utc . " OR user_digest_send_hour_gmt = " . (float) $current_hour_utc_plus_30 . ") 
 								AND user_inactive_reason = 0 " . $allowed_user_types . "
 								AND user_digest_type <> '" . constants::DIGESTS_NONE_VALUE . "'",
 			
@@ -903,7 +903,7 @@ class digests extends \phpbb\cron\task\base
 				
 					'WHERE'		=> 'pt.msg_id = pm.msg_id
 										AND pt.author_id = u.user_id
-										AND pt.user_id = ' . $row['user_id'] . '
+										AND pt.user_id = ' . (int) $row['user_id'] . '
 										AND (pm_unread = 1 OR pm_new = 1)',
 				
 					'ORDER_BY'	=> 'message_time',
@@ -1077,7 +1077,7 @@ class digests extends \phpbb\cron\task\base
 				
 				$pm_read_sql = 'UPDATE ' . PRIVMSGS_TO_TABLE . '
 					SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
-					WHERE user_id = ' . $row['user_id'] . '
+					WHERE user_id = ' . (int) $row['user_id'] . '
 						AND (pm_unread = 1 OR pm_new = 1)';
 						
 				$this->db->sql_query($pm_read_sql);
@@ -1158,7 +1158,7 @@ class digests extends \phpbb\cron\task\base
 
 				// Send the digest out only if there are new qualifying posts OR the user requests a digest to be sent if there are no posts OR
 				// if there are unread private messages AND the user wants to see private messages in the digest.
-					
+
 				// Try to send this digest
 				if ($row['user_digest_send_on_no_posts'] || $this->toc_post_count > 0 || ((sizeof($pm_rowset) > 0) && $row['user_digest_show_pms']))
 				{
@@ -1184,11 +1184,11 @@ class digests extends \phpbb\cron\task\base
 						{
 							if ($this->config['phpbbservices_digests_show_email'])
 							{
-								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD', false, array($this->language->lang('DIGESTS_SENT_TO'), $row['username'], $row['user_email'], $utc_year . '-' . $utc_month . '-' . $utc_day, $current_hour_utc, $this->posts_in_digest, sizeof($pm_rowset)));
+								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD', false, array($this->language->lang('DIGESTS_SENT_TO'), $row['username'], $row['user_email'], $utc_year . '-' . str_pad($utc_month, 2, '0', STR_PAD_LEFT) . '-' . str_pad($utc_day, 2, '0',STR_PAD_LEFT), $current_hour_utc, $this->posts_in_digest, sizeof($pm_rowset)));
 							}
 							else
 							{
-								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_NO_EMAIL', false, array($this->language->lang('DIGESTS_SENT_TO'), $row['username'], $utc_year . '-' . $utc_month . '-' . $utc_day, $current_hour_utc, $this->posts_in_digest, sizeof($pm_rowset)));
+								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_NO_EMAIL', false, array($this->language->lang('DIGESTS_SENT_TO'), $row['username'], $utc_year . '-' . str_pad($utc_month,2, '0',STR_PAD_LEFT) . '-' . str_pad($utc_day, 2, '0',STR_PAD_LEFT), $current_hour_utc, $this->posts_in_digest, sizeof($pm_rowset)));
 							}
 						}
 
@@ -1199,7 +1199,7 @@ class digests extends \phpbb\cron\task\base
 						
 						$sql2 = 'UPDATE ' . USERS_TABLE . '
 							SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
-							WHERE user_id = ' . $row['user_id'];
+							WHERE user_id = ' . (int) $row['user_id'];
 						$this->db->sql_query($sql2);
 			
 						// If requested, update user_lastvisit
@@ -1211,7 +1211,7 @@ class digests extends \phpbb\cron\task\base
 							
 							$sql2 = 'UPDATE ' . USERS_TABLE . '
 								SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
-								WHERE user_id = ' . $row['user_id'];
+								WHERE user_id = ' . (int) $row['user_id'];
 							$this->db->sql_query($sql2);
 						}
 					}
@@ -1422,7 +1422,7 @@ class digests extends \phpbb\cron\task\base
 					),
 							
 					'WHERE'		=> 'u.user_id = b.user_id AND b.topic_id = t.topic_id 
-						AND b.user_id = ' . $user_row['user_id'],
+						AND b.user_id = ' . (int) $user_row['user_id'],
 				);
 				
 				$sql3 = $this->db->sql_build_query('SELECT', $sql_array);
@@ -1492,7 +1492,7 @@ class digests extends \phpbb\cron\task\base
 					),
 				
 					'WHERE'		=> 's.forum_id = f.forum_id 
-										AND user_id = ' . $user_row['user_id'],
+										AND user_id = ' . (int) $user_row['user_id'],
 				);
 				
 				$sql3 = $this->db->sql_build_query('SELECT', $sql_array);
@@ -1787,7 +1787,7 @@ class digests extends \phpbb\cron\task\base
 						ZEBRA_TABLE	=> 'z',
 					),
 				
-					'WHERE'		=> 'user_id = ' . $user_row['user_id'] . ' AND foe = 1',
+					'WHERE'		=> 'user_id = ' . (int) $user_row['user_id'] . ' AND foe = 1',
 				);
 			
 				$sql3 = $this->db->sql_build_query('SELECT', $sql_array);
@@ -2221,14 +2221,14 @@ class digests extends \phpbb\cron\task\base
 		{
 			$sql = 'SELECT *
 				FROM ' . ATTACHMENTS_TABLE . '
-				WHERE post_msg_id = ' . $row['post_id'] . ' AND in_message = 0  
+				WHERE post_msg_id = ' . (int) $row['post_id'] . ' AND in_message = 0  
 				ORDER BY attach_id';
 		}
 		else
 		{
 			$sql = 'SELECT *
 				FROM ' . ATTACHMENTS_TABLE . '
-				WHERE post_msg_id = ' . $row['msg_id'] . ' AND in_message = 1  
+				WHERE post_msg_id = ' . (int) $row['msg_id'] . ' AND in_message = 1  
 				ORDER BY attach_id';
 		}
 		$result = $this->db->sql_query($sql);

@@ -1,96 +1,97 @@
 <!DOCTYPE html>
-<html lang="{S_USER_LANG}">
+<html lang="{{ S_USER_LANG }}">
 <head>
 	<meta charset="utf-8">
-	<title>{S_DIGESTS_TITLE}</title>
-	<link href="{T_THEME_PATH}/print.css" rel="stylesheet" type="text/css" media="print" title="printonly" />
-	<link href="{T_STYLESHEET_LINK}" rel="stylesheet" type="text/css" media="screen" />
-	<style type="text/css">
+	<title>{{ S_DIGESTS_TITLE }}</title>
+	<link href="{{ T_THEME_PATH }}/print.css" rel="stylesheet" type="text/css" media="print" title="printonly" />
+	<link href="{{ T_STYLESHEET_LINK }}" rel="stylesheet" type="text/css" media="screen" />
+	<style>
 		.postbody h3 { float: none; color:#000000; padding-bottom: 15px; }
 		.author { clear: both; float: left; }
-		blockquote { background-image: none; margin-left: 10px; clear: both; float: left;}
+		.black { color: #000000; }
+		blockquote { background-image: none; margin-left: 10px; clear: both; float: left; }
 		.box { margin:5px; padding:5px; border-style:dashed; border-width:1px; }
 		body { background: white; }
 		.copyright { padding:0px; }
-		.content { clear: both; float: left; }
-		.forum { clear: both; float: left; }
-		h1 { color:#000000; margin-bottom: 20px; };
+		.content { clear: both; float: left; width: 100%; }
+		.forum { clear: both; float: left; width: 100%; }
+		h1 { color:#000000; margin-bottom: 20px; }
 		h1,h3,p,div { margin-top:10px; margin-bottom:10px; clear: both; float: left; }
 		h4 { clear: both; float: left; }
+		hr { clear: both; }
 		.newline { clear: both; float: none; }
 		ol,ul { list-style-position: inside; }
-		.post { padding-left: 5px; border-radius: 0px; }
 		.postbody { width: 100%; }
-		#skip { background: white; }
+		.post { padding-left: 5px; border-radius: 0px; }
+		.post:nth-child(even) { clear: both; float: left; }
+		.post:nth-child(odd) { clear: both; float: left; }
+		#skip { background: white; width: 100%; }
 		table { border-collapse: collapse; border: 1px solid black; }
 		td,th { border: 1px solid black; padding: 3px; }
 		th { font-weight:800; }
 		.toc { margin-left: 5px; }
-		.topic { background: #EBEADD; padding: 5px; clear: both; float: left;}
+		.topic { background: #EBEADD; padding: 5px; clear: both; float: left; }
 		tr:nth-child(even), .post:nth-child(even) { background: #FFF; }
 		tr:nth-child(odd), .post:nth-child(odd) { background: #EBEADD; }
-		.post:nth-child(even) { clear: both; float: left; }
-		.post:nth-child(odd) { clear: both; float: left; }
 		#wrap { padding-right: 5px; padding-left: 5px; }
 	</style>
 </head>
-<body dir="{S_CONTENT_DIRECTION}">
+<body dir="{{ S_CONTENT_DIRECTION }}">
 <div id="wrap">
 	<div id="page-body">
 
 		<a id="top" accesskey="t"></a>
 		
-		<h1 style="color:#000000">{S_DIGESTS_TITLE}</h1>
+		<h1 class="black">{{ S_DIGESTS_TITLE }}</h1>
 	
-		<p>{L_DIGESTS_SALUTATION} {S_DIGESTS_SALUTATION_BLURB}</p>
+		<p>{{ lang('DIGESTS_SALUTATION') }} {{ S_DIGESTS_SALUTATION_BLURB }}</p>
 		
-		<p>{S_DIGESTS_INTRODUCTION}</p>
+		<p>{{ S_DIGESTS_INTRODUCTION }}</p>
 		
-		{DIGESTS_TOC}
+		{{ DIGESTS_TOC }}
 		
 		<br>
 		<hr>
 		
-		{DIGESTS_CONTENT}
+		{{ DIGESTS_CONTENT }}
 		<br>
 		<hr>
-		<h3>{S_DIGESTS_YOUR_DIGEST_OPTIONS}</h3>
-		<h4>{L_UCP_DIGESTS_BASICS_OPTIONS}{L_COLON}</h4>
+		<h3>{{ S_DIGESTS_YOUR_DIGEST_OPTIONS }}</h3>
+		<h4>{{ lang('UCP_DIGESTS_BASICS_OPTIONS') }}{{ lang('COLON') }}</h4>
 		<blockquote><div>
-			{L_DIGESTS_MAIL_FREQUENCY}{L_COLON} {S_DIGESTS_MAIL_FREQUENCY}<br>
-			{L_DIGESTS_FORMAT_FOOTER}{L_COLON} {S_DIGESTS_FORMAT_FOOTER}<br>
-			{L_DIGESTS_SEND_HOUR}{L_COLON} {S_DIGESTS_SEND_HOUR}
+			{{ lang('DIGESTS_MAIL_FREQUENCY') }}{{ lang('COLON') }} {{ S_DIGESTS_MAIL_FREQUENCY }}<br>
+			{{ lang('DIGESTS_FORMAT_FOOTER') }}{{ lang('COLON') }} {{ S_DIGESTS_FORMAT_FOOTER }}<br>
+			{{ lang('DIGESTS_SEND_HOUR') }}{{ lang('COLON') }} {{ S_DIGESTS_SEND_HOUR }}
 		</div></blockquote>
-		<h4>{L_UCP_DIGESTS_FORUMS_SELECTION_OPTIONS}{L_COLON}</h4>
+		<h4>{{ lang('UCP_DIGESTS_FORUMS_SELECTION_OPTIONS') }}{{ lang('COLON') }}</h4>
 		<blockquote><div>
-			{L_DIGESTS_FILTER_TYPE}{L_COLON} {S_DIGESTS_FILTER_TYPE}<br>
-			{L_DIGESTS_FORUMS_WANTED}{L_COLON} {S_DIGESTS_FORUMS_WANTED}
+			{{ lang('DIGESTS_FILTER_TYPE') }}{{ lang('COLON') }} {{ S_DIGESTS_FILTER_TYPE }}<br>
+			{{ lang('DIGESTS_FORUMS_WANTED') }}{{ lang('COLON') }} {{ S_DIGESTS_FORUMS_WANTED }}
 		</div></blockquote>
-		<h4>{L_UCP_DIGESTS_POST_FILTERS_OPTIONS}{S_COLON}</h4>
+		<h4>{{ lang('UCP_DIGESTS_POST_FILTERS_OPTIONS') }}{{ S_COLON }}</h4>
 		<blockquote><div>
-			{L_DIGESTS_COUNT_LIMIT}{L_COLON} {S_DIGESTS_COUNT_LIMIT}<br>
-			{L_DIGESTS_MIN_SIZE}{L_COLON} {S_DIGESTS_MIN_SIZE} <br>
-			{L_DIGESTS_SHOW_NEW_POSTS_ONLY}{L_COLON} <!-- IF S_DIGESTS_SHOW_NEW_POSTS_ONLY -->{L_YES}<!-- ELSE-->{L_NO}<!-- ENDIF--><br>
-			{L_DIGESTS_REMOVE_YOURS}{L_COLON} <!-- IF S_DIGESTS_REMOVE_YOURS -->{L_YES}<!-- ELSE-->{L_NO}<!-- ENDIF--><br>
-			{L_DIGESTS_FILTER_FOES}{L_COLON} <!-- IF S_DIGESTS_FILTER_FOES -->{L_YES}<!-- ELSE-->{L_NO}<!-- ENDIF--><br>
-			{L_DIGESTS_SHOW_PMS}{L_COLON} <!-- IF S_DIGESTS_SHOW_PMS -->{L_YES}<!-- ELSE-->{L_NO}<!-- ENDIF--><br>
-			{L_DIGESTS_PMS_MARK_READ}{L_COLON} <!-- IF S_DIGESTS_PMS_MARK_READ -->{L_YES}<!-- ELSE-->{L_NO}<!-- ENDIF-->
+			{{ lang('DIGESTS_COUNT_LIMIT') }}{{ lang('COLON') }} {{ S_DIGESTS_COUNT_LIMIT }}<br>
+			{{ lang('DIGESTS_MIN_SIZE') }}{{ lang('COLON') }} {{ S_DIGESTS_MIN_SIZE }} <br>
+			{{ lang('DIGESTS_SHOW_NEW_POSTS_ONLY') }}{{ lang('COLON') }} {% if S_DIGESTS_SHOW_NEW_POSTS_ONLY %}{{ lang('YES') }}{% else %}{{ lang('NO') }}{% endif %}<br>
+			{{ lang('DIGESTS_REMOVE_YOURS') }}{{ lang('COLON') }} {% if S_DIGESTS_REMOVE_YOURS %}{{ lang('YES') }}{% else %}{{ lang('NO') }}{% endif %}<br>
+			{{ lang('DIGESTS_FILTER_FOES') }}{{ lang('COLON') }} {% if S_DIGESTS_FILTER_FOES %}{{ lang('YES') }}{% else %}{{ lang('NO') }}{% endif %}<br>
+			{{ lang('DIGESTS_SHOW_PMS') }}{{ lang('COLON') }} {% if S_DIGESTS_SHOW_PMS %}{{ lang('YES') }}{% else %}{{ lang('NO') }}{% endif %}<br>
+			{{ lang('DIGESTS_PMS_MARK_READ') }}{{ lang('COLON') }} {% if S_DIGESTS_PMS_MARK_READ %}{{ lang('YES') }}{% else %}{{ lang('NO') }}{% endif %}
 		</div></blockquote>
-		<h4>{L_UCP_DIGESTS_ADDITIONAL_CRITERIA_OPTIONS}{S_COLON}</h4>
+		<h4>{{ lang('UCP_DIGESTS_ADDITIONAL_CRITERIA_OPTIONS') }}{{ S_COLON }}</h4>
 		<blockquote><div>
-			{L_DIGESTS_SORT_BY}{L_COLON} {S_DIGESTS_SORT_BY}<br>
-			{L_DIGESTS_MAX_SIZE}{L_COLON} {S_DIGESTS_MAX_SIZE}<br>
-			{L_DIGESTS_SEND_IF_NO_NEW_MESSAGES} <!-- IF S_DIGESTS_SEND_IF_NO_NEW_MESSAGES -->{L_YES}<!-- ELSE-->{L_NO}<!-- ENDIF--><br>
-			{L_DIGESTS_LASTVISIT_RESET}{L_COLON} <!-- IF S_DIGESTS_LASTVISIT_RESET -->{L_YES}<!-- ELSE-->{L_NO}<!-- ENDIF--><br>
-			{L_DIGESTS_SHOW_ATTACHMENTS}{L_COLON} <!-- IF S_DIGESTS_SHOW_ATTACHMENTS -->{L_YES}<!-- ELSE-->{L_NO}<!-- ENDIF--><br>
-			{L_DIGESTS_BLOCK_IMAGES}{L_COLON} <!-- IF S_DIGESTS_BLOCK_IMAGES -->{L_YES}<!-- ELSE-->{L_NO}<!-- ENDIF--><br>
-			{L_DIGESTS_TOC}{L_COLON} <!-- IF S_DIGESTS_TOC -->{L_YES}<!-- ELSE-->{L_NO}<!-- ENDIF-->
+			{{ lang('DIGESTS_SORT_BY') }}{{ lang('COLON') }} {{ S_DIGESTS_SORT_BY }}<br>
+			{{ lang('DIGESTS_MAX_SIZE') }}{{ lang('COLON') }} {{ S_DIGESTS_MAX_SIZE }}<br>
+			{{ lang('DIGESTS_SEND_IF_NO_NEW_MESSAGES') }} {% if S_DIGESTS_SEND_IF_NO_NEW_MESSAGES %}{{ lang('YES') }}{% else %}{{ lang('NO') }}{% endif %}<br>
+			{{ lang('DIGESTS_LASTVISIT_RESET') }}{{ lang('COLON') }} {% if S_DIGESTS_LASTVISIT_RESET %}{{ lang('YES') }}{% else %}{{ lang('NO') }}{% endif %}<br>
+			{{ lang('DIGESTS_SHOW_ATTACHMENTS') }}{{ lang('COLON') }} {% if S_DIGESTS_SHOW_ATTACHMENTS %}{{ lang('YES') }}{% else %}{{ lang('NO') }}{% endif %}<br>
+			{{ lang('DIGESTS_BLOCK_IMAGES') }}{{ lang('COLON') }} {% if S_DIGESTS_BLOCK_IMAGES %}{{ lang('YES') }}{% else %}{{ lang('NO') }}{% endif %}<br>
+			{{ lang('DIGESTS_TOC') }}{{ lang('COLON') }} {% if S_DIGESTS_TOC %}{{ lang('YES') }}{% else %}{{ lang('NO') }}{% endif %}
 		</div></blockquote>
 		<hr class="newline">
-			<p><span class="copyright"><em>{S_DIGESTS_PUBLISH_DATE}</em></span></p>
-			<p>{S_DIGESTS_DISCLAIMER}</p>
-			<p><span class="copyright">{L_DIGESTS_POWERED_BY_TEXT} {S_DIGESTS_POWERED_BY}{S_DIGESTS_TRANSLATOR}</span></p>
-		</div>
+		<p><span class="copyright"><em>{{ S_DIGESTS_PUBLISH_DATE }}</em></span></p>
+		<p>{{ S_DIGESTS_DISCLAIMER }}</p>
+		<p><span class="copyright">{{ lang('DIGESTS_POWERED_BY_TEXT') }} {{ S_DIGESTS_POWERED_BY }}{{ S_DIGESTS_TRANSLATOR }}</span></p>
 	</div>
 </div>
 </body>

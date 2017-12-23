@@ -2,3 +2,38 @@ table {
 	border-spacing: 1px;
 	border-collapse: separate;
 }
+tr:nth-child(odd)
+{
+	background-color: #DCEBFE !important;
+}
+.border-right-none {
+	border-right-style:none;
+}
+.layout-fixed {
+	table-layout: fixed; width: 100%;
+}
+.point8-em {
+	font-size:.8em;
+}
+.position-relative {
+	position:relative;
+	left: 20px;
+}
+.text-center {
+	text-align:center;
+}
+.text-center-uc {
+	text-align:center; text-transform:uppercase;
+}
+.text-left {
+	text-align:left;
+}
+.text-left-uc {
+	text-align:left; text-transform:uppercase;
+}
+.width-120 {
+	width:120px;
+}
+.width-80 {
+	width:80px;
+}

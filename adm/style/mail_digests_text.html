@@ -1,40 +1,41 @@
 
-<!-- IF S_SHOW_PMS -->
-{L_YOU_HAVE_PRIVATE_MESSAGES}
+{% if S_SHOW_PMS %}
+{{ lang('YOU_HAVE_PRIVATE_MESSAGES') }}
 
-<!-- BEGIN pm -->
-{pm.NEW_UNREAD}{L_PRIVATE_MESSAGE}
-{L_SUBJECT}{L_COLON} {pm.PRIVATE_MESSAGE_SUBJECT}
-{L_FROM}{L_COLON} {pm.FROM} {L_DIGESTS_ON} {pm.DATE}
-{pm.CONTENT}
-<!-- BEGINELSE -->
-{L_DIGESTS_NO_PRIVATE_MESSAGES}
-<!-- END pm -->
+{% for pm in loops.pm %}
+{{ pm.NEW_UNREAD }}{{ lang('PRIVATE_MESSAGE') }}
+{{ lang('SUBJECT') }}{{ lang('COLON') }} {{ pm.PRIVATE_MESSAGE_SUBJECT }}
+{{ lang('FROM') }}{{ lang('COLON') }} {{ pm.FROM }} {{ lang('DIGESTS_ON') }} {{ pm.DATE }}
+{{ pm.CONTENT }}
+
+{% else %}
+{{ lang('DIGESTS_NO_PRIVATE_MESSAGES') }}
+{% endfor %}
 ____________________________________________________________
-<!-- ENDIF -->
+{% endif %}
 
-<!-- BEGIN forum -->
-
-
-{L_FORUM}{L_COLON} {forum.FORUM}
-
-<!-- BEGIN topic -->
+{% for forum in loops.forum %}
 
 
-{L_TOPIC}{L_COLON} {forum.topic.TOPIC}
+{{ lang('FORUM') }}{{ lang('COLON') }} {{ forum.FORUM }}
 
-<!-- BEGIN post -->
+{% for topic in forum.topic %}
 
 
-<!-- IF not forum.topic.post.S_FIRST_POST -->
-{L_DIGESTS_REPLY}{L_COLON} {forum.topic.post.SUBJECT}
-<!-- ENDIF -->
-{L_DIGESTS_BY}{L_COLON} {forum.topic.post.FROM} {L_DIGESTS_ON} {forum.topic.post.DATE}
-<!-- IF S_SHOW_POST_TEXT -->{forum.topic.post.CONTENT}<!-- ENDIF -->
+{{ lang('TOPIC') }}{{ lang('COLON') }} {{ topic.TOPIC }}
 
-<!-- END post -->
-<!-- END topic -->
-<!-- BEGINELSE -->
+{% for post in topic.post %}
 
-{L_DIGESTS_NO_POSTS}
-<!-- END forum -->
+
+{% if not post.S_FIRST_POST %}
+{{ lang('DIGESTS_REPLY') }}{{ lang('COLON') }} {{ post.SUBJECT }}
+{% endif %}
+{{ lang('DIGESTS_BY') }}{{ lang('COLON') }} {{ post.FROM }} {{ lang('DIGESTS_ON') }} {{ post.DATE }}
+{% if S_SHOW_POST_TEXT %}{{ post.CONTENT }}{% endif %}
+
+{% endfor %}
+{% endfor %}
+{% else %}
+
+{{ lang('DIGESTS_NO_POSTS') }}
+{% endfor %}

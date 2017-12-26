@@ -1,405 +1,412 @@
-<!-- INCLUDE overall_header.html -->
-<!-- INCLUDEJS @phpbbservices_digests/acp_digests.js -->
-<!-- IF S_EDIT_SUBSCRIBERS -->
+{% include 'overall_header.html' %}
+{% INCLUDEJS '@phpbbservices_digests/acp_digests.js' %}
+{% if S_EDIT_SUBSCRIBERS %}
 <script>
-var collapseImageIdSrc = '{IMAGE_PATH}collapse.png';
-var collapseImageIdAlt = '{LA_DIGESTS_COLLAPSE}';
-var collapseImageIdTitle = '{LA_DIGESTS_COLLAPSE}';
-var expandImageIdSrc = '{IMAGE_PATH}expand.png';
-var expandImageIdAlt = '{LA_DIGESTS_EXPAND}';
-var expandImageIdTitle = '{LA_DIGESTS_EXPAND}';
+	var collapseImageIdSrc = '{{ IMAGE_PATH }}collapse.png';
+	var collapseImageIdAlt = '{{ lang("DIGESTS_COLLAPSE") | escape("js") }}';
+	var collapseImageIdTitle = '{{ lang("DIGESTS_COLLAPSE") | escape("js") }}';
+	var expandImageIdSrc = '{{ IMAGE_PATH }}expand.png';
+	var expandImageIdAlt = '{{ lang("DIGESTS_EXPAND") | escape("js") }}';
+	var expandImageIdTitle = '{{ lang("DIGESTS_EXPAND") | escape("js") }}';
 
-var tosubmit = [];	// Collects a list of variables to submit to the web server.
-tosubmit.push('form_token');	// Must have this control
-tosubmit.push('creation_time');	// Must have this control
-tosubmit.push('submit');	// Must have this control
-tosubmit.push('sort');	// Must have this control
+	var tosubmit = [];	// Collects a list of variables to submit to the web server.
+	tosubmit.push('form_token');	// Must have this control
+	tosubmit.push('creation_time');	// Must have this control
+	tosubmit.push('submit');	// Must have this control
+	tosubmit.push('sort');	// Must have this control
 
-function addToStack(name) {
-	// Push onto a stack a form field that will be sent to the web server on form submission. There are so many on the page we
-	// want to limit these to only those that were changed, hopefully avoiding PHP max_input_vars issues.
-	if (tosubmit.indexOf(name) == -1) {
-		tosubmit.push(name);
-	}
-	// Add the following fields so individual forum subscriptions changes can be detected
-	if (name.substr(0,4) == 'user')	{
-		var last_dash_loc = name.lastIndexOf('-');
-		if (last_dash_loc > 4) {
-			var user_id = name.substring(5, last_dash_loc);
-			var all_forums = 'user-' + user_id + '-all_forums';
-			if (tosubmit.indexOf(all_forums) == -1) {
-				tosubmit.push(all_forums);
-			}
-			var filter_type = 'user-' + user_id + '-filter_type';
-			if (tosubmit.indexOf(filter_type) == -1) {
-				tosubmit.push(filter_type);
+	function addToStack(name) {
+		// Push onto a stack a form field that will be sent to the web server on form submission. There are so many on the page we
+		// want to limit these to only those that were changed, hopefully avoiding PHP max_input_vars issues.
+		if (tosubmit.indexOf(name) == -1) {
+			tosubmit.push(name);
+		}
+		// Add the following fields so individual forum subscriptions changes can be detected
+		if (name.substr(0,4) == 'user')	{
+			var last_dash_loc = name.lastIndexOf('-');
+			if (last_dash_loc > 4) {
+				var user_id = name.substring(5, last_dash_loc);
+				var all_forums = 'user-' + user_id + '-all_forums';
+				if (tosubmit.indexOf(all_forums) == -1) {
+					tosubmit.push(all_forums);
+				}
+				var filter_type = 'user-' + user_id + '-filter_type';
+				if (tosubmit.indexOf(filter_type) == -1) {
+					tosubmit.push(filter_type);
+				}
 			}
 		}
-	}
-	// If mark-all checkbox selected, add to the stack all user-xx mark variables.
-	if (name == 'mark-all') {
-		var allInputs = document.getElementsByTagName("input");
-		for (var k = 0; k < allInputs.length; k++) {
-			var_name = allInputs[k].name;
-			last_dash_loc = var_name.lastIndexOf('-');
-			if (var_name.substr(0,5) == 'user-' && last_dash_loc == 4) {
-				if (tosubmit.indexOf(allInputs[k].name) == -1) {
-					tosubmit.push(allInputs[k].name);
+		// If mark-all checkbox selected, add to the stack all user-xx mark variables.
+		if (name == 'mark-all') {
+			var allInputs = document.getElementsByTagName("input");
+			for (var k = 0; k < allInputs.length; k++) {
+				var_name = allInputs[k].name;
+				last_dash_loc = var_name.lastIndexOf('-');
+				if (var_name.substr(0,5) == 'user-' && last_dash_loc == 4) {
+					if (tosubmit.indexOf(allInputs[k].name) == -1) {
+						tosubmit.push(allInputs[k].name);
+					}
 				}
 			}
 		}
 	}
-}
 
-function inStack(name) {
-	// Tests to see if the named form field is in the stack to be submitted.
-	return (tosubmit.indexOf(name) == -1) ? false : true;
-}
+	function inStack(name) {
+		// Tests to see if the named form field is in the stack to be submitted.
+		return (tosubmit.indexOf(name) == -1) ? false : true;
+	}
 
 </script>
-<!-- ENDIF -->		
+{% endif %}
+
 <a id="maincontent"></a>
 
-<h1>{L_TITLE}</h1>
+<h1>{{ lang('TITLE') }}</h1>
 
-<p>{L_TITLE_EXPLAIN}</p>
+<p>{{ lang('TITLE_EXPLAIN') }}</p>
 
-<!-- IF S_ERROR -->
-	<div class="errorbox">
-		<h3>{L_WARNING}</h3>
-		<p>{ERROR_MSG}</p>
-	</div>
-<!-- ENDIF -->
+{% if S_ERROR %}
+<div class="errorbox">
+	<h3>{{ lang('WARNING') }}</h3>
+	<p>{{ ERROR_MSG }}</p>
+</div>
+{% endif %}
 
-<form id="acp_digests" method="post" action="{U_ACTION}">
-<!-- BEGIN options -->
-<!-- IF options.S_LEGEND -->
-<!-- IF not options.S_FIRST_ROW -->
-</fieldset>
-<!-- ENDIF -->
-<fieldset<!-- IF S_EDIT_SUBSCRIBERS --> id="digests"<!-- ENDIF -->>
-	<legend>{options.LEGEND}</legend>
-	<!-- ELSE -->
+<form id="acp_digests" method="post" action="{{ U_ACTION }}">
+	{% for option in options %}
+	{% if option.S_LEGEND %}
+	{% if not loop.first %}
+	</fieldset>
+	{% endif %}
+	<fieldset{% if S_EDIT_SUBSCRIBERS %} id="digests"{% endif %}>
+	<legend>{{ option.LEGEND }}</legend>
+	{% else %}
 
 	<dl>
-		<dt><label for="{options.KEY}">{options.TITLE}{L_COLON}</label><!-- IF options.S_EXPLAIN --><br><span>{options.TITLE_EXPLAIN}</span><!-- ENDIF --></dt>
-		<dd>{options.CONTENT}</dd>
+		<dt><label for="{{ option.KEY }}">{{ option.TITLE }}{{ lang('COLON') }}</label>{% if option.S_EXPLAIN %}<br><span>{{ option.TITLE_EXPLAIN }}</span>{% endif %}</dt>
+		<dd>{{ option.CONTENT }}</dd>
 	</dl>
 
-	<!-- ENDIF -->
-	<!-- END options -->
+	{% endif %}
+	{% endfor %}
 
-	<!-- IF S_AUTH -->
-</fieldset>
-<!-- BEGIN auth_tpl -->
-<!-- INCLUDE {auth_tpl.TEMPLATE_FILE} -->
-<!-- END auth_tpl -->
-<fieldset>
-	<legend>{L_ACP_SUBMIT_CHANGES}</legend>
-<!-- ENDIF -->
+	{% if S_AUTH %}
+	</fieldset>
+	{% for auth in loops.auth_tpl %}
+	{% INCLUDE ''~ auth_tpl.TEMPLATE_FILE ~'' %}
+	{% include 'overall_header.html' %}
+	{% endfor %}
+	<fieldset>
+		<legend>{{ lang('L_ACP_SUBMIT_CHANGES') }}</legend>
+		{% endif %}
 
-<!-- IF S_EDIT_SUBSCRIBERS -->
-    	<dl>
-        	<dt style="border-right-style:none"><label for="member">{L_DIGESTS_SEARCH_FOR_MEMBER}{L_COLON}</label><br>{L_DIGESTS_SEARCH_FOR_MEMBER_EXPLAIN}</dt>
-        	<dd style="text-align:left;"><input type="text" id="member" name="member" size="30" maxlength="255" value="{MEMBER}" onchange="addToStack(this.name);" /></dd>
-        </dl>
-        <hr>
+		{% if S_EDIT_SUBSCRIBERS %}
+		<dl>
+			<dt class="border-right-none"><label for="member">{{ lang('DIGESTS_SEARCH_FOR_MEMBER') }}{{ lang('COLON') }}</label><br>{{ lang('DIGESTS_SEARCH_FOR_MEMBER_EXPLAIN') }}</dt>
+			<dd class="text-left"><input type="text" id="member" name="member" size="30" maxlength="255" value="{{ MEMBER }}" onchange="addToStack(this.name);" /></dd>
+		</dl>
+		<hr>
 		<div class="pagination">
-			<!-- IF .pagination -->
-			<!-- INCLUDE pagination.html -->
-			<!-- ENDIF -->
+			{% if loops.pagination|length %}
+			{% INCLUDE 'pagination.html' %}
+			{% endif %}
 		</div>
 		<table id="down">
-        <thead>
-            <tr>
-                <th style="text-align:center;"><input type="checkbox" class="radio" name="mark-all" id="mark-all" onchange="addToStack(this.name);" onclick="marklist('acp_digests', 'user-', (this.checked) ? true : false);" /></th>
-                <th>{L_USERNAME}</th>
-                <th>{L_EMAIL_ADDRESS}</th>
-                <th style="text-align:center;">{L_DIGESTS_FREQUENCY_SHORT}</th>
-                <th style="text-align:center;">{L_DIGESTS_FORMAT_STYLING}</th>
-                <th style="text-align:center;">{L_DIGESTS_HOUR_SENT}</th>
-                <th style="text-align:center;">{L_DIGESTS_HAS_UNSUBSCRIBED}</th>
-                <th style="text-align:center;">{L_LAST_VISIT}<br>{L_DIGESTS_BASED_ON}</th>
-                <th style="text-align:center;">{L_DIGESTS_LAST_SENT}<br>{L_DIGESTS_BASED_ON}</th>
-            </tr>
-        </thead>
-        <tbody>
-        <!-- BEGIN digests_edit_subscribers -->
-            <!-- IF digests_edit_subscribers.S_ROW_COUNT is even --><tr class="row1"><!-- ELSE --><tr class="row2"><!-- ENDIF -->
-                <td style="text-align:center;"><input type="checkbox" class="radio" name="user-{digests_edit_subscribers.USER_ID}" id="user-{digests_edit_subscribers.USER_ID}" onchange="addToStack(this.name);" /></td>
-                <td>
-					<a id="imglink-{digests_edit_subscribers.S_ROW_COUNT}"><img id="plusminus-{digests_edit_subscribers.S_ROW_COUNT}" src="{IMAGE_PATH}expand.png" title="{L_DIGESTS_EXPAND}" alt="{L_DIGESTS_EXPAND}" /></a>&nbsp;<a id="link-{digests_edit_subscribers.S_ROW_COUNT}">{digests_edit_subscribers.USERNAME}</a>
+			<thead>
+			<tr>
+				<th class="text-center"><input type="checkbox" class="radio" name="mark-all" id="mark-all" onchange="addToStack(this.name);" onclick="marklist('acp_digests', 'user-', (this.checked) ? true : false);" /></th>
+				<th>{{ lang('USERNAME') }}</th>
+				<th>{{ lang('EMAIL_ADDRESS') }}</th>
+				<th class="text-center">{{ lang('DIGESTS_FREQUENCY_SHORT') }}</th>
+				<th class="text-center">{{ lang('DIGESTS_FORMAT_STYLING') }}</th>
+				<th class="text-center">{{ lang('DIGESTS_HOUR_SENT') }}</th>
+				<th class="text-center">{{ lang('DIGESTS_HAS_UNSUBSCRIBED') }}</th>
+				<th class="text-center">{{ lang('LAST_VISIT') }}<br>{{ lang('DIGESTS_BASED_ON') }}</th>
+				<th class="text-center">{{ lang('DIGESTS_LAST_SENT') }}<br>{{ lang('DIGESTS_BASED_ON') }}</th>
+			</tr>
+			</thead>
+			<tbody>
+			{% for digests_edit_subscribers in loops.digests_edit_subscribers %}
+			{% if digests_edit_subscribers.S_ROW_COUNT is even %}<tr class="row1">{% else %}<tr class="row2">{% endif %}
+				<td class="text-center"><input type="checkbox" class="radio" name="user-{{ digests_edit_subscribers.USER_ID }}" id="user-{{ digests_edit_subscribers.USER_ID }}" onchange="addToStack(this.name);" /></td>
+				<td>
+					<a id="imglink-{{ digests_edit_subscribers.S_ROW_COUNT }}"><img id="plusminus-{{ digests_edit_subscribers.S_ROW_COUNT }}" src="{{ IMAGE_PATH }}expand.png" title="{{ lang('DIGESTS_EXPAND') }}" alt="{{ lang('DIGESTS_EXPAND') }}" /></a>&nbsp;<a id="link-{{ digests_edit_subscribers.S_ROW_COUNT }}">{{ digests_edit_subscribers.USERNAME }}</a>
 				</td>
-                <td>{digests_edit_subscribers.USER_EMAIL}</td>
-                <td style="text-align:center;"><select name="user-{digests_edit_subscribers.USER_ID}-digest_type" onchange="addToStack(this.name);">
-                	<option value="NONE"<!-- IF digests_edit_subscribers.S_DIGEST_NONE_CHECKED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_NONE}</option>
-                	<option value="DFLT">{L_DIGESTS_DEFAULT}</option>
-                	<option value="DAY"<!-- IF digests_edit_subscribers.S_DIGEST_DAY_CHECKED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_DAILY}</option>
-                	<option value="WEEK"<!-- IF digests_edit_subscribers.S_DIGEST_WEEK_CHECKED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_WEEKLY}</option>
-                	<option value="MNTH"<!-- IF digests_edit_subscribers.S_DIGEST_MONTH_CHECKED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_MONTHLY}</option>
-                </select></td>
-                <td style="text-align:center;"><select name="user-{digests_edit_subscribers.USER_ID}-style" onchange="addToStack(this.name);">
-                	<option value="{DIGESTS_HTML_VALUE}"<!-- IF digests_edit_subscribers.S_DIGEST_HTML_CHECKED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_FORMAT_HTML}</option>
-                	<option value="{DIGESTS_HTML_CLASSIC_VALUE}"<!-- IF digests_edit_subscribers.S_DIGEST_HTML_CLASSIC_CHECKED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_FORMAT_HTML_CLASSIC}</option>
-                	<option value="{DIGESTS_PLAIN_VALUE}"<!-- IF digests_edit_subscribers.S_DIGEST_PLAIN_CHECKED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_FORMAT_PLAIN}</option>
-                	<option value="{DIGESTS_PLAIN_CLASSIC_VALUE}"<!-- IF digests_edit_subscribers.S_DIGEST_PLAIN_CLASSIC_CHECKED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_FORMAT_PLAIN_CLASSIC}</option>
-                	<option value="{DIGESTS_FORMAT_TEXT_VALUE}"<!-- IF digests_edit_subscribers.S_DIGEST_TEXT_CHECKED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_FORMAT_TEXT}</option>
-                </select></td>
-                <td style="text-align:center;"><select name="user-{digests_edit_subscribers.USER_ID}-send_hour" onchange="addToStack(this.name);">
-                	<option value="{digests_edit_subscribers.BOARD_OFFSET_0}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_0_CHECKED --> selected="selected"<!-- ENDIF -->>{digests_edit_subscribers.DISPLAY_HOUR_0}</option>
-                 	<option value="{digests_edit_subscribers.BOARD_OFFSET_1}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_1_CHECKED --> selected="selected"<!-- ENDIF -->>{digests_edit_subscribers.DISPLAY_HOUR_1}</option>
-                	<option value="{digests_edit_subscribers.BOARD_OFFSET_2}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_2_CHECKED --> selected="selected"<!-- ENDIF -->>{digests_edit_subscribers.DISPLAY_HOUR_2}</option>
-                	<option value="{digests_edit_subscribers.BOARD_OFFSET_3}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_3_CHECKED --> selected="selected"<!-- ENDIF -->>{digests_edit_subscribers.DISPLAY_HOUR_3}</option>
-                	<option value="{digests_edit_subscribers.BOARD_OFFSET_4}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_4_CHECKED --> selected="selected"<!-- ENDIF -->>{digests_edit_subscribers.DISPLAY_HOUR_4}</option>
-                	<option value="{digests_edit_subscribers.BOARD_OFFSET_5}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_5_CHECKED --> selected="selected"<!-- ENDIF -->>{digests_edit_subscribers.DISPLAY_HOUR_5}</option>
-                	<option value="{digests_edit_subscribers.BOARD_OFFSET_6}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_6_CHECKED --> selected="selected"<!-- ENDIF -->>{digests_edit_subscribers.DISPLAY_HOUR_6}</option>
-                	<option value="{digests_edit_subscribers.BOARD_OFFSET_7}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_7_CHECKED --> selected="selected"<!-- ENDIF -->>{digests_edit_subscribers.DISPLAY_HOUR_7}</option>
-                	<option value="{digests_edit_subscribers.BOARD_OFFSET_8}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_8_CHECKED --> selected="selected"<!-- ENDIF -->>{digests_edit_subscribers.DISPLAY_HOUR_8}</option>
-                	<option value="{digests_edit_subscribers.BOARD_OFFSET_9}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_9_CHECKED --> selected="selected"<!-- ENDIF -->>{digests_edit_subscribers.DISPLAY_HOUR_9}</option>
-                	<option value="{digests_edit_subscribers.BOARD_OFFSET_10}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_10_CHECKED --> selected="selected"<!-- ENDIF -->>{digests_edit_subscribers.DISPLAY_HOUR_10}</option>
-                	<option value="{digests_edit_subscribers.BOARD_OFFSET_11}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_11_CHECKED --> selected="selected"<!-- ENDIF -->>{digests_edit_subscribers.DISPLAY_HOUR_11}</option>
-                	<option value="{digests_edit_subscribers.BOARD_OFFSET_12}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_12_CHECKED --> selected="selected"<!-- ENDIF -->>{digests_edit_subscribers.DISPLAY_HOUR_12}</option>
-                	<option value="{digests_edit_subscribers.BOARD_OFFSET_13}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_13_CHECKED --> selected="selected"<!-- ENDIF -->>{digests_edit_subscribers.DISPLAY_HOUR_13}</option>
-                	<option value="{digests_edit_subscribers.BOARD_OFFSET_14}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_14_CHECKED --> selected="selected"<!-- ENDIF -->>{digests_edit_subscribers.DISPLAY_HOUR_14}</option>
-                	<option value="{digests_edit_subscribers.BOARD_OFFSET_15}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_15_CHECKED --> selected="selected"<!-- ENDIF -->>{digests_edit_subscribers.DISPLAY_HOUR_15}</option>
-                	<option value="{digests_edit_subscribers.BOARD_OFFSET_16}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_16_CHECKED --> selected="selected"<!-- ENDIF -->>{digests_edit_subscribers.DISPLAY_HOUR_16}</option>
-                	<option value="{digests_edit_subscribers.BOARD_OFFSET_17}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_17_CHECKED --> selected="selected"<!-- ENDIF -->>{digests_edit_subscribers.DISPLAY_HOUR_17}</option>
-                	<option value="{digests_edit_subscribers.BOARD_OFFSET_18}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_18_CHECKED --> selected="selected"<!-- ENDIF -->>{digests_edit_subscribers.DISPLAY_HOUR_18}</option>
-                	<option value="{digests_edit_subscribers.BOARD_OFFSET_19}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_19_CHECKED --> selected="selected"<!-- ENDIF -->>{digests_edit_subscribers.DISPLAY_HOUR_19}</option>
-                	<option value="{digests_edit_subscribers.BOARD_OFFSET_20}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_20_CHECKED --> selected="selected"<!-- ENDIF -->>{digests_edit_subscribers.DISPLAY_HOUR_20}</option>
-                	<option value="{digests_edit_subscribers.BOARD_OFFSET_21}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_21_CHECKED --> selected="selected"<!-- ENDIF -->>{digests_edit_subscribers.DISPLAY_HOUR_21}</option>
-                	<option value="{digests_edit_subscribers.BOARD_OFFSET_22}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_22_CHECKED --> selected="selected"<!-- ENDIF -->>{digests_edit_subscribers.DISPLAY_HOUR_22}</option>
-                	<option value="{digests_edit_subscribers.BOARD_OFFSET_23}"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_HOUR_23_CHECKED --> selected="selected"<!-- ENDIF -->>{digests_edit_subscribers.DISPLAY_HOUR_23}</option>
-               </select></td>
-                <td style="text-align:center;">{digests_edit_subscribers.USER_DIGEST_HAS_UNSUBSCRIBED}</td>
-                <td style="text-align:center;">{digests_edit_subscribers.USER_LAST_VISIT}</td>
-                <td style="text-align:center;">{digests_edit_subscribers.USER_DIGEST_LAST_SENT}</td>
-            </tr>
-            <!-- IF digests_edit_subscribers.S_ROW_COUNT is even --><tr class="row1"<!-- ELSE --><tr class="row2"<!-- ENDIF --> id="user-{digests_edit_subscribers.S_ROW_COUNT}-detail" style="display:none;">
-            	<td colspan="9">
-                    <fieldset>
-                        <legend>{L_UCP_DIGESTS_FORUMS_SELECTION}</legend>
-                        <dl>
-                        	<dt><label for="user-{digests_edit_subscribers.USER_ID}-filter_type">{L_DIGESTS_FILTER_TYPE}{L_COLON}</label></dt>
-                            <dd><select id="user-{digests_edit_subscribers.USER_ID}-filter_type" name="user-{digests_edit_subscribers.USER_ID}-filter_type" onchange="addToStack(this.name);">
-                                <option value="ALL" <!-- IF digests_edit_subscribers.S_DIGEST_POST_ANY -->selected="selected"<!-- ENDIF -->>{L_DIGESTS_POSTS_TYPE_ANY}</option>
-                                <option value="1ST" <!-- IF digests_edit_subscribers.S_DIGEST_POST_FIRST -->selected="selected"<!-- ENDIF -->>{L_DIGESTS_POSTS_TYPE_FIRST}</option>
-                                <option value="BM" <!-- IF digests_edit_subscribers.S_DIGEST_POST_BM -->selected="selected"<!-- ENDIF -->>{L_DIGESTS_USE_BOOKMARKS}</option>
-                            </select></dd>
-                        </dl>
-                        <dl>
-                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-all_forums">{L_DIGESTS_SELECT_FORUMS}{L_COLON}</label><br>{L_DIGESTS_SELECT_FORUMS_ADMIN_EXPLAIN}</dt>
-                            <dd>
-                                <input type="checkbox" name="user-{digests_edit_subscribers.USER_ID}-all_forums" id="user-{digests_edit_subscribers.USER_ID}-all_forums" <!-- IF digests_edit_subscribers.S_ALL_BY_DEFAULT --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> <label for="user-{digests_edit_subscribers.USER_ID}-all_forums"><b>{L_DIGESTS_ALL_ALLOWED_FORUMS}</b></label><br><br>
-                                <div id="user-{digests_edit_subscribers.USER_ID}-div_0">
-                                    <!-- BEGIN forums -->
-                                    <!-- IF digests_edit_subscribers.forums.S_DIV_OPEN -->
-                                    <div id="user-{digests_edit_subscribers.USER_ID}-{digests_edit_subscribers.forums.CAT_ID}" style="position:relative; left:20px;">
-                                    <!-- ENDIF -->
-                                    <!-- IF digests_edit_subscribers.forums.S_PRINT -->
-                                        <!-- IF digests_edit_subscribers.forums.S_IS_FORUM -->
-                                        <input type="checkbox" name="user-{digests_edit_subscribers.USER_ID}-{digests_edit_subscribers.forums.FORUM_NAME}" id="user-{digests_edit_subscribers.USER_ID}-{digests_edit_subscribers.forums.FORUM_NAME}"<!-- IF digests_edit_subscribers.forums.S_FORUM_SUBSCRIBED --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);"/> <label for="user-{digests_edit_subscribers.USER_ID}-{digests_edit_subscribers.forums.FORUM_NAME}"><span style="font-size:.8em;">{digests_edit_subscribers.forums.FORUM_LABEL}</span></label><br>
-                                        <!-- ENDIF -->
-                                        <!-- IF not digests_edit_subscribers.forums.S_IS_FORUM -->
-                                        <span style="font-size:.8em;"><i>{digests_edit_subscribers.forums.FORUM_LABEL}</i></span><br>
-                                        <!-- ENDIF -->
-                                    <!-- ENDIF -->
-                                    <!-- IF digests_edit_subscribers.forums.S_DIV_CLOSE -->
-                                    </div>
-                                    <!-- ENDIF -->
-                                    <!-- END forums -->
-                                </div>
-                            </dd>
-                        </dl>
-                    </fieldset>
-                    <fieldset>
-                        <legend>{L_UCP_DIGESTS_POST_FILTERS}</legend>
-                        <dl>
-                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-max_posts">{L_DIGESTS_COUNT_LIMIT}</label></dt>
-                            <dd><input type="text" size="5" maxlength="5" id="user-{digests_edit_subscribers.USER_ID}-max_posts" name="user-{digests_edit_subscribers.USER_ID}-max_posts" value="{digests_edit_subscribers.USER_DIGEST_MAX_POSTS}" onchange="addToStack(this.name);" /></dd>
-                       	</dl>
-                        <dl>
-                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-min_words">{L_DIGESTS_MIN_SIZE}</label></dt>
-                            <dd><input type="text" size="4" maxlength="4" id="user-{digests_edit_subscribers.USER_ID}-min_words" name="user-{digests_edit_subscribers.USER_ID}-min_words" value="{digests_edit_subscribers.USER_DIGEST_MIN_WORDS}" onchange="addToStack(this.name);" /></dd>
-                       	</dl>
-                        <dl>
-                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-new_posts_only1">{L_DIGESTS_NEW_POSTS_ONLY}</label></dt>
-                            <dd><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-new_posts_only" id="user-{digests_edit_subscribers.USER_ID}-new_posts_only1" value="1"<!-- IF digests_edit_subscribers.S_DIGEST_NEW_POSTS_ONLY_CHECKED_YES --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> <label for="user-{digests_edit_subscribers.USER_ID}-new_posts_only1">{L_YES}</label>&nbsp;<input type="radio" name="user-{digests_edit_subscribers.USER_ID}-new_posts_only" id="user-{digests_edit_subscribers.USER_ID}-new_posts_only2" value="0"<!-- IF digests_edit_subscribers.S_DIGEST_NEW_POSTS_ONLY_CHECKED_NO --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> <label for="user-{digests_edit_subscribers.USER_ID}-new_posts_only2">{L_NO}</label></dd>
-                       	</dl>
-                        <dl>
-                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-show_mine1">{L_DIGESTS_REMOVE_YOURS}</label></dt>
-                            <dd><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-show_mine" id="user-{digests_edit_subscribers.USER_ID}-show_mine1" value="1"<!-- IF digests_edit_subscribers.S_DIGEST_SHOW_MINE_CHECKED_NO --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> <label for="user-{digests_edit_subscribers.USER_ID}-show_mine1">{L_YES}</label>&nbsp;<input type="radio" name="user-{digests_edit_subscribers.USER_ID}-show_mine" id="user-{digests_edit_subscribers.USER_ID}-show_mine2" value="0"<!-- IF digests_edit_subscribers.S_DIGEST_SHOW_MINE_CHECKED_YES --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> <label for="user-{digests_edit_subscribers.USER_ID}-show_mine2">{L_NO}</label></dd>
-                       	</dl>
-                        <dl>
-                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-filter_foes1">{L_DIGESTS_FILTER_FOES}</label></dt>
-                            <dd><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-filter_foes" id="user-{digests_edit_subscribers.USER_ID}-filter_foes1" value="1"<!-- IF digests_edit_subscribers.S_DIGEST_FILTER_FOES_CHECKED_YES --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> <label for="user-{digests_edit_subscribers.USER_ID}-filter_foes1">{L_YES}</label>&nbsp;<input type="radio" name="user-{digests_edit_subscribers.USER_ID}-filter_foes" id="user-{digests_edit_subscribers.USER_ID}-filter_foes2" value="0"<!-- IF digests_edit_subscribers.S_DIGEST_FILTER_FOES_CHECKED_NO --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> <label for="user-{digests_edit_subscribers.USER_ID}-filter_foes2">{L_NO}</label></dd>
-                       	</dl>
-                        <dl>
-                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-pms1">{L_DIGESTS_PRIVATE_MESSAGES_IN_DIGEST}</label></dt>
-                            <dd><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-pms" id="user-{digests_edit_subscribers.USER_ID}-pms1" value="1"<!-- IF digests_edit_subscribers.S_DIGEST_PRIVATE_MESSAGES_IN_DIGEST_YES --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> <label for="user-{digests_edit_subscribers.USER_ID}-pms1">{L_YES}</label>&nbsp;<input type="radio" name="user-{digests_edit_subscribers.USER_ID}-pms" id="user-{digests_edit_subscribers.USER_ID}-pms2" value="0"<!-- IF digests_edit_subscribers.S_DIGEST_PRIVATE_MESSAGES_IN_DIGEST_NO --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> <label for="user-{digests_edit_subscribers.USER_ID}-pms2">{L_NO}</label></dd>
-                       	</dl>
-                        <dl>
-                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-mark_read1">{L_DIGESTS_MARK_READ}</label></dt>
-                            <dd><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-mark_read" id="user-{digests_edit_subscribers.USER_ID}-mark_read1" value="1"<!-- IF digests_edit_subscribers.S_DIGEST_PM_MARK_READ_CHECKED_YES --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> <label for="user-{digests_edit_subscribers.USER_ID}-mark_read1">{L_YES}</label>&nbsp;<input type="radio" name="user-{digests_edit_subscribers.USER_ID}-mark_read" id="user-{digests_edit_subscribers.USER_ID}-mark_read2" value="0"<!-- IF digests_edit_subscribers.S_DIGEST_PM_MARK_READ_CHECKED_NO --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> <label for="user-{digests_edit_subscribers.USER_ID}-mark_read2">{L_NO}</label></dd>
-                        </dl>
-                   	</fieldset>
-                    <fieldset>
-                        <legend>{L_UCP_DIGESTS_ADDITIONAL_CRITERIA}</legend>
-                        <dl>
-                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-sortby">{L_DIGESTS_SORT_BY}</label></dt>
-                            <dd>
-                                <select name="user-{digests_edit_subscribers.USER_ID}-sortby" id="user-{digests_edit_subscribers.USER_ID}-sortby" onchange="addToStack(this.name);">
-                                    <option value="board"<!-- IF digests_edit_subscribers.S_BOARD_SELECTED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_SORT_USER_ORDER}</option>
-                                    <option value="standard"<!-- IF digests_edit_subscribers.S_STANDARD_SELECTED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_SORT_FORUM_TOPIC}</option>
-                                    <option value="standard_desc"<!-- IF digests_edit_subscribers.S_STANDARD_DESC_SELECTED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_SORT_FORUM_TOPIC_DESC}</option>
-                                    <option value="postdate"<!-- IF digests_edit_subscribers.S_POSTDATE_SELECTED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_SORT_POST_DATE}</option>
-                                    <option value="postdate_desc"<!-- IF digests_edit_subscribers.S_POSTDATE_DESC_SELECTED --> selected="selected"<!-- ENDIF -->>{L_DIGESTS_SORT_POST_DATE_DESC}</option>
-                                </select>
-                            </dd>
-                        </dl>
-                        <dl>
-                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-max_display_words">{L_DIGESTS_MAX_DISPLAY_WORDS}</label></dt>
-                            <dd><input type="text" size="4" maxlength="4" name="user-{digests_edit_subscribers.USER_ID}-max_display_words" id="user-{digests_edit_subscribers.USER_ID}-max_display_words" value="{digests_edit_subscribers.USER_DIGEST_MAX_DISPLAY_WORDS}" onchange="addToStack(this.name);" />
-                            </dd>
-                        </dl>
-                        <dl>
-                        	<dt><label for="user-{digests_edit_subscribers.USER_ID}-no_post_text1">{L_DIGESTS_NO_POST_TEXT}</label></dt>
-                            <dd><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-no_post_text" id="user-{digests_edit_subscribers.USER_ID}-no_post_text1" value="1"<!-- IF digests_edit_subscribers.S_DIGEST_NO_POST_TEXT_CHECKED_YES --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /><label for="user-{digests_edit_subscribers.USER_ID}-no_post_text1"> {L_YES}</label>&nbsp;<input type="radio" name="user-{digests_edit_subscribers.USER_ID}-no_post_text" id="user-{digests_edit_subscribers.USER_ID}-no_post_text2" value="0"<!-- IF digests_edit_subscribers.S_DIGEST_NO_POST_TEXT_CHECKED_NO --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> <label for="user-{digests_edit_subscribers.USER_ID}-no_post_text2"> {L_NO}</label></dd>
-                        </dl>                       
-                        <dl>
-                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-send_on_no_posts1">{L_DIGESTS_SEND_ON_NO_POSTS}</label></dt>
-                            <dd><label for="user-{digests_edit_subscribers.USER_ID}-send_on_no_posts1"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-send_on_no_posts" id="user-{digests_edit_subscribers.USER_ID}-send_on_no_posts1"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_ON_NO_POSTS_YES_CHECKED --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" value="1" /> {L_YES}</label>&nbsp;<label for="user-{digests_edit_subscribers.USER_ID}-send_on_no_posts2"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-send_on_no_posts" id="user-{digests_edit_subscribers.USER_ID}-send_on_no_posts2"<!-- IF digests_edit_subscribers.S_DIGEST_SEND_ON_NO_POSTS_NO_CHECKED --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" value="0" /> {L_NO}</label></dd>
-                        </dl>
-                        <dl>
-                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-lastvisit1">{L_DIGESTS_LASTVISIT_RESET}</label></dt>
-                            <dd><label for="user-{digests_edit_subscribers.USER_ID}-lastvisit1"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-lastvisit" id="user-{digests_edit_subscribers.USER_ID}-lastvisit1" value="1"<!-- IF digests_edit_subscribers.S_LASTVISIT_YES_CHECKED --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> {L_YES}</label>&nbsp;<label for="user-{digests_edit_subscribers.USER_ID}-lastvisit2"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-lastvisit" id="user-{digests_edit_subscribers.USER_ID}-lastvisit2" value="0"<!-- IF digests_edit_subscribers.S_LASTVISIT_NO_CHECKED --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> {L_NO}</label></dd>
-                        </dl>
-                        <dl>
-                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-attachments1">{L_DIGESTS_SHOW_ATTACHMENTS}</label></dt>
-                            <dd><label for="user-{digests_edit_subscribers.USER_ID}-attachments1"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-attachments" id="user-{digests_edit_subscribers.USER_ID}-attachments1" value="1"<!-- IF digests_edit_subscribers.S_ATTACHMENTS_YES_CHECKED --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> {L_YES}</label>&nbsp;<label for="user-{digests_edit_subscribers.USER_ID}-attachments2"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-attachments" id="user-{digests_edit_subscribers.USER_ID}-attachments2" value="0"<!-- IF digests_edit_subscribers.S_ATTACHMENTS_NO_CHECKED --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> {L_NO}</label></dd>
-                        </dl>
-                        <dl>
-                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-blockimages1">{L_DIGESTS_BLOCK_IMAGES}</label></dt>
-                            <dd><label for="user-{digests_edit_subscribers.USER_ID}-blockimages1"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-blockimages" id="user-{digests_edit_subscribers.USER_ID}-blockimages1" value="1"<!-- IF digests_edit_subscribers.S_BLOCK_IMAGES_YES_CHECKED --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> {L_YES}</label>&nbsp;<label for="user-{digests_edit_subscribers.USER_ID}-blockimages2"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-blockimages" id="user-{digests_edit_subscribers.USER_ID}-blockimages2" value="0"<!-- IF digests_edit_subscribers.S_BLOCK_IMAGES_NO_CHECKED --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> {L_NO}</label></dd>
-                        </dl>
-                        <dl>
-                            <dt><label for="user-{digests_edit_subscribers.USER_ID}-toc1">{L_DIGESTS_TOC}{L_COLON}</label></dt>
-                            <dd><label for="user-{digests_edit_subscribers.USER_ID}-toc1"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-toc" id="user-{digests_edit_subscribers.USER_ID}-toc1" value="1"<!-- IF digests_edit_subscribers.S_TOC_YES_CHECKED --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> {L_YES}</label>&nbsp;<label for="user-{digests_edit_subscribers.USER_ID}-toc2"><input type="radio" name="user-{digests_edit_subscribers.USER_ID}-toc" id="user-{digests_edit_subscribers.USER_ID}-toc2" value="0"<!-- IF digests_edit_subscribers.S_TOC_NO_CHECKED --> checked="checked"<!-- ENDIF --> onchange="addToStack(this.name);" /> {L_NO}</label></dd>
-                        </dl>
-                    </fieldset>
-               </td>
-            </tr>
-        <!-- END digests_edit_subscribers -->
-        </tbody>
-        </table>
-        <p class="quick">
-			<label for="selected">{L_DIGESTS_WITH_SELECTED}{L_COLON}</label>
-            <select id="selected" name="selected" onchange="addToStack(this.name);">
-                <option value="IGNORE" selected="selected">{L_DIGESTS_IGNORE}</option>
-                <option value="NONE">{L_DIGESTS_UNSUBSCRIBE}</option>
-                <option value="DFLT">{L_DIGESTS_DEFAULT}</option>
-            </select>&nbsp;
-			<label for="subscribe">{L_DIGESTS_SHOW}{L_COLON}</label>
-            <select id="subscribe" name="subscribe" onchange="addToStack(this.name);">
-                <option value="a"{ALL_SELECTED}>{L_DIGESTS_ALL}</option>
-                <option value="s"{SUBSCRIBE_SELECTED}>{L_DIGESTS_SUBSCRIBED}</option>
-                <option value="u"{UNSUBSCRIBE_SELECTED}>{L_DIGESTS_UNSUBSCRIBED}</option>
-                <option value="t"{STOPPED_SUBSCRIBING_SELECTED}>{L_DIGESTS_STOPPED_SUBSCRIBING}</option>
-            </select>&nbsp;
-			<label for="sortby">{L_SORT_BY}{L_COLON}</label>
-            <select id="sortby" name="sortby" onchange="addToStack(this.name);">
-                <option value="u"{USERNAME_SELECTED}>{L_USERNAME}</option>
-                <option value="e"{EMAIL_SELECTED}>{L_EMAIL_ADDRESS}</option>
-                <option value="f"{FREQUENCY_SELECTED}>{L_DIGESTS_FREQUENCY_SHORT}</option>
-                <option value="s"{FORMAT_SELECTED}>{L_DIGESTS_FORMAT_STYLING}</option>
-                <option value="h"{HOUR_SELECTED}>{L_DIGESTS_HOUR_SENT}</option>
-                <option value="b"{HAS_UNSUBSCRIBED_SELECTED}>{L_DIGESTS_HAS_UNSUBSCRIBED}</option>
-                <option value="l"{LASTVISIT_SELECTED}>{L_LAST_VISIT}</option>
-                <option value="t"{LAST_SENT_SELECTED}>{L_DIGESTS_LAST_SENT}</option>
-            </select>&nbsp;
-			<label for="sortorder">{L_DIGESTS_SORT_ORDER}{L_COLON}</label>
-            <select id="sortorder" name="sortorder" onchange="addToStack(this.name);">
-                <option value="a"{ASCENDING_SELECTED}>{L_ASCENDING}</option>
-                <option value="d"{DESCENDING_SELECTED}>{L_DESCENDING}</option>
-            </select>&nbsp;
-            <input class="button2" type="submit" name="sort" id="sort" value="{L_DIGESTS_REFRESH}" />
-        </p>
+				<td>{{ digests_edit_subscribers.USER_EMAIL }}</td>
+				<td class="text-center"><select name="user-{{ digests_edit_subscribers.USER_ID }}-digest_type" onchange="addToStack(this.name);">
+					<option value="NONE"{% if digests_edit_subscribers.S_DIGEST_NONE_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_NONE') }}</option>
+					<option value="DFLT">{{ lang('DIGESTS_DEFAULT') }}</option>
+					<option value="DAY"{% if digests_edit_subscribers.S_DIGEST_DAY_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_DAILY') }}</option>
+					<option value="WEEK"{% if digests_edit_subscribers.S_DIGEST_WEEK_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_WEEKLY') }}</option>
+					<option value="MNTH"{% if digests_edit_subscribers.S_DIGEST_MONTH_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_MONTHLY') }}</option>
+				</select></td>
+				<td class="text-center"><select name="user-{{ digests_edit_subscribers.USER_ID }}-style" onchange="addToStack(this.name);">
+					<option value="{{ DIGESTS_HTML_VALUE }}"{% if digests_edit_subscribers.S_DIGEST_HTML_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_FORMAT_HTML') }}</option>
+					<option value="{{ DIGESTS_HTML_CLASSIC_VALUE }}"{% if digests_edit_subscribers.S_DIGEST_HTML_CLASSIC_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_FORMAT_HTML_CLASSIC') }}</option>
+					<option value="{{ DIGESTS_PLAIN_VALUE }}"{% if digests_edit_subscribers.S_DIGEST_PLAIN_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_FORMAT_PLAIN') }}</option>
+					<option value="{{ DIGESTS_PLAIN_CLASSIC_VALUE }}"{% if digests_edit_subscribers.S_DIGEST_PLAIN_CLASSIC_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_FORMAT_PLAIN_CLASSIC') }}</option>
+					<option value="{{ DIGESTS_FORMAT_TEXT_VALUE }}"{% if digests_edit_subscribers.S_DIGEST_TEXT_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_FORMAT_TEXT') }}</option>
+				</select></td>
+				<td class="text-center"><select name="user-{{ digests_edit_subscribers.USER_ID }}-send_hour" onchange="addToStack(this.name);">
+					<option value="{{ digests_edit_subscribers.BOARD_OFFSET_0 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_0_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_0 }}</option>
+					<option value="{{ digests_edit_subscribers.BOARD_OFFSET_1 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_1_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_1 }}</option>
+					<option value="{{ digests_edit_subscribers.BOARD_OFFSET_2 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_2_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_2 }}</option>
+					<option value="{{ digests_edit_subscribers.BOARD_OFFSET_3 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_3_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_3 }}</option>
+					<option value="{{ digests_edit_subscribers.BOARD_OFFSET_4 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_4_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_4 }}</option>
+					<option value="{{ digests_edit_subscribers.BOARD_OFFSET_5 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_5_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_5 }}</option>
+					<option value="{{ digests_edit_subscribers.BOARD_OFFSET_6 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_6_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_6 }}</option>
+					<option value="{{ digests_edit_subscribers.BOARD_OFFSET_7 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_7_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_7 }}</option>
+					<option value="{{ digests_edit_subscribers.BOARD_OFFSET_8 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_8_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_8 }}</option>
+					<option value="{{ digests_edit_subscribers.BOARD_OFFSET_9 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_9_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_9 }}</option>
+					<option value="{{ digests_edit_subscribers.BOARD_OFFSET_10 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_10_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_10 }}</option>
+					<option value="{{ digests_edit_subscribers.BOARD_OFFSET_11 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_11_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_11 }}</option>
+					<option value="{{ digests_edit_subscribers.BOARD_OFFSET_12 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_12_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_12 }}</option>
+					<option value="{{ digests_edit_subscribers.BOARD_OFFSET_13 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_13_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_13 }}</option>
+					<option value="{{ digests_edit_subscribers.BOARD_OFFSET_14 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_14_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_14 }}</option>
+					<option value="{{ digests_edit_subscribers.BOARD_OFFSET_15 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_15_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_15 }}</option>
+					<option value="{{ digests_edit_subscribers.BOARD_OFFSET_16 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_16_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_16 }}</option>
+					<option value="{{ digests_edit_subscribers.BOARD_OFFSET_17 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_17_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_17 }}</option>
+					<option value="{{ digests_edit_subscribers.BOARD_OFFSET_18 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_18_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_18 }}</option>
+					<option value="{{ digests_edit_subscribers.BOARD_OFFSET_19 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_19_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_19 }}</option>
+					<option value="{{ digests_edit_subscribers.BOARD_OFFSET_20 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_20_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_20 }}</option>
+					<option value="{{ digests_edit_subscribers.BOARD_OFFSET_21 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_21_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_21 }}</option>
+					<option value="{{ digests_edit_subscribers.BOARD_OFFSET_22 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_22_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_22 }}</option>
+					<option value="{{ digests_edit_subscribers.BOARD_OFFSET_23 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_23_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_23 }}</option>
+				</select></td>
+				<td class="text-center">{{ digests_edit_subscribers.USER_DIGEST_HAS_UNSUBSCRIBED }}</td>
+				<td class="text-center">{{ digests_edit_subscribers.USER_LAST_VISIT }}</td>
+				<td class="text-center">{{ digests_edit_subscribers.USER_DIGEST_LAST_SENT }}</td>
+			</tr>
+			{% if digests_edit_subscribers.S_ROW_COUNT is even %}<tr class="row1"{% else %}<tr class="row2"{% endif %} id="user-{{ digests_edit_subscribers.S_ROW_COUNT }}-detail" style="display:none">
+				<td colspan="9">
+					<fieldset>
+						<legend>{{ lang('UCP_DIGESTS_FORUMS_SELECTION') }}</legend>
+						<dl>
+							<dt><label for="user-{{ digests_edit_subscribers.USER_ID }}-filter_type">{{ lang('DIGESTS_FILTER_TYPE') }}{{ lang('COLON') }}</label></dt>
+							<dd><select id="user-{{ digests_edit_subscribers.USER_ID }}-filter_type" name="user-{{ digests_edit_subscribers.USER_ID }}-filter_type" onchange="addToStack(this.name);">
+								<option value="ALL" {% if digests_edit_subscribers.S_DIGEST_POST_ANY %}selected="selected"{% endif %}>{{ lang('DIGESTS_POSTS_TYPE_ANY') }}</option>
+								<option value="1ST" {% if digests_edit_subscribers.S_DIGEST_POST_FIRST %}selected="selected"{% endif %}>{{ lang('DIGESTS_POSTS_TYPE_FIRST') }}</option>
+								<option value="BM" {% if digests_edit_subscribers.S_DIGEST_POST_BM %}selected="selected"{% endif %}>{{ lang('DIGESTS_USE_BOOKMARKS') }}</option>
+							</select></dd>
+						</dl>
+						<dl>
+							<dt><label for="user-{{ digests_edit_subscribers.USER_ID }}-all_forums">{{ lang('DIGESTS_SELECT_FORUMS') }}{{ lang('COLON') }}</label><br>{{ lang('DIGESTS_SELECT_FORUMS_ADMIN_EXPLAIN') }}</dt>
+							<dd>
+								<input type="checkbox" name="user-{{ digests_edit_subscribers.USER_ID }}-all_forums" id="user-{{ digests_edit_subscribers.USER_ID }}-all_forums" {% if digests_edit_subscribers.S_ALL_BY_DEFAULT %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> <label for="user-{{ digests_edit_subscribers.USER_ID }}-all_forums"><b>{{ lang('DIGESTS_ALL_ALLOWED_FORUMS') }}</b></label><br><br>
+								<div id="user-{{ digests_edit_subscribers.USER_ID }}-div_0">
+									{% for forums in digests_edit_subscribers.forums %}
+									{% if forums.S_DIV_OPEN %}
+									<div id="user-{{ digests_edit_subscribers.USER_ID }}-{{ forums.CAT_ID }}" class="position-relative">
+										{% endif %}
+										{% if forums.S_PRINT %}
+										{% if forums.S_IS_FORUM %}
+										<input type="checkbox" name="user-{{ digests_edit_subscribers.USER_ID }}-{{ forums.FORUM_NAME }}" id="user-{{ digests_edit_subscribers.USER_ID }}-{{ forums.FORUM_NAME }}"{% if forums.S_FORUM_SUBSCRIBED %} checked="checked"{% endif %} onchange="addToStack(this.name);"/> <label for="user-{{ digests_edit_subscribers.USER_ID }}-{{ forums.FORUM_NAME }}"><span class="point8-em">{{ forums.FORUM_LABEL }}</span></label><br>
+										{% endif %}
+										{% if not forums.S_IS_FORUM %}
+										<span class="point8-em"><i>{{ forums.FORUM_LABEL }}</i></span><br>
+										{% endif %}
+										{% endif %}
+										{% if forums.S_DIV_CLOSE %}
+									</div>
+									{% endif %}
+									{% endfor %}
+								</div>
+							</dd>
+						</dl>
+					</fieldset>
+					<fieldset>
+						<legend>{{ lang('UCP_DIGESTS_POST_FILTERS') }}</legend>
+						<dl>
+							<dt><label for="user-{{ digests_edit_subscribers.USER_ID }}-max_posts">{{ lang('DIGESTS_COUNT_LIMIT') }}</label></dt>
+							<dd><input type="text" size="5" maxlength="5" id="user-{{ digests_edit_subscribers.USER_ID }}-max_posts" name="user-{{ digests_edit_subscribers.USER_ID }}-max_posts" value="{{ digests_edit_subscribers.USER_DIGEST_MAX_POSTS }}" onchange="addToStack(this.name);" /></dd>
+						</dl>
+						<dl>
+							<dt><label for="user-{{ digests_edit_subscribers.USER_ID }}-min_words">{{ lang('DIGESTS_MIN_SIZE') }}</label></dt>
+							<dd><input type="text" size="4" maxlength="4" id="user-{{ digests_edit_subscribers.USER_ID }}-min_words" name="user-{{ digests_edit_subscribers.USER_ID }}-min_words" value="{{ digests_edit_subscribers.USER_DIGEST_MIN_WORDS }}" onchange="addToStack(this.name);" /></dd>
+						</dl>
+						<dl>
+							<dt><label for="user-{{ digests_edit_subscribers.USER_ID }}-new_posts_only1">{{ lang('DIGESTS_NEW_POSTS_ONLY') }}</label></dt>
+							<dd><input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-new_posts_only" id="user-{{ digests_edit_subscribers.USER_ID }}-new_posts_only1" value="1"{% if digests_edit_subscribers.S_DIGEST_NEW_POSTS_ONLY_CHECKED_YES %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> <label for="user-{{ digests_edit_subscribers.USER_ID }}-new_posts_only1">{{ lang('YES') }}</label>&nbsp;<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-new_posts_only" id="user-{{ digests_edit_subscribers.USER_ID }}-new_posts_only2" value="0"{% if digests_edit_subscribers.S_DIGEST_NEW_POSTS_ONLY_CHECKED_NO %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> <label for="user-{{ digests_edit_subscribers.USER_ID }}-new_posts_only2">{{ lang('NO') }}</label></dd>
+						</dl>
+						<dl>
+							<dt><label for="user-{{ digests_edit_subscribers.USER_ID }}-show_mine1">{{ lang('DIGESTS_REMOVE_YOURS') }}</label></dt>
+							<dd><input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-show_mine" id="user-{{ digests_edit_subscribers.USER_ID }}-show_mine1" value="1"{% if digests_edit_subscribers.S_DIGEST_SHOW_MINE_CHECKED_NO %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> <label for="user-{{ digests_edit_subscribers.USER_ID }}-show_mine1">{{ lang('YES') }}</label>&nbsp;<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-show_mine" id="user-{{ digests_edit_subscribers.USER_ID }}-show_mine2" value="0"{% if digests_edit_subscribers.S_DIGEST_SHOW_MINE_CHECKED_YES %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> <label for="user-{{ digests_edit_subscribers.USER_ID }}-show_mine2">{{ lang('NO') }}</label></dd>
+						</dl>
+						<dl>
+							<dt><label for="user-{{ digests_edit_subscribers.USER_ID }}-filter_foes1">{{ lang('DIGESTS_FILTER_FOES') }}</label></dt>
+							<dd><input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-filter_foes" id="user-{{ digests_edit_subscribers.USER_ID }}-filter_foes1" value="1"{% if digests_edit_subscribers.S_DIGEST_FILTER_FOES_CHECKED_YES %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> <label for="user-{{ digests_edit_subscribers.USER_ID }}-filter_foes1">{{ lang('YES') }}</label>&nbsp;<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-filter_foes" id="user-{{ digests_edit_subscribers.USER_ID }}-filter_foes2" value="0"{% if digests_edit_subscribers.S_DIGEST_FILTER_FOES_CHECKED_NO %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> <label for="user-{{ digests_edit_subscribers.USER_ID }}-filter_foes2">{{ lang('NO') }}</label></dd>
+						</dl>
+						<dl>
+							<dt><label for="user-{{ digests_edit_subscribers.USER_ID }}-pms1">{{ lang('DIGESTS_PRIVATE_MESSAGES_IN_DIGEST') }}</label></dt>
+							<dd><input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-pms" id="user-{{ digests_edit_subscribers.USER_ID }}-pms1" value="1"{% if digests_edit_subscribers.S_DIGEST_PRIVATE_MESSAGES_IN_DIGEST_YES %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> <label for="user-{{ digests_edit_subscribers.USER_ID }}-pms1">{{ lang('YES') }}</label>&nbsp;<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-pms" id="user-{{ digests_edit_subscribers.USER_ID }}-pms2" value="0"{% if digests_edit_subscribers.S_DIGEST_PRIVATE_MESSAGES_IN_DIGEST_NO %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> <label for="user-{{ digests_edit_subscribers.USER_ID }}-pms2">{{ lang('NO') }}</label></dd>
+						</dl>
+						<dl>
+							<dt><label for="user-{{ digests_edit_subscribers.USER_ID }}-mark_read1">{{ lang('DIGESTS_MARK_READ') }}</label></dt>
+							<dd><input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-mark_read" id="user-{{ digests_edit_subscribers.USER_ID }}-mark_read1" value="1"{% if digests_edit_subscribers.S_DIGEST_PM_MARK_READ_CHECKED_YES %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> <label for="user-{{ digests_edit_subscribers.USER_ID }}-mark_read1">{{ lang('YES') }}</label>&nbsp;<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-mark_read" id="user-{{ digests_edit_subscribers.USER_ID }}-mark_read2" value="0"{% if digests_edit_subscribers.S_DIGEST_PM_MARK_READ_CHECKED_NO %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> <label for="user-{{ digests_edit_subscribers.USER_ID }}-mark_read2">{{ lang('NO') }}</label></dd>
+						</dl>
+					</fieldset>
+					<fieldset>
+						<legend>{{ lang('UCP_DIGESTS_ADDITIONAL_CRITERIA') }}</legend>
+						<dl>
+							<dt><label for="user-{{ digests_edit_subscribers.USER_ID }}-sortby">{{ lang('DIGESTS_SORT_BY') }}</label></dt>
+							<dd>
+								<select name="user-{{ digests_edit_subscribers.USER_ID }}-sortby" id="user-{{ digests_edit_subscribers.USER_ID }}-sortby" onchange="addToStack(this.name);">
+									<option value="board"{% if digests_edit_subscribers.S_BOARD_SELECTED %} selected="selected"{% endif %}>{{ lang('DIGESTS_SORT_USER_ORDER') }}</option>
+									<option value="standard"{% if digests_edit_subscribers.S_STANDARD_SELECTED %} selected="selected"{% endif %}>{{ lang('DIGESTS_SORT_FORUM_TOPIC') }}</option>
+									<option value="standard_desc"{% if digests_edit_subscribers.S_STANDARD_DESC_SELECTED %} selected="selected"{% endif %}>{{ lang('DIGESTS_SORT_FORUM_TOPIC_DESC') }}</option>
+									<option value="postdate"{% if digests_edit_subscribers.S_POSTDATE_SELECTED %} selected="selected"{% endif %}>{{ lang('DIGESTS_SORT_POST_DATE') }}</option>
+									<option value="postdate_desc"{% if digests_edit_subscribers.S_POSTDATE_DESC_SELECTED %} selected="selected"{% endif %}>{{ lang('DIGESTS_SORT_POST_DATE_DESC') }}</option>
+								</select>
+							</dd>
+						</dl>
+						<dl>
+							<dt><label for="user-{{ digests_edit_subscribers.USER_ID }}-max_display_words">{{ lang('DIGESTS_MAX_DISPLAY_WORDS') }}</label></dt>
+							<dd><input type="text" size="4" maxlength="4" name="user-{{ digests_edit_subscribers.USER_ID }}-max_display_words" id="user-{{ digests_edit_subscribers.USER_ID }}-max_display_words" value="{{ digests_edit_subscribers.USER_DIGEST_MAX_DISPLAY_WORDS }}" onchange="addToStack(this.name);" />
+							</dd>
+						</dl>
+						<dl>
+							<dt><label for="user-{{ digests_edit_subscribers.USER_ID }}-no_post_text1">{{ lang('DIGESTS_NO_POST_TEXT') }}</label></dt>
+							<dd><input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-no_post_text" id="user-{{ digests_edit_subscribers.USER_ID }}-no_post_text1" value="1"{% if digests_edit_subscribers.S_DIGEST_NO_POST_TEXT_CHECKED_YES %} checked="checked"{% endif %} onchange="addToStack(this.name);" /><label for="user-{{ digests_edit_subscribers.USER_ID }}-no_post_text1"> {{ lang('YES') }}</label>&nbsp;<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-no_post_text" id="user-{{ digests_edit_subscribers.USER_ID }}-no_post_text2" value="0"{% if digests_edit_subscribers.S_DIGEST_NO_POST_TEXT_CHECKED_NO %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> <label for="user-{{ digests_edit_subscribers.USER_ID }}-no_post_text2"> {{ lang('NO') }}</label></dd>
+						</dl>
+						<dl>
+							<dt><label for="user-{{ digests_edit_subscribers.USER_ID }}-send_on_no_posts1">{{ lang('DIGESTS_SEND_ON_NO_POSTS') }}</label></dt>
+							<dd><label for="user-{{ digests_edit_subscribers.USER_ID }}-send_on_no_posts1"><input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-send_on_no_posts" id="user-{{ digests_edit_subscribers.USER_ID }}-send_on_no_posts1"{% if digests_edit_subscribers.S_DIGEST_SEND_ON_NO_POSTS_YES_CHECKED %} checked="checked"{% endif %} onchange="addToStack(this.name);" value="1" /> {{ lang('YES') }}</label>&nbsp;<label for="user-{{ digests_edit_subscribers.USER_ID }}-send_on_no_posts2"><input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-send_on_no_posts" id="user-{{ digests_edit_subscribers.USER_ID }}-send_on_no_posts2"{% if digests_edit_subscribers.S_DIGEST_SEND_ON_NO_POSTS_NO_CHECKED %} checked="checked"{% endif %} onchange="addToStack(this.name);" value="0" /> {{ lang('NO') }}</label></dd>
+						</dl>
+						<dl>
+							<dt><label for="user-{{ digests_edit_subscribers.USER_ID }}-lastvisit1">{{ lang('DIGESTS_LASTVISIT_RESET') }}</label></dt>
+							<dd><label for="user-{{ digests_edit_subscribers.USER_ID }}-lastvisit1"><input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-lastvisit" id="user-{{ digests_edit_subscribers.USER_ID }}-lastvisit1" value="1"{% if digests_edit_subscribers.S_LASTVISIT_YES_CHECKED %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> {{ lang('YES') }}</label>&nbsp;<label for="user-{{ digests_edit_subscribers.USER_ID }}-lastvisit2"><input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-lastvisit" id="user-{{ digests_edit_subscribers.USER_ID }}-lastvisit2" value="0"{% if digests_edit_subscribers.S_LASTVISIT_NO_CHECKED %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> {{ lang('NO') }}</label></dd>
+						</dl>
+						<dl>
+							<dt><label for="user-{{ digests_edit_subscribers.USER_ID }}-attachments1">{{ lang('DIGESTS_SHOW_ATTACHMENTS') }}</label></dt>
+							<dd><label for="user-{{ digests_edit_subscribers.USER_ID }}-attachments1"><input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-attachments" id="user-{{ digests_edit_subscribers.USER_ID }}-attachments1" value="1"{% if digests_edit_subscribers.S_ATTACHMENTS_YES_CHECKED %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> {{ lang('YES') }}</label>&nbsp;<label for="user-{{ digests_edit_subscribers.USER_ID }}-attachments2"><input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-attachments" id="user-{{ digests_edit_subscribers.USER_ID }}-attachments2" value="0"{% if digests_edit_subscribers.S_ATTACHMENTS_NO_CHECKED %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> {{ lang('NO') }}</label></dd>
+						</dl>
+						<dl>
+							<dt><label for="user-{{ digests_edit_subscribers.USER_ID }}-blockimages1">{{ lang('DIGESTS_BLOCK_IMAGES') }}</label></dt>
+							<dd><label for="user-{{ digests_edit_subscribers.USER_ID }}-blockimages1"><input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-blockimages" id="user-{{ digests_edit_subscribers.USER_ID }}-blockimages1" value="1"{% if digests_edit_subscribers.S_BLOCK_IMAGES_YES_CHECKED %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> {{ lang('YES') }}</label>&nbsp;<label for="user-{{ digests_edit_subscribers.USER_ID }}-blockimages2"><input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-blockimages" id="user-{{ digests_edit_subscribers.USER_ID }}-blockimages2" value="0"{% if digests_edit_subscribers.S_BLOCK_IMAGES_NO_CHECKED %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> {{ lang('NO') }}</label></dd>
+						</dl>
+						<dl>
+							<dt><label for="user-{{ digests_edit_subscribers.USER_ID }}-toc1">{{ lang('DIGESTS_TOC') }}{{ lang('COLON') }}</label></dt>
+							<dd><label for="user-{{ digests_edit_subscribers.USER_ID }}-toc1"><input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-toc" id="user-{{ digests_edit_subscribers.USER_ID }}-toc1" value="1"{% if digests_edit_subscribers.S_TOC_YES_CHECKED %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> {{ lang('YES') }}</label>&nbsp;<label for="user-{{ digests_edit_subscribers.USER_ID }}-toc2"><input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-toc" id="user-{{ digests_edit_subscribers.USER_ID }}-toc2" value="0"{% if digests_edit_subscribers.S_TOC_NO_CHECKED %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> {{ lang('NO') }}</label></dd>
+						</dl>
+					</fieldset>
+				</td>
+			</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+		<p class="quick">
+			<label for="selected">{{ lang('DIGESTS_WITH_SELECTED') }}{{ lang('COLON') }}</label>
+			<select id="selected" name="selected" onchange="addToStack(this.name);">
+				<option value="IGNORE" selected="selected">{{ lang('DIGESTS_IGNORE') }}</option>
+				<option value="NONE">{{ lang('DIGESTS_UNSUBSCRIBE') }}</option>
+				<option value="DFLT">{{ lang('DIGESTS_DEFAULT') }}</option>
+			</select>&nbsp;
+			<label for="subscribe">{{ lang('DIGESTS_SHOW') }}{{ lang('COLON') }}</label>
+			<select id="subscribe" name="subscribe" onchange="addToStack(this.name);">
+				<option value="a"{{ ALL_SELECTED }}>{{ lang('DIGESTS_ALL') }}</option>
+				<option value="s"{{ SUBSCRIBE_SELECTED }}>{{ lang('DIGESTS_SUBSCRIBED') }}</option>
+				<option value="u"{{ UNSUBSCRIBE_SELECTED }}>{{ lang('DIGESTS_UNSUBSCRIBED') }}</option>
+				<option value="t"{{ STOPPED_SUBSCRIBING_SELECTED }}>{{ lang('DIGESTS_STOPPED_SUBSCRIBING') }}</option>
+			</select>&nbsp;
+			<label for="sortby">{{ lang('SORT_BY') }}{{ lang('COLON') }}</label>
+			<select id="sortby" name="sortby" onchange="addToStack(this.name);">
+				<option value="u"{{ USERNAME_SELECTED }}>{{ lang('USERNAME') }}</option>
+				<option value="e"{{ EMAIL_SELECTED }}>{{ lang('EMAIL_ADDRESS') }}</option>
+				<option value="f"{{ FREQUENCY_SELECTED }}>{{ lang('DIGESTS_FREQUENCY_SHORT') }}</option>
+				<option value="s"{{ FORMAT_SELECTED }}>{{ lang('DIGESTS_FORMAT_STYLING') }}</option>
+				<option value="h"{{ HOUR_SELECTED }}>{{ lang('DIGESTS_HOUR_SENT') }}</option>
+				<option value="b"{{ HAS_UNSUBSCRIBED_SELECTED }}>{{ lang('DIGESTS_HAS_UNSUBSCRIBED') }}</option>
+				<option value="l"{{ LASTVISIT_SELECTED }}>{{ lang('LAST_VISIT') }}</option>
+				<option value="t"{{ LAST_SENT_SELECTED }}>{{ lang('DIGESTS_LAST_SENT') }}</option>
+			</select>&nbsp;
+			<label for="sortorder">{{ lang('DIGESTS_SORT_ORDER') }}{{ lang('COLON') }}</label>
+			<select id="sortorder" name="sortorder" onchange="addToStack(this.name);">
+				<option value="a"{{ ASCENDING_SELECTED }}>{{ lang('ASCENDING') }}</option>
+				<option value="d"{{ DESCENDING_SELECTED }}>{{ lang('DESCENDING') }}</option>
+			</select>&nbsp;
+			<input class="button2" type="submit" name="sort" id="sort" value="{{ lang('DIGESTS_REFRESH') }}" />
+		</p>
 		<div class="pagination">
-			<!-- IF .pagination -->
-			<!-- INCLUDE pagination.html -->
-			<!-- ENDIF -->
+			{% if loops.pagination|length %}
+			{% INCLUDE 'pagination.html' %}
+			{% endif %}
 		</div>
 		<fieldset class="quick">
-            <p class="small"><a href="#" onclick="marklist('acp_digests', 'user-', true);">{L_MARK_ALL}</a> &bull; <a href="#" onclick="marklist('acp_digests', 'user-', false);">{L_UNMARK_ALL}</a></p>
-            {S_FORM_TOKEN}
-        </fieldset>
-<!-- ENDIF -->
+			<p class="small"><a href="#" onclick="marklist('acp_digests', 'user-', true);">{{ lang('MARK_ALL') }}</a> &bull; <a href="#" onclick="marklist('acp_digests', 'user-', false);">{{ lang('UNMARK_ALL') }}</a></p>
+			{{ S_FORM_TOKEN }}
+		</fieldset>
+		{% endif %}
 
-<!-- IF S_BALANCE_LOAD -->
-		<p class="quick" style="text-align:left;">
-			<label for="balance"><strong>{L_DIGESTS_APPLY_TO}{L_COLON}</strong></label>
+		{% if S_BALANCE_LOAD %}
+		<p class="quick" class="text-left">
+			<label for="balance"><strong>{{ lang('DIGESTS_APPLY_TO') }}{{ lang('COLON') }}</strong></label>
 			<select id="balance" name="balance">
-				<option value="ALL">{L_DIGESTS_ALL_TYPES}</option>
-				<option value="DAY">{L_DIGESTS_DAILY_ONLY}</option>
-				<option value="WEEK">{L_DIGESTS_WEEKLY_ONLY}</option>
-				<option value="MNTH">{L_DIGESTS_MONTHLY_ONLY}</option>
+				<option value="ALL">{{ lang('DIGESTS_ALL_TYPES') }}</option>
+				<option value="DAY">{{ lang('DIGESTS_DAILY_ONLY') }}</option>
+				<option value="WEEK">{{ lang('DIGESTS_WEEKLY_ONLY') }}</option>
+				<option value="MNTH">{{ lang('DIGESTS_MONTHLY_ONLY') }}</option>
 			</select>&nbsp;
-			<label for="for_hrs"><strong>{L_DIGESTS_BALANCE_HOURS}{L_COLON}</strong></label>
+			<label for="for_hrs"><strong>{{ lang('DIGESTS_BALANCE_HOURS') }}{{ lang('COLON') }}</strong></label>
 			<select id="for_hrs" name="for_hrs[]" multiple="multiple">
-				<option value="-1" selected="selected">{L_DIGESTS_ALL_HOURS}</option>
-				<!-- BEGIN digests_balance_load -->
-				<option value="{digests_balance_load.HOUR_UTC}">{digests_balance_load.HOUR}</option>
-				<!-- END digests_balance_load -->
+				<option value="-1" selected="selected">{{ lang('DIGESTS_ALL_HOURS') }}</option>
+				{% for digests_balance_load in loops.digests_balance_load %}
+				<option value="{{ digests_balance_load.HOUR_UTC }}">{{ digests_balance_load.HOUR }}</option>
+				{% endfor %}
 			</select>&nbsp;
-			<label for="to_hrs"><strong>{L_DIGESTS_BALANCE_APPLY_HOURS}{L_COLON}</strong></label>
+			<label for="to_hrs"><strong>{{ lang('DIGESTS_BALANCE_APPLY_HOURS') }}{{ lang('COLON') }}</strong></label>
 			<select id="to_hrs" name="to_hrs[]" multiple="multiple">
-				<option value="-1" selected="selected">{L_DIGESTS_ALL_HOURS}</option>
-				<!-- BEGIN digests_balance_load -->
-				<option value="{digests_balance_load.HOUR_UTC}">{digests_balance_load.HOUR}</option>
-				<!-- END digests_balance_load -->
+				<option value="-1" selected="selected">{{ lang('DIGESTS_ALL_HOURS') }}</option>
+				{% for digests_balance_load in loops.digests_balance_load %}
+				<option value="{{ digests_balance_load.HOUR_UTC }}">{{ digests_balance_load.HOUR }}</option>
+				{% endfor %}
 			</select>
 		</p>
-		<table id="down" style="table-layout: fixed; width: 100%;">
-            <colgroup>
-                <col class="col1" style="width:120px;">
-                <col class="col1" style="width:80px;">
-				<col class="col2">
+		<table id="down" class="layout-fixed">
+			<colgroup>
+				<col class="width-120">
+				<col class="width-80">
 			</colgroup>
-            <thead>
-                <tr>
-                    <th style="text-align:center;">{L_DIGESTS_HOUR_SENT}</th>
-					<th style="text-align:center; text-transform:uppercase;">{L_DIGESTS_NUMBER_OF_SUBSCRIBERS}</th>
-					<th style="text-align:left; text-transform:uppercase;">{L_DIGESTS_SUBSCRIBERS}</th>
-				</tr>
-				<tr>
-					<td style="text-align:center; text-transform:uppercase;"><strong>{L_DIGESTS_AVERAGE}</strong></td>
-					<td class="col1" style="text-align:center;">{S_DIGESTS_AVERAGE}</td>
-					<td class="col1" style="text-align:center;">&nbsp;</td>
-				</tr>
-            </thead>
-            <tbody>
-			<!-- BEGIN digests_balance_load -->
-                <tr>
-                    <td style="text-align:center;">{digests_balance_load.HOUR}</td>
-                    <td style="text-align:center;">{digests_balance_load.HOUR_COUNT}</td>
-					<td>{digests_balance_load.SUBSCRIBERS}</td>
-                </tr>
-			<!-- END digests_balance_load -->
-            </tbody>
-        </table>
+			<thead>
+			<tr>
+				<th class="text-center">{{ lang('DIGESTS_HOUR_SENT') }}</th>
+				<th class="text-center-uc">{{ lang('DIGESTS_NUMBER_OF_SUBSCRIBERS') }}</th>
+				<th class="text-left-uc">{{ lang('DIGESTS_SUBSCRIBERS_DAILY') }}</th>
+				<th class="text-left-uc">{{ lang('DIGESTS_SUBSCRIBERS_WEEKLY') }}</th>
+				<th class="text-left-uc">{{ lang('DIGESTS_SUBSCRIBERS_MONTHLY') }}</th>
+			</tr>
+			<tr>
+				<td class="text-center-uc"><strong>{{ lang('DIGESTS_AVERAGE') }}</strong></td>
+				<td class="text-center-uc">{{ S_DIGESTS_AVERAGE }}</td>
+				<td class="text-center">&nbsp;</td>
+				<td class="text-center">&nbsp;</td>
+				<td class="text-center">&nbsp;</td>
+			</tr>
+			</thead>
+			<tbody>
+			{% for digests_balance_load in loops.digests_balance_load %}
+			<tr>
+				<td class="text-center">{{ digests_balance_load.HOUR }}</td>
+				<td class="text-center">{{ digests_balance_load.HOUR_COUNT }}</td>
+				<td>{{ digests_balance_load.SUBSCRIBERS_DAILY }}</td>
+				<td>{{ digests_balance_load.SUBSCRIBERS_WEEKLY }}</td>
+				<td>{{ digests_balance_load.SUBSCRIBERS_MONTHLY }}</td>
+			</tr>
+			{% endfor %}
+			</tbody>
+		</table>
 
-	<p class="submit-buttons">
-        <input class="button1" type="submit" id="submit" name="submit" value="{L_DIGESTS_BALANCE_LOAD}" />
-		<input class="button2" type="reset" id="reset" name="reset" value="{L_RESET}" />
-	</p>
-<!-- ELSE -->
-	<p class="submit-buttons">
-        <input class="button1" type="submit" id="submit" name="submit" value="{L_SUBMIT}" />&nbsp;
-		<input class="button2" type="reset" id="reset" name="reset" value="{L_RESET}" />
-	</p>
-<!-- ENDIF -->
-	{S_FORM_TOKEN}
+		<p class="submit-buttons">
+			<input class="button1" type="submit" id="submit" name="submit" value="{{ lang('DIGESTS_BALANCE_LOAD') }}" />
+			<input class="button2" type="reset" id="reset" name="reset" value="{{ lang('RESET') }}" />
+		</p>
+		{% else %}
+		<p class="submit-buttons">
+			<input class="button1" type="submit" id="submit" name="submit" value="{{ lang('SUBMIT') }}" />&nbsp;
+			<input class="button2" type="reset" id="reset" name="reset" value="{{ lang('RESET') }}" />
+		</p>
+		{% endif %}
+		{{ S_FORM_TOKEN }}
 	</fieldset>
 </form>
 
-<!-- INCLUDE overall_footer.html -->
+{% INCLUDE 'overall_footer.html' %}

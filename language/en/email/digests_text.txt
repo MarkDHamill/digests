@@ -1,52 +1,52 @@
-{S_DIGESTS_TITLE}
+{{ S_DIGESTS_TITLE }}
 
-{L_DIGESTS_SALUTATION} {S_DIGESTS_SALUTATION_BLURB}
+{{ lang('DIGESTS_SALUTATION') }} {{ S_DIGESTS_SALUTATION_BLURB }}
 
-{S_DIGESTS_INTRODUCTION}
-{DIGESTS_TOC}
+{{ S_DIGESTS_INTRODUCTION }}
+{{ DIGESTS_TOC }}
 ____________________________________________________________
-{DIGESTS_CONTENT}
-____________________________________________________________
-
-{S_DIGESTS_YOUR_DIGEST_OPTIONS}
-
-{L_UCP_DIGESTS_BASICS_OPTIONS}{L_COLON}
-	{L_DIGESTS_MAIL_FREQUENCY}{L_COLON} {S_DIGESTS_MAIL_FREQUENCY}
-	{L_DIGESTS_FORMAT_FOOTER}{L_COLON} {S_DIGESTS_FORMAT_FOOTER}
-	{L_DIGESTS_SEND_HOUR}{L_COLON} {S_DIGESTS_SEND_HOUR}
-{L_UCP_DIGESTS_FORUMS_SELECTION_OPTIONS}{L_COLON}
-	{L_DIGESTS_FILTER_TYPE}{L_COLON} {S_DIGESTS_FILTER_TYPE}
-	{L_DIGESTS_FORUMS_WANTED}{L_COLON} {S_DIGESTS_FORUMS_WANTED}
-{L_UCP_DIGESTS_POST_FILTERS_OPTIONS}{L_COLON}
-	{L_DIGESTS_COUNT_LIMIT}{L_COLON} {S_DIGESTS_COUNT_LIMIT}
-	{L_DIGESTS_MIN_SIZE}{L_COLON} {S_DIGESTS_MIN_SIZE}
-	{L_DIGESTS_SHOW_NEW_POSTS_ONLY}{L_COLON} <!-- IF S_DIGESTS_SHOW_NEW_POSTS_ONLY -->{L_YES}<!-- ELSE-->{L_NO}<!-- ENDIF-->
-
-	{L_DIGESTS_FILTER_FOES}{L_COLON} <!-- IF S_DIGESTS_FILTER_FOES -->{L_YES}<!-- ELSE-->{L_NO}<!-- ENDIF-->
-
-{L_DIGESTS_REMOVE_YOURS}{L_COLON} <!-- IF S_DIGESTS_REMOVE_YOURS -->{L_YES}<!-- ELSE-->{L_NO}<!-- ENDIF-->
-
-	{L_DIGESTS_SHOW_PMS}{L_COLON} <!-- IF S_DIGESTS_SHOW_PMS -->{L_YES}<!-- ELSE-->{L_NO}<!-- ENDIF-->
-
-	{L_DIGESTS_PMS_MARK_READ}{L_COLON} <!-- IF S_DIGESTS_PMS_MARK_READ -->{L_YES}<!-- ELSE-->{L_NO}<!-- ENDIF-->
-
-{L_UCP_DIGESTS_ADDITIONAL_CRITERIA_OPTIONS}{L_COLON}
-	{L_DIGESTS_SORT_BY}{L_COLON} {S_DIGESTS_SORT_BY}
-	{L_DIGESTS_MAX_SIZE}{L_COLON} {S_DIGESTS_MAX_SIZE}
-	{L_DIGESTS_SEND_IF_NO_NEW_MESSAGES} <!-- IF S_DIGESTS_SEND_IF_NO_NEW_MESSAGES -->{L_YES}<!-- ELSE-->{L_NO}<!-- ENDIF-->
-
-	{L_DIGESTS_LASTVISIT_RESET}{L_COLON} <!-- IF S_DIGESTS_LASTVISIT_RESET -->{L_YES}<!-- ELSE-->{L_NO}<!-- ENDIF-->
-
-	{L_DIGESTS_SHOW_ATTACHMENTS}{L_COLON} <!-- IF S_DIGESTS_SHOW_ATTACHMENTS -->{L_YES}<!-- ELSE-->{L_NO}<!-- ENDIF-->
-
-	{L_DIGESTS_BLOCK_IMAGES}{L_COLON} <!-- IF S_DIGESTS_BLOCK_IMAGES -->{L_YES}<!-- ELSE-->{L_NO}<!-- ENDIF-->
-
-	{L_DIGESTS_TOC}{L_COLON} <!-- IF S_DIGESTS_TOC -->{L_YES}<!-- ELSE-->{L_NO}<!-- ENDIF-->
-
+{{ DIGESTS_CONTENT }}
 ____________________________________________________________
 
-{S_DIGESTS_PUBLISH_DATE}
+{{ S_DIGESTS_YOUR_DIGEST_OPTIONS }}
 
-{S_DIGESTS_DISCLAIMER}
+{{ lang('UCP_DIGESTS_BASICS_OPTIONS') }}{{ lang('COLON') }}
+	{{ lang('DIGESTS_MAIL_FREQUENCY') }}{{ lang('COLON') }} {{ S_DIGESTS_MAIL_FREQUENCY }}
+	{{ lang('DIGESTS_FORMAT_FOOTER') }}{{ lang('COLON') }} {{ S_DIGESTS_FORMAT_FOOTER }}
+	{{ lang('DIGESTS_SEND_HOUR') }}{{ lang('COLON') }} {{ S_DIGESTS_SEND_HOUR }}
+{{ lang('UCP_DIGESTS_FORUMS_SELECTION_OPTIONS') }}{{ lang('COLON') }}
+	{{ lang('DIGESTS_FILTER_TYPE') }}{{ lang('COLON') }} {{ S_DIGESTS_FILTER_TYPE }}
+	{{ lang('DIGESTS_FORUMS_WANTED') }}{{ lang('COLON') }} {{ S_DIGESTS_FORUMS_WANTED }}
+{{ lang('UCP_DIGESTS_POST_FILTERS_OPTIONS') }}{{ S_COLON }}
+	{{ lang('DIGESTS_COUNT_LIMIT') }}{{ lang('COLON') }} {{ S_DIGESTS_COUNT_LIMIT }}
+	{{ lang('DIGESTS_MIN_SIZE') }}{{ lang('COLON') }} {{ S_DIGESTS_MIN_SIZE }} 
+	{{ lang('DIGESTS_SHOW_NEW_POSTS_ONLY') }}{{ lang('COLON') }} {% if S_DIGESTS_SHOW_NEW_POSTS_ONLY %}{{ lang('YES') }}{% else %}{{ lang('NO') }}{% endif %}
 
-{L_DIGESTS_POWERED_BY_TEXT} {S_DIGESTS_POWERED_BY}{S_DIGESTS_TRANSLATOR}
+	{{ lang('DIGESTS_REMOVE_YOURS') }}{{ lang('COLON') }} {% if S_DIGESTS_REMOVE_YOURS %}{{ lang('YES') }}{% else %}{{ lang('NO') }}{% endif %}
+
+	{{ lang('DIGESTS_FILTER_FOES') }}{{ lang('COLON') }} {% if S_DIGESTS_FILTER_FOES %}{{ lang('YES') }}{% else %}{{ lang('NO') }}{% endif %}
+
+	{{ lang('DIGESTS_SHOW_PMS') }}{{ lang('COLON') }} {% if S_DIGESTS_SHOW_PMS %}{{ lang('YES') }}{% else %}{{ lang('NO') }}{% endif %}
+
+	{{ lang('DIGESTS_PMS_MARK_READ') }}{{ lang('COLON') }} {% if S_DIGESTS_PMS_MARK_READ %}{{ lang('YES') }}{% else %}{{ lang('NO') }}{% endif %}
+
+{{ lang('UCP_DIGESTS_ADDITIONAL_CRITERIA_OPTIONS') }}{{ S_COLON }}
+	{{ lang('DIGESTS_SORT_BY') }}{{ lang('COLON') }} {{ S_DIGESTS_SORT_BY }}
+	{{ lang('DIGESTS_MAX_SIZE') }}{{ lang('COLON') }} {{ S_DIGESTS_MAX_SIZE }}
+	{{ lang('DIGESTS_SEND_IF_NO_NEW_MESSAGES') }} {% if S_DIGESTS_SEND_IF_NO_NEW_MESSAGES %}{{ lang('YES') }}{% else %}{{ lang('NO') }}{% endif %}
+
+	{{ lang('DIGESTS_LASTVISIT_RESET') }}{{ lang('COLON') }} {% if S_DIGESTS_LASTVISIT_RESET %}{{ lang('YES') }}{% else %}{{ lang('NO') }}{% endif %}
+
+	{{ lang('DIGESTS_SHOW_ATTACHMENTS') }}{{ lang('COLON') }} {% if S_DIGESTS_SHOW_ATTACHMENTS %}{{ lang('YES') }}{% else %}{{ lang('NO') }}{% endif %}
+
+	{{ lang('DIGESTS_BLOCK_IMAGES') }}{{ lang('COLON') }} {% if S_DIGESTS_BLOCK_IMAGES %}{{ lang('YES') }}{% else %}{{ lang('NO') }}{% endif %}
+
+	{{ lang('DIGESTS_TOC') }}{{ lang('COLON') }} {% if S_DIGESTS_TOC %}{{ lang('YES') }}{% else %}{{ lang('NO') }}{% endif %}
+
+____________________________________________________________
+
+{{ S_DIGESTS_PUBLISH_DATE }}
+
+{{ S_DIGESTS_DISCLAIMER }}
+
+{{ lang('DIGESTS_POWERED_BY_TEXT') }} {{ S_DIGESTS_POWERED_BY }}{{ S_DIGESTS_TRANSLATOR }}

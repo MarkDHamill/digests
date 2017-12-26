@@ -1,7 +1,7 @@
-Dear {USERNAME},
+Dear {{ USERNAME }},
 
-This is to notify you that an administrator of {FORUM_NAME} has unsubscribed you from receiving an email digest.
+This is to notify you that an administrator of {{ FORUM_NAME }} has unsubscribed you from receiving an email digest.
 
 Sincerely,
 
-{FORUM_NAME} Administration Team
+{{ FORUM_NAME }} Administration Team

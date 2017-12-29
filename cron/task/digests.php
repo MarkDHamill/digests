@@ -1179,6 +1179,9 @@ class digests extends \phpbb\cron\task\base
 					}
 					else
 					{
+						// save queue for later delivery (if applicable)
+						$html_messenger->save_queue();
+
 						// Digest should have been mailed successfully
 						if ($this->config['phpbbservices_digests_enable_log'])
 						{

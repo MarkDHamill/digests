@@ -1850,11 +1850,11 @@ class main_module
 			$result = $this->db->sql_query($sql);
 			$rowset = $this->db->sql_fetchrowset($result);
 			
+			// E-mail setup
+			$messenger = new \messenger();
+
 			foreach ($rowset as $row)
 			{
-				
-				// E-mail setup
-				$messenger = new \messenger();
 				
 				switch ($email_template)
 				{
@@ -1966,6 +1966,7 @@ class main_module
 				
 			}
 	
+			$messenger->save_queue(); // save queued emails for later delivery, if applicable
 			$this->db->sql_freeresult($result); // Query be gone!
 			
 		}

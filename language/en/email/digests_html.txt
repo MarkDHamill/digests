@@ -16,6 +16,7 @@
 		.content { clear: both; float: left; width: 100%; }
 		.forum { clear: both; float: left; width: 100%; }
 		h1 { color:#000000; margin-bottom: 20px; }
+		h2 { clear:both; }
 		h1,h3,p,div { margin-top:10px; margin-bottom:10px; clear: both; float: left; }
 		h4 { clear: both; float: left; }
 		hr { clear: both; }

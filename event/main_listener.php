@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Digests
-* @copyright (c) 2017 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2018 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -13,8 +13,6 @@ namespace phpbbservices\digests\event;
 * @ignore
 */
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-
-use phpbbservices\digests\constants\constants;
 
 /**
 * Event listener

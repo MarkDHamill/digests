@@ -11,6 +11,7 @@ services:
     phpbbservices.digests.common:
         class: phpbbservices\digests\core\common
         arguments:
+            - '@language'
     phpbbservices.digests.cron.task.cron_task:
         class: phpbbservices\digests\cron\task\digests
         arguments:

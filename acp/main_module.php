@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Digests
-* @copyright (c) 2017 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2018 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -59,7 +59,7 @@ class main_module
 
 		$this->language->add_lang(array('acp/info_acp_common', 'acp/common'), 'phpbbservices/digests');
 
-		$submit = (isset($_POST['submit'])) ? true : false;
+		$submit = ($this->request->is_set_post('submit')) ? true : false;
 
 		$form_key = 'phpbbservices/digests';
 		add_form_key($form_key);
@@ -77,7 +77,7 @@ class main_module
 				$display_vars = array(
 					'title'	=> 'ACP_DIGESTS_GENERAL_SETTINGS',
 					'vars'	=> array(
-						'legend1'								=> 'ACP_DIGESTS_GENERAL_SETTINGS',
+						'legend1'											=> '',
 						'phpbbservices_digests_enable_log'					=> array('lang' => 'DIGESTS_ENABLE_LOG',						'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_show_email'					=> array('lang' => 'DIGESTS_SHOW_EMAIL',						'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_enable_auto_subscriptions'	=> array('lang' => 'DIGESTS_ENABLE_AUTO_SUBSCRIPTIONS',			'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
@@ -106,7 +106,7 @@ class main_module
 				$display_vars = array(
 					'title'	=> 'ACP_DIGESTS_USER_DEFAULT_SETTINGS',
 					'vars'	=> array(						
-						'legend1'											=> 'ACP_DIGESTS_USER_DEFAULT_SETTINGS',
+						'legend1'											=> '',
 						'phpbbservices_digests_user_digest_registration'	=> array('lang' => 'DIGESTS_USER_DIGESTS_REGISTRATION',	'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
 						'phpbbservices_digests_user_digest_type'			=> array('lang' => 'DIGESTS_FREQUENCY',					'validate' => 'string',	'type' => 'select', 'method' => 'digest_type_select', 'explain' => true),
 						'phpbbservices_digests_user_digest_format'			=> array('lang' => 'DIGESTS_FORMAT_STYLING',			'validate' => 'string',	'type' => 'select', 'method' => 'digest_style_select', 'explain' => true),
@@ -135,7 +135,7 @@ class main_module
 				$display_vars = array(
 					'title'	=> 'ACP_DIGESTS_EDIT_SUBSCRIBERS',
 					'vars'	=> array(
-						'legend1'											=> 'ACP_DIGESTS_EDIT_SUBSCRIBERS',
+						'legend1'											=> '',
 					)
 				);
 
@@ -249,7 +249,7 @@ class main_module
 						$ascending_selected = ' selected="selected"';
 					break;
 				}
-				
+
 				// Set up member search SQL
 				$match_any_chars = $this->db->get_any_char();
 				$member_sql = ($member <> '') ? " username_clean " . $this->db->sql_like_expression($match_any_chars . utf8_case_fold_nfc($member) . $match_any_chars) . " AND " : '';
@@ -276,8 +276,8 @@ class main_module
 				$this->db->sql_freeresult($result);
 				
 				// Create pagination logic
-				$this->u_action = append_sid("index.$this->phpEx?i=-phpbbservices-digests-acp-main_module&amp;mode=digests_edit_subscribers&amp;sortby=$sortby&amp;subscribe=$subscribe");
-				$this->pagination->generate_template_pagination($this->u_action, 'pagination', 'start', $total_users, $this->config['phpbbservices_digests_users_per_page'], $start);
+				$pagination_url = append_sid("index.$this->phpEx?i=-phpbbservices-digests-acp-main_module&amp;mode=digests_edit_subscribers&amp;sortby=$sortby&amp;subscribe=$subscribe");
+				$this->pagination->generate_template_pagination($pagination_url, 'pagination', 'start', $total_users, $this->config['phpbbservices_digests_users_per_page'], $start);
 								
 				// Stealing some code from my Smartfeed extension so I can get a list of forums that a particular user can access
 				
@@ -350,7 +350,7 @@ class main_module
 				
 					'WHERE'		=> "$subscribe_sql $member_sql user_type <> " . USER_IGNORE,
 
-					'ORDER_BY'	=> sprintf($sort_by_sql, $order_by_sql),
+					'ORDER_BY'	=> sprintf($sort_by_sql, $order_by_sql, $order_by_sql),
 				);
 
 				$sql = $this->db->sql_build_query('SELECT', $sql_array);
@@ -827,7 +827,7 @@ class main_module
 				$display_vars = array(
 					'title'	=> 'ACP_DIGESTS_MASS_SUBSCRIBE_UNSUBSCRIBE',
 					'vars'	=> array(
-						'legend1'												=> 'ACP_DIGESTS_MASS_SUBSCRIBE_UNSUBSCRIBE',
+						'legend1'												=> '',
 						'phpbbservices_digests_enable_subscribe_unsubscribe'	=> array('lang' => 'DIGESTS_ENABLE_SUBSCRIBE_UNSUBSCRIBE',	'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_subscribe_all'					=> array('lang' => 'DIGESTS_SUBSCRIBE_ALL',					'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_include_admins'					=> array('lang' => 'DIGESTS_INCLUDE_ADMINS',				'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
@@ -839,7 +839,7 @@ class main_module
 				$display_vars = array(
 					'title'	=> 'ACP_DIGESTS_RESET_CRON_RUN_TIME',
 					'vars'	=> array(
-						'legend1'								=> 'ACP_DIGESTS_RESET_CRON_RUN_TIME',
+						'legend1'								=> '',
 						'phpbbservices_digests_enable_subscribe_unsubscribe'	=> array('lang' => 'DIGESTS_RESET_CRON_RUN_TIME',	'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 					)
 				);
@@ -1243,7 +1243,7 @@ class main_module
 			$balance = $this->request->variable('balance', constants::DIGESTS_ALL);
 			$balance_sql = ($balance == constants::DIGESTS_ALL) ?
 				"user_digest_type <> '" . constants::DIGESTS_NONE_VALUE . "'" :
-				"user_digest_type = '" . $balance . "'";
+				"user_digest_type = '" . addslashes($balance) . "'";
 
 			// Get the hours to balance. If -1 is among those hours returned, all hours are wanted. Others that may be selected are ignored.
  			$for_hours = $this->request->variable('for_hrs', array('' => 0));
@@ -1850,11 +1850,11 @@ class main_module
 			$result = $this->db->sql_query($sql);
 			$rowset = $this->db->sql_fetchrowset($result);
 			
+			// E-mail setup
+			$messenger = new \messenger();
+
 			foreach ($rowset as $row)
 			{
-				
-				// E-mail setup
-				$messenger = new \messenger();
 				
 				switch ($email_template)
 				{
@@ -1966,6 +1966,7 @@ class main_module
 				
 			}
 	
+			$messenger->save_queue(); // save queued emails for later delivery, if applicable
 			$this->db->sql_freeresult($result); // Query be gone!
 			
 		}

@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - digests
-* @copyright (c) 2017 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2018 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -16,9 +16,6 @@ if (!defined('IN_PHPBB'))
 {
 	exit;
 }
-
-global $phpbb_root_path, $phpEx;
-include($phpbb_root_path . 'includes/functions_messenger.' . $phpEx); // Used to send emails
 
 // The purpose of this class is to override the messenger class so HTML can be sent in email. The code is a copy and paste for the relevant events
 // from the 3.2.0 source for /includes/functions_messenger.php with minimal changes needed to add this functionality. I made one major change from

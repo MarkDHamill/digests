@@ -10,9 +10,9 @@
 	{% endif %}
 	var dialogError = "{{ lang('ERROR')|escape('js') }}";
 	{% if S_DIGESTS_FORUMS_SELECTION %}
-	var excludedForums = "{{ lang('DIGESTS_EXCLUDED_FORUMS') }}"; // Note: LA_ template variable doesn't work, phpBB bug?
+	var excludedForums = "{{ lang('DIGESTS_EXCLUDED_FORUMS')|escape('js') }}";
 	var excludedForumsArray = excludedForums.split(',');
-	var ignoredForums = "{{ lang('DIGESTS_IGNORED_FORUMS') }}"; // Note: LA_ template variable doesn't work, phpBB bug?
+	var ignoredForums = "{{ lang('DIGESTS_IGNORED_FORUMS')|escape('js') }}";
 	var ignoredForumsArray = ignoredForums.split(',');
 	var noForumsChecked = "{{ lang('DIGESTS_NO_FORUMS_CHECKED')|escape('js') }}";
 	{% endif %}

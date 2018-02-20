@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Digests
-* @copyright (c) 2017 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2018 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -15,12 +15,18 @@ class common
 	/**
 	 * Constructor
 	*/
-		
-	public function __construct()
-	{
-		global $phpbb_container;
 
-		$this->language = $phpbb_container->get('language');
+	protected $language;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param \phpbb\language\language 	$language 			Language object
+	 */
+
+	public function __construct(\phpbb\language\language $language)
+	{
+		$this->language = $language;
 	}
 	
 	public function make_hour_string($hour, $user_dateformat)

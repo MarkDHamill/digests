@@ -2,16 +2,25 @@
 /**
 *
 * @package phpBB Extension - Digests
-* @copyright (c) 2017 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2018 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
 
 namespace phpbbservices\digests\cron\task;
 
-use phpbbservices\digests\constants\constants;
+/**
+ * @ignore
+ */
+if (!defined('IN_PHPBB'))
+{
+	exit;
+}
 
-use phpbbservices\digests\includes\html_messenger;
+global $phpbb_root_path, $phpEx;
+include($phpbb_root_path . 'includes/functions_messenger.' . $phpEx); // Used to send emails
+
+use phpbbservices\digests\constants\constants;
 
 class digests extends \phpbb\cron\task\base
 {

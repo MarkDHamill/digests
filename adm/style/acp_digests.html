@@ -96,21 +96,21 @@
 	{% INCLUDE ''~ auth_tpl.TEMPLATE_FILE ~'' %}
 	{% include 'overall_header.html' %}
 	{% endfor %}
-	<fieldset>
-		<legend>{{ lang('L_ACP_SUBMIT_CHANGES') }}</legend>
-		{% endif %}
+	<legend>{{ lang('L_ACP_SUBMIT_CHANGES') }}</legend>
+	{% endif %}
 
-		{% if S_EDIT_SUBSCRIBERS %}
-		<dl>
-			<dt class="border-right-none"><label for="member">{{ lang('DIGESTS_SEARCH_FOR_MEMBER') }}{{ lang('COLON') }}</label><br>{{ lang('DIGESTS_SEARCH_FOR_MEMBER_EXPLAIN') }}</dt>
-			<dd class="text-left"><input type="text" id="member" name="member" size="30" maxlength="255" value="{{ MEMBER }}" onchange="addToStack(this.name);" /></dd>
-		</dl>
-		<hr>
-		<div class="pagination">
-			{% if loops.pagination|length %}
-			{% INCLUDE 'pagination.html' %}
-			{% endif %}
-		</div>
+	{% if S_EDIT_SUBSCRIBERS %}
+	<dl>
+		<dt class="border-right-none"><label for="member">{{ lang('DIGESTS_SEARCH_FOR_MEMBER') }}{{ lang('COLON') }}</label><br>{{ lang('DIGESTS_SEARCH_FOR_MEMBER_EXPLAIN') }}</dt>
+		<dd class="text-left"><input type="text" id="member" name="member" size="30" maxlength="255" value="{{ MEMBER }}" onchange="addToStack(this.name);" /></dd>
+	</dl>
+	<hr>
+	<div class="pagination">
+		{% if loops.pagination|length %}
+		{% INCLUDE 'pagination.html' %}
+		{% endif %}
+	</div>
+	<fieldset>
 		<table id="down">
 			<thead>
 			<tr>
@@ -294,7 +294,12 @@
 			{% endfor %}
 			</tbody>
 		</table>
-		<p class="quick">
+		<div class="pagination">
+			{% if loops.pagination|length %}
+			{% INCLUDE 'pagination.html' %}
+			{% endif %}
+		</div>
+		<fieldset class="display-options">
 			<label for="selected">{{ lang('DIGESTS_WITH_SELECTED') }}{{ lang('COLON') }}</label>
 			<select id="selected" name="selected" onchange="addToStack(this.name);">
 				<option value="IGNORE" selected="selected">{{ lang('DIGESTS_IGNORE') }}</option>
@@ -324,21 +329,13 @@
 				<option value="a"{{ ASCENDING_SELECTED }}>{{ lang('ASCENDING') }}</option>
 				<option value="d"{{ DESCENDING_SELECTED }}>{{ lang('DESCENDING') }}</option>
 			</select>&nbsp;
-			<input class="button2" type="submit" name="sort" id="sort" value="{{ lang('DIGESTS_REFRESH') }}" />
-		</p>
-		<div class="pagination">
-			{% if loops.pagination|length %}
-			{% INCLUDE 'pagination.html' %}
-			{% endif %}
-		</div>
-		<fieldset class="quick">
-			<p class="small"><a href="#" onclick="marklist('acp_digests', 'user-', true);">{{ lang('MARK_ALL') }}</a> &bull; <a href="#" onclick="marklist('acp_digests', 'user-', false);">{{ lang('UNMARK_ALL') }}</a></p>
-			{{ S_FORM_TOKEN }}
+			<input class="button2" type="submit" name="sort" id="sort" value="{{ lang('GO') }}" />
 		</fieldset>
+		<hr>
 		{% endif %}
 
 		{% if S_BALANCE_LOAD %}
-		<p class="quick" class="text-left">
+		<p class="quick">
 			<label for="balance"><strong>{{ lang('DIGESTS_APPLY_TO') }}{{ lang('COLON') }}</strong></label>
 			<select id="balance" name="balance">
 				<option value="ALL">{{ lang('DIGESTS_ALL_TYPES') }}</option>
@@ -399,12 +396,25 @@
 			<input class="button1" type="submit" id="submit" name="submit" value="{{ lang('DIGESTS_BALANCE_LOAD') }}" />
 			<input class="button2" type="reset" id="reset" name="reset" value="{{ lang('RESET') }}" />
 		</p>
+		{% elseif S_EDIT_SUBSCRIBERS %}
+		<p class="quick">
+			<input class="button1" type="submit" id="submit" name="submit" value="{{ lang('SUBMIT') }}" />&nbsp;
+			<input class="button2" type="reset" id="reset" name="reset" value="{{ lang('RESET') }}" />
+		</p>
 		{% else %}
 		<p class="submit-buttons">
 			<input class="button1" type="submit" id="submit" name="submit" value="{{ lang('SUBMIT') }}" />&nbsp;
 			<input class="button2" type="reset" id="reset" name="reset" value="{{ lang('RESET') }}" />
 		</p>
 		{% endif %}
+
+		{% if S_EDIT_SUBSCRIBERS %}
+		<fieldset class="quick">
+			<p class="small"><a href="#" onclick="marklist('acp_digests', 'user-', true);">{{ lang('MARK_ALL') }}</a> &bull; <a href="#" onclick="marklist('acp_digests', 'user-', false);">{{ lang('UNMARK_ALL') }}</a></p>
+			{{ S_FORM_TOKEN }}
+		</fieldset>
+		{% endif %}
+
 		{{ S_FORM_TOKEN }}
 	</fieldset>
 </form>

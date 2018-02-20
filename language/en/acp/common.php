@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Digests
-* @copyright (c) 2017 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2018 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -111,7 +111,6 @@ $lang = array_merge($lang, array(
 																	1 => 'During this rebalancing, %d digest subscriber had their digest send hour changed.',
 																	2 => 'During this rebalancing, %d digest subscribers had their digest send hour changed.',
 															),
-	'DIGESTS_REFRESH'										=> 'Refresh',
 	'DIGESTS_REGISTRATION_FIELD'							=> 'Allow users to subscribe to digests upon registration',
 	'DIGESTS_REGISTRATION_FIELD_EXPLAIN'					=> 'If enabled, upon registration users have the option to get digests using the board&rsquo;s defaults. This option does not appear if automatic subscriptions are enabled.',
 	'DIGESTS_REPLY_TO_EMAIL_ADDRESS'						=> 'Reply to email address',
@@ -121,7 +120,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_RUN_TEST'										=> 'Run the mailer',
 	'DIGESTS_RUN_TEST_CLEAR_SPOOL'							=> 'Clear the cache/phpbbservices/digests directory',
 	'DIGESTS_RUN_TEST_CLEAR_SPOOL_ERROR'					=> 'Could not remove all the files in the cache/phpbbservices/digests directory. This may be due to a permissions issue or the directory was deleted. The file permissions on the directory should be set to publicly writeable (777 on Unix-based systems).',
-	'DIGESTS_RUN_TEST_CLEAR_SPOOL_EXPLAIN'					=> 'If Yes, any files in the cache/phpbbservices/digests directory will be erased. This is a good thing to do to ensure previous digest files are not accessible. This action is done before any new digests are written to this directory.',
+	'DIGESTS_RUN_TEST_CLEAR_SPOOL_EXPLAIN'					=> 'If Yes, any files in the cache/phpbbservices/digests directory will be erased. This is a good thing to do to ensure previous digest files are not accessible. It is good to select this option when you are done with any troubleshooting, as content in this folder is pubicly accessible. This action is performed before any new digests are written to this directory. Note that you can run this option at any time to erase content in this directory. It works whether or not you select to run the mailer, providing you submit this form.',
 	'DIGESTS_RUN_TEST_DAY'									=> 'Simulation day in the month',
 	'DIGESTS_RUN_TEST_DAY_EXPLAIN'							=> 'Enter a whole number from 1 to 31. If the year, month and day are in the future of course no digests will be created. Don&rsquo;t use a day that does not logically belong in the month, like February 31.',
 	'DIGESTS_RUN_TEST_EMAIL_ADDRESS'						=> 'Test email address',
@@ -140,7 +139,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_RUN_TEST_YEAR'									=> 'Simulation year',
 	'DIGESTS_RUN_TEST_YEAR_EXPLAIN'							=> 'Years from 2000 through 2030 are allowed. Normally this should be set to the current year. If the year is in the future of course no digests will created.',
 	'DIGESTS_SEARCH_FOR_MEMBER'								=> 'Search for member',
-	'DIGESTS_SEARCH_FOR_MEMBER_EXPLAIN'						=> 'Enter the full or partial member name to look for then press Refresh. Leave blank to see all members. Searches are not case sensitive.',
+	'DIGESTS_SEARCH_FOR_MEMBER_EXPLAIN'						=> 'Enter the full or partial member name to look then press Return or Enter. Leave blank to see all members. Searches are not case sensitive.',
 	'DIGESTS_SELECT_FORUMS_ADMIN_EXPLAIN'					=> 'The list of forums includes only those forums this user is allowed to read. If you wish to give this user access to additional forums not shown here, expand their forum user or group permissions. Note although you can fine tune the forums that appear in their digest, if their digest type is &ldquo;None&rdquo; no digest will actually be sent.',
 	'DIGESTS_SHOW'											=> 'Show',
 	'DIGESTS_SHOW_EMAIL'									=> 'Show email address in log',

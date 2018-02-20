@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Digests
-* @copyright (c) 2017 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2018 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -57,7 +57,7 @@ class main_module
 		$this->language->add_lang(array('common', 'acp/common'), 'phpbbservices/digests');
 
 		$form_key = 'phpbbservices/digests';
-		$submit = (isset($_POST['submit'])) ? true : false;
+		$submit = ($this->request->is_set_post('submit')) ? true : false;
 
 		if ($submit && !check_form_key($form_key))
 		{

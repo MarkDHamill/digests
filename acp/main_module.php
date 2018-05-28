@@ -872,7 +872,7 @@ class main_module
 		}
 
 		$this->new_config = $this->config;
-		$cfg_array = (isset($_REQUEST['config'])) ? $this->request->variable('config', array('' => ''), true) : $this->new_config;
+		$cfg_array = ($this->request->is_set('config')) ? $this->request->variable('config', array('' => ''), true) : $this->new_config;
 		$error = array();
 
 		// We validate the complete config if wished
@@ -1243,7 +1243,7 @@ class main_module
 			$balance = $this->request->variable('balance', constants::DIGESTS_ALL);
 			$balance_sql = ($balance == constants::DIGESTS_ALL) ?
 				"user_digest_type <> '" . constants::DIGESTS_NONE_VALUE . "'" :
-				"user_digest_type = '" . addslashes($balance) . "'";
+				"user_digest_type = '" . $this->db->sql_escape($balance) . "'";
 
 			// Get the hours to balance. If -1 is among those hours returned, all hours are wanted. Others that may be selected are ignored.
  			$for_hours = $this->request->variable('for_hrs', array('' => 0));

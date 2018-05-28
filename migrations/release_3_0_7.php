@@ -14,7 +14,7 @@ class release_3_0_7 extends \phpbb\db\migration\migration
 	static public function depends_on()
 	{
 		return array(
-			'\phpbbservices\digests\migrations\release_3_0_6',
+			'\phpbbservices\digests\migrations\release_3_0_5',
 		);
 	}
 

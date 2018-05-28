@@ -14,6 +14,8 @@ use phpbbservices\digests\core\common;
 
 class release_3_0_2_data extends \phpbb\db\migration\migration
 {
+
+
 	public function effectively_installed()
 	{
 		return $this->config->offsetExists('phpbbservices_digests_enable_auto_subscriptions');
@@ -29,9 +31,7 @@ class release_3_0_2_data extends \phpbb\db\migration\migration
 
 	public function update_data()
 	{
-		
-		$helper = new common();
-		
+
 		return array(
 		
 			// Add Digest extension configuration variables
@@ -66,7 +66,6 @@ class release_3_0_2_data extends \phpbb\db\migration\migration
 			array('config.add',	array('phpbbservices_digests_test_spool', 0)),
 			array('config.add',	array('phpbbservices_digests_test_time_use', 0)),
 			array('config.add',	array('phpbbservices_digests_test_year', date('Y'))),
-			array('config.add',	array('phpbbservices_digests_time_zone', $helper->make_tz_offset($this->config['board_timezone']))),
 			array('config.add',	array('phpbbservices_digests_user_check_all_forums', 1)),
 			array('config.add',	array('phpbbservices_digests_user_digest_attachments', 1)),
 			array('config.add',	array('phpbbservices_digests_user_digest_block_images', 0)),

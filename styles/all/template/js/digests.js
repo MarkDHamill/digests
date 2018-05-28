@@ -4,6 +4,11 @@ $(document).ready(function(){
 	$("#dialog").dialog({
 		title: dialogError,
 		autoOpen: false,
+		modal: true,
+		minHeight: 0,
+		draggable: false,
+		resizeable: false,
+		closeOnEscape: true,
 		buttons: [
 			{
 				text: ok,

@@ -1,12 +1,56 @@
 .ui-dialog {
 	font-family: Verdana, Helvetica, Arial, sans-serif;
 	text-align: center;
+	width: 100%;
+	height: auto;
+	background-color: inherit;
+	border-width: 1px;
+	border-color: #CADCEB;
+	border-style: solid;
+	float: none;
+	margin: inherit;
 }
 .ui-dialog-content {
-	text-align: left;
+	text-align: center;
+	padding: 5px;
 }
 .ui-dialog-titlebar {
 	background-color: #CADCEB;
+	font-weight: 800;
+	padding: 5px;
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
+}
+.ui-dialog-title{
+	width: 100%;
+}
+.ui-dialog-titlebar-close {
+	display: none;
+}
+.ui-dialog .ui-dialog-title {
+	width: 100%;
+}
+.ui-button {
+	width: auto;
+	background-color: #CADCEB;
+	font-weight: 800;
+	padding: 5px;
+	border-width: 1px;
+	border-color: #CADCEB;
+	border-style: solid;
+	margin: 5px;
+}
+.ui-widget {
+	border-radius: 5px;
+}
+.ui-dialog-buttonpane {
+	float:none;
+	padding: 0;
+}
+.ui-dialog-buttonset {
+	float: none;
+	text-align: center;
+	width: 100%;
 }
 .top-3px {
 	margin-top: 3px;

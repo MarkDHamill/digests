@@ -9,26 +9,22 @@
 
 namespace phpbbservices\digests\includes;
 
-/**
- * @ignore
- */
-if (!defined('IN_PHPBB'))
-{
-	exit;
-}
-
 // The purpose of this class is to override the messenger class so HTML can be sent in email. The code is a copy and paste for the relevant events
-// from the 3.2.0 source for /includes/functions_messenger.php with minimal changes needed to add this functionality. I made one major change from
+// from the 3.2.2 source for /includes/functions_messenger.php with minimal changes needed to add this functionality. I made one major change from
 // the way phpBB works by default: to bypass the queue altogether as the expectation is that a digest will be delivered promptly.
 
 class html_messenger extends \messenger
 {
 
 	/**
-	* Send the mail out to the recipients set previously in var $this->addresses
-	*
-	* $is_html 		true if you want HTML email headers because the content contains HTML, false assumes content is text
-	* $is_digest	true if sending a digest
+	 * Send the mail out to the recipients set previously in var $this->addresses
+	 *
+	 * @param int	$method	User notification method NOTIFY_EMAIL|NOTIFY_IM|NOTIFY_BOTH
+	 * @param bool	$break	Flag indicating if the function only formats the subject
+	 *						and the message without sending it
+	 * @param $is_html 		true if you want HTML email headers because the content contains HTML, false assumes content is text
+	 * @param $is_digest	true if sending a digest	 *
+	 * @return bool	* Send the mail out to the recipients set previously in var $this->addresses
 	*/
 
 	function send($method = NOTIFY_EMAIL, $break = false, $is_html = false, $is_digest = false)
@@ -164,7 +160,7 @@ class html_messenger extends \messenger
 		$vars = array('headers');
 		extract($phpbb_dispatcher->trigger_event('phpbbservices.digests.modify_email_headers', compact($vars)));
 
-		if (sizeof($this->extra_headers))
+		if (count($this->extra_headers))
 		{
 			$headers = array_merge($headers, $this->extra_headers);
 		}

@@ -14,11 +14,6 @@ use phpbbservices\digests\core\common;
 
 class convert_mod_data extends \phpbb\db\migration\migration
 {
-	public function effectively_installed()
-	{
-		return !$this->config->offsetExists('digests_version');
-	}
-
 	static public function depends_on()
 	{
 		return array(
@@ -37,12 +32,10 @@ class convert_mod_data extends \phpbb\db\migration\migration
 	public function update_configs()
 	{
 
-		// To upgrade from 2.2.6 or greater, the basic approach is to compare arrays of configuration variables and database column names.
+		// To upgrade from the digests mod, the basic approach is to compare arrays of configuration variables and database column names.
 		// Remove what has gone away, add what is missing. If there is a value already, retain it.
 
-		// Load the configuration values for the extensionn for version 3.0.2 into an array.
-
-		$helper = new common();
+		// Load the configuration values for the extension for version 3.2.7 into an array.
 
 		$new_config = array(
 			'digests_block_images'                  => 0,
@@ -59,12 +52,16 @@ class convert_mod_data extends \phpbb\db\migration\migration
 			'digests_host'                          => 'phpbbservices.com',
 			'digests_include_admins'                => 0,
 			'digests_include_forums'                => 0,
+			'digests_lowercase_digest_type'			=> 0,
+			'digests_max_cron_hrs'					=> 0,
 			'digests_max_items'                     => 0,
 			'digests_notify_on_admin_changes'		=> 1,
-			'digests_page_url'                      => 'https://www.phpbbservices.com/digests_wp/',
+			'digests_page_url'                      => 'https://www.phpbbservices.com/my-software/digests_wp/digests-extension/',
 			'digests_registration_field'            => 0,
 			'digests_reply_to_email_address'        => '',
 			'digests_show_email'                    => 0,
+			'digests_show_forum_path'				=> 0,
+			'digests_strip_tags'					=> '',
 			'digests_subscribe_all'                 => 1,
 			'digests_test'                          => 0,
 			'digests_test_clear_spool'              => 1,
@@ -76,7 +73,6 @@ class convert_mod_data extends \phpbb\db\migration\migration
 			'digests_test_spool'                    => 0,
 			'digests_test_time_use'                 => 0,
 			'digests_test_year'                     => date('Y'),
-			'digests_time_zone'                     => $helper->make_tz_offset($this->config['board_timezone']),
 			'digests_user_check_all_forums'         => 1,
 			'digests_user_digest_attachments'       => 1,
 			'digests_user_digest_block_images'      => 0,
@@ -135,8 +131,11 @@ class convert_mod_data extends \phpbb\db\migration\migration
 			}
 		}
 
-		// Modify problematic configuration variables explicitly. The digests page is now in Wordpress.
-		$this->config->set('phpbbservices_digests_page_url', 'https://www.phpbbservices.com/digests_wp/');
-
 	}
+
+	public function effectively_installed()
+	{
+		return !$this->config->offsetExists('digests_version');
+	}
+
 }

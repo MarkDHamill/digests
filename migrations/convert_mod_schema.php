@@ -92,6 +92,8 @@ class convert_mod_schema extends \phpbb\db\migration\migration
 		{
 			$tools->sql_column_add($this->table_prefix . 'users', $value, array($new_columns[$value][0], $new_columns[$value][1]));
 		}
+
+		// Note: the phpbb_digests_subscribed_forums should still exist as it was created for the phpBB 3.0 mod and is unchanged.
 		
 	}
 	

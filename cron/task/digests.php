@@ -9,17 +9,6 @@
 
 namespace phpbbservices\digests\cron\task;
 
-/**
- * @ignore
- */
-if (!defined('IN_PHPBB'))
-{
-	exit;
-}
-
-global $phpbb_root_path, $phpEx;
-include($phpbb_root_path . 'includes/functions_messenger.' . $phpEx); // Used to send emails
-
 use phpbbservices\digests\constants\constants;
 
 class digests extends \phpbb\cron\task\base
@@ -120,7 +109,7 @@ class digests extends \phpbb\cron\task\base
 			$this->user->ip = $this->request->server('SERVER_ADDR');
 		}
 	}
-	
+
 	/**
 	* Indicates to phpBB's cron utility if this task should be run.
 	*
@@ -533,6 +522,7 @@ class digests extends \phpbb\cron\task\base
 								AND p.poster_id = u.user_id
 								$date_limit_sql
 								AND p.post_visibility = 1
+								AND topic_status != " . ITEM_MOVED . "
 								AND forum_password = ''",
 		
 			'ORDER_BY'	=> 'f.left_id, f.right_id'
@@ -622,6 +612,10 @@ class digests extends \phpbb\cron\task\base
 			$this->toc_pm_count = 0; 	// # of private messages in the table of contents for subscriber
 
 			// The extended messenger class is used to send the digests. It is extended to allow HTML emails to be sent.
+			if (!class_exists('html_messenger'))
+			{
+				include($this->phpbb_root_path . 'includes/functions_messenger.' . $this->phpEx);
+			}
 			$html_messenger = new \phpbbservices\digests\includes\html_messenger();
 
 			// Set the text showing the digest type
@@ -1115,7 +1109,7 @@ class digests extends \phpbb\cron\task\base
 
 				// Save digests as file in the cache/phpbbservices/digests folder instead of emailing.
 				$suffix = ($is_html) ? '.html' : '.txt';
-				$file_name = $row['username'] . '-' . $utc_year . '-' . str_pad($utc_month, 2, '0', STR_PAD_LEFT) . '-' . str_pad($utc_day, 2, '0', STR_PAD_LEFT) . '-' . str_pad($utc_hour, 2, '0', STR_PAD_LEFT) . $suffix;
+				$file_name = $row['username'] . '-' . $utc_year . '-' . str_pad($utc_month, 2, '0', STR_PAD_LEFT) . '-' . str_pad($utc_day, 2, '0', STR_PAD_LEFT) . '-' . str_pad($utc_hour, 2, '0', STR_PAD_LEFT) . '-' . unique_id() . $suffix;
 				
 				$handle = @fopen($this->cache_path . $file_name, "w");
 				if ($handle === false)

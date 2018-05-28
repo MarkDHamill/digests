@@ -16,7 +16,7 @@ class release_3_0_5 extends \phpbb\db\migration\migration
 		$sql = 'SELECT module_id
 			FROM ' . $this->table_prefix . "modules
 			WHERE module_class = 'acp'
-				AND module_langname = 'ACP_DIGEST_SETTINGS'";
+				AND module_langname = 'ACP_DIGESTS_RESET_CRON_RUN_TIME'";
 		$result = $this->db->sql_query($sql);
 		$module_id = $this->db->sql_fetchfield('module_id');
 		$this->db->sql_freeresult($result);

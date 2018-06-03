@@ -1,1 +1,11 @@
+{# Includes ACP - CSS #}
+{% if not definition.INCLUDED_ACPDIGESTSCSS %}
 {% INCLUDECSS '@phpbbservices_digests/acp_digests.css' %}
+{% DEFINE INCLUDED_ACPDIGESTSCSS = true %}
+{% endif %}
+
+{# Includes ACP - JS #}
+{% if not definition.INCLUDED_ACPDIGESTSJS %}
+{% INCLUDEJS '@phpbbservices_digests/acp_digests.js' %}
+{% DEFINE INCLUDED_ACPDIGESTSJS = true %}
+{% endif %}

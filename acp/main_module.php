@@ -65,6 +65,10 @@ class main_module
 		add_form_key($form_key);
 		$my_time_zone = (float) $this->helper->make_tz_offset($this->user->data['user_timezone']);
 
+		$this->template->assign_vars(array(
+			'S_IN_DIGESTS'							=> true,
+		));
+
 		/**
 		*	Validation types are:
 		*		string, int, bool,

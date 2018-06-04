@@ -65,10 +65,6 @@ class main_module
 		add_form_key($form_key);
 		$my_time_zone = (float) $this->helper->make_tz_offset($this->user->data['user_timezone']);
 
-		$this->template->assign_vars(array(
-			'S_IN_DIGESTS'							=> true,
-		));
-
 		/**
 		*	Validation types are:
 		*		string, int, bool,
@@ -150,11 +146,13 @@ class main_module
 				$sortby = $this->request->variable('sortby', 'u', true);
 				$sortorder = $this->request->variable('sortorder', 'a', true);
 
-				// Translate time zone information
+				// Translate time zone information and set other switches
 				$this->template->assign_vars(array(
 					'L_DIGESTS_HOUR_SENT'               			=> $this->language->lang('DIGESTS_HOUR_SENT', $my_time_zone),
 					'L_DIGESTS_BASED_ON'							=> $this->language->lang('DIGESTS_BASED_ON', $my_time_zone),
 					'S_EDIT_SUBSCRIBERS'							=> true,	// In this module
+					'S_INCLUDE_DIGESTS_CSS'							=> true,	// Need to include special Digests CSS
+					'S_INCLUDE_DIGESTS_JS'							=> true,	// Need to include special Digests Javascript
 				));
 
 				// Set up subscription filter				
@@ -744,6 +742,7 @@ class main_module
 					'L_DIGESTS_HOUR_SENT'               		=> $this->language->lang('DIGESTS_HOUR_SENT', $my_time_zone),
 					'S_BALANCE_LOAD'							=> true,
 					'S_DIGESTS_AVERAGE'							=> '<strong>' . $avg_per_hour . '</strong>',
+					'S_INCLUDE_DIGESTS_CSS'						=> true,	// Need to include special Digests CSS
 				));
 
 				$sql_array = array(
@@ -760,7 +759,7 @@ class main_module
 					'ORDER_BY'	=> '1',
 				);
 				
-				$sql = $this->db->sql_build_query('SELECT', $sql_array);
+				$sql = $this->db->sql_build_query('SELECT', $sql_array);	
 
 				$result = $this->db->sql_query($sql);
 				$rowset = $this->db->sql_fetchrowset($result);

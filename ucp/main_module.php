@@ -210,6 +210,8 @@ class main_module
 			$show_buttons = true; // Buttons must appear in basics mode otherwise there is no way to resubscribe
 		}
 
+		$this->template->assign_var('S_INCLUDE_DIGESTS_JS', true);	// So necessary Javascript will be included
+
 		switch ($mode)
 		{
 			

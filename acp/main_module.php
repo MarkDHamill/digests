@@ -759,7 +759,7 @@ class main_module
 					'ORDER_BY'	=> '1',
 				);
 				
-				$sql = $this->db->sql_build_query('SELECT', $sql_array);	
+				$sql = $this->db->sql_build_query('SELECT', $sql_array);
 
 				$result = $this->db->sql_query($sql);
 				$rowset = $this->db->sql_fetchrowset($result);

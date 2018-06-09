@@ -3,31 +3,31 @@
 		{% if S_SHOW_PMS %}
 		<h2 class="black">{{ lang('YOU_HAVE_PRIVATE_MESSAGES') }}</h2>
 
-		{% for pm in loops.pm %}
+			{% for pm in loops.pm %}
 		<h3>{{ pm.NEW_UNREAD }}{{ lang('PRIVATE_MESSAGE') }}</h3>
-		{% if pm.S_USE_CLASSIC_TEMPLATE %}
+				{% if pm.S_USE_CLASSIC_TEMPLATE %}
 		<table>
 			<tr>
 				<th>{{ lang('DIGESTS_LINK') }}</th><th>{{ lang('DIGESTS_POST_TIME') }}</th><th>{{ lang('DIGESTS_AUTHOR') }}</th><th>{{ lang('PRIVATE_MESSAGE_2') }}</th>
 			</tr>
-			{% endif %}
-			{% if not pm.S_USE_CLASSIC_TEMPLATE %}
+				{% endif %}
+				{% if not pm.S_USE_CLASSIC_TEMPLATE %}
 			<h4 id="{{ pm.ANCHOR }}">{{ lang('SUBJECT') }}{{ lang('COLON') }} {{ pm.PRIVATE_MESSAGE_SUBJECT }}</h4>
 			<p class="author">{{ lang('FROM') }}{{ lang('COLON') }} {{ pm.FROM }} {{ lang('DIGESTS_ON') }} {{ pm.DATE }}</p>
 			<div class="content">{{ pm.CONTENT }}</div>
-			{% else %}
+				{% else %}
 			<tr id="{{ pm.ANCHOR }}">
 				<td style="text-align: center;">{{ pm.PRIVATE_MESSAGE_LINK }}</td><td>{{ pm.DATE }}</td><td>{{ pm.FROM }}</td><td>{{ pm.CONTENT }}</td>
 			</tr>
-			{% if pm.S_LAST_ROW %}
+					{% if pm.S_LAST_ROW %}
 		</table>
-		{% endif %}
-		{% endif %}
+					{% endif %}
+				{% endif %}
 		<hr>
-		{% else %}
+			{% else %}
 		<div class="content">{{ lang('DIGESTS_NO_PRIVATE_MESSAGES') }}</div>
 		<hr>
-		{% endfor %}
+			{% endfor %}
 		{% endif %}
 
 		{% for forum in loops.forum %}
@@ -41,8 +41,8 @@
 					<tr>
 						<th>{{ lang('DIGESTS_LINK') }}</th><th>{{ lang('DIGESTS_POST_TIME') }}</th><th>{{ lang('AUTHOR') }}</th>{% if S_SHOW_POST_TEXT %}<th>{{ lang('DIGESTS_POST_TEXT') }}</th>{% endif %}
 					</tr>
-					{% endif %}
-					{% for post in topic.post %}
+				{% endif %}
+				{% for post in topic.post %}
 					{% if not topic.S_USE_CLASSIC_TEMPLATE %}
 					<div class="post">
 						{% if not post.S_FIRST_POST %}
@@ -58,10 +58,10 @@
 					<tr id="{{ post.ANCHOR }}">
 						<td style="text-align: center;">{{ post.POST_LINK }}</td><td>{{ post.DATE }}</td><td>{{ post.FROM }}</td>{% if S_SHOW_POST_TEXT %}<td>{{ post.CONTENT }}</td>{% endif %}
 					</tr>
-					{% if post.S_LAST_ROW %}
+						{% if post.S_LAST_ROW %}
 				</table>
-				{% endif %}
-				{% endif %}
+						{% endif %}
+					{% endif %}
 				{% endfor %}
 			</div>
 			{% endfor %}

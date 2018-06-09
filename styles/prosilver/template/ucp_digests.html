@@ -1,21 +1,23 @@
 {% INCLUDE 'ucp_header.html' %}
-{% if not definition.INCLUDED_JQUERYUIJS %}
-{% INCLUDEJS '@phpbbservices_digests/js/jquery-ui-1.12.1.min.js' %}
-{% DEFINE INCLUDED_JQUERYUIJS = true %}
-{% endif %}
 <script>
-	{% INCLUDEJS '@phpbbservices_digests/js/digests.js' %}
-	{% if S_DIGESTS_POST_FILTERS %}
-	var adminMaxItems = {{ S_DIGESTS_MAX_ADMIN_ITEMS }};
+{% if S_INCLUDE_DIGESTS_JS %}
+	{# Includes ACP - JS #}
+	{% if not definition.INCLUDED_ACPDIGESTSJS %}
+		{% INCLUDEJS '@phpbbservices_digests/js/digests.js' %}
+	{% DEFINE INCLUDED_ACPDIGESTSJS = true %}
 	{% endif %}
+{% endif %}
+{% if S_DIGESTS_POST_FILTERS %}
+	var adminMaxItems = {{ S_DIGESTS_MAX_ADMIN_ITEMS }};
+{% endif %}
 	var dialogError = "{{ lang('ERROR')|escape('js') }}";
-	{% if S_DIGESTS_FORUMS_SELECTION %}
+{% if S_DIGESTS_FORUMS_SELECTION %}
 	var excludedForums = "{{ lang('DIGESTS_EXCLUDED_FORUMS')|escape('js') }}";
 	var excludedForumsArray = excludedForums.split(',');
 	var ignoredForums = "{{ lang('DIGESTS_IGNORED_FORUMS')|escape('js') }}";
 	var ignoredForumsArray = ignoredForums.split(',');
 	var noForumsChecked = "{{ lang('DIGESTS_NO_FORUMS_CHECKED')|escape('js') }}";
-	{% endif %}
+{% endif %}
 	var ok = "{{ lang('OK')|escape('js') }}";
 	var sizeError = "{{ lang('DIGESTS_SIZE_ERROR_MIN')|escape('js') }}";
 	var sizeErrorRange = "{{ lang('DIGESTS_SIZE_ERROR')|escape('js') }}";
@@ -29,14 +31,14 @@
 
 		<div class="inner">
 
-			{% if S_DIGESTS_NO_TIMEZONE %}
+{% if S_DIGESTS_NO_TIMEZONE %}
 			<p>{{ lang('DIGESTS_NO_TIMEZONE') }}</p>
-			{% endif %}
-			{% if S_DIGESTS_BASICS %}
+{% endif %}
+{% if S_DIGESTS_BASICS %}
 			<p>{{ lang('DIGESTS_EXPLANATION') }}</p>
-			{% endif %}
+{% endif %}
 			<fieldset>
-				{% if S_DIGESTS_BASICS %}
+{% if S_DIGESTS_BASICS %}
 				<dl>
 					<dt><label>{{ lang('DIGESTS_FREQUENCY') }}{{ lang('COLON') }}</label><br><span>{{ lang('DIGESTS_FREQUENCY_EXPLAIN') }}</span></dt>
 					<dd>
@@ -66,13 +68,13 @@
 						</select>
 					</dd>
 				</dl>
-				{% endif %}
-				{% if S_DIGESTS_FORUMS_SELECTION %}
+{% endif %}
+{% if S_DIGESTS_FORUMS_SELECTION %}
 				{{ lang('DIGESTS_DISABLED_MESSAGE') }}
-				{% if S_DIGESTS_NO_FORUMS %}
+	{% if S_DIGESTS_NO_FORUMS %}
 				<p>{{ lang('DIGESTS_NO_FORUMS_AVAILABLE') }}</p>
-				{% endif %}
-				{% if not S_DIGESTS_NO_FORUMS %}
+	{% endif %}
+	{% if not S_DIGESTS_NO_FORUMS %}
 				<dl>
 					<dt><label>{{ lang('DIGESTS_FILTER_TYPE') }}{{ lang('COLON') }}</label></dt>
 					<dd>
@@ -86,28 +88,28 @@
 					<dd>
 						<input type="checkbox" name="all_forums" id="all_forums" {% if S_DIGESTS_ALL_BY_DEFAULT %} checked="checked"{% endif %}{% if S_DIGESTS_ALL_DISABLED %} disabled="disabled"{% endif %} /> <label for="all_forums"><b>{{ lang('DIGESTS_ALL_FORUMS') }}</b></label><br><br>
 						<div id="div_0">
-							{% for forums in loops.forums %}
-							{% if forums.S_DIGESTS_DIV_OPEN %}
+		{% for forums in loops.forums %}
+			{% if forums.S_DIGESTS_DIV_OPEN %}
 							<div id="{{ forums.CAT_ID }}" class="position-relative">
-								{% endif %}
-								{% if forums.S_DIGESTS_PRINT %}
-								{% if forums.S_DIGESTS_IS_FORUM %}
+			{% endif %}
+			{% if forums.S_DIGESTS_PRINT %}
+				{% if forums.S_DIGESTS_IS_FORUM %}
 								<input type="checkbox" name="{{ forums.FORUM_NAME }}" id="{{ forums.FORUM_NAME }}"{% if forums.S_DIGESTS_FORUM_SUBSCRIBED %} checked="checked"{% endif %}{% if forums.S_DIGESTS_FORUM_DISABLED %} disabled="disabled"{% endif %} /> <label for="{{ forums.FORUM_NAME }}">{{ forums.FORUM_PREFIX }}{{ forums.FORUM_LABEL }}{{ forums.FORUM_SUFFIX }}</label><br>
-								{% endif %}
-								{% if not forums.S_DIGESTS_IS_FORUM %}
+				{% endif %}
+				{% if not forums.S_DIGESTS_IS_FORUM %}
 								<i>{{ forums.FORUM_LABEL }}</i><br>
-								{% endif %}
-								{% endif %}
-								{% if forums.S_DIGESTS_DIV_CLOSE %}
+				{% endif %}
+			{% endif %}
+			{% if forums.S_DIGESTS_DIV_CLOSE %}
 							</div>
-							{% endif %}
-							{% endfor %}
+			{% endif %}
+		{% endfor %}
 						</div>
 					</dd>
 				</dl>
-				{% endif %}
-				{% endif %}
-				{% if S_DIGESTS_POST_FILTERS %}
+	{% endif %}
+{% endif %}
+{% if S_DIGESTS_POST_FILTERS %}
 				{{ DISABLED_MESSAGE }}
 				<dl>
 					<dt><label for="count_limit">{{ lang('DIGESTS_COUNT_LIMIT') }}{{ lang('COLON') }}</label><br><span>{{ lang('DIGESTS_COUNT_LIMIT_EXPLAIN') }}</span></dt>
@@ -147,8 +149,8 @@
 						<label for="pms2"><input type="radio" name="pms" id="pms2" value="0"{% if S_DIGESTS_PRIVATE_MESSAGES_IN_DIGEST_NO %} checked="checked"{% endif %}{% if S_DIGESTS_CONTROL_DISABLED %} disabled="disabled"{% endif %} /> {{ lang('NO') }}</label>	&nbsp;<input type="checkbox" name="mark_read" id="mark_read"{% if S_DIGESTS_MARK_READ_CHECKED %} checked="checked"{% endif %}{% if S_DIGESTS_CONTROL_DISABLED %} disabled="disabled"{% endif %} /> <label for="mark_read">{{ lang('DIGESTS_MARK_READ') }}</label>
 					</dd>
 				</dl>
-				{% endif %}
-				{% if S_DIGESTS_ADDITIONAL_CRITERIA %}
+{% endif %}
+{% if S_DIGESTS_ADDITIONAL_CRITERIA %}
 				{{ DISABLED_MESSAGE }}
 				<dl>
 					<dt><label for="sort_by">{{ lang('DIGESTS_SORT_BY') }}{{ lang('COLON') }}</label><br><span>{{ lang('DIGESTS_SORT_BY_EXPLAIN') }}</span></dt>
@@ -188,7 +190,7 @@
 						<label for="attachments2"><input type="radio" name="attachments" id="attachments2" value="0"{% if S_DIGESTS_ATTACHMENTS_NO_CHECKED %} checked="checked"{% endif %}{% if S_DIGESTS_CONTROL_DISABLED %} disabled="disabled"{% endif %} /> {{ lang('NO') }}</label>
 					</dd>
 				</dl>
-				{% if not S_DIGESTS_BLOCK_IMAGES %}
+	{% if not S_DIGESTS_BLOCK_IMAGES %}
 				<dl>
 					<dt><label>{{ lang('DIGESTS_BLOCK_IMAGES') }}{{ lang('COLON') }}</label><br><span>{{ lang('DIGESTS_BLOCK_IMAGES_EXPLAIN') }}</span></dt>
 					<dd>
@@ -196,7 +198,7 @@
 						<label for="blockimages2"><input type="radio" name="blockimages" id="blockimages2" value="0"{% if S_DIGESTS_BLOCK_IMAGES_NO_CHECKED %} checked="checked"{% endif %}{% if S_DIGESTS_CONTROL_DISABLED %} disabled="disabled"{% endif %} /> {{ lang('NO') }}</label>
 					</dd>
 				</dl>
-				{% endif %}
+	{% endif %}
 				<dl>
 					<dt><label>{{ lang('DIGESTS_TOC') }}{{ lang('COLON') }}</label><br><span>{{ lang('DIGESTS_TOC_EXPLAIN') }}</span></dt>
 					<dd>
@@ -204,20 +206,20 @@
 						<label for="toc2"><input type="radio" name="toc" id="toc2" value="0"{% if S_DIGESTS_TOC_NO_CHECKED %} checked="checked"{% endif %}{% if S_DIGESTS_CONTROL_DISABLED %} disabled="disabled"{% endif %} /> {{ lang('NO') }}</label>
 					</dd>
 				</dl>
-				{% endif %}
+{% endif %}
 
 			</fieldset>
 		</div>
 
 	</div>
 
-	{% if S_DIGESTS_SHOW_BUTTONS %}
+{% if S_DIGESTS_SHOW_BUTTONS %}
 	<fieldset class="submit-buttons">
 		<input class="button2" type="reset" id="reset" name="reset" value="{{ lang('RESET') }}" />&nbsp;
 		<input class="button1" type="submit" id="submit" name="submit" value="{{ lang('SUBMIT') }}" />
 		{{ S_DIGESTS_FORM_TOKEN }}
 	</fieldset>
-	{% endif %}
+{% endif %}
 
 	<div class="copyright">
 		{{ lang('POWERED_BY') }}{{ lang('DIGESTS_TRANSLATOR') }}

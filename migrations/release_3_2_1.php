@@ -29,7 +29,6 @@ class release_3_2_1 extends \phpbb\db\migration\migration
 
 			array('config.add',		array('phpbbservices_digests_lowercase_digest_type', 0)),
 			array('config.add',		array('phpbbservices_digests_show_forum_path', 0)),
-			array('config.remove',	array('phpbbservices_digests_time_zone')),
 
 		);
 

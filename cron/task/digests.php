@@ -61,7 +61,7 @@ class digests extends \phpbb\cron\task\base
 	* @param $php_ext 										PHP file suffix
 	* @param $phpbb_root_path								Relative path to phpBB root
 	* @param \phpbb\template\template 	$template 			The template engine object
-	* @param phpbb\auth\auth 			$auth 				The auth object
+	* @param \phpbb\auth\auth 			$auth 				The auth object
 	* @param $table_prefix 									Prefix for phpbb's database tables
 	* @param \phpbb\log\log 			$phpbb_log 			phpBB log object
 	* @param \phpbbservices\digests\core\common $helper		Extension's helper object
@@ -1045,10 +1045,8 @@ class digests extends \phpbb\cron\task\base
 				$digest_toc .= ($is_html) ? "</tbody>\n</table></div>\n<br>" : ''; 
 			
 				// Publish the table of contents
-				$html_messenger->assign_vars(array(
-					'DIGESTS_TOC'			=> $digest_toc,	
-				));
-			
+				$html_messenger->assign_var('DIGESTS_TOC', $digest_toc);
+
 			}
 			else
 			{
@@ -1089,11 +1087,11 @@ class digests extends \phpbb\cron\task\base
 				// Be careful not to store a negative number in case the database is inconsistent. Note: the nature
 				// of this SQL is that using $db->sql_build_array won't generate the desired SQL, so we go rogue.
 
-				$pm_read_sql = 'UPDATE ' . USERS_TABLE . '
+				$update_users_sql = 'UPDATE ' . USERS_TABLE . '
 					SET user_unread_privmsg = user_unread_privmsg - ' . min($total_pm_unread, $row['user_unread_privmsg']) . ', 
-						user_new_privmsg = user_new_privmsg - ' . min($total_pm_new, $row['user_new_privmsg']).
+						user_new_privmsg = user_new_privmsg - ' . min($total_pm_new, $row['user_new_privmsg']);
 
-				$this->db->sql_query($pm_read_sql);
+				$this->db->sql_query($update_users_sql);
 
 				$this->db->sql_freeresult($result_posts);
 

@@ -31,42 +31,54 @@
 	function addToStack(name) {
 		// Push onto a stack a form field that will be sent to the web server on form submission. There are so many on the page we
 		// want to limit these to only those that were changed, hopefully avoiding PHP max_input_vars issues.
-		if (toSubmit.indexOf(name) == -1) {
+		if (toSubmit.indexOf(name) === -1) {
 			toSubmit.push(name);
 		}
 		// Add the following fields so individual forum subscriptions changes can be detected
-		if (name.substr(0,4) == 'user')	{
+		if (name.substr(0,4) === 'user')	{
 			var lastDashLoc = name.lastIndexOf('-');
 			if (lastDashLoc > 4) {
 				var userId = name.substring(5, lastDashLoc);
 				var allForums = 'user-' + userId + '-all_forums';
-				if (toSubmit.indexOf(allForums) == -1) {
+				if (toSubmit.indexOf(allForums) === -1) {
 					toSubmit.push(allForums);
 				}
 				var filterType = 'user-' + userId + '-filter_type';
-				if (toSubmit.indexOf(filterType) == -1) {
+				if (toSubmit.indexOf(filterType) === -1) {
 					toSubmit.push(filterType);
 				}
 			}
 		}
-		// If mark-all checkbox selected, add to the stack all user-xx mark variables.
-		if (name == 'mark-all') {
-			var allInputs = document.getElementsByTagName("input");
-			for (var k = 0; k < allInputs.length; k++) {
-				varName = allInputs[k].name;
-				lastDashLoc = varName.lastIndexOf('-');
-				if (varName.substr(0,5) == 'user-' && lastDashLoc == 4) {
-					if (toSubmit.indexOf(allInputs[k].name) == -1) {
-						toSubmit.push(allInputs[k].name);
+		// If mark-all checkbox is checked, add to the stack all user-xx mark variables if not already on the stack.
+		// If mark-all checkbox is unchecked, remove user-xx mark variables from the stack.
+		if (name === 'mark-all') {
+			var isChecked = $('#mark-all').prop('checked');
+			console.log('#mark-all ' + isChecked);
+			$('input').each(function(){
+				var thisElement = $(this).attr('name');
+				var lastDashLoc = thisElement.lastIndexOf('-');
+				if (lastDashLoc === 4 && thisElement.substr(0,5) === 'user-') {
+					if (toSubmit.includes(thisElement)) {
+						if (!isChecked){
+							index = toSubmit.indexOf(thisElement);
+							if (index > -1) {
+								toSubmit.splice(index, 1);	// Remove it from array
+							}
+						}
+					}
+					else {
+						if (isChecked) {
+							toSubmit.push(thisElement);	// Add to end of array
+						}
 					}
 				}
-			}
+			});
 		}
 	}
 
 	function inStack(name) {
 		// Tests to see if the named form field is in the stack to be submitted.
-		return (toSubmit.indexOf(name) == -1) ? false : true;
+		return (toSubmit.indexOf(name) !== -1);
 	}
 
 </script>
@@ -125,7 +137,7 @@
 		<table id="down">
 			<thead>
 				<tr>
-					<th class="text-center"><input type="checkbox" class="radio" name="mark-all" id="mark-all" onchange="addToStack(this.name);" onclick="marklist('acp_digests', 'user-', (this.checked) ? true : false);" /></th>
+					<th class="text-center"><input type="checkbox" class="radio" name="mark-all" id="mark-all" onchange="addToStack(this.name);" onclick="marklist('acp_digests', 'user-', this.checked);" /></th>
 					<th>{{ lang('USERNAME') }}</th>
 					<th>{{ lang('EMAIL_ADDRESS') }}</th>
 					<th class="text-center">{{ lang('DIGESTS_FREQUENCY_SHORT') }}</th>
@@ -139,7 +151,7 @@
 			<tbody>
 				{% for digests_edit_subscribers in loops.digests_edit_subscribers %}
 					{% if digests_edit_subscribers.S_ROW_COUNT is even %}<tr class="row1">{% else %}<tr class="row2">{% endif %}
-						<td class="text-center"><input type="checkbox" class="radio" name="user-{{ digests_edit_subscribers.userId }}" id="user-{{ digests_edit_subscribers.userId }}" onchange="addToStack(this.name);" /></td>
+						<td class="text-center"><input type="checkbox" class="radio" name="user-{{ digests_edit_subscribers.USER_ID }}" id="user-{{ digests_edit_subscribers.USER_ID }}" onchange="addToStack(this.name);" /></td>
 						<td>
 							<a id="imglink-{{ digests_edit_subscribers.S_ROW_COUNT }}">
 								<img id="plusminus-{{ digests_edit_subscribers.S_ROW_COUNT }}" src="{{ IMAGE_PATH }}expand.png" title="{{ lang('DIGESTS_EXPAND') }}" alt="{{ lang('DIGESTS_EXPAND') }}" />

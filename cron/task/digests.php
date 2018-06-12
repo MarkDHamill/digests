@@ -87,22 +87,20 @@ class digests extends \phpbb\cron\task\base
 		$this->run_mode = constants::DIGESTS_RUN_REGULAR;
 
 		// Populate the forum hierarchy array. This is used when the full path to a forum is requested to be shown in digests
-		if ($this->config['phpbbservices_digests_show_forum_path']) {
-			$sql_array = array(
-				'SELECT'	=> 'forum_id, forum_name, parent_id',
+		$sql_array = array(
+			'SELECT'	=> 'forum_id, forum_name, parent_id',
 
-				'FROM'		=> array(
-					FORUMS_TABLE	=> 'f',
-				),
-			);
-			$sql = $this->db->sql_build_query('SELECT', $sql_array);
-			$result = $this->db->sql_query($sql);
-			while ($row = $this->db->sql_fetchrow($result))
-			{
-				$this->forum_hierarchy[$row['forum_id']] = array ('forum_name' => $row['forum_name'], 'parent_id' => $row['parent_id']);
-			}
-			$this->db->sql_freeresult($result); // Query be gone!
+			'FROM'		=> array(
+				FORUMS_TABLE	=> 'f',
+			),
+		);
+		$sql = $this->db->sql_build_query('SELECT', $sql_array);
+		$result = $this->db->sql_query($sql);
+		while ($row = $this->db->sql_fetchrow($result))
+		{
+			$this->forum_hierarchy[$row['forum_id']] = array ('forum_name' => $row['forum_name'], 'parent_id' => $row['parent_id']);
 		}
+		$this->db->sql_freeresult($result); // Query be gone!
 
 		// In system cron (CLI) mode, the $user object may not have an IP assigned. If so, use the server's IP. This will
 		// allow logging to succeed since the IP is written to the log.
@@ -614,7 +612,7 @@ class digests extends \phpbb\cron\task\base
 			$this->toc_pm_count = 0; 	// # of private messages in the table of contents for subscriber
 
 			// The extended messenger class is used to send the digests. It is extended to allow HTML emails to be sent.
-			if (!class_exists('html_messenger'))
+			if (!class_exists('messenger'))
 			{
 				include($this->phpbb_root_path . 'includes/functions_messenger.' . $this->phpEx);
 			}
@@ -1101,7 +1099,7 @@ class digests extends \phpbb\cron\task\base
 
 			if (($this->run_mode == constants::DIGESTS_RUN_MANUAL) && ($this->config['phpbbservices_digests_test_spool']))
 			{
-				
+
 				// To grab the content of the email (less mail headers) first run the mailer with the $break parameter set to true. This will keep 
 				// the mail from being sent out. The function won't fail since nothing is being sent out.
 				$html_messenger->send(NOTIFY_EMAIL, true, $is_html, true);

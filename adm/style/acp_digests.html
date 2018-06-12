@@ -53,14 +53,13 @@
 		// If mark-all checkbox is unchecked, remove user-xx mark variables from the stack.
 		if (name === 'mark-all') {
 			var isChecked = $('#mark-all').prop('checked');
-			console.log('#mark-all ' + isChecked);
 			$('input').each(function(){
 				var thisElement = $(this).attr('name');
 				var lastDashLoc = thisElement.lastIndexOf('-');
 				if (lastDashLoc === 4 && thisElement.substr(0,5) === 'user-') {
 					if (toSubmit.includes(thisElement)) {
 						if (!isChecked){
-							index = toSubmit.indexOf(thisElement);
+							var index = toSubmit.indexOf(thisElement);
 							if (index > -1) {
 								toSubmit.splice(index, 1);	// Remove it from array
 							}
@@ -225,11 +224,11 @@
 								</dl>
 								<dl>
 									<dt>
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-allForums">{{ lang('DIGESTS_SELECT_FORUMS') }}{{ lang('COLON') }}</label><br>{{ lang('DIGESTS_SELECT_FORUMS_ADMIN_EXPLAIN') }}
+										<label for="user-{{ digests_edit_subscribers.USER_ID }}-all_forums">{{ lang('DIGESTS_SELECT_FORUMS') }}{{ lang('COLON') }}</label><br>{{ lang('DIGESTS_SELECT_FORUMS_ADMIN_EXPLAIN') }}
 									</dt>
 									<dd>
-										<input type="checkbox" name="user-{{ digests_edit_subscribers.USER_ID }}-allForums" id="user-{{ digests_edit_subscribers.USER_ID }}-allForums" {% if digests_edit_subscribers.S_ALL_BY_DEFAULT %} checked="checked"{% endif %} onchange="addToStack(this.name);" />
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-allForums"><b>{{ lang('DIGESTS_ALL_ALLOWED_FORUMS') }}</b></label><br><br>
+										<input type="checkbox" name="user-{{ digests_edit_subscribers.USER_ID }}-all_forums" id="user-{{ digests_edit_subscribers.USER_ID }}-all_forums" {% if digests_edit_subscribers.S_ALL_BY_DEFAULT %} checked="checked"{% endif %} onchange="addToStack(this.name);" />
+										<label for="user-{{ digests_edit_subscribers.USER_ID }}-all_forums"><b>{{ lang('DIGESTS_ALL_ALLOWED_FORUMS') }}</b></label><br><br>
 										<div id="user-{{ digests_edit_subscribers.USER_ID }}-div_0">
 											{% for forums in digests_edit_subscribers.forums %}
 												{% if forums.S_DIV_OPEN %}

@@ -9,8 +9,6 @@
 
 namespace phpbbservices\digests\migrations;
 
-use phpbbservices\digests\core\common;
-
 class release_3_2_7 extends \phpbb\db\migration\migration
 {
 

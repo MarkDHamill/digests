@@ -87,20 +87,22 @@ class digests extends \phpbb\cron\task\base
 		$this->run_mode = constants::DIGESTS_RUN_REGULAR;
 
 		// Populate the forum hierarchy array. This is used when the full path to a forum is requested to be shown in digests
-		$sql_array = array(
-			'SELECT'	=> 'forum_id, forum_name, parent_id',
+		if ($this->config['phpbbservices_digests_show_forum_path']) {
+			$sql_array = array(
+				'SELECT'	=> 'forum_id, forum_name, parent_id',
 
-			'FROM'		=> array(
-				FORUMS_TABLE	=> 'f',
-			),
-		);
-		$sql = $this->db->sql_build_query('SELECT', $sql_array);
-		$result = $this->db->sql_query($sql);
-		while ($row = $this->db->sql_fetchrow($result))
-		{
-			$this->forum_hierarchy[$row['forum_id']] = array ('forum_name' => $row['forum_name'], 'parent_id' => $row['parent_id']);
+				'FROM'		=> array(
+					FORUMS_TABLE	=> 'f',
+				),
+			);
+			$sql = $this->db->sql_build_query('SELECT', $sql_array);
+			$result = $this->db->sql_query($sql);
+			while ($row = $this->db->sql_fetchrow($result))
+			{
+				$this->forum_hierarchy[$row['forum_id']] = array ('forum_name' => $row['forum_name'], 'parent_id' => $row['parent_id']);
+			}
+			$this->db->sql_freeresult($result); // Query be gone!
 		}
-		$this->db->sql_freeresult($result); // Query be gone!
 
 		// In system cron (CLI) mode, the $user object may not have an IP assigned. If so, use the server's IP. This will
 		// allow logging to succeed since the IP is written to the log.
@@ -150,7 +152,7 @@ class digests extends \phpbb\cron\task\base
 		$this->server_timezone = (float) date('O')/100;	// Server timezone offset from UTC, in hours. Digests are mailed based on UTC time, so rehosting is unaffected.
 		
 		// Determine how this is program is being executed. Options are:
-		//   - DEFAULT: Regular cron (via invocation of cron.php as part of loading a web page in a browser) - constant::DIGESTS_RUN_REGULAR
+		//   - DEFAULT: Regular cron (via invocation of cron.php as part of loading a web page in a browser) - constants::DIGESTS_RUN_REGULAR
 		//   - System cron (via an actual cron/scheduled task from the operating system) -  constants::DIGESTS_RUN_SYSTEM
 		//   - Manual mode (via the ACP Digests "Manually run the mailer" option) - constants::DIGESTS_RUN_MANUAL
 		if (defined('IN_DIGESTS_TEST'))
@@ -833,7 +835,7 @@ class digests extends \phpbb\cron\task\base
 
 			$recipient_time = $this->utc_time + (float) ($this->helper->make_tz_offset($row['user_timezone']) * 60 * 60);
 
-			// Identify the language translator, if one exists and they choose to identify his/herself
+			// Identify the language translator, if one exists and they choose to identify him/herself
 			if (trim($this->language->lang('DIGESTS_TRANSLATOR_NAME') == ''))
 			{
 				$translator = '';
@@ -1869,13 +1871,13 @@ class digests extends \phpbb\cron\task\base
 					}
 				}
 			
-				// Skip posts if first post logic applies and not a first post
+				// Skip post if first post logic applies and not a first post
 				if (($user_row['user_digest_filter_type'] == constants::DIGESTS_FIRST) && ($post_row['topic_first_post_id'] != $post_row['post_id']))
 				{
 					continue;
 				}
 				
-				// Skip posts if remove my posts logic applies
+				// Skip post if remove my posts logic applies
 				if (($user_row['user_digest_show_mine'] == 0) && ($post_row['poster_id'] == $user_row['user_id']))
 				{
 					continue;
@@ -1917,7 +1919,7 @@ class digests extends \phpbb\cron\task\base
 				$post_text = generate_text_for_display($post_text, $post_row['bbcode_uid'], $post_row['bbcode_bitfield'], $flags);
 
 				// Logic to show attachments
-				$post_text .= $this->create_attachment_markup($post_row, $is_post = true);
+				$post_text .= $this->create_attachment_markup($post_row, true);
 
 				// User signature wanted?
 				$user_sig = ($post_row['enable_sig'] && $post_row['user_sig'] != '' && $this->config['allow_sig'] ) ? censor_text($post_row['user_sig']) : '';
@@ -2033,7 +2035,7 @@ class digests extends \phpbb\cron\task\base
 
 		// General template variables are set here. Many are inherited from language variables.
 		$this->template->assign_vars(array(
-			'DIGESTS_TOTAL_PMS'				=> sizeof($pm_rowset),
+			'DIGESTS_TOTAL_PMS'				=> count($pm_rowset),
 			'DIGESTS_TOTAL_POSTS'			=> $this->posts_in_digest,
 			'L_DIGESTS_NO_PRIVATE_MESSAGES'	=> $this->language->lang('DIGESTS_NO_PRIVATE_MESSAGES') . "\n",
 			'L_PRIVATE_MESSAGE'				=> strtolower($this->language->lang('PRIVATE_MESSAGE')) . "\n",
@@ -2113,7 +2115,7 @@ class digests extends \phpbb\cron\task\base
 				}
 				else
 				{
-					// Danger Will Robinson! No list permission exists for a parent of the requested forum, so this forum should not be shown
+					// Danger Will Robinson! No list permission exists for a parent of the requested forum, so this forum should not be shown.
 					$there_are_parents = false;
 					$include_this_forum = false;
 				}

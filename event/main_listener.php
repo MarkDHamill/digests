@@ -22,9 +22,6 @@ class main_listener implements EventSubscriberInterface
 	/* @var \phpbb\config\config */
 	protected $config;
 	
-	/* @var \phpbb\controller\helper */
-	protected $helper;
-
 	/* @var \phpbb\template\template */
 	protected $template;	
 	
@@ -35,14 +32,12 @@ class main_listener implements EventSubscriberInterface
 	* Constructor
 	*
 	* @param \phpbb\config\config		$config
-	* @param \phpbb\controller\helper	$helper		Controller helper object
 	* @param \phpbb\template\template	$template	Template object
 	* @param \phpbb\request\request		$request	Request object
 	*/
-	public function __construct(\phpbb\config\config $config, \phpbb\controller\helper $helper, \phpbb\template\template $template, \phpbb\request\request $request)
+	public function __construct(\phpbb\config\config $config, \phpbb\template\template $template, \phpbb\request\request $request)
 	{
 		$this->config = $config;
-		$this->helper = $helper;
 		$this->template = $template;
 		$this->request = $request;
 	}
@@ -77,6 +72,7 @@ class main_listener implements EventSubscriberInterface
 		$is_human = ($event['sql_ary']['user_type'] == USER_IGNORE) ? false : true;
 		if ($is_human && ($this->config['phpbbservices_digests_enable_auto_subscriptions'] == 1 || $subscribe_on_registration))
 		{
+			// Subscribe user with digest defaults
 			$sql_ary['user_digest_attachments'] 		= $this->config['phpbbservices_digests_user_digest_attachments'];
 			$sql_ary['user_digest_block_images'] 		= $this->config['phpbbservices_digests_user_digest_block_images'];
 			$sql_ary['user_digest_filter_type'] 		= $this->config['phpbbservices_digests_user_digest_filter_type'];
@@ -103,7 +99,8 @@ class main_listener implements EventSubscriberInterface
 
 	public function ucp_register_data_before($event)
 	{
-		
+
+		// Fields on registration for that allow a user to subscribe to digests, if this feature is enabled.
 		$this->template->assign_vars(array(
 			'S_DIGESTS'							=> (!$this->config['phpbbservices_digests_enable_auto_subscriptions'] && $this->config['phpbbservices_digests_registration_field']) ? true : false,	
 			'S_DIGESTS_REGISTER_CHECKED_YES' 	=> ($this->config['phpbbservices_digests_user_digest_registration']) ? true : false,

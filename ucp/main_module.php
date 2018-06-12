@@ -97,8 +97,7 @@ class main_module
 					// Note: user_digest_send_hour_gmt is stored in UTC and translated to local time (as set in the profile). 
 					// This is different than in phpBB 2, when all times were stored in server time.
 
-
-					$local_send_hour = $this->request->variable('send_hour', (float) $this->user->data['user_digest_send_hour_gmt']) - ((float) $this->helper->make_tz_offset($this->user->data['user_timezone']));
+					$local_send_hour = $this->request->variable('send_hour', (float) $this->user->data['user_digest_send_hour_gmt']) - (float) $this->helper->make_tz_offset($this->user->data['user_timezone']);
 					$local_send_hour = $this->helper->check_send_hour($local_send_hour);
 
 					$sql_ary['user_digest_type']			= $this->request->variable('digest_type', $this->user->data['user_digest_type']);
@@ -127,7 +126,7 @@ class main_module
 						{
 							if (substr($key, 0, 4) == 'elt_') 
 							{
-								$forum_id = intval(substr($key, 4, strpos($key, '_', 4) - 4));
+								$forum_id = (int) (substr($key, 4, strpos($key, '_', 4) - 4));
 	
 								$sql_ary[] = array(
 									'user_id'		=> (int) $this->user->data['user_id'],
@@ -148,7 +147,7 @@ class main_module
 
 				case constants::DIGESTS_MODE_POST_FILTERS:
 				
-					$mark_read = ($this->request->variable('mark_read', '') == 'on') ? 1 : 0;
+					$mark_read = ($this->request->variable('mark_read', '') == 'on');
 					$sql_ary = array(
 						'user_digest_max_posts'			=> $this->request->variable('count_limit', 0),
 						'user_digest_min_words'			=> $this->request->variable('min_word_size', 0),
@@ -162,7 +161,7 @@ class main_module
 					
 				case constants::DIGESTS_MODE_ADDITIONAL_CRITERIA:
 				
-					$no_post_text = ($this->request->variable('no_post_text', '') == 'on') ? 1 : 0;
+					$no_post_text = ($this->request->variable('no_post_text', '') == 'on');
 					$sql_ary = array(
 						'user_digest_sortby'			=> $this->request->variable('sort_by', $this->user->data['user_digest_sortby']),
 						'user_digest_max_display_words'	=> $this->request->variable('max_word_size', 0),
@@ -204,13 +203,16 @@ class main_module
 		add_form_key($form_key);
 		
 		// Don't show submit or reset buttons if there is no digest subscription, but it can be placed on the Basics page so it can be changed.
-		$show_buttons = ($this->user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE) ? false : true;
+		$show_buttons = !($this->user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE);
 		if ($mode == constants::DIGESTS_MODE_BASICS)
 		{
 			$show_buttons = true; // Buttons must appear in basics mode otherwise there is no way to resubscribe
 		}
 
-		$this->template->assign_var('S_INCLUDE_DIGESTS_JS', true);	// So necessary Javascript will be included
+		$this->template->assign_vars(array(
+			'S_INCLUDE_DIGESTS_CSS'					=> true,	// So necessary CSS will be included for extension, but not elsewhere
+			'S_INCLUDE_DIGESTS_JS'					=> true,	// So necessary Javascript will be included for extension, but not elsewhere
+		));
 
 		switch ($mode)
 		{
@@ -252,8 +254,8 @@ class main_module
 					// Adjust time if outside of hour range
 					$local_send_hour = $this->helper->check_send_hour($local_send_hour);
 
-					// Set other form fields using board defaults if necessary, otherwise pull from the user's settings
-					// Note, setting an administator configured default for digest type is a bad idea because
+					// Set other form fields using board defaults if necessary, otherwise pull from the user's settings.
+					// Note: setting an administator configured default for digest type is a bad idea because
 					// the user might think they have a digest subscription when they do not.
 					
 					if ($this->user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE)
@@ -334,7 +336,7 @@ class main_module
 					$disabled_all = false;
 					$disabled_first = false;
 					$disabled_bm = false;
-					$disabled = false;	// used to disable individual forums in this case
+					$disabled = false;	// used to enable individual forums in this case
 				}
 
 				// Get current subscribed forums for this user, if any. If none, all allowed forums are assumed

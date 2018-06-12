@@ -59,11 +59,11 @@ class main_module
 
 		$this->language->add_lang(array('acp/info_acp_common', 'acp/common'), 'phpbbservices/digests');
 
-		$submit = ($this->request->is_set_post('submit')) ? true : false;
+		$submit = $this->request->is_set_post('submit');
 
 		$form_key = 'phpbbservices/digests';
 		add_form_key($form_key);
-		$my_time_zone = (float) $this->helper->make_tz_offset($this->user->data['user_timezone']);
+		$my_time_zone = $this->helper->make_tz_offset($this->user->data['user_timezone']);
 
 		/**
 		*	Validation types are:
@@ -283,8 +283,8 @@ class main_module
 								
 				// Stealing some code from my Smartfeed extension so I can get a list of forums that a particular user can access
 				
-				// We need to know which auth_option_id corresponds to the forum read privilege (f_read) and forum list (f_list) privilege.
-				$auth_options = array('f_read', 'f_list');
+				// We need to know which auth_option_id corresponds to the forum read privilege (f_read) privilege.
+				$auth_options = array('f_read');
 
 				$sql_array = array(
 					'SELECT'	=> 'auth_option, auth_option_id',
@@ -298,16 +298,10 @@ class main_module
 				
 				$sql = $this->db->sql_build_query('SELECT', $sql_array);
 
-				$result = $this->db->sql_query($sql);
-				$read_id = '';
-				while ($row = $this->db->sql_fetchrow($result))
-				{
-					if ($row['auth_option'] == 'f_read')
-					{
-						$read_id = $row['auth_option_id'];
-					}
+				$result = $this->db->sql_query($sql);	// Should return 20
+				$row = $this->db->sql_fetchrow($result);
+				$read_id = $row['auth_option_id'];
 
-				}
 				$this->db->sql_freeresult($result); // Query be gone!
 				
 				// Fill in some non-block template variables
@@ -364,15 +358,15 @@ class main_module
 					// Make some translations into something more readable
 					switch($row['user_digest_type'])
 					{
-						case 'DAY':
+						case constants::DIGESTS_DAILY_VALUE:
 							$digest_type = $this->language->lang('DIGESTS_DAILY');
 						break;
 						
-						case 'WEEK':
+						case constants::DIGESTS_WEEKLY_VALUE:
 							$digest_type = $this->language->lang('DIGESTS_WEEKLY');
 						break;
 						
-						case 'MNTH':
+						case constants::DIGESTS_MONTHLY_VALUE:
 							$digest_type = $this->language->lang('DIGESTS_MONTHLY');
 						break;
 						
@@ -449,7 +443,7 @@ class main_module
 					$subscribed_forums = $this->db->sql_fetchrowset($result2);
 					$this->db->sql_freeresult($result2);
 
-					$all_by_default = (sizeof($subscribed_forums) == 0) ? true : false;
+					$all_by_default = (count($subscribed_forums) === 0);
 
 					$user_lastvisit = ($row['user_lastvisit'] == 0) ? $this->language->lang('DIGESTS_NEVER_VISITED') : $this->user->format_date($row['user_lastvisit'] + (60 * 60 * ($my_time_zone - (date('O')/100))), $this->user->data['user_dateformat']);
 					$user_digest_last_sent = ($row['user_digest_last_sent'] == 0) ? $this->language->lang('DIGESTS_NO_DIGESTS_SENT') : $this->user->format_date($row['user_digest_last_sent'] + (60 * 60 * ($my_time_zone - (date('O')/100))), $this->user->data['user_dateformat']);
@@ -507,7 +501,7 @@ class main_module
 						'DISPLAY_HOUR_21'					=> $display_hour[21],
 						'DISPLAY_HOUR_22'					=> $display_hour[22],
 						'DISPLAY_HOUR_23'					=> $display_hour[23],
-						'L_DIGEST_CHANGE_SUBSCRIPTION' 		=> ($row['user_digest_type'] != 'NONE') ? $this->language->lang('DIGESTS_UNSUBSCRIBE') : $this->language->lang('DIGESTS_SUBSCRIBE_LITERAL'),
+						'L_DIGEST_CHANGE_SUBSCRIPTION' 		=> ($row['user_digest_type'] != constants::DIGESTS_NONE_VALUE) ? $this->language->lang('DIGESTS_UNSUBSCRIBE') : $this->language->lang('DIGESTS_SUBSCRIBE_LITERAL'),
 						'S_ALL_BY_DEFAULT'					=> $all_by_default,
 						'S_ATTACHMENTS_NO_CHECKED' 			=> ($row['user_digest_attachments'] == 0),
 						'S_ATTACHMENTS_YES_CHECKED' 		=> ($row['user_digest_attachments'] == 1),
@@ -583,7 +577,7 @@ class main_module
 						'USER_EMAIL'						=> $row['user_email'],
 						'USER_ID'							=> $row['user_id'],
 						'USER_LAST_VISIT'					=> $user_lastvisit,
-						'USER_SUBSCRIBE_UNSUBSCRIBE_FLAG'	=> ($row['user_digest_type'] != 'NONE') ? 'u' : 's')
+						'USER_SUBSCRIBE_UNSUBSCRIBE_FLAG'	=> ($row['user_digest_type'] != constants::DIGESTS_NONE_VALUE) ? 'u' : 's')
 					);
 
 					// Now let's get this user's forum permissions. Note that non-registered, robots etc. get a list of public forums
@@ -920,7 +914,7 @@ class main_module
 			$use_defaults_pass = false;
 			unset($sql_ary, $sql_ary2);
 			
-			// Get the entire request variables as an array for parsing
+			// Get the entire POST request variables as an array for parsing
 			unset($requests_vars);
 			$request_vars = $this->request->get_super_global(\phpbb\request\request_interface::POST);
 			
@@ -948,13 +942,13 @@ class main_module
 				// We only care if the request variable starts with "user-".
 				if (substr($name,0,5) == 'user-')
 				{
-					
+
 					// Parse for the user_id, which is embedded in the form field name. Format is user-99-column_name where 99
 					// is the user id. The mark switch is in the form user-99.
 					$delimiter_pos = strpos($name, '-', 5);
 					if ($delimiter_pos === false)
 					{
-						// This is the mark all checkbox for a given user
+						// This is the mark_all checkbox for a given user
 						$delimiter_pos = strlen($name);
 					}
 					$user_id = substr($name, 5, $delimiter_pos - 5);
@@ -975,8 +969,8 @@ class main_module
 								WHERE user_id = ' . (int) $current_user_id;
 							$this->db->sql_query($sql);
 						}
-						
-						// If there are any individual forum subscriptions for this user, remove the old ones. 
+
+						// If there are any individual forum subscriptions for this user, remove the old ones.
 						$sql = 'DELETE FROM ' . $this->table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' 
 								WHERE user_id = ' . (int) $current_user_id;
 						$this->db->sql_query($sql);
@@ -1054,7 +1048,9 @@ class main_module
 						$all_forums = $this->request->variable($var, '', true);
 						$var = 'user-' . $current_user_id . '-filter_type';
 						$filter_type = $this->request->variable($var, '', true);
-						
+						//echo $all_forums . '~' . $filter_type;
+						//exit;
+
 						// No mass action, so associate the database columns with its requested value
 						if (!$use_defaults && ($var_part == 'digest_type') && ($value == constants::DIGESTS_DEFAULT_VALUE))
 						{
@@ -1198,7 +1194,7 @@ class main_module
 					}
 					
 				} // $request_vars variable is named user-*
-				
+
 			} // foreach
 			
 			// Process last user

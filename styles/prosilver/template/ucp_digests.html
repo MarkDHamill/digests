@@ -2,9 +2,10 @@
 <script>
 {% if S_INCLUDE_DIGESTS_JS %}
 	{# Includes ACP - JS #}
-	{% if not definition.INCLUDED_ACPDIGESTSJS %}
+	{% if not definition.INCLUDED_DIGESTSJS %}
+		{% INCLUDEJS '@phpbbservices_digests/js/jquery-ui-1.12.1.min.js' %}
 		{% INCLUDEJS '@phpbbservices_digests/js/digests.js' %}
-	{% DEFINE INCLUDED_ACPDIGESTSJS = true %}
+		{% DEFINE INCLUDED_DIGESTSJS = true %}
 	{% endif %}
 {% endif %}
 {% if S_DIGESTS_POST_FILTERS %}

@@ -69,7 +69,7 @@ $(document).ready(function(){
 	// If any individual forum is unchecked, the all_forums checkbox should be unchecked. Exception: required or excluded forums.
 	// If all individual forums are checked, the all_forums checkbox should be checked. Exception: required or excluded forums.
 	$("[id*=elt_]").click(function() {
-		allChecked = true;	// Assume all forums are checked
+		var allChecked = true;	// Assume all forums are checked
 		$("[id*=elt_]").each(function() {
 			$("#all_forums").prop('checked', false);
 			if ((!ignore_forum($(this).attr('id'))) && !$(this).is(':checked')) {
@@ -84,7 +84,7 @@ $(document).ready(function(){
 	// If bookmarked topics only is selected, disable the forum controls, otherwise enable them. All forums checkbox also needs
 	// to be enabled or disabled.
 	$("#bookmarks, #all, #first").click(function() {
-		disabled = $("#bookmarks").is(':checked');
+		var disabled = $("#bookmarks").is(':checked');
 		$("[id*=elt_]").each(function() {
 			if (!ignore_forum($(this).attr('id'))) {
 				$(this).prop('disabled', disabled);
@@ -97,7 +97,7 @@ $(document).ready(function(){
 	// to submit and display an error message.
 	$("#phpbbservices_digests").submit(function(event) {
 		if (!$("#all_forums").is(':checked')) {
-			anyChecked = false;
+			var anyChecked = false;
 			$("[id*=elt_]").each(function() {
 				if ($(this).prop('checked')) {
 					anyChecked = true;
@@ -113,16 +113,16 @@ $(document).ready(function(){
 	function exclude_forum(forumId) {
 		// Returns true if the forum representing forumId should be excluded. Pattern is elt_1_2 where 1 is the forum_id
 		// and 2 is the parent forum_id.
-		start=forumId.indexOf('_');
-		end = forumId.lastIndexOf('_');
+		var start = forumId.indexOf('_');
+		var end = forumId.lastIndexOf('_');
 		return excludedForumsArray.indexOf(forumId.substring(start+1,end)) !== -1;
 	}
 
 	function ignore_forum(forumId) {
 		// Returns true the forum representing forumId should be ignored. Pattern is elt_1_2 where 1 is the forum_id
 		// and 2 is the parent forum_id.
-		start=forumId.indexOf('_');
-		end = forumId.lastIndexOf('_');
+		var start =forumId.indexOf('_');
+		var end = forumId.lastIndexOf('_');
 		return ignoredForumsArray.indexOf(forumId.substring(start+1,end)) !== -1;
 	}
 

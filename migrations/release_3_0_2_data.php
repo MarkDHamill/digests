@@ -10,7 +10,6 @@
 namespace phpbbservices\digests\migrations;
 
 use phpbbservices\digests\constants\constants;
-use phpbbservices\digests\core\common;
 
 class release_3_0_2_data extends \phpbb\db\migration\migration
 {

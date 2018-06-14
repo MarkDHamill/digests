@@ -21,7 +21,7 @@ class release_3_0_2_modules extends \phpbb\db\migration\migration
 		$module_id = $this->db->sql_fetchfield('module_id');
 		$this->db->sql_freeresult($result);
 
-		return $module_id != false;
+		return $module_id !== false;
 	}
 
 	static public function depends_on()

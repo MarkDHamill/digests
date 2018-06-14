@@ -14,7 +14,6 @@ use phpbbservices\digests\constants\constants;
 class release_3_0_2_data extends \phpbb\db\migration\migration
 {
 
-
 	public function effectively_installed()
 	{
 		return $this->config->offsetExists('phpbbservices_digests_enable_auto_subscriptions');
@@ -49,8 +48,8 @@ class release_3_0_2_data extends \phpbb\db\migration\migration
 			array('config.add',	array('phpbbservices_digests_include_admins', 0)),
 			array('config.add',	array('phpbbservices_digests_include_forums', 0)),
 			array('config.add',	array('phpbbservices_digests_max_items', 0)),
-			array('config.add',	array('phpbbservices_digests_notify_on_admin_changes', 1)), 
-			array('config.add',	array('phpbbservices_digests_page_url', 'https://www.phpbbservices.com/digests_wp/')),
+			array('config.add',	array('phpbbservices_digests_notify_on_admin_changes', 1)),
+			array('config.add',	array('phpbbservices_digests_page_url', 'https://www.phpbbservices.com/my-software/digests_wp/digests-extension/')),
 			array('config.add',	array('phpbbservices_digests_registration_field', 0)),
 			array('config.add',	array('phpbbservices_digests_reply_to_email_address', '')),
 			array('config.add',	array('phpbbservices_digests_show_email', 0)),

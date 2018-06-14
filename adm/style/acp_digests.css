@@ -1,3 +1,7 @@
+.overflow-x
+{
+	overflow-x:auto;
+}
 #digests {
 	background-color: inherit;
 }
@@ -6,12 +10,17 @@ fieldset {
 	border: 0px;
 	background-color: inherit;
 	margin: 5px 0;
+	overflow-x: auto;
 }
 table {
 	border-spacing: 1px;
 	border-collapse: separate;
 }
-tr:nth-child(odd)
+#down tr:nth-child(3)
+{
+	background-color: #DCEBFE !important;
+}
+#balance tr:nth-child(odd)
 {
 	background-color: #DCEBFE !important;
 }

@@ -1048,8 +1048,6 @@ class main_module
 						$all_forums = $this->request->variable($var, '', true);
 						$var = 'user-' . $current_user_id . '-filter_type';
 						$filter_type = $this->request->variable($var, '', true);
-						//echo $all_forums . '~' . $filter_type;
-						//exit;
 
 						// No mass action, so associate the database columns with its requested value
 						if (!$use_defaults && ($var_part == 'digest_type') && ($value == constants::DIGESTS_DEFAULT_VALUE))

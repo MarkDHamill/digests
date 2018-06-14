@@ -14,6 +14,12 @@ use phpbbservices\digests\core\common;
 
 class convert_mod_data extends \phpbb\db\migration\migration
 {
+
+	public function effectively_installed()
+	{
+		return !$this->config->offsetExists('digests_version');
+	}
+
 	static public function depends_on()
 	{
 		return array(
@@ -131,11 +137,6 @@ class convert_mod_data extends \phpbb\db\migration\migration
 			}
 		}
 
-	}
-
-	public function effectively_installed()
-	{
-		return !$this->config->offsetExists('digests_version');
 	}
 
 }

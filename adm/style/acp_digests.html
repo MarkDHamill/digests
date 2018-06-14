@@ -493,39 +493,44 @@
 				{% endfor %}
 			</select>
 		</p>
-		<table id="down" class="layout-fixed">
-			<colgroup>
-				<col class="width-120">
-				<col class="width-80">
-			</colgroup>
-			<thead>
-				<tr>
-					<th class="text-center">{{ lang('DIGESTS_HOUR_SENT') }}</th>
-					<th class="text-center-uc">{{ lang('DIGESTS_NUMBER_OF_SUBSCRIBERS') }}</th>
-					<th class="text-left-uc">{{ lang('DIGESTS_SUBSCRIBERS_DAILY') }}</th>
-					<th class="text-left-uc">{{ lang('DIGESTS_SUBSCRIBERS_WEEKLY') }}</th>
-					<th class="text-left-uc">{{ lang('DIGESTS_SUBSCRIBERS_MONTHLY') }}</th>
-				</tr>
-				<tr>
-					<td class="text-center-uc"><strong>{{ lang('DIGESTS_AVERAGE') }}</strong></td>
-					<td class="text-center-uc">{{ S_DIGESTS_AVERAGE }}</td>
-					<td class="text-center">&nbsp;</td>
-					<td class="text-center">&nbsp;</td>
-					<td class="text-center">&nbsp;</td>
-				</tr>
-			</thead>
-			<tbody>
-			{% for digests_balance_load in loops.digests_balance_load %}
-				<tr>
-					<td class="text-center">{{ digests_balance_load.HOUR }}</td>
-					<td class="text-center">{{ digests_balance_load.HOUR_COUNT }}</td>
-					<td>{{ digests_balance_load.SUBSCRIBERS_DAILY }}</td>
-					<td>{{ digests_balance_load.SUBSCRIBERS_WEEKLY }}</td>
-					<td>{{ digests_balance_load.SUBSCRIBERS_MONTHLY }}</td>
-				</tr>
-				{% endfor %}
-			</tbody>
-		</table>
+		<div class="overflow-x">
+			<table id="balance" class="layout-fixed">
+				<colgroup>
+					<col class="width-120">
+					<col class="width-80">
+					<col>
+					<col>
+					<col>
+				</colgroup>
+				<thead>
+					<tr>
+						<th class="text-center">{{ lang('DIGESTS_HOUR_SENT') }}</th>
+						<th class="text-center-uc">{{ lang('DIGESTS_NUMBER_OF_SUBSCRIBERS') }}</th>
+						<th class="text-left-uc">{{ lang('DIGESTS_SUBSCRIBERS_DAILY') }}</th>
+						<th class="text-left-uc">{{ lang('DIGESTS_SUBSCRIBERS_WEEKLY') }}</th>
+						<th class="text-left-uc">{{ lang('DIGESTS_SUBSCRIBERS_MONTHLY') }}</th>
+					</tr>
+					<tr>
+						<td class="text-center-uc"><strong>{{ lang('DIGESTS_AVERAGE') }}</strong></td>
+						<td class="text-center-uc">{{ S_DIGESTS_AVERAGE }}</td>
+						<td class="text-center">&nbsp;</td>
+						<td class="text-center">&nbsp;</td>
+						<td class="text-center">&nbsp;</td>
+					</tr>
+				</thead>
+				<tbody>
+				{% for digests_balance_load in loops.digests_balance_load %}
+					<tr>
+						<td class="text-center">{{ digests_balance_load.HOUR }}</td>
+						<td class="text-center">{{ digests_balance_load.HOUR_COUNT }}</td>
+						<td>{{ digests_balance_load.SUBSCRIBERS_DAILY }}</td>
+						<td>{{ digests_balance_load.SUBSCRIBERS_WEEKLY }}</td>
+						<td>{{ digests_balance_load.SUBSCRIBERS_MONTHLY }}</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
 
 		<p class="submit-buttons">
 			<input class="button1" type="submit" id="submit" name="submit" value="{{ lang('DIGESTS_BALANCE_LOAD') }}" />
@@ -546,8 +551,8 @@
 	{% if S_EDIT_SUBSCRIBERS %}
 		<fieldset class="quick">
 			<p class="small"><a href="#" onclick="marklist('acp_digests', 'user-', true);">{{ lang('MARK_ALL') }}</a> &bull; <a href="#" onclick="marklist('acp_digests', 'user-', false);">{{ lang('UNMARK_ALL') }}</a></p>
-			{{ S_FORM_TOKEN }}
 		</fieldset>
+	</fieldset>
 	{% endif %}
 
 	{{ S_FORM_TOKEN }}

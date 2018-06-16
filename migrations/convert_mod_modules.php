@@ -13,15 +13,17 @@ class convert_mod_modules extends \phpbb\db\migration\migration
 {
 	public function effectively_installed()
 	{
+		// If ACP_DIGEST_SETTINGS is not in the modules table, there are no modules from the digests mod to worry about.
+		// Instead, the modules will be created in release_3_0_2_modules.php.
 		$sql = 'SELECT module_id
 			FROM ' . $this->table_prefix . "modules 
 			WHERE module_class = 'acp'
-				AND module_langname = 'ACP_DIGESTS_TEST'"; // This module is new with the extension so if exists, there are no modules to convert
+				AND module_langname = 'ACP_DIGEST_SETTINGS'";
 		$result = $this->db->sql_query($sql);
 		$module_id = $this->db->sql_fetchfield('module_id');
 		$this->db->sql_freeresult($result);
 
-		return $module_id !== false;
+		return $module_id === false;
 	}
 
 	static public function depends_on()

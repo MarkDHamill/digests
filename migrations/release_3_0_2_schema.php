@@ -13,7 +13,9 @@ class release_3_0_2_schema extends \phpbb\db\migration\migration
 {
 	public function effectively_installed()
 	{
-		return $this->db_tools->sql_table_exists('digests_subscribed_forums');
+		// phpbb_users.user_digest_attachments originated in the digests mod. So if the column exists already, there should be nothing
+		// to do here because all tables and columns were added by convert_mod_schema.php instead.
+		return $this->db_tools->sql_column_exists($this->table_prefix . 'users', 'user_digest_attachments');
 	}
 
 	static public function depends_on()
@@ -26,6 +28,7 @@ class release_3_0_2_schema extends \phpbb\db\migration\migration
 
 	public function update_schema()
 	{
+
 		return array(
 
 			'add_columns'        => array(

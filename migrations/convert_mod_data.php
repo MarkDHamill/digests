@@ -17,6 +17,8 @@ class convert_mod_data extends \phpbb\db\migration\migration
 
 	public function effectively_installed()
 	{
+		// If the configuration variable digests_version does not exist, the digests mod was not installed
+		// so data will be added by release_3_0_2_data.php instead.
 		return !$this->config->offsetExists('digests_version');
 	}
 

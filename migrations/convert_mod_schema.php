@@ -13,6 +13,8 @@ class convert_mod_schema extends \phpbb\db\migration\migration
 {
 	public function effectively_installed()
 	{
+		// phpbb_users.user_digest_attachments was in the digests mod. So if the column does not exist, the work
+		// will be done by release_3_0_2.php instead, so this migration is effectively installed.
 		return !$this->db_tools->sql_column_exists($this->table_prefix . 'users', 'user_digest_attachments');
 	}
 

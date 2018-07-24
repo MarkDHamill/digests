@@ -1045,8 +1045,9 @@ class digests extends \phpbb\cron\task\base
 				$digest_toc .= ($is_html) ? "</tbody>\n</table></div>\n<br>" : ''; 
 			
 				// Publish the table of contents
-				$html_messenger->assign_var('DIGESTS_TOC', $digest_toc);
-
+				$html_messenger->assign_vars(array(
+					'DIGESTS_TOC'			=> $digest_toc,
+				));
 			}
 			else
 			{

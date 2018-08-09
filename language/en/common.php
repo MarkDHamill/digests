@@ -17,10 +17,6 @@ if (empty($lang) || !is_array($lang))
 	$lang = array();
 }
 
-global $phpbb_container;
-
-$config = $phpbb_container->get('config');
-
 $lang = array_merge($lang, array(
 	'PLURAL_RULE'						=> 1,
 
@@ -123,7 +119,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_SHOW_ATTACHMENTS_EXPLAIN'	=> 'If enabled, attachment images will appear in your digest at the bottom of the post or private message. Non-image attachments appear as links (HTML digests only). The BBCode [img] tag is not affected by this setting.',
 	'DIGESTS_SHOW_NEW_POSTS_ONLY' 		=> 'Show new posts only',
 	'DIGESTS_SHOW_PMS' 					=> 'Show my private messages',
-	'DIGESTS_SIZE_ERROR'				=> sprintf("This field is a required field. You must enter a positive whole number, less than or equal to the maximum allowed by the Forum Administrator. The maximum allowed is %u. If this value is zero, there is no limit.", $config['phpbbservices_digests_max_items']),
+	'DIGESTS_SIZE_ERROR'				=> 'This field is a required field. You must enter a positive whole number, less than or equal to the maximum allowed by the forum administrator. If this value is zero, there is no limit.',
 	'DIGESTS_SIZE_ERROR_MIN'			=> 'You must enter a whole number or leave the field blank. If this value is zero, there is no limit.',
 	'DIGESTS_SKIP'						=> 'Skip to content',
 	'DIGESTS_SORT_BY'					=> 'Post sort order',

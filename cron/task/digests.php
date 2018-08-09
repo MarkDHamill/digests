@@ -522,7 +522,7 @@ class digests extends \phpbb\cron\task\base
 								AND p.poster_id = u.user_id
 								$date_limit_sql
 								AND p.post_visibility = 1
-								AND topic_status != " . ITEM_MOVED . "
+								AND topic_status <> " . ITEM_MOVED . "
 								AND forum_password = ''",
 		
 			'ORDER_BY'	=> 'f.left_id, f.right_id'
@@ -1094,8 +1094,6 @@ class digests extends \phpbb\cron\task\base
 
 				$this->db->sql_query($update_users_sql);
 
-				$this->db->sql_freeresult($result_posts);
-
 			}
 
 			if (($this->run_mode == constants::DIGESTS_RUN_MANUAL) && ($this->config['phpbbservices_digests_test_spool']))
@@ -1244,7 +1242,9 @@ class digests extends \phpbb\cron\task\base
 			$html_messenger->reset();
 
 		}	// foreach
-		
+
+		$this->db->sql_freeresult($result_posts);
+
 		return true;	// Successful run if all digests were processed for the requested hour.
 		
 	}
@@ -1963,22 +1963,23 @@ class digests extends \phpbb\cron\task\base
 					if (trim($this->config['phpbbservices_digests_strip_tags']) !== '')
 					{
 						$tags = explode(',',str_replace(' ', '', trim($this->config['phpbbservices_digests_strip_tags'])));
-						foreach ($tags as $tag)
+						if (count($tags) > 0)
 						{
-
 							$dom = new \DOMDocument();
-							$dom->loadHTML($post_text);
+							$dom->loadHTML($post_text, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD); // Fix provided by whocarez
+							$substitute = $dom->createElement('p', $this->language->lang('DIGESTS_TAG_REPLACED'));
 
-							$script = $dom->getElementsByTagName($tag);
-
-							foreach($script as $item)
+							foreach ($tags as $tag)
 							{
-								$substitute = $dom->createElement('p', $this->language->lang('DIGESTS_TAG_REPLACED'));
-								$item->parentNode->replaceChild($substitute, $item);	// Replace offending tag with substitute
+								$script = $dom->getElementsByTagName(trim($tag));
+
+								foreach($script as $item)
+								{
+									$item->parentNode->replaceChild($substitute, $item);	// Replace unwanted tag with substitute
+								}
 							}
 
-							$post_text = $dom->saveHTML();
-
+							$post_text = utf8_decode($dom->saveHTML($dom->documentElement)); // Fix provided by whocarez
 						}
 					}
 				} 

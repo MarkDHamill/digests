@@ -29,7 +29,6 @@ class ext extends \phpbb\extension\base
 		// Connect with some necessary services
 		$request = $this->container->get('request');
 
-		// Add language strings needed
 		switch ($old_state)
 		{
 			case '': // Empty means nothing has run yet

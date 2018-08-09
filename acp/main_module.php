@@ -843,6 +843,7 @@ class main_module
 			break;
 
 			case 'digests_test':
+
 				$display_vars = array(
 					'title'	=> 'ACP_DIGESTS_TEST',
 					'vars'	=> array(
@@ -858,8 +859,9 @@ class main_module
 						'phpbbservices_digests_test_month'			=> array('lang' => 'DIGESTS_RUN_TEST_MONTH', 'validate' => 'int:1:12', 'type' => 'text:2:2', 'explain' => true),
 						'phpbbservices_digests_test_day'			=> array('lang' => 'DIGESTS_RUN_TEST_DAY', 'validate' => 'int:1:31', 'type' => 'text:2:2', 'explain' => true),
 						'phpbbservices_digests_test_hour'			=> array('lang' => 'DIGESTS_RUN_TEST_HOUR',	'validate' => 'int:0:23',	'type' => 'text:2:2', 'explain' => true),
-				)
+					)
 				);
+
 			break;
 				
 			default:
@@ -1707,8 +1709,7 @@ class main_module
 				'KEY'			=> $config_key,
 				'TITLE'			=> (null !== $this->language->lang($vars['lang'])) ? $this->language->lang($vars['lang']) : $vars['lang'],
 				'S_EXPLAIN'		=> $vars['explain'],
-				'TITLE_EXPLAIN'	=> $l_explain,
-				)
+				'TITLE_EXPLAIN'	=> $l_explain)
 			);
 
 			unset($display_vars['vars'][$config_key]);
@@ -1815,7 +1816,7 @@ class main_module
 		
 		return $digest_sort_order;
 	}
-	
+
 	function notify_subscribers ($digest_notify_list, $email_template = '')
 	{
 		

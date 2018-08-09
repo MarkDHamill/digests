@@ -19,9 +19,6 @@ if (empty($lang) || !is_array($lang))
 
 global $phpbb_container;
 
-$config = $phpbb_container->get('config');
-$helper = $phpbb_container->get('phpbbservices.digests.common');
-
 $lang = array_merge($lang, array(
 	'DIGESTS_WEEKDAY' 					=> 'Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday',
 ));
@@ -67,7 +64,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_EXCLUDE_FORUMS'								=> 'Always exclude these forums',
 	'DIGESTS_EXCLUDE_FORUMS_EXPLAIN'						=> 'Enter the forum_ids for forums that must never appear in a digest. Separate the forum_ids with commas. If set to 0, no forums have to be excluded. To determine the forum_ids, when browsing a forum observe the &ldquo;f&rdquo; parameter on the URL field. This is the forum_id. Example: http://www.example.com/phpBB3/viewforum.php?f=1. Do not use forum_ids that correspond to categories. <i>This setting is ignored if bookmarked topics only are requested by a subscriber.</i>',
 	'DIGESTS_EXPAND'										=> 'Expand',
-	'DIGESTS_FREQUENCY_EXPLAIN'								=> 'Weekly digests are sent on ' . $weekdays[$config['phpbbservices_digests_weekly_digest_day']] . '. Monthly digests are sent on the first of the month. Coordinated Universal Time (UTC) is used for determining the day of the week.',
+	'DIGESTS_FREQUENCY_EXPLAIN'								=> 'Weekly digests are sent on the day of the week set in digests general settings. Monthly digests are sent on the first of the month. Coordinated Universal Time (UTC) is used for determining the day of the week.',
 	'DIGESTS_FORMAT_FOOTER' 								=> 'Digest format',
 	'DIGESTS_FROM_EMAIL_ADDRESS'							=> 'From email address',
 	'DIGESTS_FROM_EMAIL_ADDRESS_EXPLAIN'					=> 'When users receive a digest, this email address will appear in the FROM field. If left blank it will default to your board&rsquo;s email contract address. Use caution if using an email address with a domain other than the one the digest is hosted on, as your mail server or the user&rsquo;s email server may interpret the email as spam.',
@@ -126,12 +123,13 @@ $lang = array_merge($lang, array(
 	'DIGESTS_RUN_TEST_EMAIL_ADDRESS'						=> 'Test email address',
 	'DIGESTS_RUN_TEST_EMAIL_ADDRESS_EXPLAIN'				=> 'If an email address is specified in this field, all digests for the requested hour will be sent to this email address instead of the board contact email address.',
 	'DIGESTS_RUN_TEST_HOUR'									=> 'Simulation hour',
-	'DIGESTS_RUN_TEST_HOUR_EXPLAIN'							=> 'Digests will be sent as of the hour specified. The hour is based on your board timezone (' . $helper->make_tz_offset($config['board_timezone']) . ' UTC). If it is in the future there will be no digests created. Enter a whole number from 0 to 23.',
+	'DIGESTS_RUN_TEST_HOUR_EXPLAIN'							=> "Digests will be sent as of the hour specified. The hour is based on your board timezone. If it is in the future there will be no digests created. Enter a whole number from 0 to 23.",
 	'DIGESTS_RUN_TEST_MONTH'								=> 'Simulation month',
 	'DIGESTS_RUN_TEST_MONTH_EXPLAIN'						=> 'Enter a whole number from 1 to 12. Normally this should be set to the current month. If the year and month are in the future of course no digests will be created.',
 	'DIGESTS_RUN_TEST_OPTIONS'								=> 'Run date and time options',
 	'DIGESTS_RUN_TEST_SEND_TO_ADMIN'						=> 'Send all digests to the email address specified',
-	'DIGESTS_RUN_TEST_SEND_TO_ADMIN_EXPLAIN'				=> 'If you want to email the digests in the test, all digests will be emailed to the address specified in the field below. If Yes, but no email address is specified, the board contact email address (' . $config['board_email']. ') will be used. <em>Caution</em>: certain email servers may interpret a large volume of emails in a short period of time from the same address as spam or inappropriate use. Enable with care. If you say No then digests will actually be mailed to subscribers, which may confuse them.',
+	'DIGESTS_RUN_TEST_SEND_TO_ADMIN_EXPLAIN'				=> 'If you want to email the digests in the test, all digests will be emailed to the address specified in the field below. If Yes, but no email address is specified, the board contact email address will be used. <em>Caution</em>: certain email servers may interpret a large volume of emails in a short period of time from the same address as spam or inappropriate use. Enable with care. If you say No then digests will actually be mailed to subscribers, which may confuse them.',
+	'DIGESTS_RUN_TEST_HOUR_EXPLAIN'							=> 'Digests will be sent as of the hour specified. The hour is based on your board timezone. If it is in the future there will be no digests created. Enter a whole number from 0 to 23.',
 	'DIGESTS_RUN_TEST_SPOOL'								=> 'Send results to files instead of emailing',
 	'DIGESTS_RUN_TEST_SPOOL_EXPLAIN'						=> 'Prevents digests from being mailed. Instead each digest is written to a file in the cache/phpbbservices/digests directory with file names in the following format: username-yyyy-mm-dd-hh-uniqueID.html or username-yyyy-mm-dd-hh-uniqueID.txt. (Files with a .txt suffix are text-only digests.) yyyy indicates the year, mm the month, dd the day in month, hh the hour and uniqueID is a 16-byte system-generated random hexadecimal string. Dates and hours in the file name are based on Coordinated Universal Time (UTC). If you simulate a different day or hour for mailing the digest using the fields below, file names will use those dates and hours. These digests can then be viewed if you specify the correct URL.',
 	'DIGESTS_RUN_TEST_TIME_USE'								=> 'Simulate month and hour, or day of week and hour for sending digest',

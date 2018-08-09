@@ -19,9 +19,6 @@ if (empty($lang) || !is_array($lang))
 
 global $phpbb_container;
 
-$config = $phpbb_container->get('config');
-$helper = $phpbb_container->get('phpbbservices.digests.common');
-
 $lang = array_merge($lang, array(
 
 	'PLURAL_RULE'											=> 1,
@@ -42,7 +39,7 @@ $lang = array_merge($lang, array(
 	'ACP_DIGESTS_RESET_CRON_RUN_TIME'						=> 'Reset mailer',
 	'ACP_DIGESTS_RESET_CRON_RUN_TIME_EXPLAIN'				=> '',
 	'ACP_DIGESTS_TEST'										=> 'Manually run the mailer',
-	'ACP_DIGESTS_TEST_EXPLAIN'								=> 'This feature allows you to manually run digests for initial testing or troubleshooting. You can also use it to recreate digests for a particular date and hour. The board timezone (currently ' . $helper->make_tz_offset($config['board_timezone']) . ' UTC) is used when calculating the date and hour. Please note that when digests are sent depends on board traffic, so digests may arrive late for some users. This can be changed if you set up <a href="https://wiki.phpbb.com/Modular_cron#Use_system_cron">a system cron</a> and enable phpBB&rsquo;s <strong>system cron</strong> feature. For more information, see the FAQ for the Digests extension on the forums at phpbb.com.',
+	'ACP_DIGESTS_TEST_EXPLAIN'								=> 'This feature allows you to manually run digests for initial testing or troubleshooting. You can also use it to recreate digests for a particular date and hour. The board timezone is used when calculating the date and hour. Please note that when digests are sent depends on board traffic, so digests may arrive late for some users. This can be changed if you set up <a href="https://wiki.phpbb.com/Modular_cron#Use_system_cron">a system cron</a> and enable phpBB&rsquo;s <strong>system cron</strong> feature. For more information, see the FAQ for the Digests extension on the forums at phpbb.com.',
 
 	'LOG_CONFIG_DIGESTS_BAD_DIGEST_TYPE'					=> '<strong>Warning: subscriber %1$s has a bad digest type of %2$s. Assumed a daily digest is wanted.</strong>',
 	'LOG_CONFIG_DIGESTS_BAD_SEND_HOUR'						=> '<strong>User %1$s digest send hour is invalid. It is %2$d. The number should be >= 0 and < 24.</strong>',

@@ -2,8 +2,8 @@
 	"name": "phpbbservices/digests",
 	"type": "phpbb-extension",
 	"description": "Sends daily, weekly or monthly digests of posts or bookmarked topics to subscribers via email.",
-	"homepage": "https://phpbbservices.com/digests_wp",
-	"version": "3.2.7",
+	"homepage": "https://www.phpbbservices.com/my-software/digests_wp/digests-extension",
+	"version": "3.2.8",
 	"license": "GPL-2.0-only",
 	"authors": [
 		{
@@ -14,7 +14,7 @@
 		}
 	],
 	"require": {
-		"php": ">=5.4,<=7.1",
+		"php": ">=5.4,<=7.2",
 		"composer/installers": "~1.0"
 	},
 	"extra": {

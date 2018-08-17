@@ -17,8 +17,6 @@ if (empty($lang) || !is_array($lang))
 	$lang = array();
 }
 
-global $phpbb_container;
-
 $lang = array_merge($lang, array(
 
 	'PLURAL_RULE'											=> 1,

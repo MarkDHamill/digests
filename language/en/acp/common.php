@@ -17,8 +17,6 @@ if (empty($lang) || !is_array($lang))
 	$lang = array();
 }
 
-global $phpbb_container;
-
 $lang = array_merge($lang, array(
 	'DIGESTS_WEEKDAY' 					=> 'Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday',
 ));
@@ -129,7 +127,6 @@ $lang = array_merge($lang, array(
 	'DIGESTS_RUN_TEST_OPTIONS'								=> 'Run date and time options',
 	'DIGESTS_RUN_TEST_SEND_TO_ADMIN'						=> 'Send all digests to the email address specified',
 	'DIGESTS_RUN_TEST_SEND_TO_ADMIN_EXPLAIN'				=> 'If you want to email the digests in the test, all digests will be emailed to the address specified in the field below. If Yes, but no email address is specified, the board contact email address will be used. <em>Caution</em>: certain email servers may interpret a large volume of emails in a short period of time from the same address as spam or inappropriate use. Enable with care. If you say No then digests will actually be mailed to subscribers, which may confuse them.',
-	'DIGESTS_RUN_TEST_HOUR_EXPLAIN'							=> 'Digests will be sent as of the hour specified. The hour is based on your board timezone. If it is in the future there will be no digests created. Enter a whole number from 0 to 23.',
 	'DIGESTS_RUN_TEST_SPOOL'								=> 'Send results to files instead of emailing',
 	'DIGESTS_RUN_TEST_SPOOL_EXPLAIN'						=> 'Prevents digests from being mailed. Instead each digest is written to a file in the cache/phpbbservices/digests directory with file names in the following format: username-yyyy-mm-dd-hh-uniqueID.html or username-yyyy-mm-dd-hh-uniqueID.txt. (Files with a .txt suffix are text-only digests.) yyyy indicates the year, mm the month, dd the day in month, hh the hour and uniqueID is a 16-byte system-generated random hexadecimal string. Dates and hours in the file name are based on Coordinated Universal Time (UTC). If you simulate a different day or hour for mailing the digest using the fields below, file names will use those dates and hours. These digests can then be viewed if you specify the correct URL.',
 	'DIGESTS_RUN_TEST_TIME_USE'								=> 'Simulate month and hour, or day of week and hour for sending digest',

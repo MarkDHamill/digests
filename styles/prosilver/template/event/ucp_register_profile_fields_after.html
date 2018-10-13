@@ -2,7 +2,7 @@
 <hr>
 
 <dl>
-	<dt><label>{{ lang('DIGESTS_REGISTER') }}:</label><br>{{ lang('DIGESTS_REGISTER_EXPLAIN') }}</dt>
+	<dt><label>{{ lang('DIGESTS_REGISTER') }}{{ lang('COLON') }}</label><br>{{ lang('DIGESTS_REGISTER_EXPLAIN') }}</dt>
 	<dd>
 		<label for="digest1"><input type="radio" name="digest" id="digest1" value="1"{% if S_DIGESTS_REGISTER_CHECKED_YES %} checked="checked"{% endif %} /> {{ lang('YES') }}</label>
 		<label for="digest2"><input type="radio" name="digest" id="digest2" value="0"{% if S_DIGESTS_REGISTER_CHECKED_NO %} checked="checked"{% endif %} /> {{ lang('NO') }}</label>

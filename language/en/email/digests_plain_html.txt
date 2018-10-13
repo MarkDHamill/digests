@@ -2,8 +2,12 @@
 <html lang="{{ S_USER_LANG }}">
 <head>
 	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="format-detection" content="telephone=no">
+	<meta http-equiv="X-UA-Compatible" content="IE=9; IE=8; IE=7; IE=EDGE">
 	<title>{{ S_DIGESTS_TITLE }}</title>
 	<style>
+		body { width:100% !important; -webkit-text; size-adjust:100%; -ms-text-size-adjust:100%; margin:0; padding:0; }
 		.box { margin:5px; padding:5px; border-style:dashed; border-width:1px; }
 		ol,ul { list-style-position: inside; }
 		.postbody { float: none; }
@@ -31,40 +35,6 @@
 		<hr>
 
 		{{ DIGESTS_CONTENT }}
-		<br>
-		<hr>
-		<h3>{{ S_DIGESTS_YOUR_DIGEST_OPTIONS }}</h3>
-		<h4>{{ lang('UCP_DIGESTS_BASICS_OPTIONS') }}{{ lang('COLON') }}</h4>
-		<blockquote><div>
-			{{ lang('DIGESTS_MAIL_FREQUENCY') }}{{ lang('COLON') }} {{ S_DIGESTS_MAIL_FREQUENCY }}<br>
-			{{ lang('DIGESTS_FORMAT_FOOTER') }}{{ lang('COLON') }} {{ S_DIGESTS_FORMAT_FOOTER }}<br>
-			{{ lang('DIGESTS_SEND_HOUR') }}{{ lang('COLON') }} {{ S_DIGESTS_SEND_HOUR }}
-		</div></blockquote>
-		<h4>{{ lang('UCP_DIGESTS_FORUMS_SELECTION_OPTIONS') }}{{ lang('COLON') }}</h4>
-		<blockquote><div>
-			{{ lang('DIGESTS_FILTER_TYPE') }}{{ lang('COLON') }} {{ S_DIGESTS_FILTER_TYPE }}<br>
-			{{ lang('DIGESTS_FORUMS_WANTED') }}{{ lang('COLON') }} {{ S_DIGESTS_FORUMS_WANTED }}
-		</div></blockquote>
-		<h4>{{ lang('UCP_DIGESTS_POST_FILTERS_OPTIONS') }}{{ S_COLON }}</h4>
-		<blockquote><div>
-			{{ lang('DIGESTS_COUNT_LIMIT') }}{{ lang('COLON') }} {{ S_DIGESTS_COUNT_LIMIT }}<br>
-			{{ lang('DIGESTS_MIN_SIZE') }}{{ lang('COLON') }} {{ S_DIGESTS_MIN_SIZE }} <br>
-			{{ lang('DIGESTS_SHOW_NEW_POSTS_ONLY') }}{{ lang('COLON') }} {% if S_DIGESTS_SHOW_NEW_POSTS_ONLY %}{{ lang('YES') }}{% else %}{{ lang('NO') }}{% endif %}<br>
-			{{ lang('DIGESTS_REMOVE_YOURS') }}{{ lang('COLON') }} {% if S_DIGESTS_REMOVE_YOURS %}{{ lang('YES') }}{% else %}{{ lang('NO') }}{% endif %}<br>
-			{{ lang('DIGESTS_FILTER_FOES') }}{{ lang('COLON') }} {% if S_DIGESTS_FILTER_FOES %}{{ lang('YES') }}{% else %}{{ lang('NO') }}{% endif %}<br>
-			{{ lang('DIGESTS_SHOW_PMS') }}{{ lang('COLON') }} {% if S_DIGESTS_SHOW_PMS %}{{ lang('YES') }}{% else %}{{ lang('NO') }}{% endif %}<br>
-			{{ lang('DIGESTS_PMS_MARK_READ') }}{{ lang('COLON') }} {% if S_DIGESTS_PMS_MARK_READ %}{{ lang('YES') }}{% else %}{{ lang('NO') }}{% endif %}
-		</div></blockquote>
-		<h4>{{ lang('UCP_DIGESTS_ADDITIONAL_CRITERIA_OPTIONS') }}{{ S_COLON }}</h4>
-		<blockquote><div>
-			{{ lang('DIGESTS_SORT_BY') }}{{ lang('COLON') }} {{ S_DIGESTS_SORT_BY }}<br>
-			{{ lang('DIGESTS_MAX_SIZE') }}{{ lang('COLON') }} {{ S_DIGESTS_MAX_SIZE }}<br>
-			{{ lang('DIGESTS_SEND_IF_NO_NEW_MESSAGES') }} {% if S_DIGESTS_SEND_IF_NO_NEW_MESSAGES %}{{ lang('YES') }}{% else %}{{ lang('NO') }}{% endif %}<br>
-			{{ lang('DIGESTS_LASTVISIT_RESET') }}{{ lang('COLON') }} {% if S_DIGESTS_LASTVISIT_RESET %}{{ lang('YES') }}{% else %}{{ lang('NO') }}{% endif %}<br>
-			{{ lang('DIGESTS_SHOW_ATTACHMENTS') }}{{ lang('COLON') }} {% if S_DIGESTS_SHOW_ATTACHMENTS %}{{ lang('YES') }}{% else %}{{ lang('NO') }}{% endif %}<br>
-			{{ lang('DIGESTS_BLOCK_IMAGES') }}{{ lang('COLON') }} {% if S_DIGESTS_BLOCK_IMAGES %}{{ lang('YES') }}{% else %}{{ lang('NO') }}{% endif %}<br>
-			{{ lang('DIGESTS_TOC') }}{{ lang('COLON') }} {% if S_DIGESTS_TOC %}{{ lang('YES') }}{% else %}{{ lang('NO') }}{% endif %}
-		</div></blockquote>
 		<hr>
 		<p><span class="copyright"><em>{{ S_DIGESTS_PUBLISH_DATE }}</em></span></p>
 		<p>{{ S_DIGESTS_DISCLAIMER }}</p>

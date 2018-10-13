@@ -76,7 +76,7 @@ $(document).ready(function() {
 		if ($('#digests').length === 1) {
 			// Logic only applies on edit subscribers screen because stack won't exist otherwise. #digests is an
 			// ID only on the edit subscribers screen.
-			$('input, select').each(function() {
+			$('input, select').each(function() { // jshint ignore:line
 				if (!inStack($(this).attr('name'))) {
 					$(this).prop('disabled', true);
 				}

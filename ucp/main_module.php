@@ -117,12 +117,10 @@ class main_module
 					$all_forums = $this->request->variable('all_forums', $this->user->data['user_digest_filter_type']);
 					$digest_type = $this->request->variable('digest_type', $this->user->data['user_digest_type']);
 					
-					// Get the POST variables as an array the phpBB approved way so they can be parsed to find individual digest subscriptions
-					$request_vars = $this->request->get_super_global(\phpbb\request\request_interface::POST);
-
-					if (($all_forums !== 'on') && (trim($digest_type) !== constants::DIGESTS_BOOKMARKS)) 
+					if (($all_forums !== 'on') && (trim($digest_type) !== constants::DIGESTS_BOOKMARKS))
 					{
-						foreach ($request_vars as $key => $value) 
+						$elt_fields = $this->request->variable('elt', array(''));
+						foreach ($elt_fields as $key => $value)
 						{
 							if (substr($key, 0, 4) == 'elt_') 
 							{

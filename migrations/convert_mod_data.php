@@ -10,7 +10,6 @@
 namespace phpbbservices\digests\migrations;
 
 use phpbbservices\digests\constants\constants;
-use phpbbservices\digests\core\common;
 
 class convert_mod_data extends \phpbb\db\migration\migration
 {

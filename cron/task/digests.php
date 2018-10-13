@@ -30,7 +30,6 @@ class digests extends \phpbb\cron\task\base
 	// Most of these private variables are needed because the create_content function does much of the assembly work and it needs a lot of common information
 	
 	private $board_url;					// Digests need an absolute URL to the forum to embed links to topic, posts, forum and private messages
-	private $cache_path;				// Relative path to the cache directory
 	private $date_limit;				// A logical range of dates that posts must be within
 	private $email_address_override;	// Used if admin wants manual mailer to send him/her a digest at an email address specified for this run
 	private $email_templates_path;		// Relative path to where the language specific email templates are located
@@ -44,10 +43,10 @@ class digests extends \phpbb\cron\task\base
 	private $requested_forums_names;	// If user specifies forums for posts wanted, this will contain the forum names
 	private $run_mode;					// phpBB (regular) cron, system cron or manual
 	private $server_timezone;			// Offset in hours from UTC for server
+	private $store_path;				// Relative path to the store directory
 	private $time;						// Current time (or requested start time if running an out of cycle digest)
 	private $toc;						// Table of contents array
 	private $toc_pm_count;				// Table of contents private message count
-	private $toc_post_count;			// Table of contents post count
 	private $utc_time;					// UTC time when digest mailer run
 	private $utc_month_lastday_end;		// The last day of the month when a monthly digest is wanted
 
@@ -85,29 +84,6 @@ class digests extends \phpbb\cron\task\base
 
 		$this->forum_hierarchy = array();
 		$this->run_mode = constants::DIGESTS_RUN_REGULAR;
-
-		// Populate the forum hierarchy array. This is used when the full path to a forum is requested to be shown in digests
-		$sql_array = array(
-			'SELECT'	=> 'forum_id, forum_name, parent_id',
-
-			'FROM'		=> array(
-				FORUMS_TABLE	=> 'f',
-			),
-		);
-		$sql = $this->db->sql_build_query('SELECT', $sql_array);
-		$result = $this->db->sql_query($sql);
-		while ($row = $this->db->sql_fetchrow($result))
-		{
-			$this->forum_hierarchy[$row['forum_id']] = array ('forum_name' => $row['forum_name'], 'parent_id' => $row['parent_id']);
-		}
-		$this->db->sql_freeresult($result); // Query be gone!
-
-		// In system cron (CLI) mode, the $user object may not have an IP assigned. If so, use the server's IP. This will
-		// allow logging to succeed since the IP is written to the log.
-		if (is_null($this->user->ip))
-		{
-			$this->user->ip = $this->request->server('SERVER_ADDR');
-		}
 	}
 
 	/**
@@ -144,6 +120,29 @@ class digests extends \phpbb\cron\task\base
 		
 		$now = time();
 
+		// Populate the forum hierarchy array. This is used when the full path to a forum is requested to be shown in digests
+		$sql_array = array(
+			'SELECT'	=> 'forum_id, forum_name, parent_id',
+
+			'FROM'		=> array(
+				FORUMS_TABLE	=> 'f',
+			),
+		);
+		$sql = $this->db->sql_build_query('SELECT', $sql_array);
+		$result = $this->db->sql_query($sql);
+		while ($row = $this->db->sql_fetchrow($result))
+		{
+			$this->forum_hierarchy[$row['forum_id']] = array ('forum_name' => $row['forum_name'], 'parent_id' => $row['parent_id']);
+		}
+		$this->db->sql_freeresult($result); // Query be gone!
+
+		// In system cron (CLI) mode, the $user object may not have an IP assigned. If so, use the server's IP. This will
+		// allow logging to succeed since the IP is written to the log.
+		if (is_null($this->user->ip))
+		{
+			$this->user->ip = $this->request->server('SERVER_ADDR');
+		}
+
 		// Need a board URL since URLs in the digest pointing to the board need to be absolute URLs
 		$this->board_url = generate_board_url() . '/';
 	
@@ -165,7 +164,7 @@ class digests extends \phpbb\cron\task\base
 		$this->path_prefix = ($this->run_mode == constants::DIGESTS_RUN_MANUAL) ? './../' : './';	// Because in manual mode you are in the adm folder
 		
 		$this->email_templates_path = $this->path_prefix . 'ext/phpbbservices/digests/language/en/email/';	// Note: the email templates (except subscribe/unsubscribe templates not used here) are language independent, so it's okay to use British English as it is always supported and the subscribe/unsubscribe templates are not used here.
-		$this->cache_path = $this->path_prefix . 'cache/phpbbservices/digests/';
+		$this->store_path = $this->path_prefix . 'store/phpbbservices/digests/';
 
 		// We need enough style information to keep get_user_style() from complaining that bbcode.html cannot be found. Ideally the default style
 		// should be used to find templates but since it is looking for bbcode.html, styles always have prosilver in the inheritance tree and bbcode.html
@@ -608,7 +607,6 @@ class digests extends \phpbb\cron\task\base
 			}
 
 			$this->toc = array();		// Create or empty the array containing table of contents information
-			$this->toc_post_count = 0; 	// # of posts in the table of contents for subscriber
 			$this->toc_pm_count = 0; 	// # of private messages in the table of contents for subscriber
 
 			// The extended messenger class is used to send the digests. It is extended to allow HTML emails to be sent.
@@ -651,7 +649,6 @@ class digests extends \phpbb\cron\task\base
 			{
 			
 				case constants::DIGESTS_TEXT_VALUE:
-					$format = $this->language->lang('DIGESTS_FORMAT_TEXT');
 					$html_messenger->template('digests_text', '', $this->email_templates_path);
 					$is_html = false;
 					$disclaimer = str_replace('&rsquo;', "'", strip_tags($this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx, $this->config['board_contact'])));
@@ -660,7 +657,6 @@ class digests extends \phpbb\cron\task\base
 				break;
 				
 				case constants::DIGESTS_PLAIN_VALUE:
-					$format = $this->language->lang('DIGESTS_FORMAT_PLAIN');
 					$html_messenger->template('digests_plain_html', '', $this->email_templates_path);
 					$is_html = true;
 					$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx, $this->config['board_contact']);
@@ -669,7 +665,6 @@ class digests extends \phpbb\cron\task\base
 				break;
 				
 				case constants::DIGESTS_PLAIN_CLASSIC_VALUE:
-					$format = $this->language->lang('DIGESTS_FORMAT_PLAIN_CLASSIC');
 					$html_messenger->template('digests_plain_html', '', $this->email_templates_path);
 					$is_html = true;
 					$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx, $this->config['board_contact']);
@@ -678,7 +673,6 @@ class digests extends \phpbb\cron\task\base
 				break;
 				
 				case constants::DIGESTS_HTML_VALUE:
-					$format = $this->language->lang('DIGESTS_FORMAT_HTML');
 					$html_messenger->template('digests_html', '', $this->email_templates_path);
 					$is_html = true;
 					$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx, $this->config['board_contact']);
@@ -687,7 +681,6 @@ class digests extends \phpbb\cron\task\base
 				break;
 				
 				case constants::DIGESTS_HTML_CLASSIC_VALUE:
-					$format = $this->language->lang('DIGESTS_FORMAT_HTML_CLASSIC');
 					$html_messenger->template('digests_html', '', $this->email_templates_path);
 					$is_html = true;
 					$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx, $this->config['board_contact']);
@@ -698,7 +691,6 @@ class digests extends \phpbb\cron\task\base
 				default:
 					// The database may be corrupted if the digest format for a subscriber is invalid. 
 					// Write an error to the log and continue to the next subscriber.
-					$format = '';		// Keep PhpStorm happy
 					$is_html = false;	// Keep PhpStorm happy
 					$disclaimer = '';	// Keep PhpStorm happy
 					$powered_by = '';	// Keep PhpStorm happy
@@ -713,7 +705,7 @@ class digests extends \phpbb\cron\task\base
 			$from_field_name = (isset($this->config['phpbbservices_digests_from_email_name']) && (strlen($this->config['phpbbservices_digests_from_email_name']) > 0)) ? $this->config['phpbbservices_digests_from_email_name'] : $this->config['sitename'] . ' ' . $this->language->lang('DIGESTS_ROBOT');
 			$reply_to_field_email = (isset($this->config['phpbbservices_digests_reply_to_email_address']) && (strlen($this->config['phpbbservices_digests_reply_to_email_address']) > 0)) ? $this->config['phpbbservices_digests_reply_to_email_address'] : $this->config['board_email'];
 		
-			// Admin may override where email is sent in manual mode. This won't apply if digests are stored to the cache/phpbbservices/digests folder instead.
+			// Admin may override where email is sent in manual mode. This won't apply if digests are stored to the store/phpbbservices/digests folder instead.
 			if ($this->run_mode == constants::DIGESTS_RUN_MANUAL && $this->config['phpbbservices_digests_test_send_to_admin'])
 			{
 				$html_messenger->to($this->email_address_override);
@@ -747,66 +739,6 @@ class digests extends \phpbb\cron\task\base
 				continue;
 			}
 
-			// Change the filter type into something a human can read
-			switch($row['user_digest_filter_type'])
-			{
-			
-				case constants::DIGESTS_ALL:
-					$post_types = $this->language->lang('DIGESTS_POSTS_TYPE_ANY');
-				break;
-				
-				case constants::DIGESTS_FIRST:
-					$post_types = $this->language->lang('DIGESTS_POSTS_TYPE_FIRST');
-				break;
-				
-				case constants::DIGESTS_BOOKMARKS:
-					$post_types = $this->language->lang('DIGESTS_USE_BOOKMARKS');
-				break;
-				
-				default:
-					// The database may be corrupted if the filter type for a subscriber is incorrect. 
-					// Write an error to the log and continue to the next subscriber.
-					$post_types = '';	// Keep PhpStorm happy
-					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILTER_ERROR', false, array($row['user_digest_filter_type'], $row['username']));
-					continue;
-				break;
-					
-			}
-			
-			// Change the sort by into something a human can read
-			switch ($row['user_digest_sortby'])
-			{
-			
-				case constants::DIGESTS_SORTBY_BOARD:
-					$sort_by = $this->language->lang('DIGESTS_SORT_USER_ORDER');
-				break;
-					
-				case constants::DIGESTS_SORTBY_STANDARD:
-					$sort_by = $this->language->lang('DIGESTS_SORT_FORUM_TOPIC');
-				break;
-					
-				case constants::DIGESTS_SORTBY_STANDARD_DESC:
-					$sort_by = $this->language->lang('DIGESTS_SORT_FORUM_TOPIC_DESC');
-				break;
-					
-				case constants::DIGESTS_SORTBY_POSTDATE:
-					$sort_by = $this->language->lang('DIGESTS_SORT_POST_DATE');
-				break;
-					
-				case constants::DIGESTS_SORTBY_POSTDATE_DESC:
-					$sort_by = $this->language->lang('DIGESTS_SORT_POST_DATE_DESC');
-				break;
-					
-				default:
-					// The database may be corrupted if the digest sort by for a subscriber is incorrect. 
-					// Write an error to the log and continue to the next subscriber.
-					$sort_by = '';	// Make PhpStorm happy
-					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_SORT_BY_ERROR', false, array($row['user_digest_sortby'], $row['username']));
-					continue;
-				break;
-					
-			}
-	
 			// Send a proper content-language to the output
 			$user_lang = $row['user_lang'];
 			if (strpos($user_lang, '-x-') !== false)
@@ -818,17 +750,14 @@ class digests extends \phpbb\cron\task\base
 			if (($row['user_digest_max_posts'] == 0) && ($this->config['phpbbservices_digests_max_items'] == 0))
 			{
 				$this->max_posts = 0;	// 0 means no limit
-				$max_posts_msg = $this->language->lang('DIGESTS_NO_LIMIT');
 			}
 			else if (($this->config['phpbbservices_digests_max_items'] != 0) && $this->config['phpbbservices_digests_max_items'] < $row['user_digest_max_posts'])
 			{
 				$this->max_posts = (int) $row['phpbbservices_digests_max_items'];
-				$max_posts_msg = $this->language->lang('DIGESTS_BOARD_LIMIT', $this->config['phpbbservices_digests_max_items']);
 			}
 			else
 			{
 				$this->max_posts = (int) $row['user_digest_max_posts'];
-				$max_posts_msg = $row['user_digest_max_posts'];
 			}
 
 			$recipient_time = $this->utc_time + (float) ($this->helper->make_tz_offset($row['user_timezone']) * 60 * 60);
@@ -855,32 +784,13 @@ class digests extends \phpbb\cron\task\base
 			// and is handled in the create_content function.
 			$html_messenger->assign_vars(array(
 				'S_CONTENT_DIRECTION'					=> $this->language->lang('DIRECTION'),
-				'S_DIGESTS_BLOCK_IMAGES'				=> $row['user_digest_block_images'],
-				'S_DIGESTS_COUNT_LIMIT'					=> $max_posts_msg,
 				'S_DIGESTS_DISCLAIMER'					=> $disclaimer,
-				'S_DIGESTS_FILTER_FOES'					=> $row['user_digest_remove_foes'],
-				'S_DIGESTS_FILTER_TYPE'					=> $post_types,
-				'S_DIGESTS_FORMAT_FOOTER'				=> $format,
 				'S_DIGESTS_INTRODUCTION'				=> ($is_html) ? $this->language->lang('DIGESTS_INTRODUCTION', $this->config['sitename']) : strip_tags($this->language->lang('DIGESTS_INTRODUCTION', $this->config['sitename'])),
-				'S_DIGESTS_LASTVISIT_RESET'				=> $row['user_digest_reset_lastvisit'],
-				'S_DIGESTS_MAIL_FREQUENCY'				=> $digest_type,
-				'S_DIGESTS_MAX_SIZE'					=> $row['user_digest_no_post_text'] ? $this->language->lang('DIGESTS_NO_POST_TEXT') : (($row['user_digest_max_display_words'] == 0) ? $this->language->lang('DIGESTS_NO_LIMIT') : $row['user_digest_max_display_words']),
-				'S_DIGESTS_MIN_SIZE'					=> !$row['user_digest_min_words'] ? $this->language->lang('DIGESTS_NO_CONSTRAINT') : $row['user_digest_min_words'],
-				'S_DIGESTS_PMS_MARK_READ'				=> $row['user_digest_pm_mark_read'] ? true : false,
 				'S_DIGESTS_POWERED_BY'					=> $powered_by,
 				'S_DIGESTS_PUBLISH_DATE'				=> $publish_date,
-				'S_DIGESTS_REMOVE_YOURS'				=> !$row['user_digest_show_mine'] ? true : false,
 				'S_DIGESTS_SALUTATION_BLURB'			=> $row['username'] . $this->language->lang('DIGESTS_COMMA'),
-				'S_DIGESTS_SEND_HOUR'					=> (trim($row['user_dateformat'] == '')) ? $this->helper->make_hour_string($local_send_hour, $this->config['board_timezone']) : $this->helper->make_hour_string($local_send_hour, $row['user_dateformat']),
-				'S_DIGESTS_SEND_IF_NO_NEW_MESSAGES'		=> $row['user_digest_send_on_no_posts'],
-				'S_DIGESTS_SHOW_ATTACHMENTS'			=> $row['user_digest_attachments'],
-				'S_DIGESTS_SHOW_NEW_POSTS_ONLY'			=> $row['user_digest_new_posts_only'] ? true : false,
-				'S_DIGESTS_SHOW_PMS'					=> $row['user_digest_show_pms'] ? true : false,
-				'S_DIGESTS_SORT_BY'						=> $sort_by,
 				'S_DIGESTS_TITLE'						=> $email_subject,
-				'S_DIGESTS_TOC'							=> $row['user_digest_toc'] ? true : false,
 				'S_DIGESTS_TRANSLATOR'					=> ($is_html) ? $translator : strip_tags($translator),
-				'S_DIGESTS_YOUR_DIGEST_OPTIONS'			=> ($is_html) ? $this->language->lang('DIGESTS_YOUR_DIGEST_OPTIONS', $row['username']) : str_replace('&rsquo;', "'", $this->language->lang('DIGESTS_YOUR_DIGEST_OPTIONS', $row['username'])),
 				'S_USER_LANG'							=> $user_lang,
 				'T_STYLESHEET_LINK'						=> ($this->config['phpbbservices_digests_enable_custom_stylesheets']) ? "{$this->board_url}styles/" . $this->config['phpbbservices_digests_custom_stylesheet_path'] : "{$this->board_url}styles/" . $row['style_path'] . '/theme/stylesheet.css',
 				'T_THEME_PATH'							=> "{$this->board_url}styles/" . $row['style_path'] . '/theme',
@@ -942,21 +852,6 @@ class digests extends \phpbb\cron\task\base
 			// email templating system, e.g. loops and switches.
 			$digest_content = $this->create_content($posts_rowset, $pm_rowset, $row, $is_html);
 		
-			// List the subscribed forums, if any
-			if ($row['user_digest_filter_type'] == constants::DIGESTS_BOOKMARKS)
-			{
-				$subscribed_forums = $this->language->lang('DIGESTS_USE_BOOKMARKS');
-			}
-			else if (sizeof($this->requested_forums_names) > 0)
-			{
-				$subscribed_forums = implode(', ', $this->requested_forums_names);
-			}
-			else
-			{
-				// Show that all forums were selected
-				$subscribed_forums = $this->language->lang('DIGESTS_ALL_FORUMS');
-			}
-			
 			// Assemble a digest table of contents
 			if ($row['user_digest_toc'] == 1)
 			{
@@ -1021,9 +916,9 @@ class digests extends \phpbb\cron\task\base
 				}
 				
 				// Add a table row for each post
-				if ($this->toc_post_count > 0)
+				if ($this->posts_in_digest > 0)
 				{
-					for ($i=0; $i <= $this->toc_post_count; $i++)
+					for ($i=0; $i <= $this->posts_in_digest; $i++)
 					{
 						if ($is_html)
 						{
@@ -1064,7 +959,6 @@ class digests extends \phpbb\cron\task\base
 			// Publish the digest content, assembled elsewhere and a list of the forums subscribed to.
 			$html_messenger->assign_vars(array(
 				'DIGESTS_CONTENT'					=> $digest_content,	
-				'S_DIGESTS_FORUMS_WANTED'			=> $subscribed_forums,
 			));
 			
 			// Mark private messages in the digest as read, if so instructed
@@ -1104,27 +998,41 @@ class digests extends \phpbb\cron\task\base
 				$html_messenger->send(NOTIFY_EMAIL, true, $is_html, true);
 				$email_content = $html_messenger->msg;
 
-				// Save digests as file in the cache/phpbbservices/digests folder instead of emailing.
+				if (!file_exists($this->store_path))
+				{
+					if (!mkdir($this->store_path, 0777, true))
+					{
+						// If unable to create these directories, it's likely a permissions issue, so flag it and terminate abnormally.
+						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_CREATE_DIRECTORY_ERROR', false, array($this->store_path));
+						if ($this->config['phpbbservices_digests_enable_log'])
+						{
+							$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END');
+						}
+						return false;
+					}
+				}
+
+				// Save digests as file in the store/phpbbservices/digests folder instead of emailing.
 				$suffix = ($is_html) ? '.html' : '.txt';
-				$file_name = $row['username'] . '-' . $utc_year . '-' . str_pad($utc_month, 2, '0', STR_PAD_LEFT) . '-' . str_pad($utc_day, 2, '0', STR_PAD_LEFT) . '-' . str_pad($utc_hour, 2, '0', STR_PAD_LEFT) . '-' . unique_id() . $suffix;
+				$file_name = $row['username'] . '-' . $utc_year . '-' . str_pad($utc_month, 2, '0', STR_PAD_LEFT) . '-' . str_pad($utc_day, 2, '0', STR_PAD_LEFT) . '-' . str_pad($utc_hour, 2, '0', STR_PAD_LEFT) . $suffix;
 				
-				$handle = @fopen($this->cache_path . $file_name, "w");
+				$handle = @fopen($this->store_path . $file_name, "w");
 				if ($handle === false)
 				{
 					// Since this indicates a major problem, let's abort now. It's likely a global write error.
-					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILE_OPEN_ERROR', false, array($this->cache_path));
+					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILE_OPEN_ERROR', false, array($this->store_path));
 					if ($this->config['phpbbservices_digests_enable_log'])
 					{
 						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END');
 					}
 					return false;
 				}
-				
+
 				$success = @fwrite($handle, htmlspecialchars_decode($email_content));
 				if ($success === false)
 				{
 					// Since this indicates a major problem, let's abort now.  It's likely a global write error.
-					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILE_WRITE_ERROR', false, array($this->cache_path . $file_name));
+					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILE_WRITE_ERROR', false, array($this->store_path . $file_name));
 					if ($this->config['phpbbservices_digests_enable_log'])
 					{
 						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END');
@@ -1136,7 +1044,7 @@ class digests extends \phpbb\cron\task\base
 				if ($success === false)
 				{
 					// Since this indicates a major problem, let's abort now
-					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILE_CLOSE_ERROR', false, array($this->cache_path . $file_name));
+					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILE_CLOSE_ERROR', false, array($this->store_path . $file_name));
 					if ($this->config['phpbbservices_digests_enable_log'])
 					{
 						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END');
@@ -1144,7 +1052,7 @@ class digests extends \phpbb\cron\task\base
 					return false;
 				}
 				
-				// Note in the log that a digest was written to the cache folder
+				// Note in the log that a digest was written to the store folder
 				if ($this->config['phpbbservices_digests_enable_log'])
 				{
 					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_DISK', false, array($file_name));
@@ -1160,7 +1068,7 @@ class digests extends \phpbb\cron\task\base
 				// if there are unread private messages AND the user wants to see private messages in the digest.
 
 				// Try to send this digest
-				if ($row['user_digest_send_on_no_posts'] || $this->toc_post_count > 0 || ((sizeof($pm_rowset) > 0) && $row['user_digest_show_pms']))
+				if ($row['user_digest_send_on_no_posts'] || $this->posts_in_digest > 0 || ((sizeof($pm_rowset) > 0) && $row['user_digest_show_pms']))
 				{
 					
 					$mail_sent = $html_messenger->send(NOTIFY_EMAIL, false, $is_html, true);	 // digest mailed
@@ -1898,12 +1806,12 @@ class digests extends \phpbb\cron\task\base
 				$post_datetime = $this->user->format_date($recipient_time, $user_row['user_dateformat']);
 
 				// Add to table of contents array
-				$this->toc['posts'][$this->toc_post_count]['post_id'] = html_entity_decode($post_row['post_id']);
-				$this->toc['posts'][$this->toc_post_count]['forum'] = $this->get_forum_path($post_row['forum_id']);
-				$this->toc['posts'][$this->toc_post_count]['topic'] = html_entity_decode($post_row['topic_title']);
-				$this->toc['posts'][$this->toc_post_count]['author'] = html_entity_decode($post_row['username']);
-				$this->toc['posts'][$this->toc_post_count]['datetime'] = $post_datetime;
-				$this->toc_post_count++;
+				$this->toc['posts'][$this->posts_in_digest]['post_id'] = html_entity_decode($post_row['post_id']);
+				$this->toc['posts'][$this->posts_in_digest]['forum'] = $this->get_forum_path($post_row['forum_id']);
+				$this->toc['posts'][$this->posts_in_digest]['topic'] = html_entity_decode($post_row['topic_title']);
+				$this->toc['posts'][$this->posts_in_digest]['author'] = html_entity_decode($post_row['username']);
+				$this->toc['posts'][$this->posts_in_digest]['datetime'] = $post_datetime;
+				$this->posts_in_digest++;
 
 				// Need BBCode flags to translate BBCode into HTML
 				$flags = (($post_row['enable_bbcode']) ? OPTION_FLAG_BBCODE : 0) +
@@ -2026,8 +1934,6 @@ class digests extends \phpbb\cron\task\base
 					'SUBJECT'		=> ($is_html) ? sprintf("<a href=\"%sviewtopic.$this->phpEx?f=%s&amp;t=%s#p%s\">%s</a>%s", $this->board_url, $post_row['forum_id'], $post_row['topic_id'], $post_row['post_id'], html_entity_decode(censor_text($post_row['post_subject'])), "\n") : html_entity_decode(censor_text($post_row['post_subject'])),
 					'S_FIRST_POST' 	=> ($post_row['topic_first_post_id'] == $post_row['post_id']), // Hide subject if first post, as it is the same as topic title
 				));
-				
-				$this->posts_in_digest++;
 				
 			}
 

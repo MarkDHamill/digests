@@ -57,6 +57,7 @@ class main_module
 	function main($id, $mode)
 	{
 
+
 		$this->language->add_lang(array('acp/info_acp_common', 'acp/common'), 'phpbbservices/digests');
 
 		$submit = $this->request->is_set_post('submit');
@@ -107,9 +108,9 @@ class main_module
 					'title'	=> 'ACP_DIGESTS_USER_DEFAULT_SETTINGS',
 					'vars'	=> array(						
 						'legend1'											=> '',
-						'phpbbservices_digests_user_digest_registration'	=> array('lang' => 'DIGESTS_USER_DIGESTS_REGISTRATION',	'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
+						'phpbbservices_digests_user_digest_registration'	=> array('lang' => 'DIGESTS_REGISTER',					'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_user_digest_type'			=> array('lang' => 'DIGESTS_FREQUENCY',					'validate' => 'string',	'type' => 'select', 'method' => 'digest_type_select', 'explain' => true),
-						'phpbbservices_digests_user_digest_format'			=> array('lang' => 'DIGESTS_FORMAT_STYLING',			'validate' => 'string',	'type' => 'select', 'method' => 'digest_style_select', 'explain' => true),
+						'phpbbservices_digests_user_digest_format'			=> array('lang' => 'DIGESTS_FORMAT_STYLING',			'validate' => 'string',	'type' => 'select', 'method' => 'digest_style_select', 'explain' => false),
 						'phpbbservices_digests_user_digest_send_hour_gmt'	=> array('lang' => 'DIGESTS_SEND_HOUR',					'validate' => 'int:-1:23',	'type' => 'select', 'method' => 'digest_send_hour_utc', 'explain' => true),
 						'phpbbservices_digests_user_digest_filter_type'		=> array('lang' => 'DIGESTS_FILTER_TYPE',				'validate' => 'string',	'type' => 'select', 'method' => 'digest_filter_type', 'explain' => false),
 						'phpbbservices_digests_user_check_all_forums'		=> array('lang' => 'DIGESTS_USER_DIGESTS_CHECK_ALL_FORUMS',	'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
@@ -254,7 +255,7 @@ class main_module
 
 				// Set up member search SQL
 				$match_any_chars = $this->db->get_any_char();
-				$member_sql = ($member <> '') ? " username_clean " . $this->db->sql_like_expression($match_any_chars . utf8_case_fold_nfc($member) . $match_any_chars) . " AND " : '';
+				$member_sql = ($member != '') ? " username_clean " . $this->db->sql_like_expression($match_any_chars . utf8_case_fold_nfc($member) . $match_any_chars) . " AND " : '';
 
 				// Get the total rows for pagination purposes
 				$sql_array = array(
@@ -264,7 +265,7 @@ class main_module
 						USERS_TABLE		=> 'u',
 					),
 				
-					'WHERE'		=> "$subscribe_sql $member_sql user_type <> " . USER_IGNORE,
+					'WHERE'		=> "$subscribe_sql $member_sql " . $this->db->sql_in_set('user_type', array(USER_NORMAL, USER_FOUNDER)),
 				);
 				
 				$sql = $this->db->sql_build_query('SELECT', $sql_array);
@@ -330,7 +331,7 @@ class main_module
 					'UNSUBSCRIBE_SELECTED'		=> $unsubscribe_selected,
 					'USERNAME_SELECTED'			=> $username_selected,
 				));
-	
+
 				$sql_array = array(
 					'SELECT'	=> '*, CASE
 										WHEN user_digest_send_hour_gmt + ' . $my_time_zone . ' >= 24 THEN
@@ -339,17 +340,18 @@ class main_module
 						 					user_digest_send_hour_gmt + ' . $my_time_zone . ' + 24 
 										ELSE user_digest_send_hour_gmt + ' . $my_time_zone . '
 										END AS send_hour_board',
-				
+
 					'FROM'		=> array(
 						USERS_TABLE		=> 'u',
 					),
 				
-					'WHERE'		=> "$subscribe_sql $member_sql user_type <> " . USER_IGNORE,
+					'WHERE'		=> "$subscribe_sql $member_sql " . $this->db->sql_in_set('user_type', array(USER_NORMAL, USER_FOUNDER)),
 
 					'ORDER_BY'	=> sprintf($sort_by_sql, $order_by_sql, $order_by_sql),
 				);
 
 				$sql = $this->db->sql_build_query('SELECT', $sql_array);
+
 				$result = $this->db->sql_query_limit($sql, $this->config['phpbbservices_digests_users_per_page'], $start);
 
 				while ($row = $this->db->sql_fetchrow($result))
@@ -1460,9 +1462,7 @@ class main_module
 						SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
 						WHERE ' . $this->db->sql_in_set('user_id', $user_id);
 
-					$result = $this->db->sql_query($sql);
-
-					$this->db->sql_freeresult($result); // Query be gone!
+					$this->db->sql_query($sql);
 
 					if ($this->config['phpbbservices_digests_subscribe_all'])
 					{
@@ -1506,8 +1506,6 @@ class main_module
 			$sql = 'UPDATE ' . USERS_TABLE . ' 
 				SET ' . $this->db->sql_build_array('UPDATE', $sql_ary);
 			$this->db->sql_query($sql);
-			
-			$this->db->sql_build_query('UPDATE', $sql_ary);
 		}
 
 		if ($submit && $mode == 'digests_test')
@@ -1986,7 +1984,7 @@ class main_module
 			),
 
 			'WHERE'		=> "user_digest_type <> '" . constants::DIGESTS_NONE_VALUE . "' 
-					AND user_type <> " . USER_IGNORE,
+					AND " . $this->db->sql_in_set('user_type', array(USER_NORMAL, USER_FOUNDER)),
 		);
 
 		$sql = $this->db->sql_build_query('SELECT', $sql_array);

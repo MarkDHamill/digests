@@ -136,30 +136,30 @@
 		<table id="down">
 			<thead>
 				<tr>
-					<th class="text-center"><input type="checkbox" class="radio" name="mark-all" id="mark-all" onchange="addToStack(this.name);" onclick="marklist('acp_digests', 'user-', this.checked);" /></th>
-					<th>{{ lang('USERNAME') }}</th>
-					<th>{{ lang('EMAIL_ADDRESS') }}</th>
-					<th class="text-center">{{ lang('DIGESTS_FREQUENCY_SHORT') }}</th>
-					<th class="text-center">{{ lang('DIGESTS_FORMAT_STYLING') }}</th>
-					<th class="text-center">{{ lang('DIGESTS_HOUR_SENT') }}</th>
-					<th class="text-center">{{ lang('DIGESTS_HAS_UNSUBSCRIBED') }}</th>
-					<th class="text-center">{{ lang('LAST_VISIT') }}<br>{{ lang('DIGESTS_BASED_ON') }}</th>
-					<th class="text-center">{{ lang('DIGESTS_LAST_SENT') }}<br>{{ lang('DIGESTS_BASED_ON') }}</th>
+					<th class="text-center" id="h1"><input type="checkbox" class="radio" name="mark-all" id="mark-all" title="{{ lang('DIGESTS_MARK_ALL') }}" onchange="addToStack(this.name);" onclick="marklist('acp_digests', 'user-', this.checked);" /></th>
+					<th id="h2">{{ lang('USERNAME') }}</th>
+					<th id="h3">{{ lang('EMAIL_ADDRESS') }}</th>
+					<th class="text-center" id="h4">{{ lang('DIGESTS_FREQUENCY_SHORT') }}</th>
+					<th class="text-center" id="h5">{{ lang('DIGESTS_FORMAT_STYLING') }}</th>
+					<th class="text-center" id="h6">{{ lang('DIGESTS_HOUR_SENT') }}</th>
+					<th class="text-center" id="h7">{{ lang('DIGESTS_HAS_UNSUBSCRIBED') }}</th>
+					<th class="text-center" id="h8">{{ lang('LAST_VISIT') }}<br>{{ lang('DIGESTS_BASED_ON') }}</th>
+					<th class="text-center" id="h9">{{ lang('DIGESTS_LAST_SENT') }}<br>{{ lang('DIGESTS_BASED_ON') }}</th>
 				</tr>
 			</thead>
 			<tbody>
 				{% for digests_edit_subscribers in loops.digests_edit_subscribers %}
 					{% if digests_edit_subscribers.S_ROW_COUNT is even %}<tr class="row1">{% else %}<tr class="row2">{% endif %}
-						<td class="text-center"><input type="checkbox" class="radio" name="user-{{ digests_edit_subscribers.USER_ID }}" id="user-{{ digests_edit_subscribers.USER_ID }}" onchange="addToStack(this.name);" /></td>
-						<td>
+						<td class="text-center" headers="h1"><input type="checkbox" class="radio" name="user-{{ digests_edit_subscribers.USER_ID }}" id="user-{{ digests_edit_subscribers.USER_ID }}" title = "{{ lang('DIGESTS_MARK_UNMARK_ROW') }}" onchange="addToStack(this.name);" /></td>
+						<td headers="h2">
 							<a id="imglink-{{ digests_edit_subscribers.S_ROW_COUNT }}">
 								<img id="plusminus-{{ digests_edit_subscribers.S_ROW_COUNT }}" src="{{ IMAGE_PATH }}expand.png" title="{{ lang('DIGESTS_EXPAND') }}" alt="{{ lang('DIGESTS_EXPAND') }}" />
 							</a>&nbsp;
 							<a id="link-{{ digests_edit_subscribers.S_ROW_COUNT }}">{{ digests_edit_subscribers.USERNAME }}</a>
 						</td>
-						<td>{{ digests_edit_subscribers.USER_EMAIL }}</td>
-						<td class="text-center">
-							<select name="user-{{ digests_edit_subscribers.USER_ID }}-digest_type" onchange="addToStack(this.name);">
+						<td headers="h3">{{ digests_edit_subscribers.USER_EMAIL }}</td>
+						<td class="text-center" headers="h4">
+							<select name="user-{{ digests_edit_subscribers.USER_ID }}-digest_type" title="{{ lang('DIGESTS_FREQUENCY_SHORT') }}" onchange="addToStack(this.name);">
 								<option value="NONE"{% if digests_edit_subscribers.S_DIGEST_NONE_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_NONE') }}</option>
 								<option value="DFLT">{{ lang('DIGESTS_DEFAULT') }}</option>
 								<option value="DAY"{% if digests_edit_subscribers.S_DIGEST_DAY_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_DAILY') }}</option>
@@ -167,8 +167,8 @@
 								<option value="MNTH"{% if digests_edit_subscribers.S_DIGEST_MONTH_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_MONTHLY') }}</option>
 							</select>
 						</td>
-						<td class="text-center">
-							<select name="user-{{ digests_edit_subscribers.USER_ID }}-style" onchange="addToStack(this.name);">
+						<td class="text-center" headers="h5">
+							<select name="user-{{ digests_edit_subscribers.USER_ID }}-style" title="{{ lang('DIGESTS_FORMAT_STYLING') }}" onchange="addToStack(this.name);">
 								<option value="{{ DIGESTS_HTML_VALUE }}"{% if digests_edit_subscribers.S_DIGEST_HTML_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_FORMAT_HTML') }}</option>
 								<option value="{{ DIGESTS_HTML_CLASSIC_VALUE }}"{% if digests_edit_subscribers.S_DIGEST_HTML_CLASSIC_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_FORMAT_HTML_CLASSIC') }}</option>
 								<option value="{{ DIGESTS_PLAIN_VALUE }}"{% if digests_edit_subscribers.S_DIGEST_PLAIN_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_FORMAT_PLAIN') }}</option>
@@ -176,8 +176,8 @@
 								<option value="{{ DIGESTS_FORMAT_TEXT_VALUE }}"{% if digests_edit_subscribers.S_DIGEST_TEXT_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_FORMAT_TEXT') }}</option>
 							</select>
 						</td>
-						<td class="text-center">
-							<select name="user-{{ digests_edit_subscribers.USER_ID }}-send_hour" onchange="addToStack(this.name);">
+						<td class="text-center" headers="h6">
+							<select name="user-{{ digests_edit_subscribers.USER_ID }}-send_hour" title="{{ lang('DIGESTS_HOUR_SENT') }}" onchange="addToStack(this.name);">
 								<option value="{{ digests_edit_subscribers.BOARD_OFFSET_0 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_0_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_0 }}</option>
 								<option value="{{ digests_edit_subscribers.BOARD_OFFSET_1 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_1_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_1 }}</option>
 								<option value="{{ digests_edit_subscribers.BOARD_OFFSET_2 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_2_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_2 }}</option>
@@ -204,9 +204,9 @@
 								<option value="{{ digests_edit_subscribers.BOARD_OFFSET_23 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_23_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_23 }}</option>
 							</select>
 						</td>
-						<td class="text-center">{{ digests_edit_subscribers.USER_DIGEST_HAS_UNSUBSCRIBED }}</td>
-						<td class="text-center">{{ digests_edit_subscribers.USER_LAST_VISIT }}</td>
-						<td class="text-center">{{ digests_edit_subscribers.USER_DIGEST_LAST_SENT }}</td>
+						<td class="text-center" headers="h7">{{ digests_edit_subscribers.USER_DIGEST_HAS_UNSUBSCRIBED }}</td>
+						<td class="text-center" headers="h8">{{ digests_edit_subscribers.USER_LAST_VISIT }}</td>
+						<td class="text-center" headers="h9">{{ digests_edit_subscribers.USER_DIGEST_LAST_SENT }}</td>
 					</tr>
 					{% if digests_edit_subscribers.S_ROW_COUNT is even %}<tr class="row1"{% else %}<tr class="row2"{% endif %} id="user-{{ digests_edit_subscribers.S_ROW_COUNT }}-detail" style="display:none">
 						<td colspan="9">
@@ -494,7 +494,7 @@
 			</select>
 		</p>
 		<div class="overflow-x">
-			<table id="balance" class="layout-fixed">
+			<table id="balance_table" class="layout-fixed">
 				<colgroup>
 					<col class="width-120">
 					<col class="width-80">

@@ -6,8 +6,8 @@
 	background-color: inherit;
 }
 fieldset {
-	padding: 0px;
-	border: 0px;
+	padding: 0;
+	border: 0;
 	background-color: inherit;
 	margin: 5px 0;
 	overflow-x: auto;
@@ -20,7 +20,7 @@ table {
 {
 	background-color: #DCEBFE !important;
 }
-#balance tr:nth-child(odd)
+#balance_table tr:nth-child(odd)
 {
 	background-color: #DCEBFE !important;
 }

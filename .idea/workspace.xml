@@ -1,0 +1,959 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="cc260747-50ef-4427-8a21-30f3b7dd5f89" name="Default" comment="">
+      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/digests.iml" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
+      <change beforePath="$PROJECT_DIR$/adm/style/acp_digests.js" afterPath="$PROJECT_DIR$/adm/style/acp_digests.js" />
+      <change beforePath="$PROJECT_DIR$/language/en/acp/info_acp_common.php" afterPath="$PROJECT_DIR$/language/en/acp/info_acp_common.php" />
+      <change beforePath="$PROJECT_DIR$/language/en/common.php" afterPath="$PROJECT_DIR$/language/en/common.php" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="TRACKING_ENABLED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ComposerSettings" doNotAsk="true" synchronizationState="SYNCHRONIZE">
+    <pharConfigPath>$PROJECT_DIR$/composer.json</pharConfigPath>
+  </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="digests_html.txt" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/language/en/email/digests_html.txt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="408">
+              <caret line="24" column="27" lean-forward="false" selection-start-line="24" selection-start-column="27" selection-end-line="24" selection-end-column="27" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="acp_digests.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/adm/style/acp_digests.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="9095">
+              <caret line="535" column="47" lean-forward="false" selection-start-line="535" selection-start-column="41" selection-end-line="535" selection-end-column="47" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="main_module.php" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/acp/main_module.php">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="12512">
+              <caret line="742" column="0" lean-forward="false" selection-start-line="736" selection-start-column="0" selection-end-line="742" selection-end-column="0" />
+              <folding>
+                <element signature="e#6#199#0#PHP" expanded="true" />
+                <marker date="1539303090000" expanded="true" signature="44917:45027" ph="DELETE FROM ${$this-&gt;table_prefix}... " />
+                <marker date="1539303090000" expanded="true" signature="55657:55765" ph="DELETE FROM ${$this-&gt;table_prefix}... " />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="acp_digests.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/adm/style/acp_digests.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="595">
+              <caret line="78" column="48" lean-forward="false" selection-start-line="78" selection-start-column="48" selection-end-line="78" selection-end-column="48" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="common.php" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/language/en/common.php">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="302">
+              <caret line="68" column="100" lean-forward="false" selection-start-line="68" selection-start-column="100" selection-end-line="68" selection-end-column="100" />
+              <folding>
+                <marker date="1539530877107" expanded="true" signature="1706:1713" ph="’" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ext.php" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ext.php">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="340">
+              <caret line="26" column="0" lean-forward="false" selection-start-line="26" selection-start-column="0" selection-end-line="26" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="composer.json" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/composer.json">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="527">
+              <caret line="31" column="0" lean-forward="false" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="common.php" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/core/common.php">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="common.php" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/language/en/acp/common.php">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="302">
+              <caret line="138" column="189" lean-forward="false" selection-start-line="138" selection-start-column="189" selection-end-line="138" selection-end-column="189" />
+              <folding>
+                <marker date="1539381968000" expanded="true" signature="2714:2721" ph="’" />
+                <marker date="1539381968000" expanded="true" signature="2799:2806" ph="’" />
+                <marker date="1539381968000" expanded="true" signature="3709:3716" ph="’" />
+                <marker date="1539381968000" expanded="true" signature="4537:4544" ph="“" />
+                <marker date="1539381968000" expanded="true" signature="4545:4552" ph="”" />
+                <marker date="1539381968000" expanded="true" signature="6628:6635" ph="“" />
+                <marker date="1539381968000" expanded="true" signature="6636:6643" ph="”" />
+                <marker date="1539381968000" expanded="true" signature="15701:15708" ph="’" />
+                <marker date="1539381968000" expanded="true" signature="16759:16766" ph="“" />
+                <marker date="1539381968000" expanded="true" signature="16770:16777" ph="”" />
+                <marker date="1539381968000" expanded="true" signature="16986:16993" ph="’" />
+                <marker date="1539381968000" expanded="true" signature="17359:17366" ph="“" />
+                <marker date="1539381968000" expanded="true" signature="17412:17419" ph="”" />
+                <marker date="1539381968000" expanded="true" signature="17549:17556" ph="“" />
+                <marker date="1539381968000" expanded="true" signature="17563:17570" ph="”" />
+                <marker date="1539381968000" expanded="true" signature="17957:17961" ph="&lt;" />
+                <marker date="1539381968000" expanded="true" signature="17965:17969" ph="&gt;" />
+                <marker date="1539381968000" expanded="true" signature="18071:18078" ph="“" />
+                <marker date="1539381968000" expanded="true" signature="18090:18097" ph="”" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="info_acp_common.php" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/language/en/acp/info_acp_common.php">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="292">
+              <caret line="46" column="106" lean-forward="false" selection-start-line="46" selection-start-column="106" selection-end-line="46" selection-end-column="106" />
+              <folding>
+                <marker date="1539534502155" expanded="true" signature="715:722" ph="’" />
+                <marker date="1539534502155" expanded="true" signature="4188:4195" ph="’" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>$request_vars</find>
+      <find>random</find>
+      <find>user_digest_send_on_no_posts</find>
+      <find>toc_post</find>
+      <find>DIGESTS_SEND_IF_NO_NEW_MESSAGES</find>
+      <find>this sett</find>
+      <find>your digest</find>
+      <find>DIGESTS_MAIL_FREQUENCY</find>
+      <find>DIGESTS_SEND_HOUR</find>
+      <find>toc_post_count</find>
+      <find>post_count</find>
+      <find>posts_in_digest</find>
+      <find>HTML</find>
+      <find>cache_path</find>
+      <find>S_</find>
+      <find>$format</find>
+      <find>$subscribed</find>
+      <find>id</find>
+      <find>id,</find>
+      <find>directory</find>
+      <find>sql_in_set</find>
+      <find>admin log</find>
+      <find>balance</find>
+      <find>all</find>
+      <find>phpbbservices_digests_user_digest_registration</find>
+      <find>$sort_by</find>
+      <find>Yes</find>
+      <find>submit</find>
+      <find>server</find>
+      <find>cache</find>
+    </findStrings>
+    <replaceStrings>
+      <replace>styled</replace>
+      <replace>!=</replace>
+      <replace>&lt;&gt;</replace>
+      <replace>posts_in_digest</replace>
+      <replace>store_path</replace>
+      <replace>folder</replace>
+      <replace>store</replace>
+    </replaceStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/styles/prosilver/template/ucp_digests.html" />
+        <option value="$PROJECT_DIR$/acp/main_info.php" />
+        <option value="$PROJECT_DIR$/migrations/convert_mod_modules.php" />
+        <option value="$PROJECT_DIR$/ucp/main_info.php" />
+        <option value="$PROJECT_DIR$/README.md" />
+        <option value="$PROJECT_DIR$/language/en/email/digests_plain_html.txt" />
+        <option value="$PROJECT_DIR$/language/en/email/digests_text.txt" />
+        <option value="$PROJECT_DIR$/adm/style/mail_digests_text.html" />
+        <option value="$PROJECT_DIR$/styles/all/template/mail_digests_text.html" />
+        <option value="$PROJECT_DIR$/styles/prosilver/template/event/ucp_register_profile_fields_after.html" />
+        <option value="$PROJECT_DIR$/ucp/main_module.php" />
+        <option value="$PROJECT_DIR$/migrations/release_3_2_9.php" />
+        <option value="$PROJECT_DIR$/config/services.yml" />
+        <option value="$PROJECT_DIR$/ext.php" />
+        <option value="$PROJECT_DIR$/migrations/convert_mod_data.php" />
+        <option value="$PROJECT_DIR$/styles/prosilver/theme/digests.css" />
+        <option value="$PROJECT_DIR$/adm/style/acp_digests.css" />
+        <option value="$PROJECT_DIR$/event/main_listener.php" />
+        <option value="$PROJECT_DIR$/adm/style/acp_digests.html" />
+        <option value="$PROJECT_DIR$/acp/main_module.php" />
+        <option value="$PROJECT_DIR$/cron/task/digests.php" />
+        <option value="$PROJECT_DIR$/styles/all/template/js/digests.js" />
+        <option value="$PROJECT_DIR$/language/en/email/digests_html.txt" />
+        <option value="$PROJECT_DIR$/language/en/acp/common.php" />
+        <option value="$PROJECT_DIR$/composer.json" />
+        <option value="$PROJECT_DIR$/adm/style/acp_digests.js" />
+        <option value="$PROJECT_DIR$/language/en/common.php" />
+        <option value="$PROJECT_DIR$/language/en/acp/info_acp_common.php" />
+      </list>
+    </option>
+  </component>
+  <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsFlowSettings">
+    <service-enabled>true</service-enabled>
+    <exe-path />
+    <other-services-enabled>true</other-services-enabled>
+    <auto-save>true</auto-save>
+  </component>
+  <component name="JsGulpfileManager">
+    <detection-done>true</detection-done>
+    <sorting>DEFINITION_ORDER</sorting>
+  </component>
+  <component name="PhpServers">
+    <servers />
+  </component>
+  <component name="PhpWorkspaceProjectConfiguration" backward_compatibility_performed="true" />
+  <component name="ProjectFrameBounds">
+    <option name="width" value="1920" />
+    <option name="height" value="1080" />
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectView">
+    <navigator currentView="ProjectPane" proportions="" version="1">
+      <flattenPackages />
+      <showMembers />
+      <showModules />
+      <showLibraryContents />
+      <hideEmptyPackages />
+      <abbreviatePackageNames />
+      <autoscrollToSource />
+      <autoscrollFromSource />
+      <sortByType />
+      <manualOrder />
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="Scratches" />
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="digests" type="b2602c69:ProjectViewProjectNode" />
+              <item name="digests" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
+            <path>
+              <item name="digests" type="b2602c69:ProjectViewProjectNode" />
+              <item name="digests" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="acp" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
+            <path>
+              <item name="digests" type="b2602c69:ProjectViewProjectNode" />
+              <item name="digests" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="adm" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
+            <path>
+              <item name="digests" type="b2602c69:ProjectViewProjectNode" />
+              <item name="digests" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="adm" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="style" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
+            <path>
+              <item name="digests" type="b2602c69:ProjectViewProjectNode" />
+              <item name="digests" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="config" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
+            <path>
+              <item name="digests" type="b2602c69:ProjectViewProjectNode" />
+              <item name="digests" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="constants" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
+            <path>
+              <item name="digests" type="b2602c69:ProjectViewProjectNode" />
+              <item name="digests" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="core" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
+            <path>
+              <item name="digests" type="b2602c69:ProjectViewProjectNode" />
+              <item name="digests" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="cron" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
+            <path>
+              <item name="digests" type="b2602c69:ProjectViewProjectNode" />
+              <item name="digests" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="cron" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="task" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
+            <path>
+              <item name="digests" type="b2602c69:ProjectViewProjectNode" />
+              <item name="digests" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="event" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
+            <path>
+              <item name="digests" type="b2602c69:ProjectViewProjectNode" />
+              <item name="digests" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="includes" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
+            <path>
+              <item name="digests" type="b2602c69:ProjectViewProjectNode" />
+              <item name="digests" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="language" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
+            <path>
+              <item name="digests" type="b2602c69:ProjectViewProjectNode" />
+              <item name="digests" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="language" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="en" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
+            <path>
+              <item name="digests" type="b2602c69:ProjectViewProjectNode" />
+              <item name="digests" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="language" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="en" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="acp" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
+            <path>
+              <item name="digests" type="b2602c69:ProjectViewProjectNode" />
+              <item name="digests" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="language" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="en" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="email" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
+            <path>
+              <item name="digests" type="b2602c69:ProjectViewProjectNode" />
+              <item name="digests" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="migrations" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
+            <path>
+              <item name="digests" type="b2602c69:ProjectViewProjectNode" />
+              <item name="digests" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="styles" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
+            <path>
+              <item name="digests" type="b2602c69:ProjectViewProjectNode" />
+              <item name="digests" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="styles" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="all" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
+            <path>
+              <item name="digests" type="b2602c69:ProjectViewProjectNode" />
+              <item name="digests" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="styles" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="all" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="template" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
+            <path>
+              <item name="digests" type="b2602c69:ProjectViewProjectNode" />
+              <item name="digests" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="styles" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="all" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="template" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="js" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
+            <path>
+              <item name="digests" type="b2602c69:ProjectViewProjectNode" />
+              <item name="digests" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="styles" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="all" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="theme" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
+            <path>
+              <item name="digests" type="b2602c69:ProjectViewProjectNode" />
+              <item name="digests" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="styles" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="prosilver" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
+            <path>
+              <item name="digests" type="b2602c69:ProjectViewProjectNode" />
+              <item name="digests" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="styles" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="prosilver" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="template" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
+            <path>
+              <item name="digests" type="b2602c69:ProjectViewProjectNode" />
+              <item name="digests" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="styles" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="prosilver" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="template" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="event" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
+            <path>
+              <item name="digests" type="b2602c69:ProjectViewProjectNode" />
+              <item name="digests" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="styles" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="prosilver" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="theme" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
+            <path>
+              <item name="digests" type="b2602c69:ProjectViewProjectNode" />
+              <item name="digests" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="ucp" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="Scope" />
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="settings.editor.selected.configurable" value="configurable.group.language" />
+    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
+    <property name="WebServerToolWindowFactoryState" value="true" />
+    <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="ShelveChangesManager" show_recycled="false">
+    <option name="remove_strategy" value="false" />
+  </component>
+  <component name="StructuralSearchPlugin">
+    <searchConfiguration name="user defined" created="1533840713288" text="3.2.7" recursive="true" caseInsensitive="true" type="PHP" history="1" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="cc260747-50ef-4427-8a21-30f3b7dd5f89" name="Default" comment="" />
+      <created>1529197911674</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1529197911674</updated>
+      <workItem from="1529197914207" duration="340000" />
+      <workItem from="1529268500251" duration="681000" />
+      <workItem from="1529323337898" duration="100000" />
+      <workItem from="1529786897487" duration="226000" />
+      <workItem from="1529788378537" duration="19000" />
+      <workItem from="1531668945922" duration="669000" />
+      <workItem from="1531703840839" duration="9000" />
+      <workItem from="1532445015294" duration="233000" />
+      <workItem from="1532805789955" duration="280000" />
+      <workItem from="1532865876085" duration="1033000" />
+      <workItem from="1532951662966" duration="182000" />
+      <workItem from="1533041267181" duration="633000" />
+      <workItem from="1533125920560" duration="1033000" />
+      <workItem from="1533212462743" duration="758000" />
+      <workItem from="1533262585857" duration="215000" />
+      <workItem from="1533297898186" duration="182000" />
+      <workItem from="1533384478331" duration="7763000" />
+      <workItem from="1533471595585" duration="186000" />
+      <workItem from="1533555736961" duration="608000" />
+      <workItem from="1533643872619" duration="1435000" />
+      <workItem from="1533730022880" duration="268000" />
+      <workItem from="1533815528485" duration="15000" />
+      <workItem from="1533839820724" duration="5398000" />
+      <workItem from="1533903498358" duration="255000" />
+      <workItem from="1534514625634" duration="468000" />
+      <workItem from="1534593661107" duration="7000" />
+      <workItem from="1537725679140" duration="1273000" />
+      <workItem from="1537789946240" duration="4000" />
+      <workItem from="1538146239204" duration="4199000" />
+      <workItem from="1538933670413" duration="4441000" />
+      <workItem from="1539013721130" duration="6209000" />
+      <workItem from="1539086763825" duration="523000" />
+      <workItem from="1539173914379" duration="4000" />
+      <workItem from="1539181200241" duration="2611000" />
+      <workItem from="1539260004371" duration="14477000" />
+      <workItem from="1539347094816" duration="625000" />
+      <workItem from="1539379043303" duration="3937000" />
+      <workItem from="1539530409418" duration="380000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="61679000" />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="0" y="0" width="1920" height="1080" extended-state="6" />
+    <editor active="true" />
+    <layout>
+      <window_info id="Remote Host" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16041666" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Docker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Inspection Results" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32994923" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+    </layout>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="php">
+          <url>file://$PROJECT_DIR$/migrations/convert_mod_data.php</url>
+          <line>11</line>
+          <option name="timeStamp" value="12" />
+        </line-breakpoint>
+      </breakpoints>
+      <option name="time" value="14" />
+    </breakpoint-manager>
+    <watches-manager />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/composer.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="221">
+          <caret line="13" column="9" lean-forward="false" selection-start-line="13" selection-start-column="9" selection-end-line="13" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/language/en/email/digests_html.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="1" column="0" lean-forward="false" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ext.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/composer.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="221">
+          <caret line="13" column="9" lean-forward="true" selection-start-line="13" selection-start-column="9" selection-end-line="13" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cron/task/digests.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17901">
+          <caret line="1053" column="22" lean-forward="false" selection-start-line="1053" selection-start-column="22" selection-end-line="1053" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ext.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/composer.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="221">
+          <caret line="13" column="9" lean-forward="true" selection-start-line="13" selection-start-column="9" selection-end-line="13" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cron/task/digests.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="7939">
+          <caret line="473" column="97" lean-forward="false" selection-start-line="473" selection-start-column="97" selection-end-line="473" selection-end-column="97" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ext.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/composer.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="221">
+          <caret line="13" column="9" lean-forward="true" selection-start-line="13" selection-start-column="9" selection-end-line="13" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cron/task/digests.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="8041">
+          <caret line="473" column="97" lean-forward="true" selection-start-line="473" selection-start-column="97" selection-end-line="473" selection-end-column="97" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ext.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ext.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ext.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ext.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ext.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/styles/all/template/mail_digests_html.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/styles/prosilver/template/ucp_digests.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="19" column="81" lean-forward="false" selection-start-line="19" selection-start-column="81" selection-end-line="19" selection-end-column="81" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/acp/main_info.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="204">
+          <caret line="18" column="33" lean-forward="false" selection-start-line="18" selection-start-column="33" selection-end-line="18" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/constants/constants.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/includes/html_messenger.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/migrations/convert_mod_modules.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="374">
+          <caret line="28" column="39" lean-forward="true" selection-start-line="28" selection-start-column="39" selection-end-line="28" selection-end-column="39" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ucp/main_info.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="272">
+          <caret line="22" column="48" lean-forward="false" selection-start-line="22" selection-start-column="48" selection-end-line="22" selection-end-column="48" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/license.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/language/en/email/digests_text.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="136">
+          <caret line="8" column="0" lean-forward="false" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/adm/style/mail_digests_text.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="612">
+          <caret line="36" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="40" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/styles/all/template/mail_digests_text.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="680">
+          <caret line="40" column="12" lean-forward="false" selection-start-line="40" selection-start-column="12" selection-end-line="40" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/adm/style/mail_digests_html.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="340">
+            <caret line="20" column="8" lean-forward="false" selection-start-line="20" selection-start-column="8" selection-end-line="20" selection-end-column="47" />
+          </first_editor>
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/migrations/release_3_2_7.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="32" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/migrations/release_3_2_9.php" />
+    <entry file="file://$PROJECT_DIR$/config/services.yml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="476">
+          <caret line="28" column="0" lean-forward="false" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/migrations/convert_mod_data.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="102">
+          <caret line="12" column="0" lean-forward="false" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ucp/main_module.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="53" column="18" lean-forward="false" selection-start-line="53" selection-start-column="18" selection-end-line="53" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/styles/prosilver/theme/digests.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="663">
+          <caret line="39" column="23" lean-forward="true" selection-start-line="39" selection-start-column="23" selection-end-line="39" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/adm/style/acp_digests.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="374">
+          <caret line="22" column="14" lean-forward="false" selection-start-line="22" selection-start-column="14" selection-end-line="22" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/event/main_listener.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1683">
+          <caret line="105" column="113" lean-forward="false" selection-start-line="105" selection-start-column="67" selection-end-line="105" selection-end-column="113" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/styles/prosilver/template/event/ucp_register_profile_fields_after.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="10" column="11" lean-forward="false" selection-start-line="10" selection-start-column="11" selection-end-line="10" selection-end-column="11" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cron/task/digests.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="32827">
+          <caret line="1937" column="0" lean-forward="false" selection-start-line="1937" selection-start-column="0" selection-end-line="1937" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/styles/all/template/js/digests.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="748">
+          <caret line="44" column="32" lean-forward="false" selection-start-line="44" selection-start-column="32" selection-end-line="44" selection-end-column="32" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/language/en/email/digests_plain_html.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="629">
+          <caret line="37" column="0" lean-forward="false" selection-start-line="37" selection-start-column="0" selection-end-line="37" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/language/en/email/digests_html.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="408">
+          <caret line="24" column="27" lean-forward="false" selection-start-line="24" selection-start-column="27" selection-end-line="24" selection-end-column="27" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/adm/style/acp_digests.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="9095">
+          <caret line="535" column="47" lean-forward="false" selection-start-line="535" selection-start-column="41" selection-end-line="535" selection-end-column="47" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/common.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/acp/main_module.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="12512">
+          <caret line="742" column="0" lean-forward="false" selection-start-line="736" selection-start-column="0" selection-end-line="742" selection-end-column="0" />
+          <folding>
+            <element signature="e#6#199#0#PHP" expanded="true" />
+            <marker date="1539303090000" expanded="true" signature="44917:45027" ph="DELETE FROM ${$this-&gt;table_prefix}... " />
+            <marker date="1539303090000" expanded="true" signature="55657:55765" ph="DELETE FROM ${$this-&gt;table_prefix}... " />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ext.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="340">
+          <caret line="26" column="0" lean-forward="false" selection-start-line="26" selection-start-column="0" selection-end-line="26" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/composer.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="527">
+          <caret line="31" column="0" lean-forward="false" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/adm/style/acp_digests.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="595">
+          <caret line="78" column="48" lean-forward="false" selection-start-line="78" selection-start-column="48" selection-end-line="78" selection-end-column="48" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/language/en/acp/info_acp_common.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="292">
+          <caret line="46" column="106" lean-forward="false" selection-start-line="46" selection-start-column="106" selection-end-line="46" selection-end-column="106" />
+          <folding>
+            <marker date="1539534502155" expanded="true" signature="715:722" ph="’" />
+            <marker date="1539534502155" expanded="true" signature="4188:4195" ph="’" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/language/en/acp/common.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="302">
+          <caret line="138" column="189" lean-forward="false" selection-start-line="138" selection-start-column="189" selection-end-line="138" selection-end-column="189" />
+          <folding>
+            <marker date="1539381968000" expanded="true" signature="2714:2721" ph="’" />
+            <marker date="1539381968000" expanded="true" signature="2799:2806" ph="’" />
+            <marker date="1539381968000" expanded="true" signature="3709:3716" ph="’" />
+            <marker date="1539381968000" expanded="true" signature="4537:4544" ph="“" />
+            <marker date="1539381968000" expanded="true" signature="4545:4552" ph="”" />
+            <marker date="1539381968000" expanded="true" signature="6628:6635" ph="“" />
+            <marker date="1539381968000" expanded="true" signature="6636:6643" ph="”" />
+            <marker date="1539381968000" expanded="true" signature="15701:15708" ph="’" />
+            <marker date="1539381968000" expanded="true" signature="16759:16766" ph="“" />
+            <marker date="1539381968000" expanded="true" signature="16770:16777" ph="”" />
+            <marker date="1539381968000" expanded="true" signature="16986:16993" ph="’" />
+            <marker date="1539381968000" expanded="true" signature="17359:17366" ph="“" />
+            <marker date="1539381968000" expanded="true" signature="17412:17419" ph="”" />
+            <marker date="1539381968000" expanded="true" signature="17549:17556" ph="“" />
+            <marker date="1539381968000" expanded="true" signature="17563:17570" ph="”" />
+            <marker date="1539381968000" expanded="true" signature="17957:17961" ph="&lt;" />
+            <marker date="1539381968000" expanded="true" signature="17965:17969" ph="&gt;" />
+            <marker date="1539381968000" expanded="true" signature="18071:18078" ph="“" />
+            <marker date="1539381968000" expanded="true" signature="18090:18097" ph="”" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/language/en/common.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="302">
+          <caret line="68" column="100" lean-forward="false" selection-start-line="68" selection-start-column="100" selection-end-line="68" selection-end-column="100" />
+          <folding>
+            <marker date="1539530877107" expanded="true" signature="1706:1713" ph="’" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>

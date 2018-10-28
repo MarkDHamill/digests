@@ -1523,10 +1523,10 @@ class main_module
 			if ($continue && $this->config['phpbbservices_digests_test_clear_spool'])
 			{
 				
-				// Clear the digests cache folder of .txt and .html files, if so instructed
+				// Clear the digests store folder of .txt and .html files, if so instructed
 				$all_cleared = true;
 
-				$path = $this->phpbb_root_path . 'cache/phpbbservices/digests';
+				$path = $this->phpbb_root_path . 'store/phpbbservices/digests';
 				if (is_dir($path))
 				{
 					foreach (new \DirectoryIterator($path) as $file_info)
@@ -1543,7 +1543,7 @@ class main_module
 						}
 					}
 				}
-				else	// Digests cache directory not found, which is not good. It is created in ext.php when the extension is enabled, so something destroyed it.
+				else	// Digests store directory not found, which is not good. It is created in ext.php when the extension is enabled, so something destroyed it.
 				{
 					$continue = false;
 					$all_cleared = false;

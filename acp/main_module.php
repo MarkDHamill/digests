@@ -54,6 +54,10 @@ class main_module
 		$this->user = $phpbb_container->get('user');
 	}
 
+	/**
+	 * @param $id
+	 * @param $mode
+	 */
 	function main($id, $mode)
 	{
 
@@ -1519,16 +1523,38 @@ class main_module
 				$message = $this->language->lang('DIGESTS_MAILER_NOT_RUN');
 				$continue = false;
 			}
-			
+
+			$path = $this->phpbb_root_path . 'store/phpbbservices/digests';
+
+			if ($continue && !is_dir($path))	// Digests store directory does not exist, so create it if possible.
+			{
+
+				// Create the store/phpbbservices/digests folder, which may require first creating store/phpbbservices folder
+				$ptr = strpos($path, '/', 5);
+				while ($ptr !== false)
+				{
+					$current_path = substr($path, 0, $ptr);
+					$ptr = strpos($path, '/', $ptr + 1);
+					if (!is_dir($current_path))
+					{
+						if (!mkdir($current_path, 0777))
+						{
+							$continue = false;
+						}
+					}
+				}
+
+			}
+
 			if ($continue && $this->config['phpbbservices_digests_test_clear_spool'])
 			{
 				
-				// Clear the digests store folder of .txt and .html files, if so instructed
-				$all_cleared = true;
-
-				$path = $this->phpbb_root_path . 'store/phpbbservices/digests';
-				if (is_dir($path))
+				if ($continue)
 				{
+					// Clear the digests store folder of .txt and .html files, if so instructed
+
+					$all_cleared = true;
+
 					foreach (new \DirectoryIterator($path) as $file_info)
 					{
 						$file_name = $file_info->getFilename();
@@ -1543,12 +1569,7 @@ class main_module
 						}
 					}
 				}
-				else	// Digests store directory not found, which is not good. It is created in ext.php when the extension is enabled, so something destroyed it.
-				{
-					$continue = false;
-					$all_cleared = false;
-				}
-					
+
 				if ($continue && $this->config['phpbbservices_digests_enable_log'])
 				{
 					if ($all_cleared)

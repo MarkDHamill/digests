@@ -1528,22 +1528,11 @@ class main_module
 
 			if ($continue && !is_dir($path))	// Digests store directory does not exist, so create it if possible.
 			{
-
 				// Create the store/phpbbservices/digests folder, which may require first creating store/phpbbservices folder
-				$ptr = strpos($path, '/', 5);
-				while ($ptr !== false)
+				if (!mkdir($path, 0777, true))
 				{
-					$current_path = substr($path, 0, $ptr);
-					$ptr = strpos($path, '/', $ptr + 1);
-					if (!is_dir($current_path))
-					{
-						if (!mkdir($current_path, 0777))
-						{
-							$continue = false;
-						}
-					}
+					$continue = false;
 				}
-
 			}
 
 			if ($continue && $this->config['phpbbservices_digests_test_clear_spool'])

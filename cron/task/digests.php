@@ -998,18 +998,17 @@ class digests extends \phpbb\cron\task\base
 				$html_messenger->send(NOTIFY_EMAIL, true, $is_html, true);
 				$email_content = $html_messenger->msg;
 
-				if (!file_exists($this->store_path))
+				// Make the store/phpbbservices/digests directory if it does not exist. This should be created in
+				// acp/main_module.php. So this acts mostly as a safety switch.
+				if (!$this->helper->make_directories())
 				{
-					if (!mkdir($this->store_path, 0777, true))
+					// If unable to create these directories, it's likely a permissions issue, so flag it and terminate abnormally.
+					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_CREATE_DIRECTORY_ERROR', false, array($this->store_path));
+					if ($this->config['phpbbservices_digests_enable_log'])
 					{
-						// If unable to create these directories, it's likely a permissions issue, so flag it and terminate abnormally.
-						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_CREATE_DIRECTORY_ERROR', false, array($this->store_path));
-						if ($this->config['phpbbservices_digests_enable_log'])
-						{
-							$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END');
-						}
-						return false;
+						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END');
 					}
+					return false;
 				}
 
 				// Save digests as file in the store/phpbbservices/digests folder instead of emailing.

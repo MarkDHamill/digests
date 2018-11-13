@@ -283,7 +283,7 @@ class main_module
 				$this->db->sql_freeresult($result);
 				
 				// Create pagination logic
-				$pagination_url = append_sid("index.$this->phpEx?i=-phpbbservices-digests-acp-main_module&amp;mode=digests_edit_subscribers&amp;sortby=$sortby&amp;subscribe=$subscribe");
+				$pagination_url = append_sid("index.$this->phpEx?i=-phpbbservices-digests-acp-main_module&amp;mode=digests_edit_subscribers&amp;sortby=$sortby&amp;subscribe=$subscribe&amp;member=$member");
 				$this->pagination->generate_template_pagination($pagination_url, 'pagination', 'start', $total_users, $this->config['phpbbservices_digests_users_per_page'], $start);
 								
 				// Stealing some code from my Smartfeed extension so I can get a list of forums that a particular user can access
@@ -1524,15 +1524,11 @@ class main_module
 				$continue = false;
 			}
 
-			$path = $this->phpbb_root_path . 'store/phpbbservices/digests';
-
-			if ($continue && !is_dir($path))	// Digests store directory does not exist, so create it if possible.
+			// Create the store/phpbbservices/digests folder. It should exist already.
+			if (!$this->helper->make_directories())
 			{
-				// Create the store/phpbbservices/digests folder, which may require first creating store/phpbbservices folder
-				if (!mkdir($path, 0777, true))
-				{
-					$continue = false;
-				}
+				$message = strip_tags(sprintf($this->language->lang('LOG_CONFIG_DIGESTS_CREATE_DIRECTORY_ERROR'), $this->phpbb_root_path . 'store/phpbbservices/digests'));
+				$continue = false;
 			}
 
 			if ($continue && $this->config['phpbbservices_digests_test_clear_spool'])

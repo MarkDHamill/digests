@@ -22,11 +22,13 @@ class common
 	 * Constructor.
 	 *
 	 * @param \phpbb\language\language 	$language 			Language object
+	 * @param $phpbb_root_path								Relative path to phpBB root
 	 */
 
-	public function __construct(\phpbb\language\language $language)
+	public function __construct(\phpbb\language\language $language, $phpbb_root_path)
 	{
 		$this->language = $language;
+		$this->phpbb_root_path = $phpbb_root_path;
 	}
 	
 	public function make_hour_string($hour, $user_dateformat)
@@ -100,6 +102,19 @@ class common
 		{
 			return (float) $hour;
 		}
+	}
+
+	public function make_directories()
+	{
+		// Makes the store/phpbbservices/directories. If they already exist, it returns true. If they are successfully
+		// created, returns true. If they cannot be created due to permission issues, returns false.
+
+		$path = $this->phpbb_root_path . 'store/phpbbservices/digests';
+		if (is_dir($path))
+		{
+			return true;
+		}
+		return @mkdir($path, 0777, true);
 	}
 
 }

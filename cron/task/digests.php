@@ -307,12 +307,12 @@ class digests extends \phpbb\cron\task\base
 	private function mail_digests($now, $hour)
 	{
 		
-		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		//                                                                                                                  //
-		// This method is what used to be mail_digests.php. It will mail all the digests for the given year, date and hour  //
-		// offset by the $hour parameter.                                                                                   //
-		//                                                                                                                  //
-		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//                                                                                                           //
+		// This method is what used to be mail_digests.php. It will mail all the digests for the given day and hour  //
+		// offset by the $hour parameter.                                                                            //
+		//                                                                                                           //
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		
 		static $daily_digest_sql, $weekly_digest_sql, $now_info;
 
@@ -481,682 +481,688 @@ class digests extends \phpbb\cron\task\base
 		$result = $this->db->sql_query($sql);
 		$rowset = $this->db->sql_fetchrowset($result);	// Gets users and their metadata that are receiving digests for this hour
 
-		// Fetch all the posts (no private messages) but do it just once for efficiency. These will be filtered later 
-		// to remove those posts a particular user should not see.
+		if (sizeof($rowset) > 0)
 
-		// First, determine a maximum date range fetched: daily, weekly or monthly
-		if ($monthly_digest_sql != '')
 		{
-			// In the case of monthly digests, it's important to include posts that support daily and weekly digests as well, hence dates of posts
-			// retrieved may exceed post dates for the previous month. Logic to exclude posts past the end of the previous month in the case of 
-			// monthly digests must be handled in the create_content function to skip these.
-			$date_limit_sql = ' AND p.post_time >= ' . $utc_month_1st_begin . ' AND p.post_time <= ' . max($this->utc_month_lastday_end, $this->utc_time);
-		}
-		else if ($weekly_digest_sql != '')	// Weekly
-		{
-			$this->date_limit = $this->time - (7 * 24 * 60 * 60);
-			$date_limit_sql = ' AND p.post_time >= ' . $this->date_limit . ' AND p.post_time < ' . $this->time;
-		}
-		else	// Daily
-		{
-			$this->date_limit = $this->time - (24 * 60 * 60);
-			$date_limit_sql = ' AND p.post_time >= ' . $this->date_limit. ' AND p.post_time < ' . $this->time;
-		}
 
-		// Now get all potential posts and related data for all users and place them in an array for parsing. Later the create_content function will filter out the stuff
-		// that should not go in a particular digest, based on permissions and options the user selected.
-		
-		// Prepare SQL
-		$sql_array = array(
-			'SELECT'	=> 'f.*, t.*, p.*, u.*',
-		
-			'FROM'		=> array(
-				POSTS_TABLE 	=> 'p',
-				USERS_TABLE 	=> 'u',
-				TOPICS_TABLE 	=> 't',
-				FORUMS_TABLE 	=> 'f'),
-		
-			'WHERE'		=> "f.forum_id = t.forum_id
+			// Fetch all the posts (no private messages) but do it just once for efficiency. These will be filtered later
+			// to remove those posts a particular user should not see.
+
+			// First, determine a maximum date range fetched: daily, weekly or monthly
+			if ($monthly_digest_sql != '')
+			{
+				// In the case of monthly digests, it's important to include posts that support daily and weekly digests as well, hence dates of posts
+				// retrieved may exceed post dates for the previous month. Logic to exclude posts past the end of the previous month in the case of
+				// monthly digests must be handled in the create_content function to skip these.
+				$date_limit_sql = ' AND p.post_time >= ' . $utc_month_1st_begin . ' AND p.post_time <= ' . max($this->utc_month_lastday_end, $this->utc_time);
+			}
+			else if ($weekly_digest_sql != '')    // Weekly
+			{
+				$this->date_limit = $this->time - (7 * 24 * 60 * 60);
+				$date_limit_sql = ' AND p.post_time >= ' . $this->date_limit . ' AND p.post_time < ' . $this->time;
+			}
+			else    // Daily
+			{
+				$this->date_limit = $this->time - (24 * 60 * 60);
+				$date_limit_sql = ' AND p.post_time >= ' . $this->date_limit . ' AND p.post_time < ' . $this->time;
+			}
+
+			// Now get all potential posts and related data for all users and place them in an array for parsing. Later the create_content function will filter out the stuff
+			// that should not go in a particular digest, based on permissions and options the user selected.
+
+			// Prepare SQL
+			$sql_array = array(
+				'SELECT' => 'f.*, t.*, p.*, u.*',
+
+				'FROM' => array(
+					POSTS_TABLE  => 'p',
+					USERS_TABLE  => 'u',
+					TOPICS_TABLE => 't',
+					FORUMS_TABLE => 'f'),
+
+				'WHERE' => "f.forum_id = t.forum_id
 								AND p.topic_id = t.topic_id 
 								AND p.poster_id = u.user_id
 								$date_limit_sql
 								AND p.post_visibility = 1
 								AND topic_status <> " . ITEM_MOVED . "
 								AND forum_password = ''",
-		
-			'ORDER_BY'	=> 'f.left_id, f.right_id'
-		);
-		
-		// Build query
-		$sql_posts = $this->db->sql_build_query('SELECT', $sql_array);
-		
-		$result_posts = $this->db->sql_query($sql_posts);	// Fetch the data
-		$posts_rowset = $this->db->sql_fetchrowset($result_posts); // Get all the posts as a set
-		
-		// Now that we have all the posts, time to send one digest at a time
-		
-		foreach ($rowset as $row)
-		{
 
-			// Each traverse through this loop sends out exactly one digest
+				'ORDER_BY' => 'f.left_id, f.right_id'
+			);
 
-			// While it shouldn't happen, we need a circuit breaker to prevent duplicate digests from going out
-			// for the same hour for the same subscriber. So if the day and hour for the last time the digest was sent
-			// for this user is the same as the current day and hour, presumably the subscriber has already received a
-			// digest so skip sending it.
+			// Build query
+			$sql_posts = $this->db->sql_build_query('SELECT', $sql_array);
 
-			$user_digest_last_sent = getdate($row['user_digest_last_sent']);
-			if ($this->run_mode != constants::DIGESTS_RUN_MANUAL)
+			$result_posts = $this->db->sql_query($sql_posts);    // Fetch the data
+			$posts_rowset = $this->db->sql_fetchrowset($result_posts); // Get all the posts as a set
+
+			// Now that we have all the posts, time to send one digest at a time
+
+			foreach ($rowset as $row)
 			{
-				if ($user_digest_last_sent['year'] == $now_info['year'] && $user_digest_last_sent['yday'] == $now_info['yday'] && $user_digest_last_sent['hours'] == $now_info['hours'])
+
+				// Each traverse through this loop sends out exactly one digest
+
+				// While it shouldn't happen, we need a circuit breaker to prevent duplicate digests from going out
+				// for the same hour for the same subscriber. So if the day and hour for the last time the digest was sent
+				// for this user is the same as the current day and hour, presumably the subscriber has already received a
+				// digest so skip sending it.
+
+				$user_digest_last_sent = getdate($row['user_digest_last_sent']);
+				if ($this->run_mode != constants::DIGESTS_RUN_MANUAL)
 				{
-					// Note the inconsistency in the log.
-					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_DUPLICATE_PREVENTED', false, array($row['username'], $row['user_email'], $utc_year . '-' . $utc_month . '-' . $utc_day, $current_hour_utc));
+					if ($user_digest_last_sent['year'] == $now_info['year'] && $user_digest_last_sent['yday'] == $now_info['yday'] && $user_digest_last_sent['hours'] == $now_info['hours'])
+					{
+						// Note the inconsistency in the log.
+						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_DUPLICATE_PREVENTED', false, array($row['username'], $row['user_email'], $utc_year . '-' . $utc_month . '-' . $utc_day, $current_hour_utc));
+						continue;
+					}
+				}
+
+				// Skip sending this digest if a full "cycle" has not elapsed since when the digest was last sent out. For example, if the user has
+				// subscribed to a daily digest, 24 hours needs to have elapsed since the last digest went out. The digest last sent time is recorded
+				// in the database when sent out.
+
+				$top_of_hour_ts = $this->top_of_hour_timestamp($row['user_digest_last_sent']);
+				switch ($row['user_digest_type'])
+				{
+					case constants::DIGESTS_WEEKLY_VALUE:
+						if ($top_of_hour_ts + (7 * 60 * 60 * 24) > $now)
+						{
+							continue;
+						}
+					break;
+
+					case constants::DIGESTS_MONTHLY_VALUE:
+						// Calculate seconds in previous month, which depends on number of days in that month
+						$use_year = date('Y', $now);
+						$use_month = date('n', $now) - 1;
+						if ($use_month == 0)
+						{
+							$use_month = 12;
+							$use_year--;
+						}
+						$use_days_in_month = cal_days_in_month(CAL_GREGORIAN, $use_month, $use_year);
+						if ($top_of_hour_ts + ($use_days_in_month * 60 * 60 * 24) > $now)
+						{
+							continue;
+						}
+					break;
+
+					case constants::DIGESTS_DAILY_VALUE:
+					default:
+						if ($top_of_hour_ts + (60 * 60 * 24) > $now)
+						{
+							continue;
+						}
+					break;
+				}
+
+				// Load the appropriate language files based on the user's preferred language. The board default language
+				// is probably English, which may not be what we want since phpBB supports multiple languages depending on
+				// the language packs installed and which language the user chooses.
+				if ($row['user_lang'] != $last_language)
+				{
+					$this->language->set_user_language($row['user_lang'], true);
+					$this->language->add_lang('common');
+					$this->language->add_lang(array('common', 'acp/common'), 'phpbbservices/digests');
+					$last_language = $row['user_lang'];
+				}
+
+				$this->toc = array();        // Create or empty the array containing table of contents information
+				$this->toc_pm_count = 0;    // # of private messages in the table of contents for subscriber
+
+				// The extended messenger class is used to send the digests. It is extended to allow HTML emails to be sent.
+				if (!class_exists('messenger'))
+				{
+					include($this->phpbb_root_path . 'includes/functions_messenger.' . $this->phpEx);
+				}
+				$html_messenger = new \phpbbservices\digests\includes\html_messenger();
+
+				// Set the text showing the digest type
+				switch ($row['user_digest_type'])
+				{
+					case constants::DIGESTS_DAILY_VALUE:
+						$digest_type = $this->language->lang('DIGESTS_DAILY');
+					break;
+
+					case constants::DIGESTS_WEEKLY_VALUE:
+						$digest_type = $this->language->lang('DIGESTS_WEEKLY');
+					break;
+
+					case constants::DIGESTS_MONTHLY_VALUE:
+						$digest_type = $this->language->lang('DIGESTS_MONTHLY');
+					break;
+
+					default:
+						// The database may be corrupted if the digest type for a subscriber is invalid.
+						// Write an error to the log and continue to the next subscriber.
+						$digest_type = '';    // Make PhpStorm happy
+						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_BAD_DIGEST_TYPE', false, array($row['user_digest_type'], $row['username']));
+						continue;
+					break;
+				}
+
+				$digest_type = ($this->config['phpbbservices_digests_lowercase_digest_type']) ? strtolower($digest_type) : $digest_type;
+				$email_subject = $this->language->lang('DIGESTS_SUBJECT_TITLE', $this->config['sitename'], $digest_type);
+
+				// Set various variables and flags based on the requested digest format.
+
+				switch ($row['user_digest_format'])
+				{
+
+					case constants::DIGESTS_TEXT_VALUE:
+						$html_messenger->template('digests_text', '', $this->email_templates_path);
+						$is_html = false;
+						$disclaimer = str_replace('&rsquo;', "'", strip_tags($this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx, $this->config['board_contact'])));
+						$powered_by = $this->config['phpbbservices_digests_host'];
+						$this->layout_with_html_tables = false;
+					break;
+
+					case constants::DIGESTS_PLAIN_VALUE:
+						$html_messenger->template('digests_plain_html', '', $this->email_templates_path);
+						$is_html = true;
+						$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx, $this->config['board_contact']);
+						$powered_by = sprintf("<a href=\"%s\">%s</a>", $this->config['phpbbservices_digests_page_url'], $this->config['phpbbservices_digests_host']);
+						$this->layout_with_html_tables = false;
+					break;
+
+					case constants::DIGESTS_PLAIN_CLASSIC_VALUE:
+						$html_messenger->template('digests_plain_html', '', $this->email_templates_path);
+						$is_html = true;
+						$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx, $this->config['board_contact']);
+						$powered_by = sprintf("<a href=\"%s\">%s</a>", $this->config['phpbbservices_digests_page_url'], $this->config['phpbbservices_digests_host']);
+						$this->layout_with_html_tables = true;
+					break;
+
+					case constants::DIGESTS_HTML_VALUE:
+						$html_messenger->template('digests_html', '', $this->email_templates_path);
+						$is_html = true;
+						$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx, $this->config['board_contact']);
+						$powered_by = sprintf("<a href=\"%s\">%s</a>", $this->config['phpbbservices_digests_page_url'], $this->config['phpbbservices_digests_host']);
+						$this->layout_with_html_tables = false;
+					break;
+
+					case constants::DIGESTS_HTML_CLASSIC_VALUE:
+						$html_messenger->template('digests_html', '', $this->email_templates_path);
+						$is_html = true;
+						$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx, $this->config['board_contact']);
+						$powered_by = sprintf("<a href=\"%s\">%s</a>", $this->config['phpbbservices_digests_page_url'], $this->config['phpbbservices_digests_host']);
+						$this->layout_with_html_tables = true;
+					break;
+
+					default:
+						// The database may be corrupted if the digest format for a subscriber is invalid.
+						// Write an error to the log and continue to the next subscriber.
+						$is_html = false;    // Keep PhpStorm happy
+						$disclaimer = '';    // Keep PhpStorm happy
+						$powered_by = '';    // Keep PhpStorm happy
+						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FORMAT_ERROR', false, array($row['user_digest_type'], $row['username']));
+						continue;
+					break;
+
+				}
+
+				// Set email header information
+				$from_field_email = (isset($this->config['phpbbservices_digests_from_email_address']) && (strlen($this->config['phpbbservices_digests_from_email_address']) > 0)) ? $this->config['phpbbservices_digests_from_email_address'] : $this->config['board_email'];
+				$from_field_name = (isset($this->config['phpbbservices_digests_from_email_name']) && (strlen($this->config['phpbbservices_digests_from_email_name']) > 0)) ? $this->config['phpbbservices_digests_from_email_name'] : $this->config['sitename'] . ' ' . $this->language->lang('DIGESTS_ROBOT');
+				$reply_to_field_email = (isset($this->config['phpbbservices_digests_reply_to_email_address']) && (strlen($this->config['phpbbservices_digests_reply_to_email_address']) > 0)) ? $this->config['phpbbservices_digests_reply_to_email_address'] : $this->config['board_email'];
+
+				// Admin may override where email is sent in manual mode. This won't apply if digests are stored to the store/phpbbservices/digests folder instead.
+				if ($this->run_mode == constants::DIGESTS_RUN_MANUAL && $this->config['phpbbservices_digests_test_send_to_admin'])
+				{
+					$html_messenger->to($this->email_address_override);
+				}
+				else
+				{
+					$html_messenger->to($row['user_email']);
+				}
+
+				if (trim($from_field_name) !== '')
+				{
+					$html_messenger->from('"' . mail_encode(htmlspecialchars_decode($from_field_name)) . '" <' . $from_field_email . '>');
+				}
+				else
+				{
+					$html_messenger->from($from_field_email);
+				}
+
+				$html_messenger->replyto($reply_to_field_email);
+				$html_messenger->subject($email_subject);
+
+				// Transform user_digest_send_hour_gmt to the subscriber's local time
+				$local_send_hour = $row['user_digest_send_hour_gmt'] + (float) $this->helper->make_tz_offset($row['user_timezone']);
+				$local_send_hour = $this->helper->check_send_hour($local_send_hour);
+
+				if (($local_send_hour >= 24) || ($local_send_hour < 0))
+				{
+					// The database may be corrupted if the local send hour for a subscriber is still not between 0 and 23.
+					// Write an error to the log and continue to the next subscriber.
+					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_BAD_SEND_HOUR', false, array($row['user_digest_type'], $row['user_digest_send_hour_gmt']));
 					continue;
 				}
-			}
 
-			// Skip sending this digest if a full "cycle" has not elapsed since when the digest was last sent out. For example, if the user has 
-			// subscribed to a daily digest, 24 hours needs to have elapsed since the last digest went out. The digest last sent time is recorded
-			// in the database when sent out.
+				// Send a proper content-language to the output
+				$user_lang = $row['user_lang'];
+				if (strpos($user_lang, '-x-') !== false)
+				{
+					$user_lang = substr($user_lang, 0, strpos($user_lang, '-x-'));
+				}
 
-			$top_of_hour_ts = $this->top_of_hour_timestamp($row['user_digest_last_sent']);
-			switch ($row['user_digest_type'])
-			{
-				case constants::DIGESTS_WEEKLY_VALUE:
-					if ($top_of_hour_ts + (7 * 60 * 60 * 24) > $now)
-					{
-						continue;
-					}
-				break;
-				
-				case constants::DIGESTS_MONTHLY_VALUE:
-					// Calculate seconds in previous month, which depends on number of days in that month
-					$use_year = date('Y', $now);
-					$use_month = date('n', $now) - 1;
-					if ($use_month == 0)
-					{
-						$use_month = 12;
-						$use_year--;
-					}
-					$use_days_in_month = cal_days_in_month (CAL_GREGORIAN, $use_month, $use_year);
-					if ($top_of_hour_ts + ($use_days_in_month * 60 * 60 * 24) > $now)
-					{
-						continue;
-					}
-				break;
+				// Create a proper message indicating the number of posts allowed in digest and set a value for the maximum posts allowed in this digest
+				if (($row['user_digest_max_posts'] == 0) && ($this->config['phpbbservices_digests_max_items'] == 0))
+				{
+					$this->max_posts = 0;    // 0 means no limit
+				}
+				else if (($this->config['phpbbservices_digests_max_items'] != 0) && $this->config['phpbbservices_digests_max_items'] < $row['user_digest_max_posts'])
+				{
+					$this->max_posts = (int) $row['phpbbservices_digests_max_items'];
+				}
+				else
+				{
+					$this->max_posts = (int) $row['user_digest_max_posts'];
+				}
 
-				case constants::DIGESTS_DAILY_VALUE:
-				default:
-					if ($top_of_hour_ts + (60 * 60 * 24) > $now)
-					{
-						continue;
-					}
-				break;
-			}
+				$recipient_time = $this->utc_time + (float) ($this->helper->make_tz_offset($row['user_timezone']) * 60 * 60);
 
-			// Load the appropriate language files based on the user's preferred language. The board default language
-			// is probably English, which may not be what we want since phpBB supports multiple languages depending on
-			// the language packs installed and which language the user chooses.
-			if ($row['user_lang'] != $last_language)
-			{
-				$this->language->set_user_language($row['user_lang'], true);
-				$this->language->add_lang('common');
-				$this->language->add_lang(array('common', 'acp/common'), 'phpbbservices/digests');
-				$last_language = $row['user_lang'];
-			}
+				// Identify the language translator, if one exists and they choose to identify him/herself
+				if (trim($this->language->lang('DIGESTS_TRANSLATOR_NAME') == ''))
+				{
+					$translator = '';
+				}
+				else
+				{
+					$translator = $this->language->lang('DIGESTS_COMMA') . strtolower($this->language->lang('DIGESTS_TRANSLATED_BY')) . ' ';
+					$translator .= ($this->language->lang('DIGESTS_TRANSLATOR_CONTACT') == '') ? $this->language->lang('DIGESTS_TRANSLATOR_NAME') : '<a href="' . $this->language->lang('DIGESTS_TRANSLATOR_CONTACT') . '" class="postlink">' . $this->language->lang('DIGESTS_TRANSLATOR_NAME') . '</a>';
+				}
 
-			$this->toc = array();		// Create or empty the array containing table of contents information
-			$this->toc_pm_count = 0; 	// # of private messages in the table of contents for subscriber
+				// When running a phpBB cron as "Anonymous", the timezone object may not exist or get destroyed. Recreate it if needed so format_date() will work.
+				if (!is_object($this->user->timezone))
+				{
+					$this->create_timezone_object($row['user_timezone'], $row['user_dateformat']);
+				}
+				$publish_date = $this->language->lang('DIGESTS_PUBLISH_DATE', $row['username'], $this->user->format_date($recipient_time, $row['user_dateformat']));
 
-			// The extended messenger class is used to send the digests. It is extended to allow HTML emails to be sent.
-			if (!class_exists('messenger'))
-			{
-				include($this->phpbb_root_path . 'includes/functions_messenger.' . $this->phpEx);
-			}
-			$html_messenger = new \phpbbservices\digests\includes\html_messenger();
+				// Print the non-post and non-private message information in the digest. The actual posts and private messages require the full templating system,
+				// and is handled in the create_content function.
+				$html_messenger->assign_vars(array(
+					'S_CONTENT_DIRECTION'        => $this->language->lang('DIRECTION'),
+					'S_DIGESTS_DISCLAIMER'       => $disclaimer,
+					'S_DIGESTS_INTRODUCTION'     => ($is_html) ? $this->language->lang('DIGESTS_INTRODUCTION', $this->config['sitename']) : strip_tags($this->language->lang('DIGESTS_INTRODUCTION', $this->config['sitename'])),
+					'S_DIGESTS_POWERED_BY'       => $powered_by,
+					'S_DIGESTS_PUBLISH_DATE'     => $publish_date,
+					'S_DIGESTS_SALUTATION_BLURB' => $row['username'] . $this->language->lang('DIGESTS_COMMA'),
+					'S_DIGESTS_TITLE'            => $email_subject,
+					'S_DIGESTS_TRANSLATOR'       => ($is_html) ? $translator : strip_tags($translator),
+					'S_USER_LANG'                => $user_lang,
+					'T_STYLESHEET_LINK'          => ($this->config['phpbbservices_digests_enable_custom_stylesheets']) ? "{$this->board_url}styles/" . $this->config['phpbbservices_digests_custom_stylesheet_path'] : "{$this->board_url}styles/" . $row['style_path'] . '/theme/stylesheet.css',
+					'T_THEME_PATH'               => "{$this->board_url}styles/" . $row['style_path'] . '/theme',
+				));
 
-			// Set the text showing the digest type
-			switch ($row['user_digest_type'])
-			{
-				case constants::DIGESTS_DAILY_VALUE:
-					$digest_type = $this->language->lang('DIGESTS_DAILY');
-				break;
-				
-				case constants::DIGESTS_WEEKLY_VALUE:
-					$digest_type = $this->language->lang('DIGESTS_WEEKLY');
-				break;
-				
-				case constants::DIGESTS_MONTHLY_VALUE:
-					$digest_type = $this->language->lang('DIGESTS_MONTHLY');
-				break;
-				
-				default:
-					// The database may be corrupted if the digest type for a subscriber is invalid. 
-					// Write an error to the log and continue to the next subscriber.
-					$digest_type = '';	// Make PhpStorm happy
-					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_BAD_DIGEST_TYPE', false, array($row['user_digest_type'], $row['username']));
-					continue;
-				break;
-			}
+				// Get any private messages for this user
 
-			$digest_type = ($this->config['phpbbservices_digests_lowercase_digest_type']) ? strtolower($digest_type) : $digest_type;
-			$email_subject = $this->language->lang('DIGESTS_SUBJECT_TITLE', $this->config['sitename'], $digest_type);
-		
-			// Set various variables and flags based on the requested digest format.
-			
-			switch($row['user_digest_format'])
-			{
-			
-				case constants::DIGESTS_TEXT_VALUE:
-					$html_messenger->template('digests_text', '', $this->email_templates_path);
-					$is_html = false;
-					$disclaimer = str_replace('&rsquo;', "'", strip_tags($this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx, $this->config['board_contact'])));
-					$powered_by = $this->config['phpbbservices_digests_host'];
-					$this->layout_with_html_tables = false;
-				break;
-				
-				case constants::DIGESTS_PLAIN_VALUE:
-					$html_messenger->template('digests_plain_html', '', $this->email_templates_path);
-					$is_html = true;
-					$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx, $this->config['board_contact']);
-					$powered_by = sprintf("<a href=\"%s\">%s</a>", $this->config['phpbbservices_digests_page_url'], $this->config['phpbbservices_digests_host']);
-					$this->layout_with_html_tables = false;
-				break;
-				
-				case constants::DIGESTS_PLAIN_CLASSIC_VALUE:
-					$html_messenger->template('digests_plain_html', '', $this->email_templates_path);
-					$is_html = true;
-					$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx, $this->config['board_contact']);
-					$powered_by = sprintf("<a href=\"%s\">%s</a>", $this->config['phpbbservices_digests_page_url'], $this->config['phpbbservices_digests_host']);
-					$this->layout_with_html_tables = true;
-				break;
-				
-				case constants::DIGESTS_HTML_VALUE:
-					$html_messenger->template('digests_html', '', $this->email_templates_path);
-					$is_html = true;
-					$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx, $this->config['board_contact']);
-					$powered_by = sprintf("<a href=\"%s\">%s</a>", $this->config['phpbbservices_digests_page_url'], $this->config['phpbbservices_digests_host']);
-					$this->layout_with_html_tables = false;
-				break;
-				
-				case constants::DIGESTS_HTML_CLASSIC_VALUE:
-					$html_messenger->template('digests_html', '', $this->email_templates_path);
-					$is_html = true;
-					$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx, $this->config['board_contact']);
-					$powered_by = sprintf("<a href=\"%s\">%s</a>", $this->config['phpbbservices_digests_page_url'], $this->config['phpbbservices_digests_host']);
-					$this->layout_with_html_tables = true;
-				break;
-				
-				default:
-					// The database may be corrupted if the digest format for a subscriber is invalid. 
-					// Write an error to the log and continue to the next subscriber.
-					$is_html = false;	// Keep PhpStorm happy
-					$disclaimer = '';	// Keep PhpStorm happy
-					$powered_by = '';	// Keep PhpStorm happy
-					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FORMAT_ERROR', false, array($row['user_digest_type'], $row['username']));
-					continue;
-				break;
-				
-			}
-	
-			// Set email header information
-			$from_field_email = (isset($this->config['phpbbservices_digests_from_email_address']) && (strlen($this->config['phpbbservices_digests_from_email_address']) > 0)) ? $this->config['phpbbservices_digests_from_email_address'] : $this->config['board_email'];
-			$from_field_name = (isset($this->config['phpbbservices_digests_from_email_name']) && (strlen($this->config['phpbbservices_digests_from_email_name']) > 0)) ? $this->config['phpbbservices_digests_from_email_name'] : $this->config['sitename'] . ' ' . $this->language->lang('DIGESTS_ROBOT');
-			$reply_to_field_email = (isset($this->config['phpbbservices_digests_reply_to_email_address']) && (strlen($this->config['phpbbservices_digests_reply_to_email_address']) > 0)) ? $this->config['phpbbservices_digests_reply_to_email_address'] : $this->config['board_email'];
-		
-			// Admin may override where email is sent in manual mode. This won't apply if digests are stored to the store/phpbbservices/digests folder instead.
-			if ($this->run_mode == constants::DIGESTS_RUN_MANUAL && $this->config['phpbbservices_digests_test_send_to_admin'])
-			{
-				$html_messenger->to($this->email_address_override);
-			}
-			else
-			{
-				$html_messenger->to($row['user_email']);
-			}
-			
-			if (trim($from_field_name) !== '')
-			{
-				$html_messenger->from('"' . mail_encode(htmlspecialchars_decode($from_field_name)) . '" <' . $from_field_email . '>');
-			}
-			else
-			{
-				$html_messenger->from($from_field_email);
-			}
+				// Count # of unread and new for this user. Counts may need to be reduced later.
+				$total_pm_unread = 0;
+				$total_pm_new = 0;
 
-			$html_messenger->replyto($reply_to_field_email);
-			$html_messenger->subject($email_subject);
-				
-			// Transform user_digest_send_hour_gmt to the subscriber's local time
-			$local_send_hour = $row['user_digest_send_hour_gmt'] + (float) $this->helper->make_tz_offset($row['user_timezone']);
-			$local_send_hour = $this->helper->check_send_hour($local_send_hour);
+				if ($row['user_digest_show_pms'])
+				{
 
-			if (($local_send_hour >= 24) || ($local_send_hour < 0))
-			{
-				// The database may be corrupted if the local send hour for a subscriber is still not between 0 and 23. 
-				// Write an error to the log and continue to the next subscriber.
-				$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_BAD_SEND_HOUR', false, array($row['user_digest_type'], $row['user_digest_send_hour_gmt']));
-				continue;
-			}
+					$sql_array = array(
+						'SELECT' => '*',
 
-			// Send a proper content-language to the output
-			$user_lang = $row['user_lang'];
-			if (strpos($user_lang, '-x-') !== false)
-			{
-				$user_lang = substr($user_lang, 0, strpos($user_lang, '-x-'));
-			}
-			
-			// Create a proper message indicating the number of posts allowed in digest and set a value for the maximum posts allowed in this digest
-			if (($row['user_digest_max_posts'] == 0) && ($this->config['phpbbservices_digests_max_items'] == 0))
-			{
-				$this->max_posts = 0;	// 0 means no limit
-			}
-			else if (($this->config['phpbbservices_digests_max_items'] != 0) && $this->config['phpbbservices_digests_max_items'] < $row['user_digest_max_posts'])
-			{
-				$this->max_posts = (int) $row['phpbbservices_digests_max_items'];
-			}
-			else
-			{
-				$this->max_posts = (int) $row['user_digest_max_posts'];
-			}
+						'FROM' => array(
+							PRIVMSGS_TO_TABLE => 'pt',
+							PRIVMSGS_TABLE    => 'pm',
+							USERS_TABLE       => 'u',
+						),
 
-			$recipient_time = $this->utc_time + (float) ($this->helper->make_tz_offset($row['user_timezone']) * 60 * 60);
-
-			// Identify the language translator, if one exists and they choose to identify him/herself
-			if (trim($this->language->lang('DIGESTS_TRANSLATOR_NAME') == ''))
-			{
-				$translator = '';
-			}
-			else
-			{
-				$translator = $this->language->lang('DIGESTS_COMMA') . strtolower($this->language->lang('DIGESTS_TRANSLATED_BY')) . ' ';
-				$translator .= ($this->language->lang('DIGESTS_TRANSLATOR_CONTACT') == '') ? $this->language->lang('DIGESTS_TRANSLATOR_NAME') : '<a href="' . $this->language->lang('DIGESTS_TRANSLATOR_CONTACT') . '" class="postlink">' . $this->language->lang('DIGESTS_TRANSLATOR_NAME') . '</a>';
-			}
-
-			// When running a phpBB cron as "Anonymous", the timezone object may not exist or get destroyed. Recreate it if needed so format_date() will work.
-			if (!is_object($this->user->timezone))
-			{
-				$this->create_timezone_object($row['user_timezone'], $row['user_dateformat']);
-			}
-			$publish_date = $this->language->lang('DIGESTS_PUBLISH_DATE', $row['username'], $this->user->format_date($recipient_time, $row['user_dateformat']));
-
-			// Print the non-post and non-private message information in the digest. The actual posts and private messages require the full templating system,
-			// and is handled in the create_content function.
-			$html_messenger->assign_vars(array(
-				'S_CONTENT_DIRECTION'					=> $this->language->lang('DIRECTION'),
-				'S_DIGESTS_DISCLAIMER'					=> $disclaimer,
-				'S_DIGESTS_INTRODUCTION'				=> ($is_html) ? $this->language->lang('DIGESTS_INTRODUCTION', $this->config['sitename']) : strip_tags($this->language->lang('DIGESTS_INTRODUCTION', $this->config['sitename'])),
-				'S_DIGESTS_POWERED_BY'					=> $powered_by,
-				'S_DIGESTS_PUBLISH_DATE'				=> $publish_date,
-				'S_DIGESTS_SALUTATION_BLURB'			=> $row['username'] . $this->language->lang('DIGESTS_COMMA'),
-				'S_DIGESTS_TITLE'						=> $email_subject,
-				'S_DIGESTS_TRANSLATOR'					=> ($is_html) ? $translator : strip_tags($translator),
-				'S_USER_LANG'							=> $user_lang,
-				'T_STYLESHEET_LINK'						=> ($this->config['phpbbservices_digests_enable_custom_stylesheets']) ? "{$this->board_url}styles/" . $this->config['phpbbservices_digests_custom_stylesheet_path'] : "{$this->board_url}styles/" . $row['style_path'] . '/theme/stylesheet.css',
-				'T_THEME_PATH'							=> "{$this->board_url}styles/" . $row['style_path'] . '/theme',
-			));
-
-			// Get any private messages for this user
-			
-			// Count # of unread and new for this user. Counts may need to be reduced later.
-			$total_pm_unread = 0;
-			$total_pm_new = 0;
-
-			if ($row['user_digest_show_pms'])
-			{
-			
-				$sql_array = array(
-					'SELECT'	=> '*',
-				
-					'FROM'		=> array(
-						PRIVMSGS_TO_TABLE	=> 'pt',
-						PRIVMSGS_TABLE		=> 'pm',
-						USERS_TABLE			=> 'u',
-					),
-				
-					'WHERE'		=> 'pt.msg_id = pm.msg_id
+						'WHERE' => 'pt.msg_id = pm.msg_id
 										AND pt.author_id = u.user_id
 										AND pt.user_id = ' . (int) $row['user_id'] . '
 										AND (pm_unread = 1 OR pm_new = 1)',
-				
-					'ORDER_BY'	=> 'message_time',
-				);
 
-				$pm_sql = $this->db->sql_build_query('SELECT', $sql_array);
-				
-				$pm_result = $this->db->sql_query($pm_sql);
-				$pm_rowset = $this->db->sql_fetchrowset($pm_result);
+						'ORDER_BY' => 'message_time',
+					);
 
-				foreach ($pm_rowset as $pm_row)
-				{
-					if ($pm_row['pm_unread'] == 1)
+					$pm_sql = $this->db->sql_build_query('SELECT', $sql_array);
+
+					$pm_result = $this->db->sql_query($pm_sql);
+					$pm_rowset = $this->db->sql_fetchrowset($pm_result);
+
+					foreach ($pm_rowset as $pm_row)
 					{
-						$total_pm_unread++;
+						if ($pm_row['pm_unread'] == 1)
+						{
+							$total_pm_unread++;
+						}
+						if ($pm_row['pm_new'] == 1)
+						{
+							$total_pm_new++;
+						}
 					}
-					if ($pm_row['pm_new'] == 1)
-					{
-						$total_pm_new++;
-					}
-				}
-				$this->db->sql_freeresult($pm_result);
+					$this->db->sql_freeresult($pm_result);
 
-			}
-			else
-			{
-				// Avoid some PHP Notices...
-				$pm_result = NULL;
-				$pm_rowset = NULL;
-			}
-
-			// Construct the body of the digest. We use the templating system because of the advanced features missing in the 
-			// email templating system, e.g. loops and switches.
-			$digest_content = $this->create_content($posts_rowset, $pm_rowset, $row, $is_html);
-		
-			// Assemble a digest table of contents
-			if ($row['user_digest_toc'] == 1)
-			{
-			
-				// Create Table of Contents header for private messages first
-				if ($is_html)
-				{
-					// For HTML digests, the table of contents always appears in a HTML table
-					$digest_toc = "<h2 style=\"color:#000000\">" . $this->language->lang('DIGESTS_TOC') . "</h2>\n";
-					$digest_toc .= "<p><a href=\"#skip\">" . $this->language->lang('DIGESTS_SKIP') . "</a></p>\n";
 				}
 				else
 				{
-					$digest_toc = "____________________________________________________________\n\n" . $this->language->lang('DIGESTS_TOC') . "\n\n";
+					// Avoid some PHP Notices...
+					$pm_result = null;
+					$pm_rowset = null;
 				}
-				
-				if ($row['user_digest_show_pms'] == 1)
+
+				// Construct the body of the digest. We use the templating system because of the advanced features missing in the
+				// email templating system, e.g. loops and switches.
+				$digest_content = $this->create_content($posts_rowset, $pm_rowset, $row, $is_html, $utc_month_1st_begin);
+
+				// Assemble a digest table of contents
+				if ($row['user_digest_toc'] == 1)
 				{
-					
-					// Heading for table of contents
+
+					// Create Table of Contents header for private messages first
 					if ($is_html)
 					{
-						$digest_toc .= sprintf("<div class=\"toc\"><table>\n<tbody>\n<tr>\n<th id=\"j1\">%s</th><th id=\"j2\">%s</th><th id=\"j3\">%s</th><th id=\"j4\">%s</th>\n</tr>\n",
-							$this->language->lang('DIGESTS_JUMP_TO_MSG') , $this->language->lang('DIGESTS_PM_SUBJECT'), $this->language->lang('DIGESTS_SENDER'), $this->language->lang('DIGESTS_DATE'));
+						// For HTML digests, the table of contents always appears in a HTML table
+						$digest_toc = "<h2 style=\"color:#000000\">" . $this->language->lang('DIGESTS_TOC') . "</h2>\n";
+						$digest_toc .= "<p><a href=\"#skip\">" . $this->language->lang('DIGESTS_SKIP') . "</a></p>\n";
 					}
-					
-					// Add a table row for each private message
-					if ($this->toc_pm_count > 0)
+					else
 					{
-						for ($i=0; $i <= $this->toc_pm_count; $i++)
+						$digest_toc = "____________________________________________________________\n\n" . $this->language->lang('DIGESTS_TOC') . "\n\n";
+					}
+
+					if ($row['user_digest_show_pms'] == 1)
+					{
+
+						// Heading for table of contents
+						if ($is_html)
+						{
+							$digest_toc .= sprintf("<div class=\"toc\"><table>\n<tbody>\n<tr>\n<th id=\"j1\">%s</th><th id=\"j2\">%s</th><th id=\"j3\">%s</th><th id=\"j4\">%s</th>\n</tr>\n",
+								$this->language->lang('DIGESTS_JUMP_TO_MSG'), $this->language->lang('DIGESTS_PM_SUBJECT'), $this->language->lang('DIGESTS_SENDER'), $this->language->lang('DIGESTS_DATE'));
+						}
+
+						// Add a table row for each private message
+						if ($this->toc_pm_count > 0)
+						{
+							for ($i = 0; $i <= $this->toc_pm_count; $i++)
+							{
+								if ($is_html)
+								{
+									$digest_toc .= (isset($this->toc['pms'][$i])) ? "<tr>\n<td headers=\"j1\" style=\"text-align: center;\"><a href=\"#m" . $this->toc['pms'][$i]['message_id'] . '">' . $this->toc['pms'][$i]['message_id'] . '</a></td><td headers="j2">' . $this->toc['pms'][$i]['message_subject'] . '</td><td headers="j3">' . $this->toc['pms'][$i]['author'] . '</td><td headers="j4">' . $this->toc['pms'][$i]['datetime'] . "</td>\n</tr>\n" : '';
+								}
+								else
+								{
+									$digest_toc .= (isset($this->toc['pms'][$i])) ? $this->toc['pms'][$i]['author'] . ' ' . $this->language->lang('DIGESTS_SENT_YOU_A_MESSAGE') . ' ' . $this->language->lang('DIGESTS_OPEN_QUOTE_TEXT') . $this->toc['pms'][$i]['message_subject'] . $this->language->lang('DIGESTS_CLOSED_QUOTE_TEXT') . ' ' . $this->language->lang('DIGESTS_ON') . ' ' . $this->toc['pms'][$i]['datetime'] . "\n" : '';
+								}
+							}
+						}
+						else
+						{
+							$digest_toc .= ($is_html) ? '<tr><td colspan="4">' . $this->language->lang('DIGESTS_NO_PRIVATE_MESSAGES') . "</td></tr>" : $this->language->lang('DIGESTS_NO_PRIVATE_MESSAGES') . "\n";
+						}
+
+						// Create Table of Contents footer for private messages
+						$digest_toc .= ($is_html) ? "</tbody></table>\n<br>" : "\n";
+
+					}
+					else
+					{
+						$digest_toc = null;    // Avoid a PHP Notice
+					}
+
+					// Create Table of Contents header for posts
+					if ($is_html)
+					{
+						// For HTML digests, the table of contents always appears in a HTML table
+						$digest_toc .= sprintf("<table>\n<tbody>\n<tr>\n<th id=\"h1\">%s</th><th id=\"h2\">%s</th><th id=\"h3\">%s</th><th id=\"h4\">%s</th><th id=\"h5\">%s</th>\n</tr>\n",
+							$this->language->lang('DIGESTS_JUMP_TO_POST'), $this->language->lang('FORUM'), $this->language->lang('TOPIC'), $this->language->lang('AUTHOR'), $this->language->lang('DIGESTS_DATE'));
+					}
+
+					// Add a table row for each post
+					if ($this->posts_in_digest > 0)
+					{
+						for ($i = 0; $i <= $this->posts_in_digest; $i++)
 						{
 							if ($is_html)
 							{
-								$digest_toc .= (isset($this->toc['pms'][$i])) ? "<tr>\n<td headers=\"j1\" style=\"text-align: center;\"><a href=\"#m" . $this->toc['pms'][$i]['message_id'] . '">' . $this->toc['pms'][$i]['message_id'] . '</a></td><td headers="j2">' . $this->toc['pms'][$i]['message_subject'] . '</td><td headers="j3">' . $this->toc['pms'][$i]['author'] . '</td><td headers="j4">' . $this->toc['pms'][$i]['datetime'] . "</td>\n</tr>\n" : '';
+								$digest_toc .= (isset($this->toc['posts'][$i])) ? "<tr>\n<td headers=\"h1\" style=\"text-align: center;\"><a href=\"#p" . $this->toc['posts'][$i]['post_id'] . '">' . $this->toc['posts'][$i]['post_id'] . '</a></td><td headers="h2">' . $this->toc['posts'][$i]['forum'] . '</td><td headers="h3">' . $this->toc['posts'][$i]['topic'] . '</td><td headers="h4">' . $this->toc['posts'][$i]['author'] . '</td><td headers="h5">' . $this->toc['posts'][$i]['datetime'] . "</td>\n</tr>\n" : '';
 							}
 							else
 							{
-								$digest_toc .= (isset($this->toc['pms'][$i])) ? $this->toc['pms'][$i]['author'] . ' ' . $this->language->lang('DIGESTS_SENT_YOU_A_MESSAGE') . ' ' . $this->language->lang('DIGESTS_OPEN_QUOTE_TEXT') . $this->toc['pms'][$i]['message_subject'] . $this->language->lang('DIGESTS_CLOSED_QUOTE_TEXT') . ' ' . $this->language->lang('DIGESTS_ON') . ' ' . $this->toc['pms'][$i]['datetime'] . "\n" : '';
+								$digest_toc .= (isset($this->toc['posts'][$i])) ? $this->toc['posts'][$i]['author'] . ' ' . $this->language->lang('DIGESTS_POSTED_TO_THE_TOPIC') . ' ' . $this->language->lang('DIGESTS_OPEN_QUOTE_TEXT') . $this->toc['posts'][$i]['topic'] . $this->language->lang('DIGESTS_CLOSED_QUOTE_TEXT') . ' ' . $this->language->lang('IN') . ' ' . $this->language->lang('DIGESTS_OPEN_QUOTE_TEXT') . $this->toc['posts'][$i]['forum'] . $this->language->lang('DIGESTS_CLOSED_QUOTE_TEXT') . ' ' . $this->language->lang('DIGESTS_ON') . ' ' . $this->toc['posts'][$i]['datetime'] . "\n" : '';
 							}
 						}
 					}
 					else
 					{
-						$digest_toc .= ($is_html) ? '<tr><td colspan="4">' . $this->language->lang('DIGESTS_NO_PRIVATE_MESSAGES') . "</td></tr>" : $this->language->lang('DIGESTS_NO_PRIVATE_MESSAGES') . "\n";
+						$no_posts_msg = ($row['user_digest_filter_type'] == constants::DIGESTS_BOOKMARKS) ? $this->language->lang('DIGESTS_NO_BOOKMARKED_POSTS') : $this->language->lang('DIGESTS_NO_POSTS');
+						$digest_toc .= ($is_html) ? '<tr><td colspan="5">' . $no_posts_msg . "</td></tr>" : $no_posts_msg;
 					}
-			
-					// Create Table of Contents footer for private messages
-					$digest_toc .= ($is_html) ? "</tbody></table>\n<br>" : "\n"; 
-				
+
+					// Create Table of Contents footer for posts
+					$digest_toc .= ($is_html) ? "</tbody>\n</table></div>\n<br>" : '';
+
+					// Publish the table of contents
+					$html_messenger->assign_vars(array(
+						'DIGESTS_TOC' => $digest_toc,
+					));
 				}
 				else
 				{
-					$digest_toc = null;	// Avoid a PHP Notice
+					$digest_toc = null;    // Avoid a PHP Notice
 				}
-				
-				// Create Table of Contents header for posts
-				if ($is_html)
+
+				if (!$is_html)
 				{
-					// For HTML digests, the table of contents always appears in a HTML table
-					$digest_toc .= sprintf("<table>\n<tbody>\n<tr>\n<th id=\"h1\">%s</th><th id=\"h2\">%s</th><th id=\"h3\">%s</th><th id=\"h4\">%s</th><th id=\"h5\">%s</th>\n</tr>\n",
-						$this->language->lang('DIGESTS_JUMP_TO_POST') , $this->language->lang('FORUM'), $this->language->lang('TOPIC'), $this->language->lang('AUTHOR'), $this->language->lang('DIGESTS_DATE'));
+					// This reduces extra lines in the text digests. Apparently the phpBB template engine leaves
+					// blank lines where a template contains templates commands.
+					$digest_content = str_replace("\n\n", "\n", $digest_content);
 				}
-				
-				// Add a table row for each post
-				if ($this->posts_in_digest > 0)
-				{
-					for ($i=0; $i <= $this->posts_in_digest; $i++)
-					{
-						if ($is_html)
-						{
-							$digest_toc .= (isset($this->toc['posts'][$i])) ? "<tr>\n<td headers=\"h1\" style=\"text-align: center;\"><a href=\"#p" . $this->toc['posts'][$i]['post_id'] . '">' . $this->toc['posts'][$i]['post_id'] . '</a></td><td headers="h2">' . $this->toc['posts'][$i]['forum'] . '</td><td headers="h3">' . $this->toc['posts'][$i]['topic'] . '</td><td headers="h4">' . $this->toc['posts'][$i]['author'] . '</td><td headers="h5">' . $this->toc['posts'][$i]['datetime'] . "</td>\n</tr>\n" : '';
-						}
-						else
-						{
-							$digest_toc .= (isset($this->toc['posts'][$i])) ? $this->toc['posts'][$i]['author'] . ' ' . $this->language->lang('DIGESTS_POSTED_TO_THE_TOPIC') . ' ' . $this->language->lang('DIGESTS_OPEN_QUOTE_TEXT') . $this->toc['posts'][$i]['topic'] . $this->language->lang('DIGESTS_CLOSED_QUOTE_TEXT') . ' ' . $this->language->lang('IN') . ' ' . $this->language->lang('DIGESTS_OPEN_QUOTE_TEXT') . $this->toc['posts'][$i]['forum'] . $this->language->lang('DIGESTS_CLOSED_QUOTE_TEXT') . ' ' . $this->language->lang('DIGESTS_ON') . ' ' . $this->toc['posts'][$i]['datetime'] . "\n" : '';
-						}
-					}
-				}
-				else
-				{
-					$no_posts_msg = ($row['user_digest_filter_type'] == constants::DIGESTS_BOOKMARKS) ? $this->language->lang('DIGESTS_NO_BOOKMARKED_POSTS') : $this->language->lang('DIGESTS_NO_POSTS');
-					$digest_toc .= ($is_html) ? '<tr><td colspan="5">' . $no_posts_msg . "</td></tr>" : $no_posts_msg;
-				}
-				
-				// Create Table of Contents footer for posts
-				$digest_toc .= ($is_html) ? "</tbody>\n</table></div>\n<br>" : ''; 
-			
-				// Publish the table of contents
+
+				// Publish the digest content, assembled elsewhere and a list of the forums subscribed to.
 				$html_messenger->assign_vars(array(
-					'DIGESTS_TOC'			=> $digest_toc,
+					'DIGESTS_CONTENT' => $digest_content,
 				));
-			}
-			else
-			{
-				$digest_toc = null;	// Avoid a PHP Notice
-			}
-			
-			if (!$is_html)
-			{
-				// This reduces extra lines in the text digests. Apparently the phpBB template engine leaves
-				// blank lines where a template contains templates commands.
-				$digest_content = str_replace("\n\n", "\n", $digest_content);
-			}
-		
-			// Publish the digest content, assembled elsewhere and a list of the forums subscribed to.
-			$html_messenger->assign_vars(array(
-				'DIGESTS_CONTENT'					=> $digest_content,	
-			));
-			
-			// Mark private messages in the digest as read, if so instructed
-			if ((sizeof($pm_rowset) != 0) && ($row['user_digest_show_pms'] == 1) && ($row['user_digest_pm_mark_read'] == 1))
-			{
-				
-				$sql_ary = array(
-					'pm_new'		=> 0,
-					'pm_unread'		=> 0,
-					'folder_id'		=> 0,
-				);
-				
-				$pm_read_sql = 'UPDATE ' . PRIVMSGS_TO_TABLE . '
+
+				// Mark private messages in the digest as read, if so instructed
+				if ((sizeof($pm_rowset) != 0) && ($row['user_digest_show_pms'] == 1) && ($row['user_digest_pm_mark_read'] == 1))
+				{
+
+					$sql_ary = array(
+						'pm_new'    => 0,
+						'pm_unread' => 0,
+						'folder_id' => 0,
+					);
+
+					$pm_read_sql = 'UPDATE ' . PRIVMSGS_TO_TABLE . '
 					SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
 					WHERE user_id = ' . (int) $row['user_id'] . '
 						AND (pm_unread = 1 OR pm_new = 1)';
-						
-				$this->db->sql_query($pm_read_sql);
 
-				// Reduce the user_unread_privmsg and user_new_privmsg count by the amount of PMs in the digest.
-				// Be careful not to store a negative number in case the database is inconsistent. Note: the nature
-				// of this SQL is that using $db->sql_build_array won't generate the desired SQL, so we go rogue.
+					$this->db->sql_query($pm_read_sql);
 
-				$update_users_sql = 'UPDATE ' . USERS_TABLE . '
+					// Reduce the user_unread_privmsg and user_new_privmsg count by the amount of PMs in the digest.
+					// Be careful not to store a negative number in case the database is inconsistent. Note: the nature
+					// of this SQL is that using $db->sql_build_array won't generate the desired SQL, so we go rogue.
+
+					$update_users_sql = 'UPDATE ' . USERS_TABLE . '
 					SET user_unread_privmsg = user_unread_privmsg - ' . min($total_pm_unread, $row['user_unread_privmsg']) . ', 
 						user_new_privmsg = user_new_privmsg - ' . min($total_pm_new, $row['user_new_privmsg']);
 
-				$this->db->sql_query($update_users_sql);
+					$this->db->sql_query($update_users_sql);
 
-			}
-
-			if (($this->run_mode == constants::DIGESTS_RUN_MANUAL) && ($this->config['phpbbservices_digests_test_spool']))
-			{
-
-				// To grab the content of the email (less mail headers) first run the mailer with the $break parameter set to true. This will keep 
-				// the mail from being sent out. The function won't fail since nothing is being sent out.
-				$html_messenger->send(NOTIFY_EMAIL, true, $is_html, true);
-				$email_content = $html_messenger->msg;
-
-				// Make the store/phpbbservices/digests directory if it does not exist. This should be created in
-				// acp/main_module.php. So this acts mostly as a safety switch.
-				if (!$this->helper->make_directories())
-				{
-					// If unable to create these directories, it's likely a permissions issue, so flag it and terminate abnormally.
-					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_CREATE_DIRECTORY_ERROR', false, array($this->store_path));
-					if ($this->config['phpbbservices_digests_enable_log'])
-					{
-						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END');
-					}
-					return false;
 				}
 
-				// Save digests as file in the store/phpbbservices/digests folder instead of emailing.
-				$suffix = ($is_html) ? '.html' : '.txt';
-				$file_name = $row['username'] . '-' . $utc_year . '-' . str_pad($utc_month, 2, '0', STR_PAD_LEFT) . '-' . str_pad($utc_day, 2, '0', STR_PAD_LEFT) . '-' . str_pad($utc_hour, 2, '0', STR_PAD_LEFT) . $suffix;
-				
-				$handle = @fopen($this->store_path . $file_name, "w");
-				if ($handle === false)
+				if (($this->run_mode == constants::DIGESTS_RUN_MANUAL) && ($this->config['phpbbservices_digests_test_spool']))
 				{
-					// Since this indicates a major problem, let's abort now. It's likely a global write error.
-					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILE_OPEN_ERROR', false, array($this->store_path));
-					if ($this->config['phpbbservices_digests_enable_log'])
-					{
-						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END');
-					}
-					return false;
-				}
 
-				$success = @fwrite($handle, htmlspecialchars_decode($email_content));
-				if ($success === false)
-				{
-					// Since this indicates a major problem, let's abort now.  It's likely a global write error.
-					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILE_WRITE_ERROR', false, array($this->store_path . $file_name));
-					if ($this->config['phpbbservices_digests_enable_log'])
-					{
-						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END');
-					}
-					return false;
-				}
-				
-				$success = @fclose($handle);
-				if ($success === false)
-				{
-					// Since this indicates a major problem, let's abort now
-					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILE_CLOSE_ERROR', false, array($this->store_path . $file_name));
-					if ($this->config['phpbbservices_digests_enable_log'])
-					{
-						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END');
-					}
-					return false;
-				}
-				
-				// Note in the log that a digest was written to the store folder
-				if ($this->config['phpbbservices_digests_enable_log'])
-				{
-					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_DISK', false, array($file_name));
-				}
-				
-			}
-			
-			else
-			
-			{
+					// To grab the content of the email (less mail headers) first run the mailer with the $break parameter set to true. This will keep
+					// the mail from being sent out. The function won't fail since nothing is being sent out.
+					$html_messenger->send(NOTIFY_EMAIL, true, $is_html, true);
+					$email_content = $html_messenger->msg;
 
-				// Send the digest out only if there are new qualifying posts OR the user requests a digest to be sent if there are no posts OR
-				// if there are unread private messages AND the user wants to see private messages in the digest.
-
-				// Try to send this digest
-				if ($row['user_digest_send_on_no_posts'] || $this->posts_in_digest > 0 || ((sizeof($pm_rowset) > 0) && $row['user_digest_show_pms']))
-				{
-					
-					$mail_sent = $html_messenger->send(NOTIFY_EMAIL, false, $is_html, true);	 // digest mailed
-					
-					if (!$mail_sent)
+					// Make the store/phpbbservices/digests directory if it does not exist. This should be created in
+					// acp/main_module.php. So this acts mostly as a safety switch.
+					if (!$this->helper->make_directories())
 					{
-						// Something went wrong when sending the digest. Errors always go in the log.
-						if ($this->config['phpbbservices_digests_show_email'])
+						// If unable to create these directories, it's likely a permissions issue, so flag it and terminate abnormally.
+						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_CREATE_DIRECTORY_ERROR', false, array($this->store_path));
+						if ($this->config['phpbbservices_digests_enable_log'])
 						{
-							$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_BAD', false, array($row['username'], $row['user_email']));
+							$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END');
+						}
+						return false;
+					}
+
+					// Save digests as file in the store/phpbbservices/digests folder instead of emailing.
+					$suffix = ($is_html) ? '.html' : '.txt';
+					$file_name = $row['username'] . '-' . $utc_year . '-' . str_pad($utc_month, 2, '0', STR_PAD_LEFT) . '-' . str_pad($utc_day, 2, '0', STR_PAD_LEFT) . '-' . str_pad($utc_hour, 2, '0', STR_PAD_LEFT) . $suffix;
+
+					$handle = @fopen($this->store_path . $file_name, "w");
+					if ($handle === false)
+					{
+						// Since this indicates a major problem, let's abort now. It's likely a global write error.
+						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILE_OPEN_ERROR', false, array($this->store_path));
+						if ($this->config['phpbbservices_digests_enable_log'])
+						{
+							$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END');
+						}
+						return false;
+					}
+
+					$success = @fwrite($handle, htmlspecialchars_decode($email_content));
+					if ($success === false)
+					{
+						// Since this indicates a major problem, let's abort now.  It's likely a global write error.
+						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILE_WRITE_ERROR', false, array($this->store_path . $file_name));
+						if ($this->config['phpbbservices_digests_enable_log'])
+						{
+							$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END');
+						}
+						return false;
+					}
+
+					$success = @fclose($handle);
+					if ($success === false)
+					{
+						// Since this indicates a major problem, let's abort now
+						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILE_CLOSE_ERROR', false, array($this->store_path . $file_name));
+						if ($this->config['phpbbservices_digests_enable_log'])
+						{
+							$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END');
+						}
+						return false;
+					}
+
+					// Note in the log that a digest was written to the store folder
+					if ($this->config['phpbbservices_digests_enable_log'])
+					{
+						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_DISK', false, array($file_name));
+					}
+
+				}
+
+				else
+
+				{
+
+					// Send the digest out only if there are new qualifying posts OR the user requests a digest to be sent if there are no posts OR
+					// if there are unread private messages AND the user wants to see private messages in the digest.
+
+					// Try to send this digest
+					if ($row['user_digest_send_on_no_posts'] || $this->posts_in_digest > 0 || ((sizeof($pm_rowset) > 0) && $row['user_digest_show_pms']))
+					{
+
+						$mail_sent = $html_messenger->send(NOTIFY_EMAIL, false, $is_html, true);     // digest mailed
+
+						if (!$mail_sent)
+						{
+							// Something went wrong when sending the digest. Errors always go in the log.
+							if ($this->config['phpbbservices_digests_show_email'])
+							{
+								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_BAD', false, array($row['username'], $row['user_email']));
+							}
+							else
+							{
+								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_BAD_NO_EMAIL', false, array($row['username']));
+							}
 						}
 						else
 						{
-							$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_BAD_NO_EMAIL', false, array($row['username']));
+							// save queue for later delivery (if applicable)
+							$html_messenger->save_queue();
+
+							// Digest should have been mailed successfully
+							if ($this->config['phpbbservices_digests_enable_log'])
+							{
+								if ($this->config['phpbbservices_digests_show_email'])
+								{
+									$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD', false, array($this->language->lang('DIGESTS_SENT_TO'), $row['username'], $row['user_email'], $utc_year . '-' . str_pad($utc_month, 2, '0', STR_PAD_LEFT) . '-' . str_pad($utc_day, 2, '0', STR_PAD_LEFT), $current_hour_utc, $this->posts_in_digest, sizeof($pm_rowset)));
+								}
+								else
+								{
+									$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_NO_EMAIL', false, array($this->language->lang('DIGESTS_SENT_TO'), $row['username'], $utc_year . '-' . str_pad($utc_month, 2, '0', STR_PAD_LEFT) . '-' . str_pad($utc_day, 2, '0', STR_PAD_LEFT), $current_hour_utc, $this->posts_in_digest, sizeof($pm_rowset)));
+								}
+							}
+
+							// Record the moment the digest was successfully sent to the subscriber
+							$sql_ary = array(
+								'user_digest_last_sent' => time(),
+							);
+
+							$sql2 = 'UPDATE ' . USERS_TABLE . '
+							SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
+							WHERE user_id = ' . (int) $row['user_id'];
+							$this->db->sql_query($sql2);
+
+							// If requested, update user_lastvisit
+							if ($row['user_digest_reset_lastvisit'] == 1)
+							{
+								$sql_ary = array(
+									'user_lastvisit' => time(),
+								);
+
+								$sql2 = 'UPDATE ' . USERS_TABLE . '
+								SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
+								WHERE user_id = ' . (int) $row['user_id'];
+								$this->db->sql_query($sql2);
+							}
 						}
+
 					}
 					else
 					{
-						// save queue for later delivery (if applicable)
-						$html_messenger->save_queue();
-
-						// Digest should have been mailed successfully
+						// Don't send a digest -- the user doesn't want one because there are no qualifying posts
 						if ($this->config['phpbbservices_digests_enable_log'])
 						{
 							if ($this->config['phpbbservices_digests_show_email'])
 							{
-								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD', false, array($this->language->lang('DIGESTS_SENT_TO'), $row['username'], $row['user_email'], $utc_year . '-' . str_pad($utc_month, 2, '0', STR_PAD_LEFT) . '-' . str_pad($utc_day, 2, '0',STR_PAD_LEFT), $current_hour_utc, $this->posts_in_digest, sizeof($pm_rowset)));
+								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_NONE', false, array($row['username'], $row['user_email']));
 							}
 							else
 							{
-								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_NO_EMAIL', false, array($this->language->lang('DIGESTS_SENT_TO'), $row['username'], $utc_year . '-' . str_pad($utc_month,2, '0',STR_PAD_LEFT) . '-' . str_pad($utc_day, 2, '0',STR_PAD_LEFT), $current_hour_utc, $this->posts_in_digest, sizeof($pm_rowset)));
+								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_NONE_NO_EMAIL', false, array($row['username']));
 							}
 						}
-
-						// Record the moment the digest was successfully sent to the subscriber
-						$sql_ary = array(
-							'user_digest_last_sent'		=> time(),
-						);
-						
-						$sql2 = 'UPDATE ' . USERS_TABLE . '
-							SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
-							WHERE user_id = ' . (int) $row['user_id'];
-						$this->db->sql_query($sql2);
-			
-						// If requested, update user_lastvisit
-						if ($row['user_digest_reset_lastvisit'] == 1)
-						{
-							$sql_ary = array(
-								'user_lastvisit'		=> time(),
-							);
-							
-							$sql2 = 'UPDATE ' . USERS_TABLE . '
-								SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
-								WHERE user_id = ' . (int) $row['user_id'];
-							$this->db->sql_query($sql2);
-						}
 					}
 
 				}
-				else
-				{
-					// Don't send a digest -- the user doesn't want one because there are no qualifying posts
-					if ($this->config['phpbbservices_digests_enable_log'])
-					{
-						if ($this->config['phpbbservices_digests_show_email'])
-						{
-							$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_NONE', false, array($row['username'], $row['user_email']));
-						}
-						else
-						{
-							$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_NONE_NO_EMAIL', false, array($row['username']));
-						}
-					}
-				}
-					
-			}
 
-			// Reset messenger object for the next subscriber, bug fix provided by robdocmagic
-			$html_messenger->reset();
+				// Reset messenger object for the next subscriber, bug fix provided by robdocmagic
+				$html_messenger->reset();
 
-		}	// foreach
+			}    // foreach
 
-		$this->db->sql_freeresult($result_posts);
+			$this->db->sql_freeresult($result_posts);
+
+		}
 
 		return true;	// Successful run if all digests were processed for the requested hour.
 		
 	}
 	
-	private function create_content(&$posts_rowset, &$pm_rowset, &$user_row, $is_html)
+	private function create_content(&$posts_rowset, &$pm_rowset, &$user_row, $is_html, $utc_month_1st_begin)
 	{
 
 		// This function creates most of the content for an individual digests and is handled by the main templating system, NOT the email templating system
@@ -1168,15 +1174,39 @@ class digests extends \phpbb\cron\task\base
 		// $pm_roswet is an array of private messages, if any, for the user getting this digest
 		// $user_row is a simple array of mostly data from the users table for the user getting this digest
 		// $is_html is true if the user getting this digest wants a HTML digest
+		// $utc_month_1st_begin is a UNIX timestamp that represents the beginning date/time for a monthly digest for this day and hour, if applicable.
 
-		$topic_first_poster_name = array();	// Keep PhpStorm happy
-		$username_clean = array();			// Keep PhpStorm happy
-		$post_time = array();				// Keep PhpStorm happy
+		$popular_topics = array();			// Keep PhpStorm happy
 		$post_subject = array();			// Keep PhpStorm happy
+		$post_time = array();				// Keep PhpStorm happy
+		$topic_first_poster_name = array();	// Keep PhpStorm happy
 		$topic_last_post_time = array();	// Keep PhpStorm happy
 		$topic_replies = array();			// Keep PhpStorm happy
 		$topic_title = array();				// Keep PhpStorm happy
 		$topic_views = array();				// Keep PhpStorm happy
+		$username_clean = array();			// Keep PhpStorm happy
+
+		// Get popular topics for this user, if needed.
+		if ((int) $user_row['user_digest_popular'] == 1 && !($user_row['user_digest_filter_type'] == constants::DIGESTS_BOOKMARKS))
+		{
+			switch ($user_row['user_digest_type'])
+			{
+				case constants::DIGESTS_MONTHLY_VALUE:
+					$start_ts = $utc_month_1st_begin;
+					$end_ts = $this->utc_month_lastday_end;
+				break;
+				case constants::DIGESTS_DAILY_VALUE:
+					$start_ts = $this->time - (24 * 60 * 60);
+					$end_ts = $this->time;
+				break;
+				case constants::DIGESTS_WEEKLY_VALUE:
+				default:
+					$start_ts = $this->time - (7 * 24 * 60 * 60);
+					$end_ts = $this->time;
+				break;
+			}
+			$popular_topics = $this->get_popular_topics($user_row['user_digest_type'], $start_ts, $end_ts, $user_row['user_digest_popularity_size']);
+		}
 
 		// Choose a template based on whether a HTML or text digest will be sent
 		$mail_template = ($is_html) ? 'mail_digests_html.html' : 'mail_digests_text.html';
@@ -1788,7 +1818,15 @@ class digests extends \phpbb\cron\task\base
 				{
 					continue;
 				}
-			
+
+				// Skip posts in topics that are not popular if that option was selected. Does not apply if bookmarked topics only are wanted.
+				if (!($user_row['user_digest_filter_type'] == constants::DIGESTS_BOOKMARKS) &&
+					$user_row['user_digest_popular'] == 1 &&
+					!in_array($post_row['topic_id'], $popular_topics))
+				{
+					continue;
+				}
+
 				// If there are inline attachments, remove them otherwise they will show up twice. Getting the styling right
 				// in these cases is probably a lost cause due to the complexity to be addressed due to various styling issues.
 				$post_text = preg_replace('#\[attachment=.*?\].*?\[/attachment:.*?]#', '', $post_row['post_text']);
@@ -2192,6 +2230,51 @@ class digests extends \phpbb\cron\task\base
 			$markup_text .= '</div>';
 		}
 		return $markup_text;
+
+	}
+
+	private function get_popular_topics ($user_digest_type, $start_ts, $end_ts, $popularity_size)
+	{
+
+		// This function determines topics that are popular for a given subscriber. The number of topic replies for the
+		// time period (day, week or month) is used. Parameters:
+		//
+		//	$user_digest_type: DAY, WEEK or MNTH, same as phpbb_users.user_digest_type
+		//	$start_ts: UNIX timestamp for start of post_time range
+		//	$end_ts: UNIX timestamp for end of post_time range
+		//	$popularity_size: phpbb_users.user_digest_popularity_size value for the subscriber
+
+		// Figure out the date range to use for this user
+		switch ($user_digest_type)
+		{
+			case constants::DIGESTS_MONTHLY_VALUE:
+				$day_range = round ((($end_ts - $start_ts) / (24 * 60 * 60 * 1000)), 0); // Days in last month
+			break;
+			case constants::DIGESTS_WEEKLY_VALUE:
+				$day_range = 7;
+			break;
+			case constants::DIGESTS_DAILY_VALUE:
+			default:
+				$day_range = 1;
+			break;
+		}
+
+		$popular_topics = array();
+
+		$sql = 'SELECT topic_id, count(*)/' . $day_range . ' AS popularity
+				FROM ' . POSTS_TABLE . '
+				WHERE post_time >= ' . (int) $start_ts . ' AND post_time <= ' . (int) $end_ts . '
+				GROUP BY topic_id
+				HAVING popularity > ' . (int) $popularity_size;
+
+		$result = $this->db->sql_query($sql);
+
+		while ($row = $this->db->sql_fetchrow($result))
+		{
+			$popular_topics[] = $row['topic_id'];
+		}
+
+		return $popular_topics;
 
 	}
 

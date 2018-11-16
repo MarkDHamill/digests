@@ -83,6 +83,8 @@ class main_listener implements EventSubscriberInterface
 			$sql_ary['user_digest_new_posts_only'] 		= $this->config['phpbbservices_digests_user_digest_new_posts_only'];
 			$sql_ary['user_digest_no_post_text'] 		= $this->config['phpbbservices_digests_user_digest_no_post_text'];
 			$sql_ary['user_digest_pm_mark_read'] 		= $this->config['phpbbservices_digests_user_digest_pm_mark_read'];
+			$sql_ary['user_digest_popular'] 			= $this->config['phpbbservices_digests_user_digest_popular'];
+			$sql_ary['user_digest_popularity_size'] 	= $this->config['phpbbservices_digests_user_digest_popularity_size'];
 			$sql_ary['user_digest_remove_foes'] 		= $this->config['phpbbservices_digests_user_digest_remove_foes'];
 			$sql_ary['user_digest_reset_lastvisit'] 	= $this->config['phpbbservices_digests_user_digest_reset_lastvisit'];
 			$sql_ary['user_digest_send_hour_gmt'] 		= ($this->config['phpbbservices_digests_user_digest_send_hour_gmt'] == -1) ? rand(0,23) : $this->config['phpbbservices_digests_user_digest_send_hour_gmt'];
@@ -92,6 +94,7 @@ class main_listener implements EventSubscriberInterface
 			$sql_ary['user_digest_sortby'] 				= $this->config['phpbbservices_digests_user_digest_sortby'];
 			$sql_ary['user_digest_toc'] 				= $this->config['phpbbservices_digests_user_digest_toc'];
 			$sql_ary['user_digest_type'] 				= $this->config['phpbbservices_digests_user_digest_type'];
+
 			$event['sql_ary'] = array_merge($event['sql_ary'], $sql_ary);
 		}
 		

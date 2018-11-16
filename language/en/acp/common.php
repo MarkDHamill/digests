@@ -49,6 +49,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_CUSTOM_STYLESHEET_PATH_EXPLAIN'				=> 'This setting only applies if the enable custom stylesheet box is enabled. If it is enabled, this stylesheet will be applied to all styled digests. The path should be a relative path from your phpBB styles folder and should normally be in the theme subfolder. Note: you are responsible for creating this stylesheet and placing it in a file with the name entered here on the appropriate location on your server. Example: prosilver/theme/digest_stylesheet.css. For information on creating stylesheets, click <a href="http://www.w3schools.com/css/">here</a>.',
 	'DIGESTS_COLLAPSE'										=> 'Collapse',
 	'DIGESTS_COMMA'											=> ', ',		// Used  in salutations and to separate items in lists
+	'DIGESTS_CREATE_DIRECTORY_ERROR'						=> 'Unable to create the folder %s. This may be due to insufficient permissions. The file permissions on the folder should be set to publicly writeable (777 on Unix-based systems).',
 	'DIGESTS_DEFAULT'										=> 'Subscribe using default settings',
 	'DIGESTS_DAILY_ONLY'									=> 'Daily digests only',
 	'DIGESTS_ENABLE_AUTO_SUBSCRIPTIONS'						=> 'Enable automatic subscriptions',
@@ -95,6 +96,8 @@ $lang = array_merge($lang, array(
 	'DIGESTS_MAX_ITEMS_EXPLAIN'								=> 'For performance reasons, you may need to set an absolute limit to the number of posts in any one digest. If you set this to 0 (zero) this allows a digest to be of an unlimited size. You may use any whole number in this field. Please note that a digest is constrained by the number of posts in the type of digest requested (daily, weekly or monthly) as well as other criteria the user may set.',
 	'DIGESTS_MAIL_FREQUENCY' 								=> 'Digest frequency',
 	'DIGESTS_MIGRATE_UNSUPPORTED_VERSION'					=> 'Upgrades of the digests modification (for phpBB 3.0) are supported from version 2.2.6 forward. You have version %s. The extension cannot be migrated or installed. Please seek help on the support forum on phpbb.com.',
+	'DIGESTS_MIN_POPULARITY_SIZE'							=> 'Minimum topic post count popularity',
+	'DIGESTS_MIN_POPULARITY_SIZE_EXPLAIN'					=> 'This sets the minimum number of posts per day needed for a topic to considered popular. A subscriber cannot set a value below this value. This value is applied to the subscriber&rsquo;s time period only: day, week or month, so it reflects recent topic popularity.',
 	'DIGESTS_MONTHLY_ONLY'									=> 'Monthly digests only',
 	'DIGESTS_NEVER_VISITED'									=> 'Never visited',
 	'DIGESTS_NO_DIGESTS_SENT'								=> 'No digests sent',

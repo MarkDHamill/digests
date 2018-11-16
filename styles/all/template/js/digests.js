@@ -20,20 +20,6 @@ $(document).ready(function(){
 		]
 	});
 
-	// Ensure certain numeric fields must be a whole number or blank, or less than a maximum amount (if id=count_limit)
-	$("#min_word_size, #max_word_size, #count_limit").blur(function() {
-		var size = $(this).val();
-		var message = ($(this).attr('id') === 'count_limit') ? sizeErrorRange : sizeError;
-		if ((size === '') || (size === 0)){
-			return;
-		}
-		if ((size < 0) || ($(this).attr('id') === 'count_limit' && size > adminMaxItems) || (isNaN(size)) || size.indexOf('.') !== -1) {
-			$("#dialog").text(message).dialog("open");
-			$(this).val($(this).prop('defaultValue'));
-			$(this).focus();
-		}
-	});
-
 	// If private messages will be allowed in the digest, the mark all private message checkbox must not be disabled.
 	$("#pms1").click(function() {
 		if ($("#pms1").is(':checked')) {
@@ -67,6 +53,14 @@ $(document).ready(function(){
 		}
 	});
 
+	// If "See popular topics" field is set to No, the field "Minimum value of popularity" needs to be disabled, and visa versa.
+	$("#popular1").click(function() {
+		$("#popularity_size").prop("disabled", false);
+	});
+	$("#popular2").click(function() {
+		$("#popularity_size").prop("disabled", true);
+	});
+
 	// If any individual forum is unchecked, the all_forums checkbox should be unchecked. Exception: required or excluded forums.
 	// If all individual forums are checked, the all_forums checkbox should be checked. Exception: required or excluded forums.
 	$("[id*=elt_]").click(function() {
@@ -95,9 +89,9 @@ $(document).ready(function(){
 	});
 
 	// If all forums is unchecked and there are no checked forums, do not allow the form
-	// to submit and display an error message.
+	// to submit and display an error message. If bookmarked topics only is checked, then ignore.
 	$("#phpbbservices_digests").submit(function(event) {
-		if (!$("#all_forums").is(':checked')) {
+		if (!$("#all_forums").is(':checked') && !$("#bookmarks").is(':checked')) {
 			var anyChecked = false;
 			$("[id*=elt_]").each(function() {
 				if ($(this).prop('checked')) {

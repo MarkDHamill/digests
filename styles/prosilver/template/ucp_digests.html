@@ -114,12 +114,12 @@
 				{{ DISABLED_MESSAGE }}
 				<dl>
 					<dt><label for="count_limit">{{ lang('DIGESTS_COUNT_LIMIT') }}{{ lang('COLON') }}</label><br><span>{{ lang('DIGESTS_COUNT_LIMIT_EXPLAIN') }}</span></dt>
-					<dd><input type="text" class="inputbox autowidth" size="5" maxlength="5" name="count_limit" id="count_limit" value="{{ S_DIGESTS_MAX_ITEMS }}"{% if S_DIGESTS_CONTROL_DISABLED %} disabled="disabled"{% endif %} />
+					<dd><input type="number" min="0" class="inputbox autowidth" name="count_limit" id="count_limit" value="{{ S_DIGESTS_MAX_ITEMS }}"{% if S_DIGESTS_CONTROL_DISABLED %} disabled="disabled"{% endif %} />
 					</dd>
 				</dl>
 				<dl>
 					<dt><label for="min_word_size">{{ lang('DIGESTS_MIN_SIZE') }}{{ lang('COLON') }}</label><br><span>{{ lang('DIGESTS_MIN_SIZE_EXPLAIN') }}</span></dt>
-					<dd><input type="text" class="inputbox autowidth" size="4" maxlength="4" name="min_word_size" id="min_word_size" value="{{ S_DIGESTS_MIN_SIZE }}"{% if S_DIGESTS_CONTROL_DISABLED %} disabled="disabled"{% endif %} />
+					<dd><input type="number" min="0" class="inputbox autowidth" name="min_word_size" id="min_word_size" value="{{ S_DIGESTS_MIN_SIZE }}"{% if S_DIGESTS_CONTROL_DISABLED %} disabled="disabled"{% endif %} />
 					</dd>
 				</dl>
 				<dl>
@@ -127,6 +127,18 @@
 					<dd>
 						<label for="new_posts1"><input type="radio" name="new_posts" id="new_posts1" value="1"{% if S_DIGESTS_NEW_POSTS_ONLY_CHECKED_YES %} checked="checked"{% endif %}{% if S_DIGESTS_CONTROL_DISABLED %} disabled="disabled"{% endif %} /> {{ lang('YES') }}</label>
 						<label for="new_posts2"><input type="radio" name="new_posts" id="new_posts2" value="0"{% if S_DIGESTS_NEW_POSTS_ONLY_CHECKED_NO %} checked="checked"{% endif %}{% if S_DIGESTS_CONTROL_DISABLED %} disabled="disabled"{% endif %} /> {{ lang('NO') }}</label>
+					</dd>
+				</dl>
+				<dl>
+					<dt><label>{{ lang('DIGESTS_SEE_POPULAR_TOPICS_ONLY') }}{{ lang('COLON') }}</label></dt>
+					<dd>
+						<label for="popular1"><input type="radio" name="popular" id="popular1" value="1"{% if S_DIGESTS_POPULAR_CHECKED_YES %} checked="checked"{% endif %}{% if S_DIGESTS_CONTROL_DISABLED %} disabled="disabled"{% endif %} /> {{ lang('YES') }}</label>
+						<label for="popular2"><input type="radio" name="popular" id="popular2" value="0"{% if S_DIGESTS_POPULAR_CHECKED_NO %} checked="checked"{% endif %}{% if S_DIGESTS_CONTROL_DISABLED %} disabled="disabled"{% endif %} /> {{ lang('NO') }}</label>
+					</dd>
+				</dl>
+				<dl>
+					<dt><label for="popularity_size">{{ lang('DIGESTS_MIN_POPULARITY_VALUE') }}{{ lang('COLON') }}</label><br><span>{{ lang('DIGESTS_MIN_POPULARITY_VALUE_EXPLAIN') }}</span></dt>
+					<dd><input type="number" min="{{ S_DIGESTS_CONFIG_POPULARITY_SIZE }}" class="inputbox autowidth" name="popularity_size" id="popularity_size" value="{{ S_DIGESTS_POPULARITY_SIZE }}"{% if S_DIGESTS_CONTROL_DISABLED %} disabled="disabled"{% endif %} />
 					</dd>
 				</dl>
 				<dl>
@@ -167,7 +179,7 @@
 				</dl>
 				<dl>
 					<dt><label for="max_word_size">{{ lang('DIGESTS_MAX_DISPLAY_WORDS') }}{{ lang('COLON') }}</label><br><span>{{ lang('DIGESTS_MAX_DISPLAY_WORDS_EXPLAIN') }}</span></dt>
-					<dd><input type="text" class="inputbox autowidth" size="4" maxlength="4" name="max_word_size" id="max_word_size" value="{{ DIGESTS_MAX_SIZE }}"{% if S_DIGESTS_CONTROL_DISABLED %} disabled="disabled"{% endif %} /> &nbsp;<input type="checkbox" name="no_post_text" id="no_post_text"{% if S_DIGESTS_NO_POST_TEXT_CHECKED %} checked="checked"{% endif %}{% if S_DIGESTS_CONTROL_DISABLED %} disabled="disabled"{% endif %} /> <label for="no_post_text">{{ lang('DIGESTS_NO_POST_TEXT') }}</label>
+					<dd><input type="number" class="inputbox autowidth" min="0" name="max_word_size" id="max_word_size" value="{{ DIGESTS_MAX_SIZE }}"{% if S_DIGESTS_CONTROL_DISABLED %} disabled="disabled"{% endif %} /> &nbsp;<input type="checkbox" name="no_post_text" id="no_post_text"{% if S_DIGESTS_NO_POST_TEXT_CHECKED %} checked="checked"{% endif %}{% if S_DIGESTS_CONTROL_DISABLED %} disabled="disabled"{% endif %} /> <label for="no_post_text">{{ lang('DIGESTS_NO_POST_TEXT') }}</label>
 					</dd>
 				</dl>
 				<dl>

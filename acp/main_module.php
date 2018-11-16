@@ -92,6 +92,7 @@ class main_module
 						'phpbbservices_digests_weekly_digest_day'			=> array('lang' => 'DIGESTS_WEEKLY_DIGESTS_DAY',				'validate' => 'int:0:6',	'type' => 'select', 'method' => 'dow_select', 'explain' => true),
 						'phpbbservices_digests_max_cron_hrs'				=> array('lang' => 'DIGESTS_MAX_CRON_HOURS',					'validate' => 'int:0:24',	'type' => 'text:5:5', 'explain' => true),
 						'phpbbservices_digests_max_items'					=> array('lang' => 'DIGESTS_MAX_ITEMS',							'validate' => 'int:0',	'type' => 'text:5:5', 'explain' => true),
+						'phpbbservices_digests_min_popularity_size'			=> array('lang' => 'DIGESTS_MIN_POPULARITY_SIZE',				'validate' => 'int:2',	'type' => 'text:5:5', 'explain' => true),
 						'phpbbservices_digests_enable_custom_stylesheets'	=> array('lang' => 'DIGESTS_ENABLE_CUSTOM_STYLESHEET',			'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_custom_stylesheet_path'		=> array('lang' => 'DIGESTS_CUSTOM_STYLESHEET_PATH',			'validate' => 'string',	'type' => 'text:40:255', 'explain' => true),
 						'phpbbservices_digests_from_email_address'			=> array('lang' => 'DIGESTS_FROM_EMAIL_ADDRESS',				'validate' => 'string',	'type' => 'text:40:255', 'explain' => true),
@@ -121,6 +122,8 @@ class main_module
 						'phpbbservices_digests_user_digest_max_posts'		=> array('lang' => 'DIGESTS_COUNT_LIMIT',				'validate' => 'int:0',	'type' => 'text:5:5', 'explain' => true),
 						'phpbbservices_digests_user_digest_min_words'		=> array('lang' => 'DIGESTS_MIN_SIZE',					'validate' => 'int:0',	'type' => 'text:5:5', 'explain' => true),
 						'phpbbservices_digests_user_digest_new_posts_only'	=> array('lang' => 'DIGESTS_NEW_POSTS_ONLY',			'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
+						'phpbbservices_digests_user_digest_popular'			=> array('lang' => 'DIGESTS_SEE_POPULAR_TOPICS_ONLY',	'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
+						'phpbbservices_digests_user_digest_popularity_size'	=> array('lang' => 'DIGESTS_MIN_POPULARITY_VALUE',		'validate' => 'int:' . $this->config['phpbbservices_digests_min_popularity_size'],	'type' => 'text:5:5', 'explain' => true),
 						'phpbbservices_digests_user_digest_show_mine'		=> array('lang' => 'DIGESTS_REMOVE_YOURS',				'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
 						'phpbbservices_digests_user_digest_remove_foes'		=> array('lang' => 'DIGESTS_FILTER_FOES',				'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
 						'phpbbservices_digests_user_digest_show_pms'		=> array('lang' => 'DIGESTS_SHOW_PMS',					'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
@@ -849,7 +852,6 @@ class main_module
 			break;
 
 			case 'digests_test':
-
 				$display_vars = array(
 					'title'	=> 'ACP_DIGESTS_TEST',
 					'vars'	=> array(
@@ -858,7 +860,7 @@ class main_module
 						'phpbbservices_digests_test_spool'			=> array('lang' => 'DIGESTS_RUN_TEST_SPOOL', 'validate' => 'bool', 'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_test_clear_spool'	=> array('lang' => 'DIGESTS_RUN_TEST_CLEAR_SPOOL', 'validate' => 'bool', 'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_test_send_to_admin'	=> array('lang' => 'DIGESTS_RUN_TEST_SEND_TO_ADMIN', 'validate' => 'bool', 'type' => 'radio:yes_no', 'explain' => true),
-						'phpbbservices_digests_test_email_address'	=> array('lang' => 'DIGESTS_RUN_TEST_EMAIL_ADDRESS', 'validate' => 'string',	'type' => 'email:25:100', 'explain' => true),
+						'phpbbservices_digests_test_email_address'	=> array('lang' => 'DIGESTS_RUN_TEST_EMAIL_ADDRESS', 'validate' => 'string',	'type' => 'email:40:100', 'explain' => true),
 						'legend2'									=> 'DIGESTS_RUN_TEST_OPTIONS',
 						'phpbbservices_digests_test_time_use'		=> array('lang' => 'DIGESTS_RUN_TEST_TIME_USE', 'validate' => 'bool', 'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_test_year'			=> array('lang' => 'DIGESTS_RUN_TEST_YEAR', 'validate' => 'int:2000:2030', 'type' => 'text:4:4', 'explain' => true),
@@ -907,6 +909,26 @@ class main_module
 
 			if ($submit)
 			{
+				if ($mode == 'digests_general')
+				{
+					if ($config_name == 'phpbbservices_digests_min_popularity_size')
+					{
+						// If this config variable's value is more than any row in the phpbb_users table for the
+						// column user_digest_popularity_size, adjust this column
+						$sql = 'UPDATE ' . USERS_TABLE . ' 
+								SET user_digest_popularity_size = ' . (int) $config_value . '
+								WHERE user_digest_popularity_size < ' . (int) $config_value;
+						$this->db->sql_query($sql);
+
+						// Also adjust the digest default so new digest subscriptions will have this value
+						// if it is lower than the new value.
+						if ((int) $this->config['phpbbservices_digests_user_digest_popularity_size'] < (int) $config_value)
+						{
+							$this->config->set('phpbbservices_digests_user_digest_popularity_size', (int) $config_value);
+						}
+					}
+				}
+
 				$this->config->set($config_name, $config_value);
 			}
 		}
@@ -1527,7 +1549,7 @@ class main_module
 			// Create the store/phpbbservices/digests folder. It should exist already.
 			if (!$this->helper->make_directories())
 			{
-				$message = strip_tags(sprintf($this->language->lang('LOG_CONFIG_DIGESTS_CREATE_DIRECTORY_ERROR'), $this->phpbb_root_path . 'store/phpbbservices/digests'));
+				$message = sprintf($this->language->lang('DIGESTS_CREATE_DIRECTORY_ERROR'), $this->phpbb_root_path . 'store/phpbbservices/digests');
 				$continue = false;
 			}
 
@@ -1801,7 +1823,7 @@ class main_module
 		$digest_filter_types .= '<option value="' . constants::DIGESTS_BOOKMARKS . '"' . $selected. '>' . $this->language->lang('DIGESTS_USE_BOOKMARKS') . '</option>';
 		
 		return $digest_filter_types;
-	} 
+	}
 
 	function digest_post_sort_order ()
 	{

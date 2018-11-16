@@ -106,7 +106,7 @@ class common
 
 	public function make_directories()
 	{
-		// Makes the store/phpbbservices/directories. If they already exist, it returns true. If they are successfully
+		// Makes the store/phpbbservices/digest directory. If it already exists, it returns true. If they are successfully
 		// created, returns true. If they cannot be created due to permission issues, returns false.
 
 		$path = $this->phpbb_root_path . 'store/phpbbservices/digests';

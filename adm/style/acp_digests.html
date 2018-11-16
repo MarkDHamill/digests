@@ -258,7 +258,7 @@
 										<label for="user-{{ digests_edit_subscribers.USER_ID }}-max_posts">{{ lang('DIGESTS_COUNT_LIMIT') }}</label>
 									</dt>
 									<dd>
-										<input type="text" size="5" maxlength="5" id="user-{{ digests_edit_subscribers.USER_ID }}-max_posts" name="user-{{ digests_edit_subscribers.USER_ID }}-max_posts" value="{{ digests_edit_subscribers.USER_DIGEST_MAX_POSTS }}" onchange="addToStack(this.name);" />
+										<input type="number" min="0" id="user-{{ digests_edit_subscribers.USER_ID }}-max_posts" name="user-{{ digests_edit_subscribers.USER_ID }}-max_posts" value="{{ digests_edit_subscribers.USER_DIGEST_MAX_POSTS }}" onchange="addToStack(this.name);" />
 									</dd>
 								</dl>
 								<dl>
@@ -266,7 +266,7 @@
 										<label for="user-{{ digests_edit_subscribers.USER_ID }}-min_words">{{ lang('DIGESTS_MIN_SIZE') }}</label>
 									</dt>
 									<dd>
-										<input type="text" size="4" maxlength="4" id="user-{{ digests_edit_subscribers.USER_ID }}-min_words" name="user-{{ digests_edit_subscribers.USER_ID }}-min_words" value="{{ digests_edit_subscribers.USER_DIGEST_MIN_WORDS }}" onchange="addToStack(this.name);" />
+										<input type="number" min="0" id="user-{{ digests_edit_subscribers.USER_ID }}-min_words" name="user-{{ digests_edit_subscribers.USER_ID }}-min_words" value="{{ digests_edit_subscribers.USER_DIGEST_MIN_WORDS }}" onchange="addToStack(this.name);" />
 									</dd>
 								</dl>
 								<dl>
@@ -346,7 +346,7 @@
 										<label for="user-{{ digests_edit_subscribers.USER_ID }}-max_display_words">{{ lang('DIGESTS_MAX_DISPLAY_WORDS') }}</label>
 									</dt>
 									<dd>
-										<input type="text" size="4" maxlength="4" name="user-{{ digests_edit_subscribers.USER_ID }}-max_display_words" id="user-{{ digests_edit_subscribers.USER_ID }}-max_display_words" value="{{ digests_edit_subscribers.USER_DIGEST_MAX_DISPLAY_WORDS }}" onchange="addToStack(this.name);" />
+										<input type="number" min="0" name="user-{{ digests_edit_subscribers.USER_ID }}-max_display_words" id="user-{{ digests_edit_subscribers.USER_ID }}-max_display_words" value="{{ digests_edit_subscribers.USER_DIGEST_MAX_DISPLAY_WORDS }}" onchange="addToStack(this.name);" />
 									</dd>
 								</dl>
 								<dl>

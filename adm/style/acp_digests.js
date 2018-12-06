@@ -29,11 +29,11 @@ $(document).ready(function() {
 
 	// If any individual forum is unchecked, the all_forums checkbox should be unchecked.
 	// If all individual forums are checked, the all_forums checkbox should be checked.
-	$("[id*=elt_]").click(function() {
+	$("[name*='-forums']").click(function() {
 		var allChecked = true;	// Assume all forums for the block under focus are checked
 		var id = ($(this).attr('id'));
 		var rowId = getRowId(id);	// Returns the unique row id for the block being changed by parsing the id attribute
-		$("[id*=elt_]").each(function() {
+		$("[name*='-forums']").each(function() {
 			var instanceId = $(this).attr('id');
 			var instanceRowId = getRowId(instanceId);	// Returns the unique row id for the block being changed by parsing the id attribute
 			if (instanceRowId === rowId && !$(this).is(':checked')) {
@@ -44,6 +44,9 @@ $(document).ready(function() {
 		if (allChecked) {
 			($("#user-" + rowId + "-all_forums").prop('checked', true));
 		}
+		else {
+			($("#user-" + rowId + "-all_forums").prop('checked', false));
+		}
 	});
 
 	// If the all forums checkbox is checked, all individual forums should be checked, and visa versa.
@@ -51,7 +54,7 @@ $(document).ready(function() {
 		var id = ($(this).attr('id'));
 		var rowId = getRowId(id);	// Returns the unique row id for the block being changed by parsing the id attribute
 		if ($(this).is(':checked')) {
-			$("[id*=elt_]").each(function() {
+			$("[name*='-forums']").each(function() {
 				var instanceId = $(this).attr('id');
 				var instanceRowId = getRowId(instanceId);	// Returns the unique row id for the block being changed by parsing the id attribute
 				if (instanceRowId === rowId) {
@@ -60,7 +63,7 @@ $(document).ready(function() {
 			});
 		}
 		else {
-			$("[id*=elt_]").each(function() {
+			$("[name*='-forums']").each(function() {
 				var instanceId = $(this).attr('id');
 				var instanceRowId = getRowId(instanceId);	// Returns the unique row id for the block being changed by parsing the id attribute
 				if (instanceRowId === rowId) {

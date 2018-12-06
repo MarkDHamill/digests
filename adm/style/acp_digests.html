@@ -229,15 +229,15 @@
 									<dd>
 										<input type="checkbox" name="user-{{ digests_edit_subscribers.USER_ID }}-all_forums" id="user-{{ digests_edit_subscribers.USER_ID }}-all_forums" {% if digests_edit_subscribers.S_ALL_BY_DEFAULT %} checked="checked"{% endif %} onchange="addToStack(this.name);" />
 										<label for="user-{{ digests_edit_subscribers.USER_ID }}-all_forums"><b>{{ lang('DIGESTS_ALL_ALLOWED_FORUMS') }}</b></label><br><br>
-										<div id="user-{{ digests_edit_subscribers.USER_ID }}-div_0">
+										<div id="user-{{ digests_edit_subscribers.USER_ID }}-0">
 											{% for forums in digests_edit_subscribers.forums %}
 												{% if forums.S_DIV_OPEN %}
 													<div id="user-{{ digests_edit_subscribers.USER_ID }}-{{ forums.CAT_ID }}" class="position-relative">
 												{% endif %}
 												{% if forums.S_PRINT %}
 													{% if forums.S_IS_FORUM %}
-														<input type="checkbox" name="user-{{ digests_edit_subscribers.USER_ID }}-{{ forums.FORUM_NAME }}" id="user-{{ digests_edit_subscribers.USER_ID }}-{{ forums.FORUM_NAME }}"{% if forums.S_FORUM_SUBSCRIBED %} checked="checked"{% endif %} onchange="addToStack(this.name);"/>
-														<label for="user-{{ digests_edit_subscribers.USER_ID }}-{{ forums.FORUM_NAME }}"><span class="point8-em">{{ forums.FORUM_LABEL }}</span></label><br>
+														<input type="checkbox" name="user-{{ digests_edit_subscribers.USER_ID }}-forums[]" value="{{ digests_edit_subscribers.USER_ID }}-{{ forums.FORUM_ID }}" id="user-{{ digests_edit_subscribers.USER_ID }}-{{ forums.FORUM_ID }}"{% if forums.S_FORUM_SUBSCRIBED %} checked="checked"{% endif %} onchange="addToStack(this.name);"/>
+														<label for="user-{{ digests_edit_subscribers.USER_ID }}-{{ forums.FORUM_ID }}"><span class="point8-em">{{ forums.FORUM_LABEL }}</span></label><br>
 													{% endif %}
 													{% if not forums.S_IS_FORUM %}
 														<span class="point8-em"><i>{{ forums.FORUM_LABEL }}</i></span><br>

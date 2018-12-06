@@ -666,7 +666,7 @@ class main_module
 									$current_level++;
 									// Need to add a category level here
 									$this->template->assign_block_vars('digests_edit_subscribers.forums', array(
-										'CAT_ID' 			=> 'div_' . $row2['parent_id'],
+										'CAT_ID' 			=> $row2['parent_id'],
 										'S_DIV_CLOSE' 		=> false,
 										'S_DIV_OPEN' 		=> true,
 										'S_PRINT' 			=> false,
@@ -696,8 +696,8 @@ class main_module
 							}
 							
 							$this->template->assign_block_vars('digests_edit_subscribers.forums', array(
+								'FORUM_ID' 				=> (int) $row2['forum_id'],
 								'FORUM_LABEL' 			=> $row2['forum_name'],
-								'FORUM_NAME' 			=> 'elt_' . (int) $row2['forum_id'] . '_' . (int) $row2['parent_id'],
 								'S_FORUM_SUBSCRIBED' 	=> $check,
 								'S_IS_FORUM' 			=> !($row2['forum_type'] == FORUM_CAT),
 								'S_PRINT' 				=> true,
@@ -947,7 +947,7 @@ class main_module
 			// Get the entire POST request variables as an array for parsing
 			unset($requests_vars);
 			$request_vars = $this->request->get_super_global(\phpbb\request\request_interface::POST);
-			
+
 			// If a mass action, we want to remove all post variables with the user-99-col_name pattern. It makes the logic easier by effectively ignoring them.
 			if ($mass_action)
 			{
@@ -1014,7 +1014,7 @@ class main_module
 						// Also want to save some information to an array to be used for sending emails to affected users.
 						$digest_notify_list[] = $current_user_id;
 
-						// We need to set these variables so we can detect if individual forum subscriptions will need to be processed.
+						// We need to set/reset these variables so we can detect if individual forum subscriptions will need to be processed.
 						$current_user_id = $user_id;
 						$use_defaults = false;
 						$use_defaults_pass = false;
@@ -1198,27 +1198,30 @@ class main_module
 							}
 														
 						}
-						
-						// Note that if "all_forums" is unchecked and bookmarks is unchecked, there are individual forum subscriptions, so they must be saved.
-						if (substr($var_part, 0, 4) == 'elt_')
+
+						if ($var_part == 'forums')
 						{
-							// We should save this forum as an individual forum subscription, but only if the all forums checkbox
-							// is not set AND the user should not get posts for bookmarked topics only.
-	
-							// This request variable is a checkbox for a forum for this user. It should be checked or it would
-							// not be in the $request_vars array.
-							
-							$delimiter_pos = strpos($var_part, '_', 4);
-							$forum_id = substr($var_part, 4, $delimiter_pos - 4);
-							
-							if (($all_forums !== 'on') && (trim($filter_type) !== constants::DIGESTS_BOOKMARKS)) 
+							// There are some individual user forum subscriptions.  We should save them, but only if the
+							// all forums checkbox is not set AND the user should not get posts for bookmarked topics only.
+
+							if (($all_forums !== 'on') && (trim($filter_type) !== constants::DIGESTS_BOOKMARKS))
 							{
-								$sql_ary2[] = array(
-									'user_id'		=> (int) $current_user_id,
-									'forum_id'		=> (int) $forum_id);
+								// $value is an array like ( [0] => 3-2 [1] => 3-13 )
+								foreach ($value as $subscript => $user_forum)
+								{
+									// To decode $user_forum, the user_id is to the left of the -, the forum_id is to its right
+									$delimiter_pos = strpos($user_forum, '-');
+									$subscriber_user_id = (int) substr($user_forum, 0, $delimiter_pos);
+									$subscriber_forum_id = (int) substr($user_forum, $delimiter_pos + 1);
+
+									// Write this forum subscription
+									$sql_ary2[] = array(
+										'user_id'		=> $subscriber_user_id,
+										'forum_id'		=> $subscriber_forum_id);
+								}
 							}
 						}
-						
+
 					}
 					
 				} // $request_vars variable is named user-*

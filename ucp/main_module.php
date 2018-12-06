@@ -120,8 +120,6 @@ class main_module
 					if (($all_forums !== 'on') && (trim($digest_type) !== constants::DIGESTS_BOOKMARKS))
 					{
 						$checked_forums = $this->request->variable('forums', array(''));
-						//print_r($checked_forums);
-						//exit;
 						foreach ($checked_forums as $subscript => $forum_id)
 						{
 							// Add to an array of individual digest subscriptions

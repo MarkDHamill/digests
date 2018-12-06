@@ -119,17 +119,15 @@ class main_module
 					
 					if (($all_forums !== 'on') && (trim($digest_type) !== constants::DIGESTS_BOOKMARKS))
 					{
-						$elt_fields = $this->request->variable('elt', array(''));
-						foreach ($elt_fields as $key => $value)
+						$checked_forums = $this->request->variable('forums', array(''));
+						//print_r($checked_forums);
+						//exit;
+						foreach ($checked_forums as $subscript => $forum_id)
 						{
-							if (substr($key, 0, 4) == 'elt_') 
-							{
-								$forum_id = (int) (substr($key, 4, strpos($key, '_', 4) - 4));
-	
-								$sql_ary[] = array(
-									'forum_id'		=> $forum_id,
-									'user_id'		=> (int) $this->user->data['user_id']);
-							}
+							// Add to an array of individual digest subscriptions
+							$sql_ary[] = array(
+								'forum_id'		=> $forum_id,
+								'user_id'		=> (int) $this->user->data['user_id']);
 						}
 						if (isset($sql_ary))
 						{
@@ -549,8 +547,8 @@ class main_module
 						}
 							
 						$this->template->assign_block_vars('forums', array(
+							'FORUM_ID' 						=> (int) $row['forum_id'],
 							'FORUM_LABEL' 					=> $row['forum_name'],
-							'FORUM_NAME' 					=> 'elt_' . (int) $row['forum_id'] . '_' . (int) $row['parent_id'],
 							'FORUM_PREFIX' 					=> $prefix,
 							'FORUM_SUFFIX' 					=> $suffix,
 							'S_DIGESTS_FORUM_DISABLED' 		=> ($disabled || $forum_disabled || $this->user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE),

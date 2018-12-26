@@ -20,3 +20,4 @@ The following translations exist but due to packaging requirements for extension
 Czech: https://github.com/petr-hendl/phpBBDigests-cs/
 French: https://github.com/bonnaphil/digests-fr
 German: https://github.com/Praggle/digests
+Spanish: https://mega.nz/#F!mGQzAQba!tSEPx3HrO8tHPiZKywcWqQ

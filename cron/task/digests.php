@@ -1152,7 +1152,7 @@ class digests extends \phpbb\cron\task\base
 				// Reset messenger object for the next subscriber, bug fix provided by robdocmagic
 				$html_messenger->reset();
 
-			}    // foreach
+			}   // foreach
 
 			$this->db->sql_freeresult($result_posts);
 
@@ -1910,6 +1910,7 @@ class digests extends \phpbb\cron\task\base
 						$tags = explode(',',str_replace(' ', '', trim($this->config['phpbbservices_digests_strip_tags'])));
 						if (count($tags) > 0)
 						{
+							libxml_use_internal_errors(true);	// Suppress picky errors
 							$dom = new \DOMDocument();
 							$dom->loadHTML($post_text, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD); // Fix provided by whocarez
 							$substitute = $dom->createElement('p', $this->language->lang('DIGESTS_TAG_REPLACED'));
@@ -1976,7 +1977,7 @@ class digests extends \phpbb\cron\task\base
 
 		}
 
-		// General template variables are set here. Many are inherited from language variables.
+		// General template variables are set here. Many are inherited automatically from language variables.
 		$this->template->assign_vars(array(
 			'DIGESTS_TOTAL_PMS'				=> count($pm_rowset),
 			'DIGESTS_TOTAL_POSTS'			=> $this->posts_in_digest,
@@ -2207,7 +2208,7 @@ class digests extends \phpbb\cron\task\base
 					$image_text = $this->language->lang('DIGESTS_POST_IMAGE_TEXT');
 					$thumbnail_parameter = '&t=1';
 				}
-				$markup_text .= sprintf("%s<br><em>%s</em> (%s %s)<br>%s<img src=\"%s\" alt=\"%s\" title=\"%s\" />%s\n<br>%s", censor_text($attachment_row['attach_comment']), $attachment_row['real_filename'], $file_size, $this->language->lang('KIB'), $anchor_begin, $this->board_url . "download/file.$this->phpEx?id=" . $attachment_row['attach_id'] . $thumbnail_parameter, censor_text($attachment_row['attach_comment']), censor_text($attachment_row['attach_comment']), $anchor_end, $image_text);
+				$markup_text .= sprintf("<div>%s<br><em>%s</em> (%s %s)<br>%s<img src=\"%s\" alt=\"%s\" title=\"%s\" />%s\n<br>%s</div>", censor_text($attachment_row['attach_comment']), $attachment_row['real_filename'], $file_size, $this->language->lang('KIB'), $anchor_begin, $this->board_url . "download/file.$this->phpEx?id=" . $attachment_row['attach_id'] . $thumbnail_parameter, censor_text($attachment_row['attach_comment']), censor_text($attachment_row['attach_comment']), $anchor_end, $image_text);
 			}
 			else
 			{
@@ -2273,6 +2274,7 @@ class digests extends \phpbb\cron\task\base
 		{
 			$popular_topics[] = $row['topic_id'];
 		}
+		$this->db->sql_freeresult($result);
 
 		return $popular_topics;
 

@@ -1,3 +1,8 @@
+input[type="number"]
+{
+	text-align: right;
+	width: 5em !important;
+}
 .overflow-x
 {
 	overflow-x:auto;

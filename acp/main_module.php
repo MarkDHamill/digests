@@ -20,6 +20,7 @@ class main_module
 	private $helper;
 	private $language;
 	private $pagination;
+	private $phpbb_container;
 	private $phpbb_extension_manager;
 	private $phpbb_log;
 	private $phpbb_path_helper;
@@ -35,23 +36,25 @@ class main_module
 		global $phpbb_container;
 
 		// Get global variables via containers to minimize security issues
-		$this->phpbb_root_path = $phpbb_container->getParameter('core.root_path');
-		$this->phpEx = $phpbb_container->getParameter('core.php_ext');
-		$this->table_prefix = $phpbb_container->getParameter('core.table_prefix');
+		$this->phpbb_container = $phpbb_container;
+		$this->phpbb_root_path = $this->phpbb_container->getParameter('core.root_path');
+		$this->phpEx = $this->phpbb_container->getParameter('core.php_ext');
+		$this->table_prefix = $this->phpbb_container->getParameter('core.table_prefix');
 
 		// Encapsulate certain phpBB objects inside this class to minimize security issues
-		$this->auth = $phpbb_container->get('auth');
-		$this->config = $phpbb_container->get('config');
-		$this->db = $phpbb_container->get('dbal.conn');
-		$this->helper = $phpbb_container->get('phpbbservices.digests.common');
-		$this->language = $phpbb_container->get('language');
-		$this->pagination = $phpbb_container->get('pagination');
-		$this->phpbb_extension_manager = $phpbb_container->get('ext.manager');
-		$this->phpbb_log = $phpbb_container->get('log');
-		$this->phpbb_path_helper = $phpbb_container->get('path_helper');
-		$this->request = $phpbb_container->get('request');
-		$this->template = $phpbb_container->get('template');
-		$this->user = $phpbb_container->get('user');
+		$this->auth = $this->phpbb_container->get('auth');
+		$this->config = $this->phpbb_container->get('config');
+		$this->db = $this->phpbb_container->get('dbal.conn');
+		$this->helper = $this->phpbb_container->get('phpbbservices.digests.common');
+		$this->language = $this->phpbb_container->get('language');
+		$this->new_config = $this->phpbb_container->get('config');
+		$this->pagination = $this->phpbb_container->get('pagination');
+		$this->phpbb_extension_manager = $this->phpbb_container->get('ext.manager');
+		$this->phpbb_log = $this->phpbb_container->get('log');
+		$this->phpbb_path_helper = $this->phpbb_container->get('path_helper');
+		$this->request = $this->phpbb_container->get('request');
+		$this->template = $this->phpbb_container->get('template');
+		$this->user = $this->phpbb_container->get('user');
 	}
 
 	/**
@@ -878,7 +881,6 @@ class main_module
 				
 		}
 
-		$this->new_config = $this->config;
 		$cfg_array = ($this->request->is_set('config')) ? $this->request->variable('config', array('' => ''), true) : $this->new_config;
 		$error = array();
 
@@ -1542,6 +1544,7 @@ class main_module
 
 			define('IN_DIGESTS_TEST', true);
 			$continue = true;
+			$digests_storage_path = $this->phpbb_root_path . 'store/phpbbservices/digests';
 
 			if (!$this->config['phpbbservices_digests_test'] && !$this->config['phpbbservices_digests_test_clear_spool'])
 			{
@@ -1552,35 +1555,32 @@ class main_module
 			// Create the store/phpbbservices/digests folder. It should exist already.
 			if (!$this->helper->make_directories())
 			{
-				$message = sprintf($this->language->lang('DIGESTS_CREATE_DIRECTORY_ERROR'), $this->phpbb_root_path . 'store/phpbbservices/digests');
+				$message = sprintf($this->language->lang('DIGESTS_CREATE_DIRECTORY_ERROR'), $digests_storage_path);
 				$continue = false;
 			}
 
 			if ($continue && $this->config['phpbbservices_digests_test_clear_spool'])
 			{
 				
-				if ($continue)
+				// Clear the digests store folder of .txt and .html files, if so instructed
+
+				$all_cleared = true;
+
+				foreach (new \DirectoryIterator($digests_storage_path) as $file_info)
 				{
-					// Clear the digests store folder of .txt and .html files, if so instructed
-
-					$all_cleared = true;
-
-					foreach (new \DirectoryIterator($path) as $file_info)
+					$file_name = $file_info->getFilename();
+					// Exclude dot files, hidden files and non "real" files, and real files if they don't have the .html or .txt suffix
+					if ((substr($file_name, 0, 1) !== '.') && $file_info->isFile() && ($file_info->getExtension() == 'html' || $file_info->getExtension() == 'txt'))
 					{
-						$file_name = $file_info->getFilename();
-						// Exclude dot files, hidden files and non "real" files, and real files if they don't have the .html or .txt suffix
-						if ((substr($file_name, 0, 1) !== '.') && $file_info->isFile() && ($file_info->getExtension() == 'html' || $file_info->getExtension() == 'txt'))
+						$deleted = unlink($digests_storage_path . '/' . $file_name); // delete file
+						if (!$deleted)
 						{
-							$deleted = unlink($path . '/' . $file_name); // delete file
-							if (!$deleted)
-							{
-								$all_cleared = false;
-							}
+							$all_cleared = false;
 						}
 					}
 				}
 
-				if ($continue && $this->config['phpbbservices_digests_enable_log'])
+				if ($this->config['phpbbservices_digests_enable_log'])
 				{
 					if ($all_cleared)
 					{
@@ -1619,31 +1619,8 @@ class main_module
 			if ($continue)
 			{
 
-				// Create a new template object for the mailer to use since we don't want to lose the content in this one. (The mailer will overwrite it and
-				// remove the sidebars.) With phpBB 3.2 this first requires creating a template environment object. Note: similar code used to work in 3.1, but
-				// doesn't in 3.2. I've looked at it and tried various things but so far it results in a TWIG error. Keeping it around for future attempts.
-				/*$mailer_template = new \phpbb\template\twig\twig(
-					$this->phpbb_path_helper,
-					$this->config,
-					new \phpbb\template\context(),
-					new \phpbb\template\twig\environment(
-						$this->config,
-						$phpbb_container->get('filesystem'),
-						$this->phpbb_path_helper,
-						$phpbb_container->getParameter('core.cache_dir'),
-						$this->phpbb_extension_manager,
-						new \phpbb\template\twig\loader(
-							$phpbb_container->get('filesystem')
-						)
-					),
-					$phpbb_container->getParameter('core.cache_dir'),
-					$this->user
-				);*/
-
-				//$mailer_template->set_style(array('./ext/phpbbservices/digests/styles', 'styles'));
-
 				// Create a mailer object and call its run method. The logic for sending a digest is embedded in this method, which is normally run as a cron task.
-				$mailer = new \phpbbservices\digests\cron\task\digests($this->config, $this->request, $this->user, $this->db, $this->phpEx, $this->phpbb_root_path, $this->template, $this->auth, $this->table_prefix, $this->phpbb_log, $this->helper, $this->language);
+				$mailer = $this->phpbb_container->get('phpbbservices.digests.cron.task.cron_task');
 				$success = $mailer->run();
 				
 				if (!$success)

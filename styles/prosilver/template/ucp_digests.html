@@ -95,7 +95,7 @@
 			{% endif %}
 			{% if forums.S_DIGESTS_PRINT %}
 				{% if forums.S_DIGESTS_IS_FORUM %}
-								<input type="checkbox" name="forums[]" value="{{ forums.FORUM_ID }}" id="{{ forums.FORUM_ID }}"{% if forums.S_DIGESTS_FORUM_SUBSCRIBED %} checked="checked"{% endif %}{% if forums.S_DIGESTS_FORUM_DISABLED %} disabled="disabled"{% endif %} /> <label for="{{ forums.FORUM_NAME }}">{{ forums.FORUM_PREFIX }}{{ forums.FORUM_LABEL }}{{ forums.FORUM_SUFFIX }}</label><br>
+								<input type="checkbox" name="forums[]" value="{{ forums.FORUM_ID }}" id="f{{ forums.FORUM_ID }}"{% if forums.S_DIGESTS_FORUM_SUBSCRIBED %} checked="checked"{% endif %}{% if forums.S_DIGESTS_FORUM_DISABLED %} disabled="disabled"{% endif %} /> <label for="f{{ forums.FORUM_ID }}">{{ forums.FORUM_PREFIX }}{{ forums.FORUM_LABEL }}{{ forums.FORUM_SUFFIX }}</label><br>
 				{% endif %}
 				{% if not forums.S_DIGESTS_IS_FORUM %}
 								<i>{{ forums.FORUM_LABEL }}</i><br>

@@ -10,8 +10,7 @@
 namespace phpbbservices\digests\includes;
 
 // The purpose of this class is to override the messenger class so HTML can be sent in email. The code is a copy and paste for the relevant events
-// from the 3.2.2 source for /includes/functions_messenger.php with minimal changes needed to add this functionality. I made one major change from
-// the way phpBB works by default: to bypass the queue altogether as the expectation is that a digest will be delivered promptly.
+// from the 3.2.5 source for /includes/functions_messenger.php with minimal changes needed to add this functionality.
 
 class html_messenger extends \messenger
 {
@@ -39,9 +38,26 @@ class html_messenger extends \messenger
 		));
 
 		$subject = $this->subject;
-		$message = $this->msg;
+		$template = $this->template;
 		/**
-		* Event to modify notification message text before parsing
+		 * Event to modify the template before parsing
+		 *
+		 * @event phpbbservices.digests.modify_notification_template
+		 * @var	int						method		User notification method NOTIFY_EMAIL|NOTIFY_IM|NOTIFY_BOTH
+		 * @var	bool					break		Flag indicating if the function only formats the subject
+		 *											and the message without sending it
+		 * @var	string					subject		The message subject
+		 * @var \phpbb\template\template template	The (readonly) template object
+		 * @since 3.2.4-RC1
+		 */
+		$vars = array('method', 'break', 'subject', 'template');
+		extract($phpbb_dispatcher->trigger_event('phpbbservices.digests.modify_notification_template', compact($vars)));
+
+		// Parse message through template
+		$message = trim($this->template->assign_display('body'));
+
+		/**
+		* Event to modify notification message text after parsing
 		*
 		* @event phpbbservices.digests.modify_notification_message
 		* @var	int		method	User notification method NOTIFY_EMAIL|NOTIFY_IM|NOTIFY_BOTH
@@ -51,19 +67,12 @@ class html_messenger extends \messenger
 		* @var	string	message	The message text
 		* @since 3.1.11-RC1
 		*/
-		$vars = array(
-			'method',
-			'break',
-			'subject',
-			'message',
-		);
+		$vars = array('method', 'break', 'subject', 'message');
 		extract($phpbb_dispatcher->trigger_event('phpbbservices.digests.modify_notification_message', compact($vars)));
+
 		$this->subject = $subject;
 		$this->msg = $message;
-		unset($subject, $message);
-
-		// Parse message through template
-		$this->msg = trim($this->template->assign_display('body'));
+		unset($subject, $message, $template);
 
 		// Because we use \n for newlines in the body message we need to fix line encoding errors for those admins who uploaded email template files in the wrong encoding
 		$this->msg = str_replace("\r\n", "\n", $this->msg);
@@ -80,6 +89,12 @@ class html_messenger extends \messenger
 		else
 		{
 			$this->subject = (($this->subject != '') ? $this->subject : $user->lang['NO_EMAIL_SUBJECT']);
+		}
+
+		if (preg_match('#^(List-Unsubscribe:(.*?))$#m', $this->msg, $match))
+		{
+			$this->extra_headers[] = $match[1];
+			$drop_header .= '[\r\n]*?' . preg_quote($match[1], '#');
 		}
 
 		if ($drop_header)
@@ -173,7 +188,7 @@ class html_messenger extends \messenger
 	*/
 	function msg_email($is_html=false)
 	{
-		global $config;
+		global $config, $phpbb_dispatcher;
 
 		if (empty($config['email_enable']))
 		{
@@ -200,6 +215,33 @@ class html_messenger extends \messenger
 
 		$contact_name = htmlspecialchars_decode($config['board_contact_name']);
 		$board_contact = (($contact_name !== '') ? '"' . mail_encode($contact_name) . '" ' : '') . '<' . $config['board_contact'] . '>';
+
+		$break = false;
+		$addresses = $this->addresses;
+		$subject = $this->subject;
+		$msg = $this->msg;
+		/**
+		 * Event to send message via external transport
+		 *
+		 * @event phpbbservices.digests.notification_message_email
+		 * @var	bool	break		Flag indicating if the function return after hook
+		 * @var	array	addresses 	The message recipients
+		 * @var	string	subject		The message subject
+		 * @var	string	msg			The message text
+		 * @since 3.2.4-RC1
+		 */
+		$vars = array(
+			'break',
+			'addresses',
+			'subject',
+			'msg',
+		);
+		extract($phpbb_dispatcher->trigger_event('phpbbservices.digests.notification_message_email', compact($vars)));
+
+		if ($break)
+		{
+			return true;
+		}
 
 		if (empty($this->replyto))
 		{

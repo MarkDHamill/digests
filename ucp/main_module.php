@@ -19,6 +19,7 @@ class main_module
 	private $db;
 	private $helper;
 	private $language;
+	private $phpbb_container;
 	private $phpbb_root_path;
 	private $phpEx;
 	private $request;
@@ -35,20 +36,22 @@ class main_module
 	{
 		global $phpbb_container;
 
+		$this->phpbb_container = $phpbb_container;
+
 		// Get global variables via containers to minimize security issues
-		$this->phpbb_root_path = $phpbb_container->getParameter('core.root_path');
-		$this->phpEx= $phpbb_container->getParameter('core.php_ext');
-		$this->table_prefix = $phpbb_container->getParameter('core.table_prefix');
+		$this->phpbb_root_path = $this->phpbb_container->getParameter('core.root_path');
+		$this->phpEx= $this->phpbb_container->getParameter('core.php_ext');
+		$this->table_prefix = $this->phpbb_container->getParameter('core.table_prefix');
 
 		// Encapsulate certain phpBB objects inside this class to minimize security issues
-		$this->auth = $phpbb_container->get('auth');
-		$this->config = $phpbb_container->get('config');
-		$this->db = $phpbb_container->get('dbal.conn');
-		$this->helper = $phpbb_container->get('phpbbservices.digests.common');
-		$this->language = $phpbb_container->get('language');
-		$this->request = $phpbb_container->get('request');
-		$this->template = $phpbb_container->get('template');
-		$this->user = $phpbb_container->get('user');
+		$this->auth = $this->phpbb_container->get('auth');
+		$this->config = $this->phpbb_container->get('config');
+		$this->db = $this->phpbb_container->get('dbal.conn');
+		$this->helper = $this->phpbb_container->get('phpbbservices.digests.common');
+		$this->language = $this->phpbb_container->get('language');
+		$this->request = $this->phpbb_container->get('request');
+		$this->template = $this->phpbb_container->get('template');
+		$this->user = $this->phpbb_container->get('user');
 	}
 
 	function main($id, $mode)

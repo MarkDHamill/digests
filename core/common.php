@@ -17,6 +17,7 @@ class common
 	*/
 
 	protected $language;
+	protected $phpbb_root_path;
 
 	/**
 	 * Constructor.

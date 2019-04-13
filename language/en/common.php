@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Digests
-* @copyright (c) 2018 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2019 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -48,7 +48,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_FORMAT_PLAIN'				=> 'Plain',
 	'DIGESTS_FORMAT_PLAIN_EXPLAIN'		=> 'Styled with no colors or fonts',
 	'DIGESTS_FORMAT_PLAIN_CLASSIC'		=> 'Plain, posts laid out inside tables',
-	'DIGESTS_FORMAT_PLAIN_CLASSIC_EXPLAIN'	=> 'Similar to plain except topic posts and private messagaes are inside of tables',
+	'DIGESTS_FORMAT_PLAIN_CLASSIC_EXPLAIN'	=> 'Similar to plain except topic posts and private messages are inside of tables',
 	'DIGESTS_FORMAT_STYLING'			=> 'Digest styling',
 	'DIGESTS_FORMAT_STYLING_EXPLAIN'	=> 'Please note that the styling actually rendered depends on the capabilities of your email program. Move your cursor over the styling type to learn more about each style.',
 	'DIGESTS_FORMAT_TEXT'				=> 'Text',
@@ -62,7 +62,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_JUMP_TO_MSG'				=> 'Msg ID',
 	'DIGESTS_JUMP_TO_POST'				=> 'Post ID',
 	'DIGESTS_LASTVISIT_RESET'			=> 'Reset my last visit date when I am sent a digest',
-	'DIGESTS_LASTVISIT_RESET_EXPLAIN'	=> 'If enabled, posts on the forum should appear as read if they were posted before the date and time your digest was created. Selecting this option effectively tells the forum that reading your digest substitutes for reading posts on the forum.',
+	'DIGESTS_LASTVISIT_RESET_EXPLAIN'	=> 'If enabled, the date and time your digest was created will be used to set your last visit date. Topics and notifications at or before this date and time are also marked as read.',
 	'DIGESTS_LINK'						=> 'Link',
 	'DIGESTS_MARK_READ'					=> 'Mark as read when they appear in the digest',
 	'DIGESTS_MAX_DISPLAY_WORDS'			=> 'Maximum words to display in a post',

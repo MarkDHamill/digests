@@ -26,7 +26,7 @@
 		.newline { clear: both; float: none; }
 		ol,ul { list-style-position: inside; }
 		.postbody { width: 100%; }
-		.post { padding-left: 5px; border-radius: 0px; }
+		.post { padding-left: 5px; border-radius: 0px; padding-right: 0px;}
 		.post:nth-child(even) { clear: both; float: left; }
 		.post:nth-child(odd) { clear: both; float: left; }
 		#skip { background: white; width: 100%; }

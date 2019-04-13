@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Digests
-* @copyright (c) 2018 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2019 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -57,11 +57,11 @@ class digests extends \phpbb\cron\task\base
 	* @param \phpbb\request\request 	$request 			The request object
 	* @param \phpbb\user 				$user 				The user object
 	* @param \phpbb\db\driver\factory 	$db 				The database factory object
-	* @param $php_ext 										PHP file suffix
-	* @param $phpbb_root_path								Relative path to phpBB root
+	* @param $php_ext 					$string				PHP file suffix
+	* @param $phpbb_root_path			$string				Relative path to phpBB root
 	* @param \phpbb\template\template 	$template 			The template engine object
 	* @param \phpbb\auth\auth 			$auth 				The auth object
-	* @param $table_prefix 									Prefix for phpbb's database tables
+	* @param $table_prefix 				string				Prefix for phpbb's database tables
 	* @param \phpbb\log\log 			$phpbb_log 			phpBB log object
 	* @param \phpbbservices\digests\core\common $helper		Extension's helper object
 	* @param \phpbb\language\language 	$language 			Language object
@@ -552,7 +552,7 @@ class digests extends \phpbb\cron\task\base
 				$user_digest_last_sent = getdate($row['user_digest_last_sent']);
 				if ($this->run_mode != constants::DIGESTS_RUN_MANUAL)
 				{
-					if ($user_digest_last_sent['year'] == $now_info['year'] && $user_digest_last_sent['yday'] == $now_info['yday'] && $user_digest_last_sent['hours'] == $now_info['hours'])
+					if ($hour == 0 && $user_digest_last_sent['year'] == $now_info['year'] && $user_digest_last_sent['yday'] == $now_info['yday'] && $user_digest_last_sent['hours'] == $now_info['hours'])
 					{
 						// Note the inconsistency in the log.
 						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_DUPLICATE_PREVENTED', false, array($row['username'], $row['user_email'], $utc_year . '-' . $utc_month . '-' . $utc_day, $current_hour_utc));
@@ -1105,6 +1105,10 @@ class digests extends \phpbb\cron\task\base
 									$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_NO_EMAIL', false, array($this->language->lang('DIGESTS_SENT_TO'), $row['username'], $utc_year . '-' . str_pad($utc_month, 2, '0', STR_PAD_LEFT) . '-' . str_pad($utc_day, 2, '0', STR_PAD_LEFT), $current_hour_utc, $this->posts_in_digest, sizeof($pm_rowset)));
 								}
 							}
+						}
+
+						if (!$this->run_mode == constants::DIGESTS_RUN_MANUAL)
+						{
 
 							// Record the moment the digest was successfully sent to the subscriber
 							$sql_ary = array(
@@ -1112,11 +1116,12 @@ class digests extends \phpbb\cron\task\base
 							);
 
 							$sql2 = 'UPDATE ' . USERS_TABLE . '
-							SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
-							WHERE user_id = ' . (int) $row['user_id'];
+								SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
+								WHERE user_id = ' . (int) $row['user_id'];
 							$this->db->sql_query($sql2);
 
-							// If requested, update user_lastvisit
+							// If requested, update user_lastvisit, which also marks all forums read and clears
+							// any notifications
 							if ($row['user_digest_reset_lastvisit'] == 1)
 							{
 								$sql_ary = array(
@@ -1124,10 +1129,28 @@ class digests extends \phpbb\cron\task\base
 								);
 
 								$sql2 = 'UPDATE ' . USERS_TABLE . '
-								SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
-								WHERE user_id = ' . (int) $row['user_id'];
+									SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
+									WHERE user_id = ' . (int) $row['user_id'];
 								$this->db->sql_query($sql2);
+
+								if (!function_exists('markread'))
+								{
+									include($this->path_prefix . 'includes/functions.' . $this->phpEx);
+								}
+
+								// In order to mark all forums read and to clear all notifications, we must temporarily
+								// set the value of $user->data['user_id'] to the current subscriber because markall()
+								// assumes the subscriber is logged in and uses this value.
+
+								$saved_user_id = $this->user->data['user_id'];
+
+								$this->user->data['user_id'] = $row['user_id'];
+								$this->user->data['is_registered'] = 1;
+								markread('all');    // Perform mark all forums read
+
+								$this->user->data['user_id'] = $saved_user_id;
 							}
+
 						}
 
 					}
@@ -1753,8 +1776,8 @@ class digests extends \phpbb\cron\task\base
 					break;
 				}
 				
-				// Skip posts if new posts only logic applies
-				if (($user_row['user_digest_new_posts_only']) && ($post_row['post_time'] < min($this->date_limit, $user_row['user_lastvisit'])))
+				// Skip posts if new posts only logic applies, or if for some reason it's timestamp is before the allowed daily, weekly or monthly digest range.
+				if (($user_row['user_digest_new_posts_only']) && ($post_row['post_time'] < max($this->date_limit, $user_row['user_lastvisit'])))
 				{
 					continue;
 				}
@@ -1910,7 +1933,6 @@ class digests extends \phpbb\cron\task\base
 						$tags = explode(',',str_replace(' ', '', trim($this->config['phpbbservices_digests_strip_tags'])));
 						if (count($tags) > 0)
 						{
-							libxml_use_internal_errors(true);	// Suppress picky errors
 							$dom = new \DOMDocument();
 							$dom->loadHTML($post_text, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD); // Fix provided by whocarez
 							$substitute = $dom->createElement('p', $this->language->lang('DIGESTS_TAG_REPLACED'));
@@ -1977,7 +1999,7 @@ class digests extends \phpbb\cron\task\base
 
 		}
 
-		// General template variables are set here. Many are inherited automatically from language variables.
+		// General template variables are set here. Many are inherited from language variables.
 		$this->template->assign_vars(array(
 			'DIGESTS_TOTAL_PMS'				=> count($pm_rowset),
 			'DIGESTS_TOTAL_POSTS'			=> $this->posts_in_digest,

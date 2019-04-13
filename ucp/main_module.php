@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Digests
-* @copyright (c) 2018 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2019 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -180,7 +180,7 @@ class main_module
 			}
 			
 			// Update the user's digest settings
-			if (isset($sql_ary) && sizeof($sql_ary) > 0)
+			if (isset($sql_ary) && count($sql_ary) > 0)
 			{
 				$sql = 'UPDATE ' . USERS_TABLE . '
 					SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
@@ -355,7 +355,7 @@ class main_module
 				$rowset = $this->db->sql_fetchrowset($result);
 				$this->db->sql_freeresult($result);
 
-				$all_by_default = ((sizeof($rowset) == 0) && $this->config['phpbbservices_digests_user_check_all_forums']) ? true : false;
+				$all_by_default = ((count($rowset) == 0) && $this->config['phpbbservices_digests_user_check_all_forums']) ? true : false;
 
 				$allowed_forums = array();
 				
@@ -417,7 +417,7 @@ class main_module
 				// Get a list of forums as they appear on the main index for this user. For presentation purposes indent them so they show the natural phpBB3 hierarchy.
 				// Indenting is cleverly handled by nesting <div> tags inside of other <div> tags, and the template defines the relative offset (20 pixels).
 				
-				if (sizeof($allowed_forums) > 0)
+				if (count($allowed_forums) > 0)
 				
 				{
 

@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Digests
-* @copyright (c) 2018 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2019 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -37,7 +37,7 @@ $lang = array_merge($lang, array(
 	'ACP_DIGESTS_RESET_CRON_RUN_TIME'						=> 'Reset mailer',
 	'ACP_DIGESTS_RESET_CRON_RUN_TIME_EXPLAIN'				=> '',
 	'ACP_DIGESTS_TEST'										=> 'Manually run the mailer',
-	'ACP_DIGESTS_TEST_EXPLAIN'								=> 'This feature allows you to manually run digests for initial testing and troubleshooting. You can also use it to recreate digests for a particular date and hour. The board timezone is used when calculating the date and hour. Please note that when digests are sent depends on board traffic, so digests may arrive late for some users. This can be changed if you set up <a href="https://wiki.phpbb.com/Modular_cron#Use_system_cron">a system cron</a> and enable phpBB&rsquo;s <strong>system cron</strong> feature. For more information, see the FAQ for the Digests extension on the forums at phpbb.com.',
+	'ACP_DIGESTS_TEST_EXPLAIN'								=> 'This feature allows you to manually run digests for initial testing and troubleshooting. You can also use it to recreate digests for a particular date and hour. Only one hour is run using this mode. The board timezone is used when calculating the date and hour. No user data is changed in this mode.',
 
 	'LOG_CONFIG_DIGESTS_BAD_DIGEST_TYPE'					=> '<strong>Warning: subscriber %1$s has a bad digest type of %2$s. Assumed a daily digest is wanted.</strong>',
 	'LOG_CONFIG_DIGESTS_BAD_SEND_HOUR'						=> '<strong>User %1$s digest send hour is invalid. It is %2$d. The number should be >= 0 and < 24.</strong>',

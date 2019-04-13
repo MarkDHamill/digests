@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Digests
-* @copyright (c) 2018 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2019 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -133,7 +133,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_RUN_TEST_SEND_TO_ADMIN'						=> 'Send all digests to the email address specified',
 	'DIGESTS_RUN_TEST_SEND_TO_ADMIN_EXPLAIN'				=> 'If you want to email the digests in the test, all digests will be emailed to the address specified in the field below. <em>Note</em>: if you elected to send emails to files, this setting is ignored. If yes, but no email address is specified, the board contact email address will be used. <em>Caution</em>: certain email servers may interpret a large volume of emails in a short period of time from the same address as spam or inappropriate use. Enable with care. If you say no then digests will actually be mailed to subscribers, which may confuse them.',
 	'DIGESTS_RUN_TEST_SPOOL'								=> 'Send results to files instead of emailing',
-	'DIGESTS_RUN_TEST_SPOOL_EXPLAIN'						=> 'Prevents digests from being mailed. Instead each digest is written to a file in the store/phpbbservices/digests folder with file names in the following format: username-yyyy-mm-dd-hh.html or username-yyyy-mm-dd-hh.txt. (Files with a .txt suffix are text-only digests.) username is the phpBB forum username. yyyy indicates the year, mm the month, dd the day in month and hh the hour. Dates and hours in the file name are based on Coordinated Universal Time (UTC). If you simulate a different day or hour for mailing the digest using the fields below, file names will use those dates and hours. To view these files, download them with FTP. For HTML digests, view the file in a browser using its local mode: CTRL+O or CMD+O (Mac). <em>Note</em>: use the letter O, not the number 0.',
+	'DIGESTS_RUN_TEST_SPOOL_EXPLAIN'						=> 'Prevents digests from being mailed. Instead each digest is written to a file in the store/phpbbservices/digests folder with file names in the following format: username-yyyy-mm-dd-hh.html or username-yyyy-mm-dd-hh.txt. (Files with a .txt suffix are text-only digests.) username is the phpBB forum username. yyyy indicates the year, mm the month, dd the day in month and hh the hour. Dates and hours in the file name are based on Coordinated Universal Time (UTC). If you simulate a different day or hour for mailing the digest using the fields below, file names will use those dates and hours translated to UTC. To view these files, first download them to a local folder. View the file in a browser using its local mode: CTRL+O or CMD+O (Mac). <em>Note</em>: use the letter O, not the number 0.',
 	'DIGESTS_RUN_TEST_TIME_USE'								=> 'Simulate month and hour, or day of week and hour for sending digest',
 	'DIGESTS_RUN_TEST_TIME_USE_EXPLAIN'						=> 'If set to yes, the controls below will be used to send a digest as if it were the month and hour or the day of the week and hour specified, based on your server&rsquo;s timezone. (You can determine your server&rsquo;s timezone by viewing the PHP Information feature in the ACP and searching for &ldquo;Default timezone&rdquo;.) If no, the current date and hour will be used.',
 	'DIGESTS_RUN_TEST_YEAR'									=> 'Simulation year',

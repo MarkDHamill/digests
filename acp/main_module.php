@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Digests
-* @copyright (c) 2018 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2019 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -19,6 +19,8 @@ class main_module
 	private $db;
 	private $helper;
 	private $language;
+	private $new_config;
+	private $page_title;
 	private $pagination;
 	private $phpbb_container;
 	private $phpbb_extension_manager;
@@ -881,6 +883,7 @@ class main_module
 				
 		}
 
+		$this->new_config = $this->config;
 		$cfg_array = ($this->request->is_set('config')) ? $this->request->variable('config', array('' => ''), true) : $this->new_config;
 		$error = array();
 

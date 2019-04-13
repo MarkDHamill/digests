@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - digests
-* @copyright (c) 2018 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2019 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -18,11 +18,11 @@ class html_messenger extends \messenger
 	/**
 	 * Send the mail out to the recipients set previously in var $this->addresses
 	 *
-	 * @param int	$method	User notification method NOTIFY_EMAIL|NOTIFY_IM|NOTIFY_BOTH
-	 * @param bool	$break	Flag indicating if the function only formats the subject
-	 *						and the message without sending it
-	 * @param $is_html 		true if you want HTML email headers because the content contains HTML, false assumes content is text
-	 * @param $is_digest	true if sending a digest	 *
+	 * @param int	$method		User notification method NOTIFY_EMAIL|NOTIFY_IM|NOTIFY_BOTH
+	 * @param bool	$break		Flag indicating if the function only formats the subject
+	 *							and the message without sending it
+	 * @param bool	$is_html 	true if you want HTML email headers because the content contains HTML, false assumes content is text
+	 * @param bool 	$is_digest	true if sending a digest	 *
 	 * @return bool	* Send the mail out to the recipients set previously in var $this->addresses
 	*/
 

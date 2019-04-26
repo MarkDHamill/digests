@@ -153,11 +153,17 @@ class main_module
 				);
 
 				// Grab some URL parameters that are used in sorting and filtering
+				$selected = $this->request->variable('selected', 'i', true);
 				$member = $this->request->variable('member', '', true);
 				$start = $this->request->variable('start', 0);
 				$subscribe = $this->request->variable('subscribe', 'a', true);
 				$sortby = $this->request->variable('sortby', 'u', true);
 				$sortorder = $this->request->variable('sortorder', 'a', true);
+
+				// Retain the "With selected" setting
+				$selected_ignore = ($selected == 'i') ? 'selected="selected"' : '';
+				$selected_unsubscribe = ($selected == 'n') ? 'selected="selected"' : '';
+				$selected_subscribe = ($selected == 'd') ? 'selected="selected"' : '';
 
 				// Translate time zone information and set other switches
 				$this->template->assign_vars(array(
@@ -169,7 +175,7 @@ class main_module
 				));
 
 				// Set up subscription filter				
-				$all_selected = $stopped_subscribing = $subscribe_selected = $unsubscribe_selected = '';
+				$all_selected = $stopped_subscribing = $subscribe_selected = $unsubscribe_selected = $daily_selected = $weekly_selected = $monthly_selected = '';
 				switch ($subscribe)
 				{
 					case 'u':
@@ -196,11 +202,30 @@ class main_module
 						$context = $this->language->lang('DIGESTS_ALL');
 					break;
 
+					case 'd':
+						$subscribe_sql = "user_digest_type <> 'NONE' AND user_digest_type = '" . constants::DIGESTS_DAILY_VALUE . "'  AND ";
+						$daily_selected = ' selected="selected"';
+						$context = $this->language->lang('DIGESTS_DAILY_ONLY');
+					break;
+
+					case 'w':
+						$subscribe_sql = "user_digest_type <> 'NONE' AND user_digest_type = '" . constants::DIGESTS_WEEKLY_VALUE . "'  AND ";
+						$weekly_selected = ' selected="selected"';
+						$context = $this->language->lang('DIGESTS_WEEKLY_ONLY');
+					break;
+
+					case 'm':
+						$subscribe_sql = "user_digest_type <> 'NONE' AND user_digest_type ='" . constants::DIGESTS_MONTHLY_VALUE . "' AND ";
+						$monthly_selected = ' selected="selected"';
+						$context = $this->language->lang('DIGESTS_MONTHLY');
+					break;
+
 					default:
 						// Keep PhpStorm happy, this block should never get invoked
 						$subscribe_sql = '';
 						$all_selected = '';
 						$context = '';
+
 				}
 
 				// Set up sort by column
@@ -291,7 +316,7 @@ class main_module
 				$this->db->sql_freeresult($result);
 				
 				// Create pagination logic
-				$pagination_url = append_sid("index.$this->phpEx?i=-phpbbservices-digests-acp-main_module&amp;mode=digests_edit_subscribers&amp;sortby=$sortby&amp;subscribe=$subscribe&amp;member=$member");
+				$pagination_url = append_sid("index.$this->phpEx?i=-phpbbservices-digests-acp-main_module&amp;mode=digests_edit_subscribers&amp;sortby=$sortby&amp;subscribe=$subscribe&amp;member=$member&amp;selected=$selected&amp;sortorder=$sortorder");
 				$this->pagination->generate_template_pagination($pagination_url, 'pagination', 'start', $total_users, $this->config['phpbbservices_digests_users_per_page'], $start);
 								
 				// Stealing some code from my Smartfeed extension so I can get a list of forums that a particular user can access
@@ -321,6 +346,8 @@ class main_module
 				$this->template->assign_vars(array(
 					'ALL_SELECTED'				=> $all_selected,
 					'ASCENDING_SELECTED'		=> $ascending_selected,
+					'DAILY_SELECTED'			=> $daily_selected,
+					'DEFAULT_SELECTED'			=> $selected_subscribe,
 					'DESCENDING_SELECTED'		=> $descending_selected,
 					'DIGESTS_HTML_VALUE'			=> constants::DIGESTS_HTML_VALUE,
 					'DIGESTS_HTML_CLASSIC_VALUE'	=> constants::DIGESTS_HTML_CLASSIC_VALUE,
@@ -332,16 +359,20 @@ class main_module
 					'FREQUENCY_SELECTED'		=> $frequency_selected,
 					'HAS_UNSUBSCRIBED_SELECTED'	=> $has_unsubscribed_selected,
 					'HOUR_SELECTED'				=> $hour_selected,
+					'IGNORE_SELECTED'			=> $selected_ignore,
 					'IMAGE_PATH'				=> $this->phpbb_root_path . 'ext/phpbbservices/digests/adm/images/',
 					'LAST_SENT_SELECTED'		=> $last_sent_selected,
 					'LASTVISIT_SELECTED'		=> $lastvisit_selected,
 					'L_CONTEXT'					=> $context,
 					'MEMBER'					=> $member,
+					'MONTHLY_SELECTED'			=> $monthly_selected,
+					'NONE_SELECTED'				=> $selected_unsubscribe,
 					'STOPPED_SUBSCRIBING_SELECTED'	=> $stopped_subscribing,
 					'SUBSCRIBE_SELECTED'		=> $subscribe_selected,
 					'TOTAL_USERS'       		=> $this->language->lang('DIGESTS_LIST_USERS', (int) $total_users),
 					'UNSUBSCRIBE_SELECTED'		=> $unsubscribe_selected,
 					'USERNAME_SELECTED'			=> $username_selected,
+					'WEEKLY_SELECTED'			=> $weekly_selected,
 				));
 
 				$sql_array = array(
@@ -943,8 +974,8 @@ class main_module
 
 			// The "selected" input control indicates whether to do mass actions or not. With mass actions only the select control and
 			// the mark checkboxes matter. Other controls are ignored.
-			$selected = $this->request->variable('selected', 'IGNORE', true);
-			$mass_action = ($selected == 'IGNORE') ? false : true;
+			$selected = $this->request->variable('selected', 'i', true);
+			$mass_action = ($selected == 'i') ? false : true;
 			$use_defaults = false;
 			$use_defaults_pass = false;
 			unset($sql_ary, $sql_ary2);
@@ -1558,7 +1589,7 @@ class main_module
 			// Create the store/phpbbservices/digests folder. It should exist already.
 			if (!$this->helper->make_directories())
 			{
-				$message = sprintf($this->language->lang('DIGESTS_CREATE_DIRECTORY_ERROR'), $digests_storage_path);
+				$message = sprintf(strip_tags($this->language->lang('LOG_CONFIG_DIGESTS_CREATE_DIRECTORY_ERROR')), $digests_storage_path);
 				$continue = false;
 			}
 

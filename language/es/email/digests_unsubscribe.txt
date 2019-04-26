@@ -1,0 +1,7 @@
+Estimado {{ USERNAME }},
+
+Esto es para notificarte que un administrador de {{ FORUM_NAME }} te ha dado de baja de recibir el correo de resumen.
+
+Atentamente,
+
+Equipo de Administración de {{ FORUM_NAME }}

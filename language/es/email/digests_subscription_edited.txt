@@ -1,0 +1,9 @@
+Estimado {{ USERNAME }},
+
+Esto es para notificarte que un administrador del foro {{ FORUM_NAME }} ha editado los ajustes de tu resumen. Para ver los nuevos ajustes de tu resumen, utiliza el siguiente enlace y pincha en el enlace del resumen:
+
+{{ DIGESTS_UCP_LINK }}
+
+Atentamente,
+
+Equipo de Administración de {{ FORUM_NAME }}

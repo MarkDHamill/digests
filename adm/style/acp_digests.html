@@ -437,9 +437,9 @@
 		<fieldset class="display-options">
 			<label for="selected">{{ lang('DIGESTS_WITH_SELECTED') }}{{ lang('COLON') }}</label>
 			<select id="selected" name="selected" onchange="addToStack(this.name);">
-				<option value="IGNORE" selected="selected">{{ lang('DIGESTS_IGNORE') }}</option>
-				<option value="NONE">{{ lang('DIGESTS_UNSUBSCRIBE') }}</option>
-				<option value="DFLT">{{ lang('DIGESTS_DEFAULT') }}</option>
+				<option value="i"{{ IGNORE_SELECTED }}>{{ lang('DIGESTS_IGNORE') }}</option>
+				<option value="n"{{ NONE_SELECTED }}>{{ lang('DIGESTS_UNSUBSCRIBE') }}</option>
+				<option value="d"{{ DEFAULT_SELECTED }}>{{ lang('DIGESTS_DEFAULT') }}</option>
 			</select>&nbsp;
 			<label for="subscribe">{{ lang('DIGESTS_SHOW') }}{{ lang('COLON') }}</label>
 			<select id="subscribe" name="subscribe" onchange="addToStack(this.name);">
@@ -447,6 +447,9 @@
 				<option value="s"{{ SUBSCRIBE_SELECTED }}>{{ lang('DIGESTS_SUBSCRIBED') }}</option>
 				<option value="u"{{ UNSUBSCRIBE_SELECTED }}>{{ lang('DIGESTS_UNSUBSCRIBED') }}</option>
 				<option value="t"{{ STOPPED_SUBSCRIBING_SELECTED }}>{{ lang('DIGESTS_STOPPED_SUBSCRIBING') }}</option>
+				<option value="d"{{ DAILY_SELECTED }}>{{ lang('DIGESTS_DAILY_ONLY') }}</option>
+				<option value="w"{{ WEEKLY_SELECTED }}>{{ lang('DIGESTS_WEEKLY_ONLY') }}</option>
+				<option value="m"{{ MONTHLY_SELECTED }}>{{ lang('DIGESTS_MONTHLY_ONLY') }}</option>
 			</select>&nbsp;
 			<label for="sortby">{{ lang('SORT_BY') }}{{ lang('COLON') }}</label>
 			<select id="sortby" name="sortby" onchange="addToStack(this.name);">

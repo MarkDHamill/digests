@@ -1,0 +1,13 @@
+{{ S_DIGESTS_TITLE }}
+
+{{ lang('DIGESTS_SALUTATION') }} {{ S_DIGESTS_SALUTATION_BLURB }}
+
+{{ S_DIGESTS_INTRODUCTION }}
+{{ DIGESTS_TOC }}
+____________________________________________________________
+{{ DIGESTS_CONTENT }}
+____________________________________________________________
+
+{{ S_DIGESTS_DISCLAIMER }}
+
+{{ lang('DIGESTS_POWERED_BY_TEXT') }} {{ S_DIGESTS_POWERED_BY }}{{ S_DIGESTS_TRANSLATOR }}

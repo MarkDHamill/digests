@@ -1,0 +1,9 @@
+Estimado {{ USERNAME }},
+
+Esto es para notificarte que un administrador del foro {{ FORUM_NAME }} te ha suscrito a recibir {{ DIGESTS_TYPE }} {{ DIGESTS_FORMAT }} resumen. Si no quieres recibir el resumen, te puedes dar de baja seleccionando el tabulador de resúmenes en el panel de control de usuario del foro. Una vez conectado, selecciona la opción de darte de baja. Lo puedes hacer mediante este enlace:
+
+{{ DIGESTS_UCP_LINK }}
+
+Atentamente,
+
+Equipo de Administración de {{ FORUM_NAME }}

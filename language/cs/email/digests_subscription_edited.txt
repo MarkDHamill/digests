@@ -1,0 +1,9 @@
+Milá/milý {{ USERNAME }},
+
+oznamujeme vám, že administrátor fóra {{ FORUM_NAME }} změnil vaše nastavení souhrnů emailem. Vaše aktuální nastavení si můžete prohlédnout v uživatelském panelu, záložce "Souhrny emailem", případně použijte tento odkaz:
+
+{{ DIGESTS_UCP_LINK }}
+
+S pozdravem,
+
+{{ FORUM_NAME }} - administrátor

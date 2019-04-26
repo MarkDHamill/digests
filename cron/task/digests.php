@@ -69,6 +69,8 @@ class digests extends \phpbb\cron\task\base
 
 	public function __construct(\phpbb\config\config $config, \phpbb\request\request $request, \phpbb\user $user, \phpbb\db\driver\factory $db, $php_ext, $phpbb_root_path, \phpbb\template\template $template, \phpbb\auth\auth $auth, $table_prefix, \phpbb\log\log $phpbb_log, \phpbbservices\digests\core\common $helper, \phpbb\language\language $language)
 	{
+		global $phpbb_container;
+
 		$this->config = $config;
 		$this->request = $request;
 		$this->user = $user;
@@ -81,6 +83,7 @@ class digests extends \phpbb\cron\task\base
 		$this->phpbb_log = $phpbb_log;
 		$this->helper = $helper;
 		$this->language = $language;
+		$this->phpbb_container = $phpbb_container;
 
 		$this->forum_hierarchy = array();
 		$this->run_mode = constants::DIGESTS_RUN_REGULAR;
@@ -965,35 +968,6 @@ class digests extends \phpbb\cron\task\base
 					'DIGESTS_CONTENT' => $digest_content,
 				));
 
-				// Mark private messages in the digest as read, if so instructed
-				if ((sizeof($pm_rowset) != 0) && ($row['user_digest_show_pms'] == 1) && ($row['user_digest_pm_mark_read'] == 1))
-				{
-
-					$sql_ary = array(
-						'pm_new'    => 0,
-						'pm_unread' => 0,
-						'folder_id' => 0,
-					);
-
-					$pm_read_sql = 'UPDATE ' . PRIVMSGS_TO_TABLE . '
-					SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
-					WHERE user_id = ' . (int) $row['user_id'] . '
-						AND (pm_unread = 1 OR pm_new = 1)';
-
-					$this->db->sql_query($pm_read_sql);
-
-					// Reduce the user_unread_privmsg and user_new_privmsg count by the amount of PMs in the digest.
-					// Be careful not to store a negative number in case the database is inconsistent. Note: the nature
-					// of this SQL is that using $db->sql_build_array won't generate the desired SQL, so we go rogue.
-
-					$update_users_sql = 'UPDATE ' . USERS_TABLE . '
-					SET user_unread_privmsg = user_unread_privmsg - ' . min($total_pm_unread, $row['user_unread_privmsg']) . ', 
-						user_new_privmsg = user_new_privmsg - ' . min($total_pm_new, $row['user_new_privmsg']);
-
-					$this->db->sql_query($update_users_sql);
-
-				}
-
 				if (($this->run_mode == constants::DIGESTS_RUN_MANUAL) && ($this->config['phpbbservices_digests_test_spool']))
 				{
 
@@ -1107,7 +1081,7 @@ class digests extends \phpbb\cron\task\base
 							}
 						}
 
-						if (!$this->run_mode == constants::DIGESTS_RUN_MANUAL)
+						if (!($this->run_mode == constants::DIGESTS_RUN_MANUAL))
 						{
 
 							// Record the moment the digest was successfully sent to the subscriber
@@ -1138,19 +1112,51 @@ class digests extends \phpbb\cron\task\base
 									include($this->path_prefix . 'includes/functions.' . $this->phpEx);
 								}
 
-								// In order to mark all forums read and to clear all notifications, we must temporarily
-								// set the value of $user->data['user_id'] to the current subscriber because markall()
-								// assumes the subscriber is logged in and uses this value.
+								// In order to mark all forums read and to clear all forum-related notifications, we must
+								// temporarily set the value of $user->data['user_id'] to the current subscriber because
+								// markread() assumes the subscriber is logged in and uses this value.
 
 								$saved_user_id = $this->user->data['user_id'];
 
 								$this->user->data['user_id'] = $row['user_id'];
 								$this->user->data['is_registered'] = 1;
-								markread('all');    // Perform mark all forums read
+								markread('all', false, false, $now);    // Perform mark all forums read through the current hour for this subscriber
 
 								$this->user->data['user_id'] = $saved_user_id;
 							}
 
+							// Mark private messages in the digest as read, if so instructed
+							if ((sizeof($pm_rowset) != 0) && ($row['user_digest_show_pms'] == 1) && ($row['user_digest_pm_mark_read'] == 1))
+							{
+
+								$sql_ary = array(
+									'pm_new'    => 0,
+									'pm_unread' => 0,
+									'folder_id' => 0,
+								);
+
+								$pm_read_sql = 'UPDATE ' . PRIVMSGS_TO_TABLE . '
+									SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
+									WHERE user_id = ' . (int) $row['user_id'] . '
+										AND (pm_unread = 1 OR pm_new = 1)';
+
+								$this->db->sql_query($pm_read_sql);
+
+								// Reduce the user_unread_privmsg and user_new_privmsg count by the amount of PMs in the digest.
+								// Be careful not to store a negative number in case the database is inconsistent. Note: the nature
+								// of this SQL is that using $db->sql_build_array won't generate the desired SQL, so we go rogue.
+
+								$update_users_sql = 'UPDATE ' . USERS_TABLE . '
+									SET user_unread_privmsg = user_unread_privmsg - ' . min($total_pm_unread, $row['user_unread_privmsg']) . ', 
+										user_new_privmsg = user_new_privmsg - ' . min($total_pm_new, $row['user_new_privmsg']);
+
+								$this->db->sql_query($update_users_sql);
+
+								// Next, mark all private message notification for the subscriber as read
+								$phpbb_notifications = $this->phpbb_container->get('notification_manager');
+								$phpbb_notifications->mark_notifications_read('notification.type.pm', false, $row['user_id'], true);
+
+							}
 						}
 
 					}
@@ -1776,7 +1782,7 @@ class digests extends \phpbb\cron\task\base
 					break;
 				}
 				
-				// Skip posts if new posts only logic applies, or if for some reason it's timestamp is before the allowed daily, weekly or monthly digest range.
+				// Skip post if new posts only logic applies, or if for some reason its timestamp is before the allowed daily, weekly or monthly digest range.
 				if (($user_row['user_digest_new_posts_only']) && ($post_row['post_time'] < max($this->date_limit, $user_row['user_lastvisit'])))
 				{
 					continue;
@@ -2288,7 +2294,7 @@ class digests extends \phpbb\cron\task\base
 				FROM ' . POSTS_TABLE . '
 				WHERE post_time >= ' . (int) $start_ts . ' AND post_time <= ' . (int) $end_ts . '
 				GROUP BY topic_id
-				HAVING popularity > ' . (int) $popularity_size;
+				HAVING popularity >= ' . (int) $popularity_size;
 
 		$result = $this->db->sql_query($sql);
 

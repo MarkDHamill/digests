@@ -20,6 +20,7 @@ class digests extends \phpbb\cron\task\base
 	protected $helper;
 	protected $language;
 	protected $phpbb_log;
+	protected $phpbb_notifications;
 	protected $phpbb_root_path;
 	protected $phpEx;
 	protected $request;
@@ -53,24 +54,24 @@ class digests extends \phpbb\cron\task\base
 	/**
 	* Constructor.
 	*
-	* @param \phpbb\config\config 		$config 			The config
-	* @param \phpbb\request\request 	$request 			The request object
-	* @param \phpbb\user 				$user 				The user object
-	* @param \phpbb\db\driver\factory 	$db 				The database factory object
-	* @param $php_ext 					$string				PHP file suffix
-	* @param $phpbb_root_path			$string				Relative path to phpBB root
-	* @param \phpbb\template\template 	$template 			The template engine object
-	* @param \phpbb\auth\auth 			$auth 				The auth object
-	* @param $table_prefix 				string				Prefix for phpbb's database tables
-	* @param \phpbb\log\log 			$phpbb_log 			phpBB log object
-	* @param \phpbbservices\digests\core\common $helper		Extension's helper object
-	* @param \phpbb\language\language 	$language 			Language object
+	* @param \phpbb\config\config 				$config 				The config
+	* @param \phpbb\request\request 			$request 				The request object
+	* @param \phpbb\user 						$user 					The user object
+	* @param \phpbb\db\driver\factory 			$db 					The database factory object
+	* @param string								$php_ext 				PHP file suffix
+	* @param string								$phpbb_root_path		Relative path to phpBB root
+	* @param \phpbb\template\template 			$template 				The template engine object
+	* @param \phpbb\auth\auth 					$auth 					The auth object
+	* @param string								$table_prefix 			Prefix for phpbb's database tables
+	* @param \phpbb\log\log 					$phpbb_log 				phpBB log object
+	* @param \phpbbservices\digests\core\common $helper					Extension's helper object
+	* @param \phpbb\language\language 			$language 				Language object
+	* @param \phpbb\notification\manager 		$notification_manager 	Notifications manager
+	*
 	*/
 
-	public function __construct(\phpbb\config\config $config, \phpbb\request\request $request, \phpbb\user $user, \phpbb\db\driver\factory $db, $php_ext, $phpbb_root_path, \phpbb\template\template $template, \phpbb\auth\auth $auth, $table_prefix, \phpbb\log\log $phpbb_log, \phpbbservices\digests\core\common $helper, \phpbb\language\language $language)
+	public function __construct(\phpbb\config\config $config, \phpbb\request\request $request, \phpbb\user $user, \phpbb\db\driver\factory $db, $php_ext, $phpbb_root_path, \phpbb\template\template $template, \phpbb\auth\auth $auth, $table_prefix, \phpbb\log\log $phpbb_log, \phpbbservices\digests\core\common $helper, \phpbb\language\language $language, \phpbb\notification\manager $notification_manager)
 	{
-		global $phpbb_container;
-
 		$this->config = $config;
 		$this->request = $request;
 		$this->user = $user;
@@ -83,7 +84,7 @@ class digests extends \phpbb\cron\task\base
 		$this->phpbb_log = $phpbb_log;
 		$this->helper = $helper;
 		$this->language = $language;
-		$this->phpbb_container = $phpbb_container;
+		$this->phpbb_notifications = $notification_manager;
 
 		$this->forum_hierarchy = array();
 		$this->run_mode = constants::DIGESTS_RUN_REGULAR;
@@ -808,6 +809,8 @@ class digests extends \phpbb\cron\task\base
 				// Count # of unread and new for this user. Counts may need to be reduced later.
 				$total_pm_unread = 0;
 				$total_pm_new = 0;
+				unset($msg_ids);
+				$msg_ids = array();
 
 				if ($row['user_digest_show_pms'])
 				{
@@ -824,7 +827,7 @@ class digests extends \phpbb\cron\task\base
 						'WHERE' => 'pt.msg_id = pm.msg_id
 										AND pt.author_id = u.user_id
 										AND pt.user_id = ' . (int) $row['user_id'] . '
-										AND (pm_unread = 1 OR pm_new = 1)',
+										AND ((pm_unread = 1 AND folder_id <> ' . PRIVMSGS_OUTBOX .') OR (pm_new = 1 AND folder_id IN (' . PRIVMSGS_NO_BOX . ', ' . PRIVMSGS_HOLD_BOX . ')))',	// Logic used by function update_pm_counts() in /includes/functions_privmsgs.php
 
 						'ORDER_BY' => 'message_time',
 					);
@@ -844,6 +847,7 @@ class digests extends \phpbb\cron\task\base
 						{
 							$total_pm_new++;
 						}
+						$msg_ids[] = $pm_row['msg_id'];
 					}
 					$this->db->sql_freeresult($pm_result);
 
@@ -1045,7 +1049,7 @@ class digests extends \phpbb\cron\task\base
 					// if there are unread private messages AND the user wants to see private messages in the digest.
 
 					// Try to send this digest
-					if ($row['user_digest_send_on_no_posts'] || $this->posts_in_digest > 0 || ((sizeof($pm_rowset) > 0) && $row['user_digest_show_pms']))
+					if ($row['user_digest_send_on_no_posts'] || $this->posts_in_digest > 0 || (is_array($pm_rowset) && count($pm_rowset) > 0) && $row['user_digest_show_pms'])
 					{
 
 						$mail_sent = $html_messenger->send(NOTIFY_EMAIL, false, $is_html, true);     // digest mailed
@@ -1132,29 +1136,30 @@ class digests extends \phpbb\cron\task\base
 								$sql_ary = array(
 									'pm_new'    => 0,
 									'pm_unread' => 0,
-									'folder_id' => 0,
+									'folder_id' => PRIVMSGS_INBOX,
 								);
+
+								$this->db->sql_transaction('begin');
 
 								$pm_read_sql = 'UPDATE ' . PRIVMSGS_TO_TABLE . '
 									SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
-									WHERE user_id = ' . (int) $row['user_id'] . '
-										AND (pm_unread = 1 OR pm_new = 1)';
+									WHERE ' . $this->db->sql_in_set('msg_id', $msg_ids);
 
 								$this->db->sql_query($pm_read_sql);
 
-								// Reduce the user_unread_privmsg and user_new_privmsg count by the amount of PMs in the digest.
-								// Be careful not to store a negative number in case the database is inconsistent. Note: the nature
-								// of this SQL is that using $db->sql_build_array won't generate the desired SQL, so we go rogue.
+								// Since any unread and new private messages will be in the digest, it's safe to set these values to zero.
 
 								$update_users_sql = 'UPDATE ' . USERS_TABLE . '
-									SET user_unread_privmsg = user_unread_privmsg - ' . min($total_pm_unread, $row['user_unread_privmsg']) . ', 
-										user_new_privmsg = user_new_privmsg - ' . min($total_pm_new, $row['user_new_privmsg']);
+									SET user_unread_privmsg = 0, 
+										user_new_privmsg = 0
+									WHERE user_id = ' . (int) $row['user_id'];
 
 								$this->db->sql_query($update_users_sql);
 
+								$this->db->sql_transaction('commit');
+
 								// Next, mark all private message notification for the subscriber as read
-								$phpbb_notifications = $this->phpbb_container->get('notification_manager');
-								$phpbb_notifications->mark_notifications_read('notification.type.pm', false, $row['user_id'], true);
+								$this->phpbb_notifications->mark_notifications('notification.type.pm', false, $row['user_id'], false);
 
 							}
 						}
@@ -1249,7 +1254,7 @@ class digests extends \phpbb\cron\task\base
 
 		// Process private messages (if any) first since they appear before posts in the digest
 		
-		if ((sizeof($pm_rowset) != 0) && ($user_row['user_digest_show_pms'] == 1))
+		if ((is_array($pm_rowset) && count($pm_rowset) > 0) && ($user_row['user_digest_show_pms'] == 1))
 		{
 		
 			// There are private messages and the user wants to see them in the digest
@@ -2007,7 +2012,7 @@ class digests extends \phpbb\cron\task\base
 
 		// General template variables are set here. Many are inherited from language variables.
 		$this->template->assign_vars(array(
-			'DIGESTS_TOTAL_PMS'				=> count($pm_rowset),
+			'DIGESTS_TOTAL_PMS'				=> is_array($pm_rowset) ? count($pm_rowset) : 0,
 			'DIGESTS_TOTAL_POSTS'			=> $this->posts_in_digest,
 			'L_DIGESTS_NO_PRIVATE_MESSAGES'	=> $this->language->lang('DIGESTS_NO_PRIVATE_MESSAGES') . "\n",
 			'L_PRIVATE_MESSAGE'				=> strtolower($this->language->lang('PRIVATE_MESSAGE')) . "\n",

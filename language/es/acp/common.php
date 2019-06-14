@@ -44,11 +44,12 @@ $lang = array_merge($lang, array(
 	'DIGESTS_BALANCE_LOAD'									=> 'Balancear la carga',
 	'DIGESTS_BALANCE_HOURS'									=> 'Balancear estas horas',
 	'DIGESTS_BASED_ON'										=> '(Basado en UTC%+d)',
+	'DIGESTS_COLLAPSE'										=> 'Colapsar',
+	'DIGESTS_COMMA'											=> ', ',		// Utilizado en saludos y para separar artículos en listas
+	'DIGESTS_CREATE_DIRECTORY_ERROR'						=> 'No se puede crear la carpeta %s. Esto puede deberse a permisos insuficientes. Los permisos de archivo en la carpeta deben configurarse en escritura pública (777 en sistemas basados en Unix).',
 	'DIGESTS_CURRENT_VERSION_INFO'							=> 'Tienes la versión <strong>%s</strong>.',
 	'DIGESTS_CUSTOM_STYLESHEET_PATH'						=> 'Ruta del estilo customizado',
 	'DIGESTS_CUSTOM_STYLESHEET_PATH_EXPLAIN'				=> 'Esta configuración solo se aplica si la casilla para habilitar la hoja de estilo personalizada está habilitada. Si está habilitado, esta hoja de estilo se aplicará a todos los resúmenes estilizados. La ruta debe ser una ruta relativa desde la carpeta de estilos de phpBB y normalmente debe estar en la subcarpeta del tema. Nota: tú eres responsable de crear esta hoja de estilo y de colocarla en un archivo con el nombre ingresado aquí en la ubicación apropiada de tu servidor. Ejemplo: prosilver/theme/digest_stylesheet.css. Para más información sobre la creación de hojas de estilo, haz clic en <a href="http://www.w3schools.com/css/"> aquí</a>.',
-	'DIGESTS_COLLAPSE'										=> 'Colapsar',
-	'DIGESTS_COMMA'											=> ', ',		// Utilizado en saludos y para separar artículos en listas
 	'DIGESTS_DEFAULT'										=> 'Suscribirse usando los valores por defecto',
 	'DIGESTS_DAILY_ONLY'									=> 'Solo resúmenes diarios',
 	'DIGESTS_ENABLE_AUTO_SUBSCRIPTIONS'						=> 'Habilitar suscripciones automáticas',

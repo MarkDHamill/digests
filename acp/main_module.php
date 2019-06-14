@@ -1589,7 +1589,7 @@ class main_module
 			// Create the store/phpbbservices/digests folder. It should exist already.
 			if (!$this->helper->make_directories())
 			{
-				$message = sprintf(strip_tags($this->language->lang('LOG_CONFIG_DIGESTS_CREATE_DIRECTORY_ERROR')), $digests_storage_path);
+				$message = sprintf($this->language->lang('DIGESTS_CREATE_DIRECTORY_ERROR'), $digests_storage_path);
 				$continue = false;
 			}
 

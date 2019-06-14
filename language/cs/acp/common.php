@@ -46,12 +46,13 @@ $lang = array_merge($lang, array(
 	'DIGESTS_BALANCE_LOAD'									=> 'Vyvážení zátěže',
 	'DIGESTS_BALANCE_HOURS'									=> 'Vyvážit tyto hodiny',
 	'DIGESTS_BASED_ON'										=> '(Vztaženo k UTC%+d)',
+	'DIGESTS_COLLAPSE'										=> 'Sbalit',
+	'DIGESTS_COMMA'											=> ', ',		// Used  in salutations and to separate items in lists
+	'DIGESTS_CREATE_DIRECTORY_ERROR'						=> 'Nepodařilo se vytvořit složku "%s". Může to být způsobeno nedostatečnými právy. Práva nadřazené složky by měla umožnit zapisování (777 na unixových systémech).',
 	'DIGESTS_CURRENT_VERSION_INFO'							=> 'Vaše verze je <strong>%s</strong>.',
 	'DIGESTS_CUSTOM_STYLESHEET_PATH'						=> 'Cesta k vlastnímu CSS stylu',
 	'DIGESTS_CUSTOM_STYLESHEET_PATH_EXPLAIN'				=> 'Toto nastavení je použito jen pokud je nastavena volba "Povolit vlastní CSS styl". Pokud je nastavena, styl bude použit pro všechny souhrny ve Stylovaném formátu. Cesta by měla být relativní k složce stylů a zpravidla by se měla nacházet ve složce s tématy. Upozornění: tento styl musíte vytvořit a umístit na server. Příklad: prosilver/theme/digest_stylesheet.css. Více informací o vytváření CSS stylů např. na <a href="http://www.w3schools.com/css/">W3 Schools</a>.',
-	'DIGESTS_COLLAPSE'										=> 'Sbalit',
-	'DIGESTS_COMMA'											=> ', ',		// Used  in salutations and to separate items in lists
-    'DIGESTS_DEFAULT'										=> 'Objednat pomocí výchozích nastavení',
+	'DIGESTS_DEFAULT'										=> 'Objednat pomocí výchozích nastavení',
 	'DIGESTS_DAILY_ONLY'									=> 'Jen denní souhrny',
 	'DIGESTS_ENABLE_AUTO_SUBSCRIPTIONS'						=> 'Automaticky zapnout souhrny novým uživatelům',
 	'DIGESTS_ENABLE_AUTO_SUBSCRIPTIONS_EXPLAIN'				=> 'Pokud chcete, aby noví uživatelé automaticky dostávali souhrny, zvolte "Ano". Jako výchozí nastavení se použijí výchozí nastavení (to se nastavuje v sekci "Výchozí nastavení uživatelů" níže). Tímto se ale nenastaví zasílání souhrnů stávajícím uživatelům.',

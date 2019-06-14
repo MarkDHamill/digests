@@ -44,11 +44,12 @@ $lang = array_merge($lang, array(
 	'DIGESTS_BALANCE_LOAD'									=> 'Équilibrer la charge',
 	'DIGESTS_BALANCE_HOURS'									=> 'Équilibrer les heures',
 	'DIGESTS_BASED_ON'										=> '(Basée sur UTC%+d)',
+	'DIGESTS_COLLAPSE'										=> 'Réduire',
+	'DIGESTS_COMMA'											=> ', ',		// Utilisée pour les salutations et pour séparer les éléments dans les listes
+	'DIGESTS_CREATE_DIRECTORY_ERROR'						=> 'Impossible de créer le dossier %s. Cela est peut-être dû à permissions insuffisantes. Les permissions de fichier du dossier doivent être réglées en écriture publique (777 sur les systèmes Unix).',
 	'DIGESTS_CURRENT_VERSION_INFO'							=> 'Vous exécutez la version <strong>%s</strong>.',
 	'DIGESTS_CUSTOM_STYLESHEET_PATH'						=> 'Chemin d&apos;accès à la feuille de style personnalisée',
 	'DIGESTS_CUSTOM_STYLESHEET_PATH_EXPLAIN'				=> 'Ce réglage ne s&apos;applique que si l&apos;option Activer la feuille de style personnalisée est activée. Si elle est activée, cette feuille de style sera appliquée à tous les résumés stylés. Le chemin d&apos;accès doit être un chemin d&apos;accès relatif à votre dossier de styles phpBB qui doit normalement se trouver dans le sous-dossier theme. Nota : vous êtes responsables de la création de la feuille de style et de son placement dans un fichier ayant pour nom celui saisi ici à l&apos;endroit approprié sur votre serveur. Exemple: prosilver/theme/digest_stylesheet.css. Pour des informations relatives à la création de feuilles de style, cliquez <a href="http://www.w3schools.com/css/">ici</a>.',
-	'DIGESTS_COLLAPSE'										=> 'Réduire',
-	'DIGESTS_COMMA'											=> ', ',		// Utilisée pour les salutations et pour séparer les éléments dans les listes
 	'DIGESTS_DEFAULT'										=> 'Abonner en utilisant les valeurs par défaut',
 	'DIGESTS_DAILY_ONLY'									=> 'Résumés journaliers seulement',
 	'DIGESTS_ENABLE_AUTO_SUBSCRIPTIONS'						=> 'Activer l&apos;abonnement automatique',

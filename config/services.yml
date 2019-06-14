@@ -27,6 +27,7 @@ services:
             - '@log'
             - '@phpbbservices.digests.common'
             - '@language'
+            - '@notification_manager'
         calls:
             - [set_name, [cron.task.cron_task]]
         tags:

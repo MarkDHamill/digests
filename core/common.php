@@ -23,7 +23,7 @@ class common
 	 * Constructor.
 	 *
 	 * @param \phpbb\language\language 	$language 			Language object
-	 * @param $phpbb_root_path								Relative path to phpBB root
+	 * @param string					$phpbb_root_path	Relative path to phpBB root
 	 */
 
 	public function __construct(\phpbb\language\language $language, $phpbb_root_path)

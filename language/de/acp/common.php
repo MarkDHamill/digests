@@ -44,11 +44,12 @@ $lang = array_merge($lang, array(
 	'DIGESTS_BALANCE_LOAD'									=> 'Last-Verteilung',
 	'DIGESTS_BALANCE_HOURS'									=> 'Last-Verteilung für diese Zeiten durchführen',
 	'DIGESTS_BASED_ON'										=> '(UTC%+d)',
+	'DIGESTS_COLLAPSE'										=> 'Einklappen',
+	'DIGESTS_COMMA'											=> ', ',		// Used  in salutations and to separate items in lists
+	'DIGESTS_CREATE_DIRECTORY_ERROR'						=> 'Das Verzeichnis %s konnte nicht angelegt werden. Ursache könnten fehlende Dateirechte sein. Sie sollten auf &rsquo;publicly writeable&rsquo; sein (777 auf Unix-basierten Systemen).',
 	'DIGESTS_CURRENT_VERSION_INFO'							=> 'Aktuelle Version: <strong>%s</strong>',
 	'DIGESTS_CUSTOM_STYLESHEET_PATH'						=> 'Pfad zum Custom-Stylesheet',
 	'DIGESTS_CUSTOM_STYLESHEET_PATH_EXPLAIN'				=> 'Dieser Pfadangabe ist nur von Bedeutung, wenn weiter oben auch die Verwendung des Custom-Sylesheet aktiviert ist. Das Stylesheet wird dann für alle HTML-Zusammenfassungen verwendet. Es muss der relative Pfad zum phpBB-styles-Verzeichnis angegeben werden. Es ist sinnvoll, dafür ein eigenes Unterverzeichnis innerhalb des Themes anzulegen. Anmerkung: Es fällt in deinen eigenen Zuständigkeitsbereich, selbst ein solches Stylesheet zu entwickeln und es unter dem hier angegebenen Pfad und Namen auf den Server zu hinterlegen. Beispiel: prosilver/theme/digest_stylesheet.css. Informationen zum Erstellen von Stylesheets findest du <a href="http://www.w3schools.com/css/">hier</a>.',
-	'DIGESTS_COLLAPSE'										=> 'Einklappen',
-	'DIGESTS_COMMA'											=> ', ',		// Used  in salutations and to separate items in lists
 	'DIGESTS_DEFAULT'										=> 'Abonnement mit Standard-Einstellungen anlegen',
 	'DIGESTS_DAILY_ONLY'									=> 'Nur tägliche Zusammenfassung',
 	'DIGESTS_ENABLE_AUTO_SUBSCRIPTIONS'						=> 'Automatisches Abonnieren aktivieren',

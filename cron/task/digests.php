@@ -453,7 +453,7 @@ class digests extends \phpbb\cron\task\base
 								AND user_inactive_reason = 0 " . $allowed_user_types . "
 								AND user_digest_type <> '" . constants::DIGESTS_NONE_VALUE . "'",
 			
-				'ORDER_BY'	=> ' user_lang',
+				'ORDER_BY'	=> 'user_lang',
 			);
 
 		}
@@ -553,54 +553,46 @@ class digests extends \phpbb\cron\task\base
 				// for this user is the same as the current day and hour, presumably the subscriber has already received a
 				// digest so skip sending it.
 
-				$user_digest_last_sent = getdate($row['user_digest_last_sent']);
 				if ($this->run_mode != constants::DIGESTS_RUN_MANUAL)
 				{
-					if ($hour == 0 && $user_digest_last_sent['year'] == $now_info['year'] && $user_digest_last_sent['yday'] == $now_info['yday'] && $user_digest_last_sent['hours'] == $now_info['hours'])
+
+					// Skip sending this digest if a full "cycle" has not elapsed since when the digest was last sent out. For example, if the user has
+					// subscribed to a daily digest, 24 hours needs to have elapsed since the last digest went out. The digest last sent time is recorded
+					// in the database when sent out. In manual mode, always try to send a digest.
+
+					switch ($row['user_digest_type'])
 					{
-						// Note the inconsistency in the log.
-						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_DUPLICATE_PREVENTED', false, array($row['username'], $row['user_email'], $utc_year . '-' . $utc_month . '-' . $utc_day, $current_hour_utc));
-						continue;
+						case constants::DIGESTS_WEEKLY_VALUE:
+							if (((int) $row['user_digest_last_sent']) + (7 * 60 * 60 * 24) > $now)
+							{
+								continue;
+							}
+						break;
+
+						case constants::DIGESTS_MONTHLY_VALUE:
+							// Calculate seconds in previous month, which depends on number of days in that month
+							$use_year = date('Y', $now);
+							$use_month = date('n', $now) - 1;
+							if ($use_month == 0)
+							{
+								$use_month = 12;
+								$use_year--;
+							}
+							$use_days_in_month = cal_days_in_month(CAL_GREGORIAN, $use_month, $use_year);
+							if (((int) $row['user_digest_last_sent']) + ($use_days_in_month * 60 * 60 * 24) > $now)
+							{
+								continue;
+							}
+						break;
+
+						case constants::DIGESTS_DAILY_VALUE:
+						default:
+							if (((int) $row['user_digest_last_sent']) + (60 * 60 * 24) > $now)
+							{
+								continue;
+							}
+						break;
 					}
-				}
-
-				// Skip sending this digest if a full "cycle" has not elapsed since when the digest was last sent out. For example, if the user has
-				// subscribed to a daily digest, 24 hours needs to have elapsed since the last digest went out. The digest last sent time is recorded
-				// in the database when sent out.
-
-				$top_of_hour_ts = $this->top_of_hour_timestamp($row['user_digest_last_sent']);
-				switch ($row['user_digest_type'])
-				{
-					case constants::DIGESTS_WEEKLY_VALUE:
-						if ($top_of_hour_ts + (7 * 60 * 60 * 24) > $now)
-						{
-							continue;
-						}
-					break;
-
-					case constants::DIGESTS_MONTHLY_VALUE:
-						// Calculate seconds in previous month, which depends on number of days in that month
-						$use_year = date('Y', $now);
-						$use_month = date('n', $now) - 1;
-						if ($use_month == 0)
-						{
-							$use_month = 12;
-							$use_year--;
-						}
-						$use_days_in_month = cal_days_in_month(CAL_GREGORIAN, $use_month, $use_year);
-						if ($top_of_hour_ts + ($use_days_in_month * 60 * 60 * 24) > $now)
-						{
-							continue;
-						}
-					break;
-
-					case constants::DIGESTS_DAILY_VALUE:
-					default:
-						if ($top_of_hour_ts + (60 * 60 * 24) > $now)
-						{
-							continue;
-						}
-					break;
 				}
 
 				// Load the appropriate language files based on the user's preferred language. The board default language

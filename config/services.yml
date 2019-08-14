@@ -5,6 +5,8 @@ services:
             - '@config'
             - '@template'
             - '@request'
+            - '%core.table_prefix%'
+            - '@dbal.conn'
         tags:
             - { name: event.listener }
     phpbbservices.digests.common:

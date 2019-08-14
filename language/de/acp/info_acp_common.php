@@ -46,7 +46,6 @@ $lang = array_merge($lang, array(
 	'LOG_CONFIG_DIGESTS_CACHE_CLEARED'						=> '<strong>Der store/ext/phpbbservices/digests-Ordner wurde geleert',
 	'LOG_CONFIG_DIGESTS_CLEAR_SPOOL_ERROR'					=> '<strong>Es konnten nicht alle Dateien aus dem store/ext/phpbbservices/digests-Ordner entfernt werden. Ursache könnten fehlende Datei-Rechte sein. Alle Dateien sollten &rsquo;publicly writeable&rsquo; sein (777 auf Unix-basierten Systemen).</strong>',
 	'LOG_CONFIG_DIGESTS_CREATE_DIRECTORY_ERROR'				=> '<strong>Das Verzeichnis %s konnte nicht angelegt werden. Ursache könnten fehlende Dateirechte sein. Sie sollten auf &rsquo;publicly writeable&rsquo; sein (777 auf Unix-basierten Systemen).</strong>',
-	'LOG_CONFIG_DIGESTS_DUPLICATE_PREVENTED'				=> '<strong>Die E-Mail-Zusammenfassung für %1$s (%2$s) vom %3$s, %4$02d UTC wurde nicht versandt, weil innerhalb dieser Stunde schon vorher eine Zusammenfassung an diesen Abonnenten versandt worden ist.</strong>',
 	'LOG_CONFIG_DIGESTS_EDIT_SUBSCRIBERS'					=> '<strong>Abonnenten bearbeitet</strong>',
 	'LOG_CONFIG_DIGESTS_FILE_CLOSE_ERROR'					=> '<strong>Die Datei %s kann nicht geschlossen werden</strong>',
 	'LOG_CONFIG_DIGESTS_FILE_OPEN_ERROR'					=> '<strong>File Handler kann im Verzeichnis %s nicht geöffnet werden. Ursache könnten fehlende Datei-Rechte sein. Alle Dateien sollten &rsquo;publicly writeable&rsquo; sein (777 auf Unix-basierten Systemen).</strong>',

@@ -46,7 +46,6 @@ $lang = array_merge($lang, array(
 	'LOG_CONFIG_DIGESTS_CACHE_CLEARED'						=> '<strong>Le dossier cache/phpbbservices/digests a été vidé',
 	'LOG_CONFIG_DIGESTS_CLEAR_SPOOL_ERROR'					=> '<strong>Impossible d&apos;effacer les fichiers dans le dossier cache/phpbbservices/digests. Cela peut être dû à un problème de permissions ou à un chemin d&apos;accès incorrect. Les permissions de fichier du dossier doivent être réglées sur écriture publique (777 sur les systèmes à base Unix).</strong>',
 	'LOG_CONFIG_DIGESTS_CREATE_DIRECTORY_ERROR'				=> '<strong>Impossible de créer le dossier %s. Cela est peut-être dû à permissions insuffisantes. Les permissions de fichier du dossier doivent être réglées en écriture publique (777 sur les systèmes Unix).</strong>',
-	'LOG_CONFIG_DIGESTS_DUPLICATE_PREVENTED'				=> '<strong>Le résumé n&apos;a PAS été envoyé à %1$s (%2$s) le %3$s à %4$02d UTC car il en a été envoyé un plus tôt pour cet abonné durant cette heure.</strong>',
 	'LOG_CONFIG_DIGESTS_EDIT_SUBSCRIBERS'					=> '<strong>Édition des abonnés au résumé</strong>',
 	'LOG_CONFIG_DIGESTS_FILE_CLOSE_ERROR'					=> '<strong>Impossible de fermer le fichier %s</strong>',
 	'LOG_CONFIG_DIGESTS_FILE_OPEN_ERROR'					=> '<strong>Impossible d&apos;ouvrir gestionnaire de fichier vers le dossier %s. Cela est peut-être dû à permissions insuffisantes. Les permissions de fichier du dossier doivent être réglées en écriture publique (777 sur les systèmes Unix).</strong>',

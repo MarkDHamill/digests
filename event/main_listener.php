@@ -13,6 +13,7 @@ namespace phpbbservices\digests\event;
 * @ignore
 */
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use phpbbservices\digests\constants\constants;
 
 /**
 * Event listener
@@ -28,18 +29,25 @@ class main_listener implements EventSubscriberInterface
 	/* @var \phpbb\request\request */
 	protected $request;
 
+	protected $table_prefix;
+	protected $db;
+
 	/**
 	* Constructor
 	*
 	* @param \phpbb\config\config		$config
-	* @param \phpbb\template\template	$template	Template object
-	* @param \phpbb\request\request		$request	Request object
+	* @param \phpbb\template\template	$template		Template object
+	* @param \phpbb\request\request		$request		Request object
+	* @param string						$table_prefix 	Prefix for phpbb's database tables
+	* @param \phpbb\db\driver\factory 	$db 			The database factory object
 	*/
-	public function __construct(\phpbb\config\config $config, \phpbb\template\template $template, \phpbb\request\request $request)
+	public function __construct(\phpbb\config\config $config, \phpbb\template\template $template, \phpbb\request\request $request, $table_prefix, \phpbb\db\driver\factory $db)
 	{
 		$this->config = $config;
 		$this->template = $template;
 		$this->request = $request;
+		$this->table_prefix = $table_prefix;
+		$this->db = $db;
 	}
 
 	static public function getSubscribedEvents()
@@ -48,6 +56,7 @@ class main_listener implements EventSubscriberInterface
 			'core.user_setup'					=> 'load_language_on_setup',
 			'core.user_add_modify_data'			=> 'subscribe_digests_on_registration',
 			'core.ucp_register_data_before'		=> 'ucp_register_data_before',
+			'core.delete_user_after'			=> 'delete_user_after',
 		);
 	}
 	
@@ -113,4 +122,21 @@ class main_listener implements EventSubscriberInterface
 		
 	}
 
+	/**
+	 * @param data $event
+	 */
+	public function delete_user_after($event)
+	{
+		// If a user is being deleted in the ACP, delete any individual forum subscriptions. This is true regardless of
+		// whether there are any posts to be retained.
+		if (($event['mode'] == 'remove') || ($event['mode'] == 'retain'))
+		{
+			foreach ($event['user_ids'] as $user_id)
+			{
+				$sql = 'DELETE FROM ' . $this->table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' 
+					WHERE user_id = ' . (int) $user_id;
+				$this->db->sql_query($sql);
+			}
+		}
+	}
 }

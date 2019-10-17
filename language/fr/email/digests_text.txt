@@ -9,5 +9,3 @@ ____________________________________________________________
 ____________________________________________________________
 
 {{ S_DIGESTS_DISCLAIMER }}
-
-{{ lang('DIGESTS_POWERED_BY_TEXT') }} {{ S_DIGESTS_POWERED_BY }}{{ S_DIGESTS_TRANSLATOR }}

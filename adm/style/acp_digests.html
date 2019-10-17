@@ -96,7 +96,7 @@
 	</div>
 {% endif %}
 
-<form id="acp_digests" method="post" action="{{ U_ACTION }}">
+<form id="acp_digests" method="post" action="{{ U_ACTION }}" {% if S_EDIT_SUBSCRIBERS %}novalidate{% endif %}>
 	{% for option in options %}
 		{% if option.S_LEGEND %}
 			{% if not loop.first %}

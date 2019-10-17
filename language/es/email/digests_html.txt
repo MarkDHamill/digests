@@ -62,7 +62,6 @@
 		<hr class="newline">
 		<p><span class="copyright"><em>{{ S_DIGESTS_PUBLISH_DATE }}</em></span></p>
 		<p>{{ S_DIGESTS_DISCLAIMER }}</p>
-		<p><span class="copyright">{{ lang('DIGESTS_POWERED_BY_TEXT') }} {{ S_DIGESTS_POWERED_BY }}{{ S_DIGESTS_TRANSLATOR }}</span></p>
 	</div>
 </div>
 </body>

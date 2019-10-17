@@ -30,6 +30,7 @@ services:
             - '@phpbbservices.digests.common'
             - '@language'
             - '@notification_manager'
+            - '@service_container'
         calls:
             - [set_name, [cron.task.cron_task]]
         tags:

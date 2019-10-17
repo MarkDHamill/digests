@@ -109,6 +109,7 @@ class main_module
 						'phpbbservices_digests_strip_tags'					=> array('lang' => 'DIGESTS_STRIP_TAGS',						'validate' => 'string',	'type' => 'textarea:3:85', 'explain' => true),
 						'phpbbservices_digests_show_forum_path'				=> array('lang' => 'DIGESTS_SHOW_FORUM_PATH',					'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_lowercase_digest_type'		=> array('lang' => 'DIGESTS_LOWERCASE_DIGEST_TYPE',				'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
+						'phpbbservices_digests_saluation_fields'			=> array('lang' => 'DIGESTS_SALUTATION_FIELDS',					'validate' => 'string',	'type' => 'text:40:255', 'explain' => true),
 					)
 				);
 			break;
@@ -927,7 +928,7 @@ class main_module
 		}
 		
 		// Do not write values if there is an error
-		if (sizeof($error))
+		if (count($error))
 		{
 			$submit = false;
 		}
@@ -1028,7 +1029,7 @@ class main_module
 					{
 						
 						// Save this subscriber's digest settings
-						if (isset($sql_ary) && sizeof($sql_ary) > 0)
+						if (isset($sql_ary) && count($sql_ary) > 0)
 						{
 							$sql = 'UPDATE ' . USERS_TABLE . ' 
 								SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
@@ -1042,7 +1043,7 @@ class main_module
 						$this->db->sql_query($sql);
 		
 						// Now save the individual forum subscriptions, if any
-						if (!$mass_action && isset($sql_ary2) && sizeof($sql_ary2) > 0)
+						if (!$mass_action && isset($sql_ary2) && count($sql_ary2) > 0)
 						{
 							$this->db->sql_multi_insert($this->table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE, $sql_ary2);
 						}
@@ -1267,7 +1268,7 @@ class main_module
 			// Process last user
 			
 			// Save this subscriber's digest settings
-			if (isset($sql_ary) && sizeof($sql_ary) > 0)
+			if (isset($sql_ary) && count($sql_ary) > 0)
 			{
 				$sql = 'UPDATE ' . USERS_TABLE . ' 
 					SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
@@ -1284,7 +1285,7 @@ class main_module
 			}
 
 			// Now save the individual forum subscriptions, if any
-			if (!$mass_action && isset($sql_ary2) && sizeof($sql_ary2) > 0)
+			if (!$mass_action && isset($sql_ary2) && count($sql_ary2) > 0)
 			{
 				$this->db->sql_multi_insert($this->table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE, $sql_ary2);
 			}
@@ -1358,7 +1359,7 @@ class main_module
 			$rebalanced = 0;
 			$digest_notify_list = array();
 
-			if (sizeof($oversubscribed_hours) > 0)
+			if (count($oversubscribed_hours) > 0)
 			{
 				
 				$sql_array = array(
@@ -1544,11 +1545,11 @@ class main_module
 				
 				if ($this->config['phpbbservices_digests_subscribe_all'])
 				{
-					$message = $this->language->lang('DIGESTS_ALL_SUBSCRIBED', sizeof($digest_notify_list));
+					$message = $this->language->lang('DIGESTS_ALL_SUBSCRIBED', count($digest_notify_list));
 				}
 				else
 				{
-					$message = $this->language->lang('DIGESTS_ALL_UNSUBSCRIBED', sizeof($digest_notify_list));
+					$message = $this->language->lang('DIGESTS_ALL_UNSUBSCRIBED', count($digest_notify_list));
 				}
 				
 			}
@@ -1703,7 +1704,7 @@ class main_module
 			'L_MESSAGE'			=> $error,
 			'L_TITLE'			=> $this->language->lang($display_vars['title']),
 			'L_TITLE_EXPLAIN'	=> $this->language->lang($display_vars['title'] . '_EXPLAIN'),
-			'S_ERROR'			=> (sizeof($error)) ? true : false,
+			'S_ERROR'			=> (count($error)) ? true : false,
 			'U_ACTION'			=> $this->u_action)
 		);
 
@@ -1865,7 +1866,7 @@ class main_module
 		
 		$emails_sent = 0;
 		
-		if (isset($digest_notify_list) && (sizeof($digest_notify_list) > 0))
+		if (isset($digest_notify_list) && (count($digest_notify_list) > 0))
 		{
 			
 			if (!class_exists('messenger'))

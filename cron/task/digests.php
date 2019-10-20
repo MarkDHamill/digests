@@ -651,7 +651,7 @@ class digests extends \phpbb\cron\task\base
 				}
 
 				$digest_type = ($this->config['phpbbservices_digests_lowercase_digest_type']) ? strtolower($digest_type) : $digest_type;
-				$email_subject = $this->language->lang('DIGESTS_SUBJECT_TITLE', $this->config['sitename'], $digest_type);
+				$email_subject = html_entity_decode($this->language->lang('DIGESTS_SUBJECT_TITLE', $this->config['sitename'], $digest_type));
 
 				// Set various variables and flags based on the requested digest format.
 

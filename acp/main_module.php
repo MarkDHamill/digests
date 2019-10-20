@@ -20,7 +20,6 @@ class main_module
 	private $helper;
 	private $language;
 	private $new_config;
-	private $page_title;
 	private $pagination;
 	private $phpbb_container;
 	private $phpbb_extension_manager;
@@ -66,8 +65,7 @@ class main_module
 	function main($id, $mode)
 	{
 
-
-		$this->language->add_lang(array('acp/info_acp_common', 'acp/common'), 'phpbbservices/digests');
+		$this->language->add_lang(array('acp/common'), 'phpbbservices/digests');
 
 		$submit = $this->request->is_set_post('submit');
 
@@ -291,9 +289,18 @@ class main_module
 					break;
 				}
 
-				// Set up member search SQL
+				// Set up member search SQL, either by email or username
 				$match_any_chars = $this->db->get_any_char();
-				$member_sql = ($member != '') ? " username_clean " . $this->db->sql_like_expression($match_any_chars . utf8_case_fold_nfc($member) . $match_any_chars) . " AND " : '';
+				if (strpos($member, '@') === false)
+				{
+					// Username search
+					$member_sql = ($member != '') ? " username_clean " . $this->db->sql_like_expression($match_any_chars . utf8_case_fold_nfc($member) . $match_any_chars) . " AND " : '';
+				}
+				else
+				{
+					// Email search
+					$member_sql = ($member != '') ? " user_email " . $this->db->sql_like_expression($match_any_chars . utf8_case_fold_nfc($member) . $match_any_chars) . " AND " : '';
+				}
 
 				// Get the total rows for pagination purposes
 				$sql_array = array(
@@ -305,7 +312,7 @@ class main_module
 				
 					'WHERE'		=> "$subscribe_sql $member_sql " . $this->db->sql_in_set('user_type', array(USER_NORMAL, USER_FOUNDER)),
 				);
-				
+
 				$sql = $this->db->sql_build_query('SELECT', $sql_array);
 
 				$result = $this->db->sql_query($sql);
@@ -1731,11 +1738,11 @@ class main_module
 			$l_explain = '';
 			if ($vars['explain'] && isset($vars['lang_explain']))
 			{
-				$l_explain = (null !== $this->language->lang($vars['lang_explain'])) ? $this->language->lang($vars['lang_explain']) : $vars['lang_explain'];
+				$l_explain = (NULL !== $this->language->lang($vars['lang_explain'])) ? $this->language->lang($vars['lang_explain']) : $vars['lang_explain'];
 			}
 			else if ($vars['explain'])
 			{
-				$l_explain = (null !== $this->language->lang($vars['lang'] . '_EXPLAIN')) ? $this->language->lang($vars['lang'] . '_EXPLAIN') : '';
+				$l_explain = (NULL !== $this->language->lang($vars['lang'] . '_EXPLAIN')) ? $this->language->lang($vars['lang'] . '_EXPLAIN') : '';
 			}
 
 			$content = build_cfg_template($type, $config_key, $this->new_config, $config_key, $vars);
@@ -1749,7 +1756,7 @@ class main_module
 				'CONTENT'		=> $content,
 				'KEY'			=> $config_key,
 				'TITLE'			=> (null !== $this->language->lang($vars['lang'])) ? $this->language->lang($vars['lang']) : $vars['lang'],
-				'S_EXPLAIN'		=> $vars['explain'],
+				'S_EXPLAIN'		=> $vars['explain'] && !empty($l_explain),
 				'TITLE_EXPLAIN'	=> $l_explain)
 			);
 
@@ -1913,6 +1920,7 @@ class main_module
 				switch ($row['user_digest_type'])
 				{
 					case constants::DIGESTS_DAILY_VALUE:
+					default:
 						$digest_type_text = strtolower($this->language->lang('DIGESTS_DAILY'));
 					break;
 					
@@ -1927,16 +1935,13 @@ class main_module
 					case constants::DIGESTS_NONE_VALUE:
 						$digest_type_text = strtolower($this->language->lang('DIGESTS_NONE'));
 					break;
-
-					default:
-						$digest_type_text = strtolower($this->language->lang('DIGESTS_DAILY'));
-					break;
 				}
 				
 				// Set up associations between digest formats as constants and their language equivalents
 				switch ($row['user_digest_format'])
 				{
 					case constants::DIGESTS_HTML_VALUE:
+					default:
 						$digest_format_text = $this->language->lang('DIGESTS_FORMAT_HTML');
 					break;
 					
@@ -1954,10 +1959,6 @@ class main_module
 					
 					case constants::DIGESTS_TEXT_VALUE:
 						$digest_format_text = strtolower($this->language->lang('DIGESTS_FORMAT_TEXT'));
-					break;
-					
-					default:
-						$digest_format_text = $this->language->lang('DIGESTS_FORMAT_HTML');
 					break;
 				}
 					

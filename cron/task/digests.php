@@ -188,7 +188,7 @@ class digests extends \phpbb\cron\task\base
 		// Get the fields to be used in the salutations
 		$this->salutation_fields = $this->get_salutation_field_names(); // returns array of custom field names, or false if none are to be used.
 
-		if ($this->run_mode != constants::DIGESTS_RUN_MANUAL)
+		if ($this->run_mode !== constants::DIGESTS_RUN_MANUAL)
 		{
 
 			// phpBB cron and a system cron assume an interface where styles won't be needed, so it must be told where to find them. We need styles because we
@@ -225,8 +225,8 @@ class digests extends \phpbb\cron\task\base
 
 				// If the year or day differs from when digests was last run, or if these are the same but the hour differs, we look at the minute last ran
 				// and compare it  with the minute now. If the minute now is less than the minute last run we have to increment $hours_to_do to capture the missing hour.
-				if ($year_now != $year_last_ran || $day_now != $day_last_ran ||
-					($year_now == $year_last_ran && $day_now == $day_last_ran && $hour_now != $hour_last_ran))
+				if ($year_now !== $year_last_ran || $day_now !== $day_last_ran ||
+					($year_now == $year_last_ran && $day_now == $day_last_ran && $hour_now !== $hour_last_ran))
 				{
 					if ($minute_now < $minute_last_ran)
 					{
@@ -255,7 +255,7 @@ class digests extends \phpbb\cron\task\base
 			$hours_to_do = 1;	// When running manually, the mailer always processes exactly 1 hour
 
 			// Send all digests to a specified email address if this feature is enabled.
-			$this->email_address_override = (trim($this->config['phpbbservices_digests_test_email_address']) != '') ? $this->config['phpbbservices_digests_test_email_address'] : $this->config['board_contact'];
+			$this->email_address_override = (trim($this->config['phpbbservices_digests_test_email_address']) !== '') ? $this->config['phpbbservices_digests_test_email_address'] : $this->config['board_contact'];
 		}
 
 		// Display a digest mail start processing message. It is captured in a log.
@@ -503,14 +503,14 @@ class digests extends \phpbb\cron\task\base
 			// to remove those posts a particular user should not see.
 
 			// First, determine a maximum date range fetched: daily, weekly or monthly
-			if ($monthly_digest_sql != '')
+			if ($monthly_digest_sql !== '')
 			{
 				// In the case of monthly digests, it's important to include posts that support daily and weekly digests as well, hence dates of posts
 				// retrieved may exceed post dates for the previous month. Logic to exclude posts past the end of the previous month in the case of
 				// monthly digests must be handled in the create_content function to skip these.
 				$date_limit_sql = ' AND p.post_time >= ' . $utc_month_1st_begin . ' AND p.post_time <= ' . max($this->utc_month_lastday_end, $this->utc_time);
 			}
-			else if ($weekly_digest_sql != '')    // Weekly
+			else if ($weekly_digest_sql !== '')    // Weekly
 			{
 				$this->date_limit = $this->time - (7 * 24 * 60 * 60);
 				$date_limit_sql = ' AND p.post_time >= ' . $this->date_limit . ' AND p.post_time < ' . $this->time;
@@ -563,7 +563,7 @@ class digests extends \phpbb\cron\task\base
 				// for this user is the same as the current day and hour, presumably the subscriber has already received a
 				// digest so skip sending it.
 
-				if ($this->run_mode != constants::DIGESTS_RUN_MANUAL)
+				if ($this->run_mode !== constants::DIGESTS_RUN_MANUAL)
 				{
 
 					// Skip sending this digest if a full "cycle" has not elapsed since when the digest was last sent out. For example, if the user has
@@ -608,7 +608,7 @@ class digests extends \phpbb\cron\task\base
 				// Load the appropriate language files based on the user's preferred language. The board default language
 				// is probably English, which may not be what we want since phpBB supports multiple languages depending on
 				// the language packs installed and which language the user chooses.
-				if ($row['user_lang'] != $last_language)
+				if ($row['user_lang'] !== $last_language)
 				{
 					$this->language->set_user_language($row['user_lang'], true);
 					$this->language->add_lang('common');
@@ -1155,7 +1155,7 @@ class digests extends \phpbb\cron\task\base
 							}
 
 							// Mark private messages in the digest as read, if so instructed
-							if ((count($pm_rowset) != 0) && ($row['user_digest_show_pms'] == 1) && ($row['user_digest_pm_mark_read'] == 1))
+							if ((count($pm_rowset) !== 0) && ($row['user_digest_show_pms'] == 1) && ($row['user_digest_pm_mark_read'] == 1))
 							{
 
 								$sql_ary = array(
@@ -1327,8 +1327,8 @@ class digests extends \phpbb\cron\task\base
 				$pm_text = generate_text_for_display(censor_text($pm_row['message_text']), $pm_row['bbcode_uid'], $pm_row['bbcode_bitfield'], $flags);
 				
 				// User signature wanted? If so append it to the private message.
-				$user_sig = ($pm_row['enable_sig'] && $pm_row['user_sig'] != '' && $this->config['allow_sig']) ? censor_text($pm_row['user_sig']) : '';
-				if ($user_sig != '')
+				$user_sig = ($pm_row['enable_sig'] && $pm_row['user_sig'] !== '' && $this->config['allow_sig']) ? censor_text($pm_row['user_sig']) : '';
+				if ($user_sig !== '')
 				{
 					if ($this->run_mode == constants::DIGESTS_RUN_SYSTEM)
 					{
@@ -1347,7 +1347,7 @@ class digests extends \phpbb\cron\task\base
 				}
 					
 				// Add signature to bottom of private message
-				$pm_text = ($user_sig != '') ? $pm_text . "\n" . $this->language->lang('DIGESTS_POST_SIGNATURE_DELIMITER') . "\n" . $user_sig : $pm_text . "\n";
+				$pm_text = ($user_sig !== '') ? $pm_text . "\n" . $this->language->lang('DIGESTS_POST_SIGNATURE_DELIMITER') . "\n" . $user_sig : $pm_text . "\n";
 	
 				// If required or requested, remove all images
 				if ($this->config['phpbbservices_digests_block_images'] || $user_row['user_digest_block_images'])
@@ -1397,7 +1397,7 @@ class digests extends \phpbb\cron\task\base
 		$last_forum_id = -1;
 		$last_topic_id = -1;
 	
-		if (count($posts_rowset) != 0)
+		if (count($posts_rowset) !== 0)
 		{
 			
 			unset($bookmarked_topics);
@@ -1925,8 +1925,8 @@ class digests extends \phpbb\cron\task\base
 				$post_text .= $this->create_attachment_markup($post_row, true);
 
 				// User signature wanted?
-				$user_sig = ($post_row['enable_sig'] && $post_row['user_sig'] != '' && $this->config['allow_sig'] ) ? censor_text($post_row['user_sig']) : '';
-				if ($user_sig != '')
+				$user_sig = ($post_row['enable_sig'] && $post_row['user_sig'] !== '' && $this->config['allow_sig'] ) ? censor_text($post_row['user_sig']) : '';
+				if ($user_sig !== '')
 				{
 					// Format the signature for display
 					// Fix by phpBB user EAM to handle when post and signature BBCode settings differ
@@ -1942,8 +1942,8 @@ class digests extends \phpbb\cron\task\base
 				}
 				
 				// Add signature to bottom of post
-				$post_text = ($user_sig != '') ? trim($post_text . "\n" . $this->language->lang('DIGESTS_POST_SIGNATURE_DELIMITER') . "\n" . $user_sig) : trim($post_text . "\n");
-	
+				$post_text = ($user_sig !== '') ? trim($post_text . "\n" . $this->language->lang('DIGESTS_POST_SIGNATURE_DELIMITER') . "\n" . $user_sig) : trim($post_text . "\n");
+
 				// If required or requested, remove all images
 				if ($this->config['phpbbservices_digests_block_images'] || $user_row['user_digest_block_images'])
 				{
@@ -1959,9 +1959,10 @@ class digests extends \phpbb\cron\task\base
 				else
 				{
 					// Board URLs must be absolute in the digests, so substitute board URL for relative URL. Smilies are marked up differently after converted
-					// to HTML so a special pass must be made for them.
+					// to HTML so a special pass must be made for them. Also replace & with entity to avoid parser error.
 					$post_text = str_replace('<img src="' . $this->phpbb_root_path, '<img src="' . $this->board_url, $post_text);
 					$post_text = str_replace('<img class="smilies" src="' . $this->phpbb_root_path, '<img class="smilies" src="' . $this->board_url, $post_text);
+					$post_text = str_replace('&', '&amp;', $post_text);
 
 					// For HTML digests, remove problematic HTML tags if the board administrator has specified any.
 					if (trim($this->config['phpbbservices_digests_strip_tags']) !== '')
@@ -1986,7 +1987,7 @@ class digests extends \phpbb\cron\task\base
 							$post_text = utf8_decode($dom->saveHTML($dom->documentElement)); // Fix provided by whocarez
 						}
 					}
-				} 
+				}
 	
 				if ($last_forum_id != (int) $post_row['forum_id'])
 				{
@@ -2002,7 +2003,7 @@ class digests extends \phpbb\cron\task\base
 					$last_forum_id = (int) $post_row['forum_id'];
 				}
 						
-				if ($last_topic_id != (int) $post_row['topic_id'])
+				if ($last_topic_id !== (int) $post_row['topic_id'])
 				{
 					// Process a topic break
 					$this->template->assign_block_vars('forum.topic', array(
@@ -2247,7 +2248,7 @@ class digests extends \phpbb\cron\task\base
 			$attachments_found++;
 			if ($attachments_found == 1)
 			{
-				$markup_text = sprintf("<div class=\"box\">\n<p>%s</p>\n", $this->language->lang('ATTACHMENTS'));
+				$markup_text = sprintf("<div class=\"box\"><p>%s</p>", $this->language->lang('ATTACHMENTS'));
 			}
 			$file_size = round(($attachment_row['filesize']/1024),2);
 			// Show images, link to other attachments
@@ -2270,12 +2271,9 @@ class digests extends \phpbb\cron\task\base
 			}
 			else
 			{
-				$my_styles = $this->template->get_user_style();
-				$markup_text .= ($attachment_row['attach_comment'] == '') ? '' : '<em>' . censor_text($attachment_row['attach_comment']) . '</em><br>';
+				$markup_text .= '<div>' . ($attachment_row['attach_comment'] == '') ? '' : '<em>' . censor_text($attachment_row['attach_comment']) . '</em>';
 				$markup_text .=
-					sprintf("<img src=\"%s\" title=\"\" alt=\"\" /> ",
-						$this->board_url . 'styles/' . $my_styles[count($my_styles) - 1] . '/theme/images/icon_topic_attach.gif') .
-					sprintf("<b><a href=\"%s\">%s</a></b> (%s %s)<br>",
+					sprintf("<div><a href=\"%s\"><strong>%s (%s %s)</strong></a></div>",
 						$this->board_url . "download/file.$this->phpEx?id=" . $attachment_row['attach_id'],
 						$attachment_row['real_filename'],
 						$file_size,
@@ -2283,6 +2281,8 @@ class digests extends \phpbb\cron\task\base
 			}
 		}
 		$this->db->sql_freeresult($result);
+
+
 
 		if ($attachments_found > 0)
 		{

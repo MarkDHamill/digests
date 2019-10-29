@@ -294,12 +294,12 @@ class main_module
 				if (strpos($member, '@') === false)
 				{
 					// Username search
-					$member_sql = ($member != '') ? " username_clean " . $this->db->sql_like_expression($match_any_chars . utf8_case_fold_nfc($member) . $match_any_chars) . " AND " : '';
+					$member_sql = ($member !== '') ? " username_clean " . $this->db->sql_like_expression($match_any_chars . utf8_case_fold_nfc($member) . $match_any_chars) . " AND " : '';
 				}
 				else
 				{
 					// Email search
-					$member_sql = ($member != '') ? " user_email " . $this->db->sql_like_expression($match_any_chars . utf8_case_fold_nfc($member) . $match_any_chars) . " AND " : '';
+					$member_sql = ($member !== '') ? " user_email " . $this->db->sql_like_expression($match_any_chars . utf8_case_fold_nfc($member) . $match_any_chars) . " AND " : '';
 				}
 
 				// Get the total rows for pagination purposes
@@ -554,7 +554,7 @@ class main_module
 						'DISPLAY_HOUR_21'					=> $display_hour[21],
 						'DISPLAY_HOUR_22'					=> $display_hour[22],
 						'DISPLAY_HOUR_23'					=> $display_hour[23],
-						'L_DIGEST_CHANGE_SUBSCRIPTION' 		=> ($row['user_digest_type'] != constants::DIGESTS_NONE_VALUE) ? $this->language->lang('DIGESTS_UNSUBSCRIBE') : $this->language->lang('DIGESTS_SUBSCRIBE_LITERAL'),
+						'L_DIGEST_CHANGE_SUBSCRIPTION' 		=> ($row['user_digest_type'] !== constants::DIGESTS_NONE_VALUE) ? $this->language->lang('DIGESTS_UNSUBSCRIBE') : $this->language->lang('DIGESTS_SUBSCRIBE_LITERAL'),
 						'S_ALL_BY_DEFAULT'					=> $all_by_default,
 						'S_ATTACHMENTS_NO_CHECKED' 			=> ($row['user_digest_attachments'] == 0),
 						'S_ATTACHMENTS_YES_CHECKED' 		=> ($row['user_digest_attachments'] == 1),
@@ -630,7 +630,7 @@ class main_module
 						'USER_EMAIL'						=> $row['user_email'],
 						'USER_ID'							=> $row['user_id'],
 						'USER_LAST_VISIT'					=> $user_lastvisit,
-						'USER_SUBSCRIBE_UNSUBSCRIBE_FLAG'	=> ($row['user_digest_type'] != constants::DIGESTS_NONE_VALUE) ? 'u' : 's')
+						'USER_SUBSCRIBE_UNSUBSCRIBE_FLAG'	=> ($row['user_digest_type'] !== constants::DIGESTS_NONE_VALUE) ? 'u' : 's')
 					);
 
 					// Now let's get this user's forum permissions. Note that non-registered, robots etc. get a list of public forums
@@ -685,12 +685,12 @@ class main_module
 						
 						while ($row2 = $this->db->sql_fetchrow($result2))
 						{
-							if ((int) $row2['parent_id'] != (int) end($parent_stack) || (end($parent_stack) == 0))
+							if ((int) $row2['parent_id'] !== (int) end($parent_stack) || (end($parent_stack) == 0))
 							{
 								if (in_array($row2['parent_id'],$parent_stack))
 								{
 									// If parent is in the stack, then pop the stack until the parent is found, otherwise push stack adding the current parent. This creates a </div>
-									while ((int) $row2['parent_id'] != (int) end($parent_stack))
+									while ((int) $row2['parent_id'] !== (int) end($parent_stack))
 									{
 										array_pop($parent_stack);
 										$current_level--;
@@ -753,7 +753,7 @@ class main_module
 						$this->db->sql_freeresult($result2);
 					
 						// Now out of the loop, it is important to remember to close any open <div> tags. Typically there is at least one.
-						while ((int) $row2['parent_id'] != (int) end($parent_stack))
+						while ((int) $row2['parent_id'] !== (int) end($parent_stack))
 						{
 							array_pop($parent_stack);
 							$current_level--;
@@ -1397,7 +1397,7 @@ class main_module
 
 					$digest_notify_list[] = $row['user_id'];
 
-					if ($current_hour != $row['user_digest_send_hour_gmt'])
+					if ($current_hour !== $row['user_digest_send_hour_gmt'])
 					{
 						$current_hour = $row['user_digest_send_hour_gmt'];
 						$counted_for_this_hour = 0;
@@ -1726,7 +1726,7 @@ class main_module
 			if (strpos($config_key, 'legend') !== false)
 			{
 				$this->template->assign_block_vars('options', array(
-					'LEGEND'		=> (null !== $this->language->lang($vars)) ? $this->language->lang($vars) : $vars,
+					'LEGEND'		=> (NULL !== $this->language->lang($vars)) ? $this->language->lang($vars) : $vars,
 					'S_LEGEND'		=> true)
 				);
 
@@ -1755,7 +1755,7 @@ class main_module
 			$this->template->assign_block_vars('options', array(
 				'CONTENT'		=> $content,
 				'KEY'			=> $config_key,
-				'TITLE'			=> (null !== $this->language->lang($vars['lang'])) ? $this->language->lang($vars['lang']) : $vars['lang'],
+				'TITLE'			=> (NULL !== $this->language->lang($vars['lang'])) ? $this->language->lang($vars['lang']) : $vars['lang'],
 				'S_EXPLAIN'		=> $vars['explain'] && !empty($l_explain),
 				'TITLE_EXPLAIN'	=> $l_explain)
 			);

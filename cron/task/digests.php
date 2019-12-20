@@ -345,20 +345,28 @@ class digests extends \phpbb\cron\task\base
 		
 		// If it was requested, get the year, month, date and hour of the digests to recreate. If it was not requested, simply use the current time. Note:
 		// if used it must be as a result of a manual run of the mailer.
-		if (($this->run_mode == constants::DIGESTS_RUN_MANUAL) && ($this->config['phpbbservices_digests_test_time_use']))
+		if (($this->run_mode == constants::DIGESTS_RUN_MANUAL) && (trim($this->config['phpbbservices_digests_test_date_hour'])) !== '')
 		{
-			$this->time = mktime($this->config['phpbbservices_digests_test_hour'], 0, 0, $this->config['phpbbservices_digests_test_month'], $this->config['phpbbservices_digests_test_day'], $this->config['phpbbservices_digests_test_year']);
+			$this->time = mktime(substr($this->config['phpbbservices_digests_test_date_hour'], 11,2),
+				substr($this->config['phpbbservices_digests_test_date_hour'],14,2),
+				substr($this->config['phpbbservices_digests_test_date_hour'],17,2),
+				substr($this->config['phpbbservices_digests_test_date_hour'],5,2),
+				substr($this->config['phpbbservices_digests_test_date_hour'],8,2),
+				substr($this->config['phpbbservices_digests_test_date_hour'],0,4));
+			// To determine UTC in manual mode, we need to use the administrator's timezone and offset from it.
+			$hour_offset = $this->helper->make_tz_offset ($this->user->data['user_timezone']);
+			$this->utc_time = $this->time - (int) ($hour_offset * 60 * 60);	// Convert server time (or requested run date) into UTC
 			if ($this->config['phpbbservices_digests_enable_log'])
 			{
-				$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_SIMULATION_DATE_TIME', false, array(str_pad($this->config['phpbbservices_digests_test_year'], 2, '0', STR_PAD_LEFT) . '-' . str_pad($this->config['phpbbservices_digests_test_month'], 2, '0', STR_PAD_LEFT) . '-' . str_pad($this->config['phpbbservices_digests_test_day'], 2, '0', STR_PAD_LEFT), $this->config['phpbbservices_digests_test_hour']));
+				$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_SIMULATION_DATE_TIME', false, array(
+					$this->config['phpbbservices_digests_test_date_hour']));
 			}
 		}
 		else
 		{
 			$this->time = $now + ($hour * (60 * 60));	// Timestamp for hour to be processed
+			$this->utc_time = $this->time - (int) ($this->server_timezone * 60 * 60);	// Convert server time (or requested run date) into UTC
 		}
-
-		$this->utc_time = $this->time - (int) ($this->server_timezone * 60 * 60);	// Convert server time (or requested run date) into UTC
 
 		// Get the current hour in UTC, so applicable digests can be sent out for this hour
 		$current_hour_utc = date('G', $this->utc_time); // 0 thru 23
@@ -662,39 +670,34 @@ class digests extends \phpbb\cron\task\base
 						$html_messenger->template('digests_text', '', $this->email_templates_path);
 						$is_html = false;
 						$disclaimer = str_replace('&rsquo;', "'", strip_tags($this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx, $this->config['board_contact'])));
-						$powered_by = $this->config['phpbbservices_digests_host'];
 						$this->layout_with_html_tables = false;
 					break;
 
 					case constants::DIGESTS_PLAIN_VALUE:
 						$html_messenger->template('digests_plain_html', '', $this->email_templates_path);
 						$is_html = true;
-						$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx, $this->config['board_contact']);
-						$powered_by = sprintf("<a href=\"%s\">%s</a>", $this->config['phpbbservices_digests_page_url'], $this->config['phpbbservices_digests_host']);
+						$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx . '?i=-phpbbservices-digests-ucp-main_module&mode=basics', $this->config['board_contact']);
 						$this->layout_with_html_tables = false;
 					break;
 
 					case constants::DIGESTS_PLAIN_CLASSIC_VALUE:
 						$html_messenger->template('digests_plain_html', '', $this->email_templates_path);
 						$is_html = true;
-						$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx, $this->config['board_contact']);
-						$powered_by = sprintf("<a href=\"%s\">%s</a>", $this->config['phpbbservices_digests_page_url'], $this->config['phpbbservices_digests_host']);
+						$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx . '?i=-phpbbservices-digests-ucp-main_module&mode=basics', $this->config['board_contact']);
 						$this->layout_with_html_tables = true;
 					break;
 
 					case constants::DIGESTS_HTML_VALUE:
 						$html_messenger->template('digests_html', '', $this->email_templates_path);
 						$is_html = true;
-						$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx, $this->config['board_contact']);
-						$powered_by = sprintf("<a href=\"%s\">%s</a>", $this->config['phpbbservices_digests_page_url'], $this->config['phpbbservices_digests_host']);
+						$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx . '?i=-phpbbservices-digests-ucp-main_module&mode=basics', $this->config['board_contact']);
 						$this->layout_with_html_tables = false;
 					break;
 
 					case constants::DIGESTS_HTML_CLASSIC_VALUE:
 						$html_messenger->template('digests_html', '', $this->email_templates_path);
 						$is_html = true;
-						$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx, $this->config['board_contact']);
-						$powered_by = sprintf("<a href=\"%s\">%s</a>", $this->config['phpbbservices_digests_page_url'], $this->config['phpbbservices_digests_host']);
+						$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx . '?i=-phpbbservices-digests-ucp-main_module&mode=basics', $this->config['board_contact']);
 						$this->layout_with_html_tables = true;
 					break;
 
@@ -703,7 +706,6 @@ class digests extends \phpbb\cron\task\base
 						// Write an error to the log and continue to the next subscriber.
 						$is_html = false;    // Keep PhpStorm happy
 						$disclaimer = '';    // Keep PhpStorm happy
-						$powered_by = '';    // Keep PhpStorm happy
 						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FORMAT_ERROR', false, array($row['user_digest_type'], $row['username']));
 						continue;
 					break;
@@ -852,7 +854,7 @@ class digests extends \phpbb\cron\task\base
 						'WHERE' => 'pt.msg_id = pm.msg_id
 										AND pt.author_id = u.user_id
 										AND pt.user_id = ' . (int) $row['user_id'] . '
-										AND ((pm_unread = 1 AND folder_id <> ' . PRIVMSGS_OUTBOX .') OR (pm_new = 1 AND folder_id IN (' . PRIVMSGS_NO_BOX . ', ' . PRIVMSGS_HOLD_BOX . ')))',	// Logic used by function update_pm_counts() in /includes/functions_privmsgs.php
+										AND ((pm_unread = 1 AND folder_id <> ' . PRIVMSGS_OUTBOX .') OR (pm_new = 1 AND ' . $this->db->sql_in_set('folder_id', PRIVMSGS_NO_BOX, PRIVMSGS_HOLD_BOX) . '))',	// Logic used by function update_pm_counts() in /includes/functions_privmsgs.php
 
 						'ORDER_BY' => 'message_time',
 					);

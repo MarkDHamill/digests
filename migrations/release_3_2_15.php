@@ -22,45 +22,35 @@ class release_3_2_15 extends \phpbb\db\migration\migration
 
 	public function update_data()
 	{
-		// Clean up. Prior to Digests 3.2.15, if a user was deleted in the ACP, their digest subscribed forums were not deleted.
-		$this->db->sql_query('DELETE FROM ' . $this->table_prefix . 'digests_subscribed_forums
-			WHERE user_id NOT IN (SELECT user_id FROM ' . $this->table_prefix . 'users)');
-		return array();
+		return array(array('custom', array(array($this, 'clean_up'))));
 	}
 
 	public function revert_data()
 	{
-		// Clean up. Remove the extension's directory and any files inside it.
-		$this->rrmdir('./../store/phpbbservices/digests');
-		return array();
+		return array(array('custom', array(array($this, 'remove_files'))));
 	}
 
-	private function rrmdir($dir)
+	public function clean_up()
+	{
+		// Prior to Digests 3.2.15, if a user was deleted in the ACP, their digest subscribed forums were not deleted.
+		$this->db->sql_query('DELETE FROM ' . $this->table_prefix . 'digests_subscribed_forums
+			WHERE user_id NOT IN (SELECT user_id FROM ' . $this->table_prefix . 'users)');
+	}
+
+	public function remove_files()
 	{
 
-		// Recursively removes files in a directory
-		if (is_dir($dir))
+		// Remove the extension's directory and any files inside it.
+		global $phpbb_container;
+
+		$filesystem = $phpbb_container->get('filesystem');
+
+		$filepath = $this->phpbb_root_path . 'store/phpbbservices/digests';
+		if ($filesystem->exists($filepath))
 		{
-			$inodes = scandir($dir);
-			if (is_array($inodes))
-			{
-				foreach ($inodes as $inode)
-				{
-					if ($inode != "." && $inode != "..")
-					{
-						if (is_dir($dir . "/" . $inode))
-						{
-							rrmdir($dir . "/" . $inode);
-						}
-						else
-						{
-							unlink($dir . "/" . $inode);
-						}
-					}
-				}
-				rmdir($dir);
-			}
+			$filesystem->remove($filepath);
 		}
 
 	}
+
 }

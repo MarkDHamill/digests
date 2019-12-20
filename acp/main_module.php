@@ -120,7 +120,7 @@ class main_module
 						'phpbbservices_digests_user_digest_registration'	=> array('lang' => 'DIGESTS_REGISTER',					'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_user_digest_type'			=> array('lang' => 'DIGESTS_FREQUENCY',					'validate' => 'string',	'type' => 'select', 'method' => 'digest_type_select', 'explain' => true),
 						'phpbbservices_digests_user_digest_format'			=> array('lang' => 'DIGESTS_FORMAT_STYLING',			'validate' => 'string',	'type' => 'select', 'method' => 'digest_style_select', 'explain' => false),
-						'phpbbservices_digests_user_digest_send_hour_gmt'	=> array('lang' => 'DIGESTS_SEND_HOUR',					'validate' => 'int:-1:23',	'type' => 'select', 'method' => 'digest_send_hour_utc', 'explain' => true),
+						'phpbbservices_digests_user_digest_send_hour_gmt'	=> array('lang' => 'DIGESTS_HOUR_SENT_GMT',				'validate' => 'int:-1:23',	'type' => 'select', 'method' => 'digest_send_hour_utc', 'explain' => false),
 						'phpbbservices_digests_user_digest_filter_type'		=> array('lang' => 'DIGESTS_FILTER_TYPE',				'validate' => 'string',	'type' => 'select', 'method' => 'digest_filter_type', 'explain' => false),
 						'phpbbservices_digests_user_check_all_forums'		=> array('lang' => 'DIGESTS_USER_DIGESTS_CHECK_ALL_FORUMS',	'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
 						'phpbbservices_digests_user_digest_max_posts'		=> array('lang' => 'DIGESTS_COUNT_LIMIT',				'validate' => 'int:0',	'type' => 'text:5:5', 'explain' => true),
@@ -901,19 +901,16 @@ class main_module
 					'vars'	=> array(
 						'legend1'									=> 'GENERAL_OPTIONS',
 						'phpbbservices_digests_test'				=> array('lang' => 'DIGESTS_RUN_TEST', 'validate' => 'bool', 'type' => 'radio:yes_no', 'explain' => false),
-						'phpbbservices_digests_test_spool'			=> array('lang' => 'DIGESTS_RUN_TEST_SPOOL', 'validate' => 'bool', 'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_test_clear_spool'	=> array('lang' => 'DIGESTS_RUN_TEST_CLEAR_SPOOL', 'validate' => 'bool', 'type' => 'radio:yes_no', 'explain' => true),
+						'phpbbservices_digests_test_date_hour'		=> array('lang' => 'DIGESTS_RUN_TEST_DATE_HOUR', 'validate' => 'string', 'type' => 'text:19:19', 'explain' => true),
+						'phpbbservices_digests_test_spool'			=> array('lang' => 'DIGESTS_RUN_TEST_SPOOL', 'validate' => 'bool', 'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_test_send_to_admin'	=> array('lang' => 'DIGESTS_RUN_TEST_SEND_TO_ADMIN', 'validate' => 'bool', 'type' => 'radio:yes_no', 'explain' => true),
 						'phpbbservices_digests_test_email_address'	=> array('lang' => 'DIGESTS_RUN_TEST_EMAIL_ADDRESS', 'validate' => 'string',	'type' => 'email:40:100', 'explain' => true),
-						'legend2'									=> 'DIGESTS_RUN_TEST_OPTIONS',
-						'phpbbservices_digests_test_time_use'		=> array('lang' => 'DIGESTS_RUN_TEST_TIME_USE', 'validate' => 'bool', 'type' => 'radio:yes_no', 'explain' => true),
-						'phpbbservices_digests_test_year'			=> array('lang' => 'DIGESTS_RUN_TEST_YEAR', 'validate' => 'int:2000:2030', 'type' => 'text:4:4', 'explain' => true),
-						'phpbbservices_digests_test_month'			=> array('lang' => 'DIGESTS_RUN_TEST_MONTH', 'validate' => 'int:1:12', 'type' => 'text:2:2', 'explain' => true),
-						'phpbbservices_digests_test_day'			=> array('lang' => 'DIGESTS_RUN_TEST_DAY', 'validate' => 'int:1:31', 'type' => 'text:2:2', 'explain' => true),
-						'phpbbservices_digests_test_hour'			=> array('lang' => 'DIGESTS_RUN_TEST_HOUR',	'validate' => 'int:0:23',	'type' => 'text:2:2', 'explain' => true),
 					)
 				);
-
+				$this->template->assign_vars(array(
+					'S_INCLUDE_DIGESTS_MANUAL_MAILER'				=> true,	// Allows inclusion of date/time picker
+				));
 			break;
 				
 			default:
@@ -1076,12 +1073,12 @@ class main_module
 						{
 							switch ($selected)
 							{
-								case constants::DIGESTS_DEFAULT_VALUE:
+								case 'd':
 									// Use the default digest type
 									$sql_ary['user_digest_type'] = $this->config['phpbbservices_digests_user_digest_type'];
 								break;
 								
-								case constants::DIGESTS_NONE_VALUE;
+								case 'n':
 									// Remove user's subscription (mass action)
 									$sql_ary['user_digest_type'] = constants::DIGESTS_NONE_VALUE;
 								break;
@@ -1597,6 +1594,7 @@ class main_module
 			// Create the store/phpbbservices/digests folder. It should exist already.
 			if (!$this->helper->make_directories())
 			{
+				$message_type = E_USER_WARNING;
 				$message = sprintf($this->language->lang('DIGESTS_CREATE_DIRECTORY_ERROR'), $digests_storage_path);
 				$continue = false;
 			}
@@ -1643,11 +1641,11 @@ class main_module
 
 			}
 			
-			if ($continue && $this->config['phpbbservices_digests_test_time_use'])
+			if ($continue && (trim($this->config['phpbbservices_digests_test_date_hour']) !== ''))
 			{
 				
 				// Make sure run date is valid, if a run date was requested.
-				$good_date = checkdate($this->config['phpbbservices_digests_test_month'], $this->config['phpbbservices_digests_test_day'], $this->config['phpbbservices_digests_test_year']);
+				$good_date = $this->helper->validate_iso_date($this->config['phpbbservices_digests_test_date_hour']);
 				if (!$good_date)
 				{
 					$message_type = E_USER_WARNING;
@@ -1664,7 +1662,7 @@ class main_module
 				// Create a mailer object and call its run method. The logic for sending a digest is embedded in this method, which is normally run as a cron task.
 				$mailer = $this->phpbb_container->get('phpbbservices.digests.cron.task.cron_task');
 				$success = $mailer->run();
-				
+
 				if (!$success)
 				{
 					$message_type = E_USER_WARNING;
@@ -1700,7 +1698,7 @@ class main_module
 				$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_' . strtoupper($mode));
 			}
 			trigger_error($message . adm_back_link($this->u_action), $message_type);
-				
+
 		}
 
 		$this->tpl_name = 'acp_digests';
@@ -1714,6 +1712,60 @@ class main_module
 			'S_ERROR'			=> (count($error)) ? true : false,
 			'U_ACTION'			=> $this->u_action)
 		);
+
+		if ($mode == 'digests_test')
+		{
+			// Show subscribers for the current hour. This gives admins some idea who or if anyone will received digests for the current hour.
+
+			$server_timezone = (float) date('O')/100;	// Server timezone offset from UTC, in hours. Digests are mailed based on UTC time, so rehosting is unaffected.
+			$utc_time = time() - (int) ($server_timezone * 60 * 60);	// Convert server time (or requested run date) into UTC
+
+			// Get the current hour in UTC, so applicable digests can be sent out for this hour
+			$current_hour_utc = (int) date('G', $utc_time); // 0 thru 23
+
+			// Get subscribers for current hour
+			$sql_array = array(
+				'SELECT'	=> 'username, user_digest_type',
+
+				'FROM'		=> array(
+					USERS_TABLE	=> 'u',
+				),
+
+				'WHERE'		=> $this->db->sql_in_set('user_digest_send_hour_gmt', $current_hour_utc) . ' AND ' . $this->db->sql_in_set('user_digest_type', constants::DIGESTS_NONE_VALUE, true),
+
+				'ORDER_BY'	=> 'username',
+			);
+
+			$sql = $this->db->sql_build_query('SELECT', $sql_array);
+
+			$result = $this->db->sql_query($sql);
+			$rowset = $this->db->sql_fetchrowset($result);
+
+			foreach ($rowset as $row)
+			{
+				switch ($row['user_digest_type'])
+				{
+					case constants::DIGESTS_DAILY_VALUE:
+					default:
+						$digest_type = $this->language->lang('DIGESTS_DAILY');
+					break;
+
+					case constants::DIGESTS_WEEKLY_VALUE:
+						$digest_type = $this->language->lang('DIGESTS_WEEKLY');
+					break;
+
+					case constants::DIGESTS_MONTHLY_VALUE:
+						$digest_type = $this->language->lang('DIGESTS_MONTHLY');
+					break;
+				}
+				$current_hour_subscribers[] = $row['username'] . ' (' . $digest_type . ')';
+			}
+
+			$subscribers = (count($current_hour_subscribers) == 0) ? '' : implode(', ', $current_hour_subscribers);
+
+			$this->template->assign_vars(array(
+				'L_TITLE_EXPLAIN'	=> sprintf($this->language->lang($display_vars['title'] . '_EXPLAIN', $subscribers))));
+		}
 
 		// Output relevant page
 		foreach ($display_vars['vars'] as $config_key => $vars)

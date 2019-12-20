@@ -131,12 +131,9 @@ class main_listener implements EventSubscriberInterface
 		// whether there are any posts to be retained.
 		if (($event['mode'] == 'remove') || ($event['mode'] == 'retain'))
 		{
-			foreach ($event['user_ids'] as $user_id)
-			{
-				$sql = 'DELETE FROM ' . $this->table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' 
-					WHERE user_id = ' . (int) $user_id;
-				$this->db->sql_query($sql);
-			}
+			$sql = 'DELETE FROM ' . $this->table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' 
+				WHERE ' . $this->db->sql_in_set('user_id' , $event['user_ids']);
+			$this->db->sql_query($sql);
 		}
 	}
 }

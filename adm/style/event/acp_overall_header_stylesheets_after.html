@@ -1,0 +1,10 @@
+{% if S_INCLUDE_DIGESTS_MANUAL_MAILER %}
+{% if not definition.INCLUDED_JQUERYUI1121JS %}
+{% DEFINE INCLUDED_JQUERYUI1121JS = true %}
+{% INCLUDEJS '@phpbbservices_filterbycountry/jquery-ui-1.12.1.min.js' %}
+{% endif %}
+{% if not definition.INCLUDED_DATETIMEPICKERCSS %}
+{% DEFINE INCLUDED_DATETIMEPICKERCSS = true %}
+{% INCLUDECSS '@phpbbservices_digests/jquery.datetimepicker.css' %}
+{% endif %}
+{% endif %}

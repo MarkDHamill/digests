@@ -103,6 +103,47 @@ class main_module
 					$local_send_hour = $this->request->variable('send_hour', (float) $this->user->data['user_digest_send_hour_gmt']) - (float) $this->helper->make_tz_offset($this->user->data['user_timezone']);
 					$local_send_hour = $this->helper->check_send_hour($local_send_hour);
 
+					// If the digest type was none and is being changed, set the defaults for this user based on the digest configuration values
+					if (($this->user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE) && ($this->request->variable('digest_type', $this->user->data['user_digest_type'] !== constants::DIGESTS_NONE_VALUE)))
+					{
+						// Determine values for maximum display words and no post text
+						if ($this->config['phpbbservices_digests_user_digest_max_display_words'] == -1)
+						{
+							$max_display_words = 0;
+							$no_post_text = 0;
+						}
+						else if ($this->config['phpbbservices_digests_user_digest_max_display_words'] == 0)
+						{
+							$max_display_words = 0;
+							$no_post_text = 1;
+						}
+						else
+						{
+							$max_display_words = $this->config['phpbbservices_digests_user_digest_max_display_words'];
+							$no_post_text = 0;
+						}
+
+						$sql_ary = array(
+							'user_digest_attachments'		=> $this->config['phpbbservices_digests_user_digest_attachments'],
+							'user_digest_block_images'		=> $this->config['phpbbservices_digests_user_digest_block_images'],
+							'user_digest_filter_type'		=> $this->config['phpbbservices_digests_user_digest_filter_type'],
+							'user_digest_max_display_words'	=> $max_display_words,
+							'user_digest_max_posts'			=> $this->config['phpbbservices_digests_user_digest_max_posts'],
+							'user_digest_min_words'			=> $this->config['phpbbservices_digests_user_digest_min_words'],
+							'user_digest_new_posts_only'	=> $this->config['phpbbservices_digests_user_digest_new_posts_only'],
+							'user_digest_no_post_text'		=> $no_post_text,
+							'user_digest_popular'			=> $this->config['phpbbservices_digests_user_digest_popular'],
+							'user_digest_popularity_size'	=> $this->config['phpbbservices_digests_user_digest_popularity_size'],
+							'user_digest_reset_lastvisit'	=> $this->config['phpbbservices_digests_user_digest_reset_lastvisit'],
+							'user_digest_remove_foes'		=> $this->config['phpbbservices_digests_user_digest_remove_foes'],
+							'user_digest_send_on_no_posts'	=> $this->config['phpbbservices_digests_user_digest_send_on_no_posts'],
+							'user_digest_show_mine'			=> !$this->config['phpbbservices_digests_user_digest_show_mine'],
+							'user_digest_show_pms'			=> $this->config['phpbbservices_digests_user_digest_show_pms'],
+							'user_digest_sortby'			=> $this->config['phpbbservices_digests_user_digest_sortby'],
+							'user_digest_toc'				=> $this->config['phpbbservices_digests_user_digest_toc'],
+					);
+					}
+
 					$sql_ary['user_digest_format']			= $this->request->variable('style', $this->user->data['user_digest_format']);
 					$sql_ary['user_digest_send_hour_gmt']	= $local_send_hour;
 					$sql_ary['user_digest_type']			= $this->request->variable('digest_type', $this->user->data['user_digest_type']);
@@ -241,7 +282,7 @@ class main_module
 						}
 						else
 						{
-							$local_send_hour = $this->config['phpbbservices_digests_user_digest_send_hour_gmt'];
+							$local_send_hour = $this->config['phpbbservices_digests_user_digest_send_hour_gmt'] + (float) $this->helper->make_tz_offset($this->user->data['user_timezone']);
 						}
 					}
 					else
@@ -249,7 +290,7 @@ class main_module
 						// Translate the digests send hour (in UTC) to the local timezone, based on the timezone set in the user's profile.
 						$local_send_hour = (float) $this->user->data['user_digest_send_hour_gmt'] + (float) $this->helper->make_tz_offset($this->user->data['user_timezone']);
 					}
-					
+
 					// Adjust time if outside of hour range
 					$local_send_hour = $this->helper->check_send_hour($local_send_hour);
 
@@ -259,11 +300,11 @@ class main_module
 					
 					if ($this->user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE)
 					{
-						$styling_html = ($this->config['phpbbservices_digests_user_digests_format'] == constants::DIGESTS_HTML_VALUE);
-						$styling_html_classic = ($this->config['phpbbservices_digests_user_digests_format'] == constants::DIGESTS_HTML_CLASSIC_VALUE);
-						$styling_plain = ($this->config['phpbbservices_digests_user_digests_format'] == constants::DIGESTS_PLAIN_VALUE);
-						$styling_plain_classic = ($this->config['phpbbservices_digests_user_digests_format'] == constants::DIGESTS_PLAIN_CLASSIC_VALUE);
-						$styling_text = ($this->config['phpbbservices_digests_user_digests_format'] == constants::DIGESTS_TEXT_VALUE);
+						$styling_html = ($this->config['phpbbservices_digests_user_digest_format'] == constants::DIGESTS_HTML_VALUE);
+						$styling_html_classic = ($this->config['phpbbservices_digests_user_digest_format'] == constants::DIGESTS_HTML_CLASSIC_VALUE);
+						$styling_plain = ($this->config['phpbbservices_digests_user_digest_format'] == constants::DIGESTS_PLAIN_VALUE);
+						$styling_plain_classic = ($this->config['phpbbservices_digests_user_digest_format'] == constants::DIGESTS_PLAIN_CLASSIC_VALUE);
+						$styling_text = ($this->config['phpbbservices_digests_user_digest_format'] == constants::DIGESTS_TEXT_VALUE);
 					}
 					else
 					{
@@ -273,7 +314,7 @@ class main_module
 						$styling_plain_classic = ($this->user->data['user_digest_format'] == constants::DIGESTS_PLAIN_CLASSIC_VALUE);
 						$styling_text = ($this->user->data['user_digest_format'] == constants::DIGESTS_TEXT_VALUE);
 					}
-					
+
 					// Populated the Hour Sent select control
 					for($i=0; $i<24; $i++)
 					{

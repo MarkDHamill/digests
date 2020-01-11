@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Digests
-* @copyright (c) 2019 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2020 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -909,7 +909,7 @@ class main_module
 					)
 				);
 				$this->template->assign_vars(array(
-					'S_INCLUDE_DIGESTS_MANUAL_MAILER'				=> true,	// Allows inclusion of date/time picker
+					'S_INCLUDE_DIGESTS_MANUAL_MAILER'				=> true,	// Allows inclusion of date and hour picker
 				));
 			break;
 				
@@ -1656,7 +1656,7 @@ class main_module
 			}
 			
 			// Get ready to manually mail digests
-			if ($continue)
+			if ($continue && $this->config['phpbbservices_digests_test'])
 			{
 
 				// Create a mailer object and call its run method. The logic for sending a digest is embedded in this method, which is normally run as a cron task.
@@ -1761,7 +1761,7 @@ class main_module
 				$current_hour_subscribers[] = $row['username'] . ' (' . $digest_type . ')';
 			}
 
-			$subscribers = (count($current_hour_subscribers) == 0) ? '' : implode(', ', $current_hour_subscribers);
+			$subscribers = (empty($current_hour_subscribers) || count($current_hour_subscribers) == 0) ? '' : implode(', ', $current_hour_subscribers);
 
 			$this->template->assign_vars(array(
 				'L_TITLE_EXPLAIN'	=> sprintf($this->language->lang($display_vars['title'] . '_EXPLAIN', $subscribers))));

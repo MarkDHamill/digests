@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Digests
-* @copyright (c) 2019 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2020 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -142,24 +142,30 @@ class common
 		// Makes the store/phpbbservices/digest directory. If they are successfully created, returns true. If they
 		// cannot be created (likely due to permission issues), returns false.
 
-		try
+		if (!$this->filesystem->exists($this->phpbb_root_path . 'store/phpbbservices'))
 		{
-			$this->filesystem->mkdir($this->phpbb_root_path . 'store/phpbbservices');
-		}
-		catch (\Exception $e)
-		{
-			$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_EXCEPTION_ERROR', false, array($e));
-			return false;
+			try
+			{
+				$this->filesystem->mkdir($this->phpbb_root_path . 'store/phpbbservices', '0777');
+			}
+			catch (\Exception $e)
+			{
+				$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_EXCEPTION_ERROR', false, array($e->getMessage()));
+				return false;
+			}
 		}
 
-		try
+		if (!$this->filesystem->exists($this->phpbb_root_path . 'store/phpbbservices/digests'))
 		{
-			$this->filesystem->mkdir($this->phpbb_root_path . 'store/phpbbservices/digests');
-		}
-		catch (\Exception $e)
-		{
-			$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_EXCEPTION_ERROR', false, array($e));
-			return false;
+			try
+			{
+				$this->filesystem->mkdir($this->phpbb_root_path . 'store/phpbbservices/digests', '0777');
+			}
+			catch (\Exception $e)
+			{
+				$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_EXCEPTION_ERROR', false, array($e->getMessage()));
+				return false;
+			}
 		}
 
 		return true;

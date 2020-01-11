@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Digests
-* @copyright (c) 2019 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2020 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -583,7 +583,7 @@ class digests extends \phpbb\cron\task\base
 						case constants::DIGESTS_WEEKLY_VALUE:
 							if (((int) $row['user_digest_last_sent']) + (7 * 60 * 60 * 24) > $now)
 							{
-								continue;
+								continue 2;
 							}
 						break;
 
@@ -599,7 +599,7 @@ class digests extends \phpbb\cron\task\base
 							$use_days_in_month = cal_days_in_month(CAL_GREGORIAN, $use_month, $use_year);
 							if (((int) $row['user_digest_last_sent']) + ($use_days_in_month * 60 * 60 * 24) > $now)
 							{
-								continue;
+								continue 2;
 							}
 						break;
 
@@ -607,7 +607,7 @@ class digests extends \phpbb\cron\task\base
 						default:
 							if (((int) $row['user_digest_last_sent']) + (60 * 60 * 24) > $now)
 							{
-								continue;
+								continue 2;
 							}
 						break;
 					}
@@ -654,7 +654,7 @@ class digests extends \phpbb\cron\task\base
 						// Write an error to the log and continue to the next subscriber.
 						$digest_type = '';    // Make PhpStorm happy
 						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_BAD_DIGEST_TYPE', false, array($row['user_digest_type'], $row['username']));
-						continue;
+						continue 2;
 					break;
 				}
 
@@ -707,7 +707,7 @@ class digests extends \phpbb\cron\task\base
 						$is_html = false;    // Keep PhpStorm happy
 						$disclaimer = '';    // Keep PhpStorm happy
 						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FORMAT_ERROR', false, array($row['user_digest_type'], $row['username']));
-						continue;
+						continue 2;
 					break;
 
 				}
@@ -821,7 +821,6 @@ class digests extends \phpbb\cron\task\base
 					'S_CONTENT_DIRECTION'        => $this->language->lang('DIRECTION'),
 					'S_DIGESTS_DISCLAIMER'       => $disclaimer,
 					'S_DIGESTS_INTRODUCTION'     => ($is_html) ? $this->language->lang('DIGESTS_INTRODUCTION', $this->config['sitename']) : strip_tags($this->language->lang('DIGESTS_INTRODUCTION', $this->config['sitename'])),
-					'S_DIGESTS_POWERED_BY'       => $powered_by,
 					'S_DIGESTS_PUBLISH_DATE'     => $publish_date,
 					'S_DIGESTS_SALUTATION_BLURB' => $salutation_name . $this->language->lang('DIGESTS_COMMA'),
 					'S_DIGESTS_TITLE'            => $email_subject,
@@ -1157,7 +1156,7 @@ class digests extends \phpbb\cron\task\base
 							}
 
 							// Mark private messages in the digest as read, if so instructed
-							if ((count($pm_rowset) !== 0) && ($row['user_digest_show_pms'] == 1) && ($row['user_digest_pm_mark_read'] == 1))
+							if (!empty($pm_rowset) && $row['user_digest_show_pms'] == 1 && $row['user_digest_pm_mark_read'] == 1)
 							{
 
 								$sql_ary = array(

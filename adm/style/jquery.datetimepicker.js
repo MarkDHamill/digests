@@ -275,7 +275,9 @@ var datetimepickerFactory = function ($) {
 				],
 				dayOfWeekShort: [
 					"Ne", "Po", "Út", "St", "Čt", "Pá", "So"
-				]
+				],
+				dayNames: [
+					"Neděle", "Pondělí", "Úterý", "Středa", "Čtvrtek", "Pátek", "Sobota" ],
 			},
 			hu: { // Hungarian
 				months: [

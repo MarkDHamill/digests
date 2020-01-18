@@ -19,8 +19,8 @@ class ext extends \phpbb\extension\base
 	{
 		$config = $this->container->get('config');
 
-		// phpBB 3.2 is supported. phpBB 3.1 is not due to changes in TWIG.
-		return ( phpbb_version_compare($config['version'], '3.2.0', '>=') || (phpbb_version_compare($config['version'], '3.3', '<')) );
+		// phpBB 3.2 and 3.3 are supported. phpBB 3.1 is not due to changes in TWIG.
+		return ( phpbb_version_compare($config['version'], '3.2.0', '>=') || (phpbb_version_compare($config['version'], '4.0', '<')) );
 	}
 
 }

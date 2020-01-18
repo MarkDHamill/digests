@@ -3,7 +3,7 @@
     "type": "phpbb-extension",
     "description": "Sends daily, weekly or monthly digests of posts or bookmarked topics to subscribers via email.",
     "homepage": "https://www.phpbbservices.com/my-software/digests_wp/digests-extension",
-    "version": "3.2.17",
+    "version": "3.3.0",
     "time": "2020-01-11",
     "license": "GPL-2.0-only",
     "authors": [
@@ -21,12 +21,12 @@
     "extra": {
         "display-name": "Digests",
         "soft-require": {
-            "phpbb/phpbb": ">=3.2.0,<3.3"
+            "phpbb/phpbb": ">=3.2.0,<4.0"
         },
         "version-check": {
             "host": "www.phpbbservices.com",
             "directory": "/digests/updatecheck/",
-            "filename": "3.2.json",
+            "filename": "3.3.json",
             "ssl": true
         }
     }

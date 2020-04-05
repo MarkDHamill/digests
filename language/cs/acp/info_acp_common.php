@@ -46,6 +46,7 @@ $lang = array_merge($lang, array(
 	'LOG_CONFIG_DIGESTS_CLEAR_SPOOL_ERROR'					=> '<strong>Nebylo možné vymazat soubory ze složky store/phpbbservices/digests. To může být  způsobeno nedostatečnými právy k souborům a nebo je tato cesta neplatná. Soubory by měly být veřejně zapisovatelné (777 na unixových systémech).</strong>',
 	'LOG_CONFIG_DIGESTS_CREATE_DIRECTORY_ERROR'				=> '<strong>Nepodařilo se vytvořit složku "%s". Může to být způsobeno nedostatečnými právy. Práva nadřazené složky by měla umožnit zapisování (777 na unixových systémech).</strong>',
 	'LOG_CONFIG_DIGESTS_EDIT_SUBSCRIBERS'					=> '<strong>Upraveny objednávky souhrnů</strong>',
+	'LOG_CONFIG_DIGESTS_EMAILING_FAILURE' 					=> '<strong>Nepodařilo se odeslat souhrn pro den %s a hodinu %d UTC (GMT)</strong>',
 	'LOG_CONFIG_DIGESTS_EXCEPTION_ERROR'					=> '<strong>Vyskytla se následující PHP výjimka: %s</strong>',
 	'LOG_CONFIG_DIGESTS_FILE_CLOSE_ERROR'					=> '<strong>Nepodařilo se zavřít soubor "%s"</strong>',
 	'LOG_CONFIG_DIGESTS_FILE_OPEN_ERROR'					=> '<strong>Nepodařilo se otevřít složku "%s". Může to být způsobeno nedostatečnými právy k ní. Práva k souboru by měla umožnit zapisování (777 na unixových systémech).</strong>',

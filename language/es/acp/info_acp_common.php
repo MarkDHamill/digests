@@ -47,6 +47,7 @@ $lang = array_merge($lang, array(
 	'LOG_CONFIG_DIGESTS_CLEAR_SPOOL_ERROR'					=> '<strong>No se pueden borrar archivos en la carpeta store/phpbbservices/digests. Esto puede deberse a un problema de permisos o una ruta incorrecta. Los permisos de archivo en la carpeta deben configurarse en escritura pública (777 en sistemas basados en Unix).</strong>',
 	'LOG_CONFIG_DIGESTS_CREATE_DIRECTORY_ERROR'				=> '<strong>No se puede crear la carpeta %s. Esto puede deberse a permisos insuficientes. Los permisos de archivo en la carpeta deben configurarse en escritura pública (777 en sistemas basados en Unix).</strong>',
 	'LOG_CONFIG_DIGESTS_EDIT_SUBSCRIBERS'					=> '<strong>Editado los resúmenes de suscriptores</strong>',
+	'LOG_CONFIG_DIGESTS_EMAILING_FAILURE' 					=> '<strong>No se puede enviar el resumen para la fecha %s hora %d UTC</strong>',
 	'LOG_CONFIG_DIGESTS_EXCEPTION_ERROR'					=> '<strong>La siguiente excepción de PHP try/catch ha ocurrido: %s</strong>',
 	'LOG_CONFIG_DIGESTS_FILE_CLOSE_ERROR'					=> '<strong>No se puede cerrar el archivo %s</strong>',
 	'LOG_CONFIG_DIGESTS_FILE_OPEN_ERROR'					=> '<strong>No se puede abrir un controlador de archivos en la carpeta %s. Esto puede deberse a permisos insuficientes. Los permisos de archivo en la carpeta deben configurarse en escritura pública (777 en sistemas basados en Unix).</strong>',

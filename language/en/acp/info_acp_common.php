@@ -47,6 +47,7 @@ $lang = array_merge($lang, array(
 	'LOG_CONFIG_DIGESTS_CLEAR_SPOOL_ERROR'					=> '<strong>Unable to clear files in the store/phpbbservices/digests folder. This may be due to a permissions issue or an incorrect path. The file permissions on the folder should be set to publicly writeable (777 on Unix-based systems).</strong>',
 	'LOG_CONFIG_DIGESTS_CREATE_DIRECTORY_ERROR'				=> '<strong>Unable to create the folder %s. This may be due to insufficient permissions. The file permissions on the folder should be set to publicly writeable (777 on Unix-based systems).</strong>',
 	'LOG_CONFIG_DIGESTS_EDIT_SUBSCRIBERS'					=> '<strong>Edited digest subscribers</strong>',
+	'LOG_CONFIG_DIGESTS_EMAILING_FAILURE'					=> '<strong>Unable to email digests for date %s hour %d UTC</strong>',
 	'LOG_CONFIG_DIGESTS_EXCEPTION_ERROR'					=> '<strong>The following PHP try/catch exception occurred: %s</strong>',
 	'LOG_CONFIG_DIGESTS_FILE_CLOSE_ERROR'					=> '<strong>Unable to close file %s</strong>',
 	'LOG_CONFIG_DIGESTS_FILE_OPEN_ERROR'					=> '<strong>Unable to open a file handler to the folder %s. This may be due to insufficient permissions. The file permissions on the folder should be set to publicly writeable (777 on Unix-based systems).</strong>',

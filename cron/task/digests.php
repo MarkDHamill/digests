@@ -292,7 +292,8 @@ class digests extends \phpbb\cron\task\base
 				$success = $this->mail_digests($now, $i);
 				if (!$success)
 				{
-					// To do: Need logic to notify or email admins when mailing digests fails. There are probably emailing issues needing fixing.
+					// Notify admins when mailing digests fails through an error log entry
+					$this->phpbb_log->add('critical', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_EMAILING_FAILURE', false, array(date('Y-m-d', $now), date('H', $now)));
 					return false;
 				}
 				else if ($this->run_mode !== constants::DIGESTS_RUN_MANUAL)
@@ -497,7 +498,7 @@ class digests extends \phpbb\cron\task\base
 				'ORDER_BY'	=> 'user_lang',
 			);
 		}
-		
+
 		$sql = $this->db->sql_build_query('SELECT', $sql_array);
 
 		$result = $this->db->sql_query($sql);
@@ -565,53 +566,6 @@ class digests extends \phpbb\cron\task\base
 			{
 
 				// Each traverse through this loop sends out exactly one digest
-
-				// While it shouldn't happen, we need a circuit breaker to prevent duplicate digests from going out
-				// for the same hour for the same subscriber. So if the day and hour for the last time the digest was sent
-				// for this user is the same as the current day and hour, presumably the subscriber has already received a
-				// digest so skip sending it.
-
-				if ($this->run_mode !== constants::DIGESTS_RUN_MANUAL)
-				{
-
-					// Skip sending this digest if a full "cycle" has not elapsed since when the digest was last sent out. For example, if the user has
-					// subscribed to a daily digest, 24 hours needs to have elapsed since the last digest went out. The digest last sent time is recorded
-					// in the database when sent out. In manual mode, always try to send a digest.
-
-					switch ($row['user_digest_type'])
-					{
-						case constants::DIGESTS_WEEKLY_VALUE:
-							if (((int) $row['user_digest_last_sent']) + (7 * 60 * 60 * 24) > $now)
-							{
-								continue 2;
-							}
-						break;
-
-						case constants::DIGESTS_MONTHLY_VALUE:
-							// Calculate seconds in previous month, which depends on number of days in that month
-							$use_year = date('Y', $now);
-							$use_month = date('n', $now) - 1;
-							if ($use_month == 0)
-							{
-								$use_month = 12;
-								$use_year--;
-							}
-							$use_days_in_month = cal_days_in_month(CAL_GREGORIAN, $use_month, $use_year);
-							if (((int) $row['user_digest_last_sent']) + ($use_days_in_month * 60 * 60 * 24) > $now)
-							{
-								continue 2;
-							}
-						break;
-
-						case constants::DIGESTS_DAILY_VALUE:
-						default:
-							if (((int) $row['user_digest_last_sent']) + (60 * 60 * 24) > $now)
-							{
-								continue 2;
-							}
-						break;
-					}
-				}
 
 				// Load the appropriate language files based on the user's preferred language. The board default language
 				// is probably English, which may not be what we want since phpBB supports multiple languages depending on
@@ -1963,7 +1917,6 @@ class digests extends \phpbb\cron\task\base
 					// to HTML so a special pass must be made for them. Also replace & with entity to avoid parser error.
 					$post_text = str_replace('<img src="' . $this->phpbb_root_path, '<img src="' . $this->board_url, $post_text);
 					$post_text = str_replace('<img class="smilies" src="' . $this->phpbb_root_path, '<img class="smilies" src="' . $this->board_url, $post_text);
-					$post_text = str_replace('&', '&amp;', $post_text);
 
 					// For HTML digests, remove problematic HTML tags if the board administrator has specified any.
 					if (trim($this->config['phpbbservices_digests_strip_tags']) !== '')

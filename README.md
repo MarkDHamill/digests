@@ -1,5 +1,5 @@
 # Digests
-Digests extension for phpBB 3.2
+Digests extension for phpBB 3.2 and 3.3
 
 Please note that when deployed the extension will go under ext/phpbbservices/digests. Only the digests tree is shown in GitHub.
 

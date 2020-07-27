@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Digests
-* @copyright (c) 2020 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2019 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -37,7 +37,7 @@ class digests extends \phpbb\cron\task\base
 	private $date_limit;				// A logical range of dates that posts must be within
 	private $email_address_override;	// Used if admin wants manual mailer to send him/her a digest at an email address specified for this run
 	private $email_templates_path;		// Relative path to where the language specific email templates are located
-	private $forum_hierarchy;			// Provides a list of forums, their forum_ids and their parent_ids.
+	private $forum_hierarchy;			// An array of forum_ids and their parent forum_ids.
 	private $layout_with_html_tables;	// Layout posts in the email as HTML tables, similar to the phpBB2 digests mod
 	private $list_id;					// Used in determining forum access privileges for a subscriber
 	private $max_posts;					// Maximum number of posts in a digest
@@ -131,21 +131,8 @@ class digests extends \phpbb\cron\task\base
 		
 		$now = time();
 
-		// Populate the forum hierarchy array. This is used when the full path to a forum is requested to be shown in digests
-		$sql_array = array(
-			'SELECT'	=> 'forum_id, forum_name, parent_id',
-
-			'FROM'		=> array(
-				FORUMS_TABLE	=> 'f',
-			),
-		);
-		$sql = $this->db->sql_build_query('SELECT', $sql_array);
-		$result = $this->db->sql_query($sql);
-		while ($row = $this->db->sql_fetchrow($result))
-		{
-			$this->forum_hierarchy[$row['forum_id']] = array ('forum_name' => $row['forum_name'], 'parent_id' => $row['parent_id']);
-		}
-		$this->db->sql_freeresult($result); // Query be gone!
+		// Populate the forum hierarchy array. This is used when the full path to a forum is requested to be shown in digests.
+		$this->create_forum_hierarchy();
 
 		// In system cron (CLI) mode, the $user object may not have an IP assigned. If so, use the server's IP. This will
 		// allow logging to succeed since the IP is written to the log.
@@ -172,10 +159,10 @@ class digests extends \phpbb\cron\task\base
 			$this->run_mode = constants::DIGESTS_RUN_SYSTEM;
 		}
 
-		$this->path_prefix = ($this->run_mode == constants::DIGESTS_RUN_MANUAL) ? './../' : './';	// Because in manual mode you executing this from the adm folder
+		$this->path_prefix = ($this->run_mode == constants::DIGESTS_RUN_MANUAL) ? './../' : './';	// Because in manual mode you are executing this from the adm folder
 		
 		$this->email_templates_path = $this->path_prefix . 'ext/phpbbservices/digests/language/en/email/';	// Note: the email templates (except subscribe/unsubscribe templates not used here) are language independent, so it's okay to use British English as it is always supported and the subscribe/unsubscribe templates are not used here.
-		$this->store_path = $this->path_prefix . 'store/phpbbservices/digests/';
+		$this->store_path = $this->path_prefix . 'store/phpbbservices/digests/';	// Used to write digests to files so they can be analyzed
 
 		// We need enough style information to keep get_user_style() from complaining that bbcode.html cannot be found. Ideally the default style
 		// should be used to find templates but since it is looking for bbcode.html, styles always have prosilver in the inheritance tree and bbcode.html
@@ -258,7 +245,7 @@ class digests extends \phpbb\cron\task\base
 			$this->email_address_override = (trim($this->config['phpbbservices_digests_test_email_address']) !== '') ? $this->config['phpbbservices_digests_test_email_address'] : $this->config['board_contact'];
 		}
 
-		// Display a digest mail start processing message. It is captured in a log.
+		// Display a digest mail start processing message. It is captured in the admin log.
 		if ($this->config['phpbbservices_digests_enable_log'])
 		{
 			$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_START');
@@ -843,102 +830,8 @@ class digests extends \phpbb\cron\task\base
 				// email templating system, e.g. loops and switches.
 				$digest_content = $this->create_content($posts_rowset, $pm_rowset, $row, $is_html, $utc_month_1st_begin);
 
-				// Assemble a digest table of contents
-				if ($row['user_digest_toc'] == 1)
-				{
-
-					// Create Table of Contents header for private messages first
-					if ($is_html)
-					{
-						// For HTML digests, the table of contents always appears in a HTML table
-						$digest_toc = "<h2 style=\"color:#000000\">" . $this->language->lang('DIGESTS_TOC') . "</h2>\n";
-						$digest_toc .= "<p><a href=\"#skip\">" . $this->language->lang('DIGESTS_SKIP') . "</a></p>\n";
-					}
-					else
-					{
-						$digest_toc = "____________________________________________________________\n\n" . $this->language->lang('DIGESTS_TOC') . "\n\n";
-					}
-
-					if ($row['user_digest_show_pms'] == 1)
-					{
-
-						// Heading for table of contents
-						if ($is_html)
-						{
-							$digest_toc .= sprintf("<div class=\"toc\"><table>\n<tbody>\n<tr>\n<th id=\"j1\">%s</th><th id=\"j2\">%s</th><th id=\"j3\">%s</th><th id=\"j4\">%s</th>\n</tr>\n",
-								$this->language->lang('DIGESTS_JUMP_TO_MSG'), $this->language->lang('DIGESTS_PM_SUBJECT'), $this->language->lang('DIGESTS_SENDER'), $this->language->lang('DIGESTS_DATE'));
-						}
-
-						// Add a table row for each private message
-						if ($this->toc_pm_count > 0)
-						{
-							for ($i = 0; $i <= $this->toc_pm_count; $i++)
-							{
-								if ($is_html)
-								{
-									$digest_toc .= (isset($this->toc['pms'][$i])) ? "<tr>\n<td headers=\"j1\" style=\"text-align: center;\"><a href=\"#m" . $this->toc['pms'][$i]['message_id'] . '">' . $this->toc['pms'][$i]['message_id'] . '</a></td><td headers="j2">' . $this->toc['pms'][$i]['message_subject'] . '</td><td headers="j3">' . $this->toc['pms'][$i]['author'] . '</td><td headers="j4">' . $this->toc['pms'][$i]['datetime'] . "</td>\n</tr>\n" : '';
-								}
-								else
-								{
-									$digest_toc .= (isset($this->toc['pms'][$i])) ? $this->toc['pms'][$i]['author'] . ' ' . $this->language->lang('DIGESTS_SENT_YOU_A_MESSAGE') . ' ' . $this->language->lang('DIGESTS_OPEN_QUOTE_TEXT') . $this->toc['pms'][$i]['message_subject'] . $this->language->lang('DIGESTS_CLOSED_QUOTE_TEXT') . ' ' . $this->language->lang('DIGESTS_ON') . ' ' . $this->toc['pms'][$i]['datetime'] . "\n" : '';
-								}
-							}
-						}
-						else
-						{
-							$digest_toc .= ($is_html) ? '<tr><td colspan="4">' . $this->language->lang('DIGESTS_NO_PRIVATE_MESSAGES') . "</td></tr>" : $this->language->lang('DIGESTS_NO_PRIVATE_MESSAGES') . "\n";
-						}
-
-						// Create Table of Contents footer for private messages
-						$digest_toc .= ($is_html) ? "</tbody></table>\n<br>" : "\n";
-
-					}
-					else
-					{
-						$digest_toc = null;    // Avoid a PHP Notice
-					}
-
-					// Create Table of Contents header for posts
-					if ($is_html)
-					{
-						// For HTML digests, the table of contents always appears in a HTML table
-						$digest_toc .= sprintf("<table>\n<tbody>\n<tr>\n<th id=\"h1\">%s</th><th id=\"h2\">%s</th><th id=\"h3\">%s</th><th id=\"h4\">%s</th><th id=\"h5\">%s</th>\n</tr>\n",
-							$this->language->lang('DIGESTS_JUMP_TO_POST'), $this->language->lang('FORUM'), $this->language->lang('TOPIC'), $this->language->lang('AUTHOR'), $this->language->lang('DIGESTS_DATE'));
-					}
-
-					// Add a table row for each post
-					if ($this->posts_in_digest > 0)
-					{
-						for ($i = 0; $i <= $this->posts_in_digest; $i++)
-						{
-							if ($is_html)
-							{
-								$digest_toc .= (isset($this->toc['posts'][$i])) ? "<tr>\n<td headers=\"h1\" style=\"text-align: center;\"><a href=\"#p" . $this->toc['posts'][$i]['post_id'] . '">' . $this->toc['posts'][$i]['post_id'] . '</a></td><td headers="h2">' . $this->toc['posts'][$i]['forum'] . '</td><td headers="h3">' . $this->toc['posts'][$i]['topic'] . '</td><td headers="h4">' . $this->toc['posts'][$i]['author'] . '</td><td headers="h5">' . $this->toc['posts'][$i]['datetime'] . "</td>\n</tr>\n" : '';
-							}
-							else
-							{
-								$digest_toc .= (isset($this->toc['posts'][$i])) ? $this->toc['posts'][$i]['author'] . ' ' . $this->language->lang('DIGESTS_POSTED_TO_THE_TOPIC') . ' ' . $this->language->lang('DIGESTS_OPEN_QUOTE_TEXT') . $this->toc['posts'][$i]['topic'] . $this->language->lang('DIGESTS_CLOSED_QUOTE_TEXT') . ' ' . $this->language->lang('IN') . ' ' . $this->language->lang('DIGESTS_OPEN_QUOTE_TEXT') . $this->toc['posts'][$i]['forum'] . $this->language->lang('DIGESTS_CLOSED_QUOTE_TEXT') . ' ' . $this->language->lang('DIGESTS_ON') . ' ' . $this->toc['posts'][$i]['datetime'] . "\n" : '';
-							}
-						}
-					}
-					else
-					{
-						$no_posts_msg = ($row['user_digest_filter_type'] == constants::DIGESTS_BOOKMARKS) ? $this->language->lang('DIGESTS_NO_BOOKMARKED_POSTS') : $this->language->lang('DIGESTS_NO_POSTS');
-						$digest_toc .= ($is_html) ? '<tr><td colspan="5">' . $no_posts_msg . "</td></tr>" : $no_posts_msg;
-					}
-
-					// Create Table of Contents footer for posts
-					$digest_toc .= ($is_html) ? "</tbody>\n</table></div>\n<br>" : '';
-
-					// Publish the table of contents
-					$html_messenger->assign_vars(array(
-						'DIGESTS_TOC' => $digest_toc,
-					));
-				}
-				else
-				{
-					$digest_toc = null;    // Avoid a PHP Notice
-				}
+				// Create the table of contents. We move this to a function to make this more readable.
+				$this->create_table_of_contents($row, $is_html, $html_messenger);
 
 				if (!$is_html)
 				{
@@ -952,6 +845,7 @@ class digests extends \phpbb\cron\task\base
 					'DIGESTS_CONTENT' => $digest_content,
 				));
 
+				// Email the digest or save it locally.
 				if (($this->run_mode == constants::DIGESTS_RUN_MANUAL) && ($this->config['phpbbservices_digests_test_spool']))
 				{
 
@@ -1032,18 +926,18 @@ class digests extends \phpbb\cron\task\base
 					if ($row['user_digest_send_on_no_posts'] || $this->posts_in_digest > 0 || (is_array($pm_rowset) && count($pm_rowset) > 0) && $row['user_digest_show_pms'])
 					{
 
-						$mail_sent = $html_messenger->send(NOTIFY_EMAIL, false, $is_html, true);     // digest mailed
+						$mail_sent = $html_messenger->send(NOTIFY_EMAIL, false, $is_html, true);     // digest mailed?
 
 						if (!$mail_sent)
 						{
-							// Something went wrong when sending the digest. Errors always go in the log.
+							// Something went wrong when sending the digest. Errors now go into the error log for more visibility.
 							if ($this->config['phpbbservices_digests_show_email'])
 							{
-								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_BAD', false, array($row['username'], $row['user_email']));
+								$this->phpbb_log->add('critical', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_BAD', false, array($row['username'], $row['user_email']));
 							}
 							else
 							{
-								$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_BAD_NO_EMAIL', false, array($row['username']));
+								$this->phpbb_log->add('critical', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_BAD_NO_EMAIL', false, array($row['username']));
 							}
 						}
 						else
@@ -1234,7 +1128,7 @@ class digests extends \phpbb\cron\task\base
 
 		// Process private messages (if any) first since they appear before posts in the digest
 		
-		if ((is_array($pm_rowset) && count($pm_rowset) > 0) && ($user_row['user_digest_show_pms'] == 1))
+		if (($user_row['user_digest_show_pms'] == 1) && (is_array($pm_rowset) && count($pm_rowset) > 0))
 		{
 		
 			// There are private messages and the user wants to see them in the digest
@@ -1354,141 +1248,9 @@ class digests extends \phpbb\cron\task\base
 	
 		if (count($posts_rowset) !== 0)
 		{
-			
-			unset($bookmarked_topics);
-			unset($fetched_forums);
-			$fetched_forums = array();
-			
-			// Determine bookmarked topics, if any
-			if ($user_row['user_digest_filter_type'] == constants::DIGESTS_BOOKMARKS) // Bookmarked topics only
-			{
-			
-				// When selecting bookmarked topics only, we can safely ignore the logic constraining the user to read only 
-				// from certain forums. Instead we will create the SQL to get the bookmarked topics only.
-				
-				$bookmarked_topics = array();
-				
-				$sql_array = array(
-					'SELECT'	=> 't.topic_id',
-				
-					'FROM'		=> array(
-						USERS_TABLE			=> 'u',
-						BOOKMARKS_TABLE		=> 'b',
-						TOPICS_TABLE		=> 't',
-					),
-							
-					'WHERE'		=> 'u.user_id = b.user_id AND b.topic_id = t.topic_id 
-						AND b.user_id = ' . (int) $user_row['user_id'],
-				);
-				
-				$sql3 = $this->db->sql_build_query('SELECT', $sql_array);
-				$result3 = $this->db->sql_query($sql3);
-				
-				while ($row3 = $this->db->sql_fetchrow($result3))
-				{
-					$bookmarked_topics[] = (int) $row3['topic_id'];
-				}
-				$this->db->sql_freeresult($result3);
-				
-				if (count($bookmarked_topics) == 0)
-				{
-					// Logically, if there are no bookmarked topics for this user_id then there will be nothing in the digest. Flag an exception and
-					// make a note in the log about this inconsistency. Subscriber should still get a digest with a no bookmarked posts message.
-					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGEST_NO_BOOKMARKS', false, array($user_row['username']));
-				}
-				
-			}
-			
-			else
-			
-			{
-				
-				// Determine the forums allowed this subscriber is allowed to read
-				
-				// Get forum read permissions for this user. They are also usually stored in the user_permissions column, but sometimes the field is empty. This always works.
-				unset($allowed_forums);
-				$allowed_forums = array();
-				
-				$forum_array = $this->auth->acl_raw_data_single_user($user_row['user_id']);
-				foreach ($forum_array as $key => $value)
-				{
-					foreach ($value as $auth_option_id => $auth_setting)
-					{
-						if ($auth_option_id == $this->read_id)
-						{
-							if (($auth_setting == 1) && $this->check_all_parents($forum_array, $key))
-							{
-								$allowed_forums[] = $key;
-							}
-						}
-					}
-				}
-			
-				if (count($allowed_forums) == 0)
-				{
-					// If this user cannot retrieve ANY forums, in most cases no digest will be produced. However, there may be forums that the admin
-					// requires be presented, so we don't do an exception, but we do note it in the log.
-					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_NO_ALLOWED_FORUMS', false, array($user_row['username']));
-				}
-				$allowed_forums[] = 0;	// Add in global announcements forum
-		
-				// Ensure there are no duplicates
-				$allowed_forums = array_unique($allowed_forums);
-				
-				// Get the requested forums and their names. If none are specified in the phpbb_digests_subscribed_forums table, then all allowed forums are assumed
-				$requested_forums = array();
-				$this->requested_forums_names = array();
-				
-				$sql_array = array(
-					'SELECT'	=> 's.forum_id, forum_name',
-				
-					'FROM'		=> array(
-						$this->table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE	=> 's',
-						FORUMS_TABLE														=> 'f',
-					),
-				
-					'WHERE'		=> 's.forum_id = f.forum_id 
-										AND user_id = ' . (int) $user_row['user_id'],
-				);
-				
-				$sql3 = $this->db->sql_build_query('SELECT', $sql_array);
 
-				$result3 = $this->db->sql_query($sql3);
-				while ($row3 = $this->db->sql_fetchrow($result3))
-				{
-					$requested_forums[] = $row3['forum_id'];
-					$this->requested_forums_names[] = $row3['forum_name'];
-				}
-				$this->db->sql_freeresult($result3);
-				$requested_forums[] = 0;	// Add in global announcements forum
-				
-				// Ensure there are no duplicates
-				$requested_forums = array_unique($requested_forums);
-				
-				// The forums that will be fetched is the array intersection of the requested and allowed forums. There should be at least one forum
-				// allowed because the global announcements pseudo forum is common to both. However, if the user did not specify any forums then the allowed 
-				// forums become the ones fetched.
-				$fetched_forums = (count($requested_forums) > 1) ? array_intersect($allowed_forums, $requested_forums) : $allowed_forums;
-				asort($fetched_forums);
-				
-				// Add in any required forums
-				$required_forums = (isset($this->config['phpbbservices_digests_include_forums'])) ? explode(',',$this->config['phpbbservices_digests_include_forums']) : array();
-				if (count($required_forums) > 0)
-				{
-					$fetched_forums = array_merge($fetched_forums, $required_forums);
-				}
-				
-				// Remove any prohibited forums
-				$excluded_forums = (isset($this->config['phpbbservices_digests_exclude_forums'])) ? explode(',',$this->config['phpbbservices_digests_exclude_forums']) : array();
-				if (count($excluded_forums) > 0)
-				{
-					$fetched_forums = array_diff($fetched_forums, $excluded_forums);
-				}
-				
-				// Tidy up the forum list
-				$fetched_forums = array_unique($fetched_forums);
-				
-			}
+			$bookmarked_topics = $this->get_bookmarked_topics($user_row);
+			$fetched_forums = $this->get_fetched_forums($user_row);
 
 			// Sort posts by the user's preference.
 
@@ -1730,32 +1492,9 @@ class digests extends \phpbb\cron\task\base
 
 			}
 			
-			// Fetch foes, if any but only if they want foes filtered out
-			unset($foes);
-			if ($user_row['user_digest_remove_foes'] == 1)
-			{
-			
-				// Fetch your foes
-				$sql_array = array(
-					'SELECT'	=> 'zebra_id',
-				
-					'FROM'		=> array(
-						ZEBRA_TABLE	=> 'z',
-					),
-				
-					'WHERE'		=> 'user_id = ' . (int) $user_row['user_id'] . ' AND foe = 1',
-				);
-			
-				$sql3 = $this->db->sql_build_query('SELECT', $sql_array);
-				$result3 = $this->db->sql_query($sql3);
-				while ($row3 = $this->db->sql_fetchrow($result3))
-				{
-					$foes[] = (int) $row3['zebra_id'];
-				}
-				$this->db->sql_freeresult($result3);
-						
-			}
-		
+			// Fetch foes, if any, of the subscriber. These posts could be filtered out.
+			$foes = $this->get_foes($user_row);
+
 			// Put posts in the digests, assuming they should not be filtered out
 			
 			foreach ($posts_rowset as $post_row)
@@ -1804,7 +1543,7 @@ class digests extends \phpbb\cron\task\base
 					continue;
 				}
 				
-				// Skip post if not a bookmarked topic
+				// Skip post if not a bookmarked topic and bookmarked topics only are wanted.
 				if ($user_row['user_digest_filter_type'] == constants::DIGESTS_BOOKMARKS)
 				{
 					if ((isset($bookmarked_topics)) && !in_array($post_row['topic_id'], $bookmarked_topics))
@@ -1874,7 +1613,7 @@ class digests extends \phpbb\cron\task\base
 					// Hack that is needed for system crons to show smilies
 					$post_text = str_replace('{SMILIES_PATH}', $this->board_url . 'images/smilies', $post_text);
 				}
-				$post_text = generate_text_for_display($post_text, $post_row['bbcode_uid'], $post_row['bbcode_bitfield'], $flags);
+				$post_text = '<div>' . generate_text_for_display($post_text, $post_row['bbcode_uid'], $post_row['bbcode_bitfield'], $flags) . '</div>';
 
 				// Logic to show attachments
 				$post_text .= $this->create_attachment_markup($post_row, true);
@@ -2113,6 +1852,29 @@ class digests extends \phpbb\cron\task\base
 		
 	}
 
+	private function create_forum_hierarchy()
+	{
+
+		// Populates an internal array used to show the full path to a forum when it is requested to be shown in digests.
+		// get_forum_path makes it readable.
+
+		$sql_array = array(
+			'SELECT'	=> 'forum_id, forum_name, parent_id',
+
+			'FROM'		=> array(
+				FORUMS_TABLE	=> 'f',
+			),
+		);
+		$sql = $this->db->sql_build_query('SELECT', $sql_array);
+		$result = $this->db->sql_query($sql);
+		while ($row = $this->db->sql_fetchrow($result))
+		{
+			$this->forum_hierarchy[$row['forum_id']] = array ('forum_name' => $row['forum_name'], 'parent_id' => $row['parent_id']);
+		}
+		$this->db->sql_freeresult($result); // Query be gone!
+
+	}
+
 	private function get_forum_path ($forum_id)
 	{
 
@@ -2202,7 +1964,7 @@ class digests extends \phpbb\cron\task\base
 			$attachments_found++;
 			if ($attachments_found == 1)
 			{
-				$markup_text = sprintf("<div class=\"box\"><p>%s</p>", $this->language->lang('ATTACHMENTS'));
+				$markup_text = sprintf("<div class=\"box\"><div>%s</div>", $this->language->lang('ATTACHMENTS'));
 			}
 			$file_size = round(($attachment_row['filesize']/1024),2);
 			// Show images, link to other attachments
@@ -2225,9 +1987,9 @@ class digests extends \phpbb\cron\task\base
 			}
 			else
 			{
-				$markup_text .= '<div>' . ($attachment_row['attach_comment'] == '') ? '' : '<em>' . censor_text($attachment_row['attach_comment']) . '</em>';
 				$markup_text .=
-					sprintf("<div><a href=\"%s\"><strong>%s (%s %s)</strong></a></div>",
+					sprintf("<div>%s<br><a href=\"%s\">%s</a><br>(%s %s)</div>",
+						($attachment_row['attach_comment'] == '') ? '' : '<em>' . censor_text($attachment_row['attach_comment']) . '</em>',
 						$this->board_url . "download/file.$this->phpEx?id=" . $attachment_row['attach_id'],
 						$attachment_row['real_filename'],
 						$file_size,
@@ -2235,8 +1997,6 @@ class digests extends \phpbb\cron\task\base
 			}
 		}
 		$this->db->sql_freeresult($result);
-
-
 
 		if ($attachments_found > 0)
 		{
@@ -2313,6 +2073,289 @@ class digests extends \phpbb\cron\task\base
 
 		return $salutation_fields;
 
+	}
+
+	private function create_table_of_contents($row, $is_html, $html_messenger)
+	{
+
+		// Assemble a digest table of contents as a HTML table or as text.
+
+		if ($row['user_digest_toc'] == 1)
+		{
+
+			// Create Table of Contents header for private messages first
+			if ($is_html)
+			{
+				// For HTML digests, the table of contents always appears in a HTML table
+				$digest_toc = "<h2 style=\"color:#000000\">" . $this->language->lang('DIGESTS_TOC') . "</h2>\n";
+				$digest_toc .= "<p><a href=\"#skip\">" . $this->language->lang('DIGESTS_SKIP') . "</a></p>\n";
+			}
+			else
+			{
+				$digest_toc = "____________________________________________________________\n\n" . $this->language->lang('DIGESTS_TOC') . "\n\n";
+			}
+
+			if ($row['user_digest_show_pms'] == 1)
+			{
+
+				// Heading for table of contents
+				if ($is_html)
+				{
+					$digest_toc .= sprintf("<div class=\"toc\"><table>\n<tbody>\n<tr>\n<th id=\"j1\">%s</th><th id=\"j2\">%s</th><th id=\"j3\">%s</th><th id=\"j4\">%s</th>\n</tr>\n",
+						$this->language->lang('DIGESTS_JUMP_TO_MSG'), $this->language->lang('DIGESTS_PM_SUBJECT'), $this->language->lang('DIGESTS_SENDER'), $this->language->lang('DIGESTS_DATE'));
+				}
+
+				// Add a table row for each private message
+				if ($this->toc_pm_count > 0)
+				{
+					for ($i = 0; $i <= $this->toc_pm_count; $i++)
+					{
+						if ($is_html)
+						{
+							$digest_toc .= (isset($this->toc['pms'][$i])) ? "<tr>\n<td headers=\"j1\" style=\"text-align: center;\"><a href=\"#m" . $this->toc['pms'][$i]['message_id'] . '">' . $this->toc['pms'][$i]['message_id'] . '</a></td><td headers="j2">' . $this->toc['pms'][$i]['message_subject'] . '</td><td headers="j3">' . $this->toc['pms'][$i]['author'] . '</td><td headers="j4">' . $this->toc['pms'][$i]['datetime'] . "</td>\n</tr>\n" : '';
+						}
+						else
+						{
+							$digest_toc .= (isset($this->toc['pms'][$i])) ? $this->toc['pms'][$i]['author'] . ' ' . $this->language->lang('DIGESTS_SENT_YOU_A_MESSAGE') . ' ' . $this->language->lang('DIGESTS_OPEN_QUOTE_TEXT') . $this->toc['pms'][$i]['message_subject'] . $this->language->lang('DIGESTS_CLOSED_QUOTE_TEXT') . ' ' . $this->language->lang('DIGESTS_ON') . ' ' . $this->toc['pms'][$i]['datetime'] . "\n" : '';
+						}
+					}
+				}
+				else
+				{
+					$digest_toc .= ($is_html) ? '<tr><td colspan="4">' . $this->language->lang('DIGESTS_NO_PRIVATE_MESSAGES') . "</td></tr>" : $this->language->lang('DIGESTS_NO_PRIVATE_MESSAGES') . "\n";
+				}
+
+				// Create Table of Contents footer for private messages
+				$digest_toc .= ($is_html) ? "</tbody></table>\n<br>" : "\n";
+
+			}
+			else
+			{
+				$digest_toc = null;    // Avoid a PHP Notice
+			}
+
+			// Create Table of Contents header for posts
+			if ($is_html)
+			{
+				// For HTML digests, the table of contents always appears in a HTML table
+				$digest_toc .= sprintf("<table>\n<tbody>\n<tr>\n<th id=\"h1\">%s</th><th id=\"h2\">%s</th><th id=\"h3\">%s</th><th id=\"h4\">%s</th><th id=\"h5\">%s</th>\n</tr>\n",
+					$this->language->lang('DIGESTS_JUMP_TO_POST'), $this->language->lang('FORUM'), $this->language->lang('TOPIC'), $this->language->lang('AUTHOR'), $this->language->lang('DIGESTS_DATE'));
+			}
+
+			// Add a table row for each post
+			if ($this->posts_in_digest > 0)
+			{
+				for ($i = 0; $i <= $this->posts_in_digest; $i++)
+				{
+					if ($is_html)
+					{
+						$digest_toc .= (isset($this->toc['posts'][$i])) ? "<tr>\n<td headers=\"h1\" style=\"text-align: center;\"><a href=\"#p" . $this->toc['posts'][$i]['post_id'] . '">' . $this->toc['posts'][$i]['post_id'] . '</a></td><td headers="h2">' . $this->toc['posts'][$i]['forum'] . '</td><td headers="h3">' . $this->toc['posts'][$i]['topic'] . '</td><td headers="h4">' . $this->toc['posts'][$i]['author'] . '</td><td headers="h5">' . $this->toc['posts'][$i]['datetime'] . "</td>\n</tr>\n" : '';
+					}
+					else
+					{
+						$digest_toc .= (isset($this->toc['posts'][$i])) ? $this->toc['posts'][$i]['author'] . ' ' . $this->language->lang('DIGESTS_POSTED_TO_THE_TOPIC') . ' ' . $this->language->lang('DIGESTS_OPEN_QUOTE_TEXT') . $this->toc['posts'][$i]['topic'] . $this->language->lang('DIGESTS_CLOSED_QUOTE_TEXT') . ' ' . $this->language->lang('IN') . ' ' . $this->language->lang('DIGESTS_OPEN_QUOTE_TEXT') . $this->toc['posts'][$i]['forum'] . $this->language->lang('DIGESTS_CLOSED_QUOTE_TEXT') . ' ' . $this->language->lang('DIGESTS_ON') . ' ' . $this->toc['posts'][$i]['datetime'] . "\n" : '';
+					}
+				}
+			}
+			else
+			{
+				$no_posts_msg = ($row['user_digest_filter_type'] == constants::DIGESTS_BOOKMARKS) ? $this->language->lang('DIGESTS_NO_BOOKMARKED_POSTS') : $this->language->lang('DIGESTS_NO_POSTS');
+				$digest_toc .= ($is_html) ? '<tr><td colspan="5">' . $no_posts_msg . "</td></tr>" : $no_posts_msg;
+			}
+
+			// Create Table of Contents footer for posts
+			$digest_toc .= ($is_html) ? "</tbody>\n</table></div>\n<br>" : '';
+
+			// Publish the table of contents
+			$html_messenger->assign_vars(array(
+				'DIGESTS_TOC' => $digest_toc,
+			));
+		}
+		else
+		{
+			$digest_toc = null;    // Avoid a PHP Notice
+		}
+
+		return;
+
+	}
+
+	private function get_bookmarked_topics(&$user_row)
+	{
+
+		// If bookmarked topics only is checked, returns an array of bookmarked topic_ids. Otherwise
+		// returns a null array.
+
+		$bookmarked_topics = array();
+
+		// Determine bookmarked topics, if any
+		if ($user_row['user_digest_filter_type'] == constants::DIGESTS_BOOKMARKS) // Bookmarked topics only
+		{
+
+			// When selecting bookmarked topics only, we can safely ignore the logic constraining the user to read only
+			// from certain forums. Instead we will create the SQL to get the bookmarked topics only.
+
+			$bookmarked_topics = array();
+
+			$sql_array = array(
+				'SELECT'	=> 't.topic_id',
+
+				'FROM'		=> array(
+					USERS_TABLE			=> 'u',
+					BOOKMARKS_TABLE		=> 'b',
+					TOPICS_TABLE		=> 't',
+				),
+
+				'WHERE'		=> 'u.user_id = b.user_id AND b.topic_id = t.topic_id 
+						AND b.user_id = ' . (int) $user_row['user_id'],
+			);
+
+			$sql3 = $this->db->sql_build_query('SELECT', $sql_array);
+			$result3 = $this->db->sql_query($sql3);
+
+			while ($row3 = $this->db->sql_fetchrow($result3))
+			{
+				$bookmarked_topics[] = (int) $row3['topic_id'];
+			}
+			$this->db->sql_freeresult($result3);
+
+			if (count($bookmarked_topics) == 0)
+			{
+				// Logically, if there are no bookmarked topics for this user_id then there will be nothing in the digest. Flag an exception and
+				// make a note in the log about this inconsistency. Subscriber should still get a digest with a no bookmarked posts message.
+				$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGEST_NO_BOOKMARKS', false, array($user_row['username']));
+			}
+
+		}
+		return $bookmarked_topics;
+
+	}
+
+	private function get_fetched_forums(&$user_row)
+	{
+
+		// Returns an array of forum_ids that the user is allowed to read. If none, an empty array is returned
+
+		$fetched_forums = array();
+
+		// Get forum read permissions for this user. They are also usually stored in the user_permissions column, but sometimes the field is empty. This always works.
+		unset($allowed_forums);
+		$allowed_forums = array();
+
+		$forum_array = $this->auth->acl_raw_data_single_user($user_row['user_id']);
+		foreach ($forum_array as $key => $value)
+		{
+			foreach ($value as $auth_option_id => $auth_setting)
+			{
+				if ($auth_option_id == $this->read_id)
+				{
+					if (($auth_setting == 1) && $this->check_all_parents($forum_array, $key))
+					{
+						$allowed_forums[] = $key;
+					}
+				}
+			}
+		}
+
+		if (count($allowed_forums) == 0)
+		{
+			// If this user cannot retrieve ANY forums, in most cases no digest will be produced. However, there may be forums that the admin
+			// requires be presented, so we don't do an exception, but we do note it in the log.
+			$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_NO_ALLOWED_FORUMS', false, array($user_row['username']));
+		}
+		$allowed_forums[] = 0;	// Add in global announcements forum
+
+		// Ensure there are no duplicates
+		$allowed_forums = array_unique($allowed_forums);
+
+		// Get the requested forums and their names. If none are specified in the phpbb_digests_subscribed_forums table, then all allowed forums are assumed
+		$requested_forums = array();
+		$this->requested_forums_names = array();
+
+		$sql_array = array(
+			'SELECT'	=> 's.forum_id, forum_name',
+
+			'FROM'		=> array(
+				$this->table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE	=> 's',
+				FORUMS_TABLE														=> 'f',
+			),
+
+			'WHERE'		=> 's.forum_id = f.forum_id 
+										AND user_id = ' . (int) $user_row['user_id'],
+		);
+
+		$sql3 = $this->db->sql_build_query('SELECT', $sql_array);
+
+		$result3 = $this->db->sql_query($sql3);
+		while ($row3 = $this->db->sql_fetchrow($result3))
+		{
+			$requested_forums[] = $row3['forum_id'];
+			$this->requested_forums_names[] = $row3['forum_name'];
+		}
+		$this->db->sql_freeresult($result3);
+		$requested_forums[] = 0;	// Add in global announcements forum
+
+		// Ensure there are no duplicates
+		$requested_forums = array_unique($requested_forums);
+
+		// The forums that will be fetched is the array intersection of the requested and allowed forums. There should be at least one forum
+		// allowed because the global announcements pseudo forum is common to both. However, if the user did not specify any forums then the allowed
+		// forums become the ones fetched.
+		$fetched_forums = (count($requested_forums) > 1) ? array_intersect($allowed_forums, $requested_forums) : $allowed_forums;
+		asort($fetched_forums);
+
+		// Add in any required forums
+		$required_forums = (isset($this->config['phpbbservices_digests_include_forums'])) ? explode(',',$this->config['phpbbservices_digests_include_forums']) : array();
+		if (count($required_forums) > 0)
+		{
+			$fetched_forums = array_merge($fetched_forums, $required_forums);
+		}
+
+		// Remove any prohibited forums
+		$excluded_forums = (isset($this->config['phpbbservices_digests_exclude_forums'])) ? explode(',',$this->config['phpbbservices_digests_exclude_forums']) : array();
+		if (count($excluded_forums) > 0)
+		{
+			$fetched_forums = array_diff($fetched_forums, $excluded_forums);
+		}
+
+		// Tidy up the forum list
+		$fetched_forums = array_unique($fetched_forums);
+
+		return $fetched_forums;
+
+	}
+
+	private function get_foes(&$user_row)
+	{
+
+		// Returns an array of foes for the subscriber, if any. If none, an empty array is returned.
+		$foes = array();
+
+		if ($user_row['user_digest_remove_foes'] == 1)
+		{
+
+			// Fetch your foes
+			$sql_array = array(
+				'SELECT'	=> 'zebra_id',
+
+				'FROM'		=> array(
+					ZEBRA_TABLE	=> 'z',
+				),
+
+				'WHERE'		=> 'user_id = ' . (int) $user_row['user_id'] . ' AND foe = 1',
+			);
+
+			$sql3 = $this->db->sql_build_query('SELECT', $sql_array);
+			$result3 = $this->db->sql_query($sql3);
+			while ($row3 = $this->db->sql_fetchrow($result3))
+			{
+				$foes[] = (int) $row3['zebra_id'];
+			}
+			$this->db->sql_freeresult($result3);
+
+		}
+
+		return $foes;
 	}
 
 }

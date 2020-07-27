@@ -13,6 +13,7 @@
 		{% DEFINE INCLUDED_ACPDIGESTSJS = true %}
 	{% endif %}
 {% endif %}
+
 {% if S_EDIT_SUBSCRIBERS %}
 <script>
 	var collapseImageIdSrc = '{{ IMAGE_PATH }}collapse.png';
@@ -79,7 +80,6 @@
 		// Tests to see if the named form field is in the stack to be submitted.
 		return (toSubmit.indexOf(name) !== -1);
 	}
-
 </script>
 {% endif %}
 
@@ -561,5 +561,18 @@
 	{{ S_FORM_TOKEN }}
 	</fieldset>
 </form>
-
 {% INCLUDE 'overall_footer.html' %}
+{% if S_INCLUDE_DIGESTS_MANUAL_MAILER %}
+{% if not definition.INCLUDED_DATETIMEPICKERJS %}
+{% DEFINE INCLUDED_DATETIMEPICKERJS = true %}
+{% INCLUDEJS '@phpbbservices_digests/jquery.datetimepicker.js' %}
+<script>
+	$(document).ready(function(){
+		$('#phpbbservices_digests_test_date_hour').datetimepicker({
+			inline:true,
+			format: 'Y-m-d H:00:00',
+		})
+	});
+</script>
+{% endif %}
+{% endif %}

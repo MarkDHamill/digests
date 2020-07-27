@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Digests
-* @copyright (c) 2020 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2019 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -274,20 +274,9 @@ class main_module
 				}
 
 				// Set up sort order
-				$ascending_selected = $descending_selected = '';
-				switch ($sortorder)
-				{
-					case 'd':
-						$order_by_sql = 'DESC';
-						$descending_selected = ' selected="selected"';
-					break;
-					
-					case 'a':
-					default:
-						$order_by_sql = 'ASC';
-						$ascending_selected = ' selected="selected"';
-					break;
-				}
+				$order_by_sql = ($sortorder == 'a') ? 'ASC' : 'DESC';
+				$ascending_selected = ($sortorder == 'a') ?  ' selected="selected"' : '';
+				$descending_selected = ($sortorder == 'd') ?  ' selected="selected"' : '';
 
 				// Set up member search SQL, either by email or username
 				$match_any_chars = $this->db->get_any_char();
@@ -974,6 +963,8 @@ class main_module
 			}
 		}
 
+		$this->page_title = $this->language->lang($display_vars['title']);
+
 		if ($submit && $mode == 'digests_edit_subscribers')
 		{
 
@@ -1582,13 +1573,13 @@ class main_module
 		{
 
 			define('IN_DIGESTS_TEST', true);
-			$continue = true;
+			$proceed = true;
 			$digests_storage_path = $this->phpbb_root_path . 'store/phpbbservices/digests';
 
 			if (!$this->config['phpbbservices_digests_test'] && !$this->config['phpbbservices_digests_test_clear_spool'])
 			{
 				$message = $this->language->lang('DIGESTS_MAILER_NOT_RUN');
-				$continue = false;
+				$proceed = false;
 			}
 
 			// Create the store/phpbbservices/digests folder. It should exist already.
@@ -1596,10 +1587,10 @@ class main_module
 			{
 				$message_type = E_USER_WARNING;
 				$message = sprintf($this->language->lang('DIGESTS_CREATE_DIRECTORY_ERROR'), $digests_storage_path);
-				$continue = false;
+				$proceed = false;
 			}
 
-			if ($continue && $this->config['phpbbservices_digests_test_clear_spool'])
+			if ($proceed && $this->config['phpbbservices_digests_test_clear_spool'])
 			{
 				
 				// Clear the digests store folder of .txt and .html files, if so instructed
@@ -1636,12 +1627,12 @@ class main_module
 				{
 					$message_type = E_USER_WARNING;
 					$message = $this->language->lang('DIGESTS_RUN_TEST_CLEAR_SPOOL_ERROR');
-					$continue = false;
+					$proceed = false;
 				}
 
 			}
 			
-			if ($continue && (trim($this->config['phpbbservices_digests_test_date_hour']) !== ''))
+			if ($proceed && (trim($this->config['phpbbservices_digests_test_date_hour']) !== ''))
 			{
 				
 				// Make sure run date is valid, if a run date was requested.
@@ -1650,13 +1641,13 @@ class main_module
 				{
 					$message_type = E_USER_WARNING;
 					$message = $this->language->lang('DIGESTS_ILLOGICAL_DATE');
-					$continue = false;
+					$proceed = false;
 				}
 
 			}
 			
 			// Get ready to manually mail digests
-			if ($continue && $this->config['phpbbservices_digests_test'])
+			if ($proceed && $this->config['phpbbservices_digests_test'])
 			{
 
 				// Create a mailer object and call its run method. The logic for sending a digest is embedded in this method, which is normally run as a cron task.
@@ -1702,7 +1693,6 @@ class main_module
 		}
 
 		$this->tpl_name = 'acp_digests';
-		$this->page_title = $display_vars['title'];
 
 		$this->template->assign_vars(array(
 			'ERROR_MSG'			=> (is_array($error) ? implode('<br>', $error) : $error),
@@ -1745,17 +1735,17 @@ class main_module
 			{
 				switch ($row['user_digest_type'])
 				{
-					case constants::DIGESTS_DAILY_VALUE:
-					default:
-						$digest_type = $this->language->lang('DIGESTS_DAILY');
-					break;
-
 					case constants::DIGESTS_WEEKLY_VALUE:
 						$digest_type = $this->language->lang('DIGESTS_WEEKLY');
 					break;
 
 					case constants::DIGESTS_MONTHLY_VALUE:
 						$digest_type = $this->language->lang('DIGESTS_MONTHLY');
+					break;
+
+					case constants::DIGESTS_DAILY_VALUE:
+					default:
+						$digest_type = $this->language->lang('DIGESTS_DAILY');
 					break;
 				}
 				$current_hour_subscribers[] = $row['username'] . ' (' . $digest_type . ')';
@@ -1768,8 +1758,10 @@ class main_module
 		}
 
 		// Output relevant page
+
 		foreach ($display_vars['vars'] as $config_key => $vars)
 		{
+
 			if (!is_array($vars) && strpos($config_key, 'legend') === false)
 			{
 				continue;
@@ -1778,10 +1770,9 @@ class main_module
 			if (strpos($config_key, 'legend') !== false)
 			{
 				$this->template->assign_block_vars('options', array(
-					'LEGEND'		=> (NULL !== $this->language->lang($vars)) ? $this->language->lang($vars) : $vars,
+					'LEGEND'		=> (!isset($this->language->lang[$vars])) ? $this->language->lang($vars) : $vars,
 					'S_LEGEND'		=> true)
 				);
-
 				continue;
 			}
 
@@ -1790,11 +1781,11 @@ class main_module
 			$l_explain = '';
 			if ($vars['explain'] && isset($vars['lang_explain']))
 			{
-				$l_explain = (NULL !== $this->language->lang($vars['lang_explain'])) ? $this->language->lang($vars['lang_explain']) : $vars['lang_explain'];
+				$l_explain = (!isset($this->language->lang[$vars['lang_explain']])) ? $this->language->lang($vars['lang_explain']) : $vars['lang_explain'];
 			}
 			else if ($vars['explain'])
 			{
-				$l_explain = (NULL !== $this->language->lang($vars['lang'] . '_EXPLAIN')) ? $this->language->lang($vars['lang'] . '_EXPLAIN') : '';
+				$l_explain = (!isset($this->language->lang[$vars['lang'] . '_EXPLAIN'])) ? $this->language->lang($vars['lang'] . '_EXPLAIN') : '';
 			}
 
 			$content = build_cfg_template($type, $config_key, $this->new_config, $config_key, $vars);
@@ -1807,7 +1798,7 @@ class main_module
 			$this->template->assign_block_vars('options', array(
 				'CONTENT'		=> $content,
 				'KEY'			=> $config_key,
-				'TITLE'			=> (NULL !== $this->language->lang($vars['lang'])) ? $this->language->lang($vars['lang']) : $vars['lang'],
+				'TITLE'			=> ($this->language->lang($vars['lang'])) ? $this->language->lang($vars['lang']) : $vars['lang'],
 				'S_EXPLAIN'		=> $vars['explain'] && !empty($l_explain),
 				'TITLE_EXPLAIN'	=> $l_explain)
 			);
@@ -1971,11 +1962,6 @@ class main_module
 				// Set up associations between digest types as constants and their language equivalents
 				switch ($row['user_digest_type'])
 				{
-					case constants::DIGESTS_DAILY_VALUE:
-					default:
-						$digest_type_text = strtolower($this->language->lang('DIGESTS_DAILY'));
-					break;
-					
 					case constants::DIGESTS_WEEKLY_VALUE:
 						$digest_type_text = strtolower($this->language->lang('DIGESTS_WEEKLY'));
 					break;
@@ -1987,16 +1973,16 @@ class main_module
 					case constants::DIGESTS_NONE_VALUE:
 						$digest_type_text = strtolower($this->language->lang('DIGESTS_NONE'));
 					break;
+
+					case constants::DIGESTS_DAILY_VALUE:
+					default:
+						$digest_type_text = strtolower($this->language->lang('DIGESTS_DAILY'));
+					break;
 				}
 				
 				// Set up associations between digest formats as constants and their language equivalents
 				switch ($row['user_digest_format'])
 				{
-					case constants::DIGESTS_HTML_VALUE:
-					default:
-						$digest_format_text = $this->language->lang('DIGESTS_FORMAT_HTML');
-					break;
-					
 					case constants::DIGESTS_HTML_CLASSIC_VALUE:
 						$digest_format_text = $this->language->lang('DIGESTS_FORMAT_HTML_CLASSIC');
 					break;
@@ -2011,6 +1997,11 @@ class main_module
 					
 					case constants::DIGESTS_TEXT_VALUE:
 						$digest_format_text = strtolower($this->language->lang('DIGESTS_FORMAT_TEXT'));
+					break;
+
+					case constants::DIGESTS_HTML_VALUE:
+					default:
+						$digest_format_text = $this->language->lang('DIGESTS_FORMAT_HTML');
 					break;
 				}
 					

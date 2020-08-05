@@ -275,8 +275,8 @@ class main_module
 
 				// Set up sort order
 				$order_by_sql = ($sortorder == 'a') ? 'ASC' : 'DESC';
-				$ascending_selected = ($sortorder == 'a') ?  ' selected="selected"' : '';
-				$descending_selected = ($sortorder == 'd') ?  ' selected="selected"' : '';
+				$ascending_selected = ($sortorder == 'a') ? ' selected="selected"' : '';
+				$descending_selected = ($sortorder == 'd') ? ' selected="selected"' : '';
 
 				// Set up member search SQL, either by email or username
 				$match_any_chars = $this->db->get_any_char();

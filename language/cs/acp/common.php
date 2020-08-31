@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Digests
-* @copyright (c) 2019 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2020 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -99,7 +99,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_MAX_ITEMS'										=> 'Maximální počet příspěvků v jakémkoliv souhrnu',
 	'DIGESTS_MAX_ITEMS_EXPLAIN'								=> 'Z důvodu zatížení serveru můžete chtít nastavit maximální počet příspěvků pro jakýkoliv souhrn. Nastavíte-li 0 (nulu), nebude se počet nijak omezovat. Můžete použít jakékoliv celé číslo. Příspěvky jsou dále omezeny frekvencí souhrnu (denně, týdně nebo měsíčně) a dalšími kritérii, která si uživatel nastaví.',
 	'DIGESTS_MAIL_FREQUENCY' 								=> 'Frekvence zasílání',
-	'DIGESTS_MIGRATE_UNSUPPORTED_VERSION'					=> 'Aktualizace souhrnů na novou verzi (pro phpBB 3.0) je podporováno pro verzi 2.2.6 a novější. Máte verzi %s. Rozšížení nemůže být aktualizováno ani instalováno. Pomoc naleznete na fóru podpory phpbb.com.',
+	'DIGESTS_MIGRATE_UNSUPPORTED_VERSION'					=> 'Aktualizace souhrnů na novou verzi (pro phpBB 3.0) je podporováno pro verzi 2.2.6 a novější. Máte verzi %s. Rozšížení nemůže být aktualizováno ani instalováno. Pomoc naleznete na diskuzním fóru tohoto rozšíření na phpbb.com.',
 	'DIGESTS_MIN_POPULARITY_SIZE'							=> 'Minimální oblíbenost tématu',
 	'DIGESTS_MIN_POPULARITY_SIZE_EXPLAIN'					=> 'Toto nastavuje minimální počet příspěvků denně potřebných proto, aby se téma považovalo za oblíbené. Uživatelé si nemohou nastavit hodnotu nižší než je zde uvedená hodnota. Hodnota je aplikována pouze pro odběratele s frekvencí den, týden nebo měsíc, aby odrážela oblíbenost v posledním období.',
 	'DIGESTS_MONTHLY_ONLY'									=> 'Jen měsíční souhrn',

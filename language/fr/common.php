@@ -1,11 +1,11 @@
 <?php
 /**
-*
-* @package phpBB Extension - Digests
-* @copyright (c) 2019 Mark D. Hamill (mark@phpbbservices.com)
-* @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
-*
-*/
+ *
+ * @package phpBB Extension - Digests
+ * @copyright (c) 2019 Mark D. Hamill (mark@phpbbservices.com)
+ * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
+ *
+ */
 
 if (!defined('IN_PHPBB'))
 {
@@ -19,7 +19,7 @@ if (empty($lang) || !is_array($lang))
 
 $lang = array_merge($lang, array(
 	'PLURAL_RULE'						=> 2,
-	
+
 	'DIGESTS_ALL_FORUMS'				=> 'Tous',
 	'DIGESTS_AM'						=> ' AM', // non utilisé si les formats date/heure ne pemettent pas AM et PM
 	'DIGESTS_AUTHOR'					=> 'Auteur',
@@ -92,8 +92,8 @@ $lang = array_merge($lang, array(
 	'DIGESTS_PM'						=> ' PM', // non utilisé si les formats date/heure ne pemettent pas AM et PM
 	'DIGESTS_PM_SUBJECT'				=> 'Sujet du message privé',
 	'DIGESTS_POST_IMAGE_TEXT'			=> '<br>(Cliquez sur l&apos;image pour l&apos;afficher en taille réelle.)',
-	'DIGESTS_POST_TEXT'					=> 'Texte du post', 
-	'DIGESTS_POST_TIME'					=> 'Date', 
+	'DIGESTS_POST_TEXT'					=> 'Texte du post',
+	'DIGESTS_POST_TIME'					=> 'Date',
 	'DIGESTS_POST_SIGNATURE_DELIMITER'	=> '<br>____________________<br>', // Placez ici du code HTML que vous souhaitez utiliser pour délimiter la fin d&apos;un post du début de la ligne de signature (assurez-vous qu'il s'agisse de code HTML valide)
 	'DIGESTS_POSTED_TO_THE_TOPIC'		=> 'posté sur le sujet',
 	'DIGESTS_POSTS_TYPE_ANY'			=> 'Tous les posts',
@@ -146,7 +146,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_WEEKDAY' 					=> 'Dimanche,Lundi,Mardi,Mercredi,Jeudi,Vendredi,Samedi',
 	'DIGESTS_WEEKLY'					=> 'Hebdomadaire',
 	'DIGESTS_YOU_HAVE_PRIVATE_MESSAGES' => 'Vous avez de nouveaux messages privés',
-	
+
 	'UCP_DIGESTS'								=> 'Résumés',
 	'UCP_DIGESTS_ADDITIONAL_CRITERIA'			=> 'Critères additionnels',
 	'UCP_DIGESTS_ADDITIONAL_CRITERIA_OPTIONS'	=> 'Options des critères additionnels',

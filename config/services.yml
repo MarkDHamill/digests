@@ -30,11 +30,11 @@ services:
             - '@auth'
             - '%core.table_prefix%'
             - '@log'
-            - '@phpbbservices.digests.common'
             - '@language'
             - '@notification_manager'
             - '@service_container'
+            - '@filesystem'
         calls:
-            - [set_name, [cron.task.cron_task]]
+            - [set_name, [phpbbservices.digests.cron.task.cron_task]]
         tags:
             - { name: cron.task }

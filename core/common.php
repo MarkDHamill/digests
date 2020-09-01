@@ -32,7 +32,7 @@ class common
 	 * @param \phpbb\user 				$user 				The user object
 	 */
 
-	public function __construct(\phpbb\language\language $language, $phpbb_root_path,  \phpbb\filesystem\filesystem $filesystem, \phpbb\log\log $phpbb_log, \phpbb\user $user)
+	public function __construct(\phpbb\language\language $language, $phpbb_root_path, \phpbb\filesystem\filesystem $filesystem, \phpbb\log\log $phpbb_log, \phpbb\user $user)
 	{
 		$this->filesystem = $filesystem;
 		$this->language = $language;

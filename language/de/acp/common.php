@@ -85,6 +85,7 @@ $lang = array_merge($lang, array(
 	),
 	'DIGESTS_LOWERCASE_DIGEST_TYPE'							=> 'Kleinschreibung der Zusammenfassungsart',
 	'DIGESTS_LOWERCASE_DIGEST_TYPE_EXPLAIN'					=> 'In manchen Sprachen kann es sinnvoll sein, z.B. aus &ldquo;Digest Daily My board name&rdquo; &ldquo;Digest daily of my board name&rdquo;, zu machen. Der erste Buchstabe des Board-Namens wird dabei auch verkleinert.',
+	'DIGESTS_MAIL_FREQUENCY' 								=> 'Häufigkeit der E-Mail-Zusammenstellung',
 	'DIGESTS_MAILER_NOT_RUN'								=> 'Mailer wurde nicht gestartet, weil er nicht aktiviert war oder es keine Löschanforderung für das Digests-Verzeichnis gab.',
 	'DIGESTS_MAILER_RAN_SUCCESSFULLY'						=> 'Mailer wurde erfolgreich gestartet.',
 	'DIGESTS_MAILER_RAN_WITH_ERROR'							=> 'Bei der Ausführung des Mailers ist ein Fehler aufgetreten. Dabei können jedoch Zusammenfassungen durchaus erfolgreich erzeugt worden sein. Die Administrations- oder das Fehlerprotokoll kann dazu ggf. genauere Informationen enthalten.',

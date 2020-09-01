@@ -18,7 +18,6 @@ class digests extends \phpbb\cron\task\base
 	protected $auth;
 	protected $config;
 	protected $db;
-	protected $helper;
 	protected $language;
 	protected $phpbb_container;
 	protected $phpbb_log;
@@ -37,6 +36,7 @@ class digests extends \phpbb\cron\task\base
 	private $date_limit;				// A logical range of dates that posts must be within
 	private $email_address_override;	// Used if admin wants manual mailer to send him/her a digest at an email address specified for this run
 	private $email_templates_path;		// Relative path to where the language specific email templates are located
+	private $helper;					// Object for extension's helper class
 	private $forum_hierarchy;			// An array of forum_ids and their parent forum_ids.
 	private $layout_with_html_tables;	// Layout posts in the email as HTML tables, similar to the phpBB2 digests mod
 	private $list_id;					// Used in determining forum access privileges for a subscriber
@@ -68,29 +68,37 @@ class digests extends \phpbb\cron\task\base
 	* @param \phpbb\auth\auth 					$auth 					The auth object
 	* @param string								$table_prefix 			Prefix for phpbb's database tables
 	* @param \phpbb\log\log 					$phpbb_log 				phpBB log object
-	* @param \phpbbservices\digests\core\common $helper					Extension's helper object
 	* @param \phpbb\language\language 			$language 				Language object
 	* @param \phpbb\notification\manager 		$notification_manager 	Notifications manager
 	* @param ContainerInterface 				$phpbb_container 		Container
-	*
+	* @param \phpbb\filesystem		 			$filesystem				Filesystem object
 	*/
 
-	public function __construct(\phpbb\config\config $config, \phpbb\request\request $request, \phpbb\user $user, \phpbb\db\driver\factory $db, $php_ext, $phpbb_root_path, \phpbb\template\template $template, \phpbb\auth\auth $auth, $table_prefix, \phpbb\log\log $phpbb_log, \phpbbservices\digests\core\common $helper, \phpbb\language\language $language, \phpbb\notification\manager $notification_manager, ContainerInterface $phpbb_container)
+	public function __construct(\phpbb\config\config $config, \phpbb\request\request $request, \phpbb\user $user, \phpbb\db\driver\factory $db, $php_ext, $phpbb_root_path, \phpbb\template\template $template, \phpbb\auth\auth $auth, $table_prefix, \phpbb\log\log $phpbb_log, \phpbb\language\language $language, \phpbb\notification\manager $notification_manager, ContainerInterface $phpbb_container, \phpbb\filesystem\filesystem $filesystem)
 	{
-		$this->config = $config;
-		$this->request = $request;
-		$this->user = $user;
-		$this->db = $db;
-		$this->phpEx = $php_ext;
-		$this->phpbb_root_path = $phpbb_root_path;
-		$this->template = $template;
 		$this->auth = $auth;
-		$this->table_prefix = $table_prefix;
-		$this->phpbb_log = $phpbb_log;
-		$this->helper = $helper;
+		$this->config = $config;
+		$this->db = $db;
+		$this->filesystem = $filesystem;
 		$this->language = $language;
-		$this->phpbb_notifications = $notification_manager;
+		$this->phpbb_log = $phpbb_log;
+		$this->request = $request;
 		$this->phpbb_container = $phpbb_container;
+		$this->phpbb_notifications = $notification_manager;
+		$this->phpbb_root_path = $phpbb_root_path;
+		$this->phpEx = $php_ext;
+		$this->table_prefix = $table_prefix;
+		$this->template = $template;
+		$this->user = $user;
+
+		/* Thanks to gregorlove for this fix! Without it, cron.php cannot be run successfully from the command line. */
+		$this->helper = new \phpbbservices\digests\core\common(
+			$this->language,
+			$this->phpbb_root_path,
+			$this->filesystem,
+			$this->phpbb_log,
+			$this->user
+		);
 
 		$this->cpfs = $this->phpbb_container->get('profilefields.manager');	// Used to grab custom profile fields
 		$this->forum_hierarchy = array();

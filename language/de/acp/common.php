@@ -18,7 +18,7 @@ if (empty($lang) || !is_array($lang))
 }
 
 $lang = array_merge($lang, array(
-	'DIGESTS_WEEKDAY' 					=> 'Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday',
+	'DIGESTS_WEEKDAY' 					=> 'Sonntag,Montag,Dienstag,Mittwoch,Donnerstag,Freitag,Samstag',
 ));
 
 $weekdays = explode(',', $lang['DIGESTS_WEEKDAY']);

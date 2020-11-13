@@ -160,9 +160,9 @@ class main_module
 				$sortorder = $this->request->variable('sortorder', 'a', true);
 
 				// Retain the "With selected" setting
-				$selected_ignore = ($selected == 'i') ? 'selected="selected"' : '';
-				$selected_unsubscribe = ($selected == 'n') ? 'selected="selected"' : '';
-				$selected_subscribe = ($selected == 'd') ? 'selected="selected"' : '';
+				$selected_ignore = ($selected == 'i') ? ' selected="selected"' : '';
+				$selected_unsubscribe = ($selected == 'n') ? ' selected="selected"' : '';
+				$selected_subscribe = ($selected == 'd') ? ' selected="selected"' : '';
 
 				// Translate time zone information and set other switches
 				$this->template->assign_vars(array(

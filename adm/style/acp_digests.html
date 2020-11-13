@@ -562,17 +562,3 @@
 	</fieldset>
 </form>
 {% INCLUDE 'overall_footer.html' %}
-{% if S_INCLUDE_DIGESTS_MANUAL_MAILER %}
-{% if not definition.INCLUDED_DATETIMEPICKERJS %}
-{% DEFINE INCLUDED_DATETIMEPICKERJS = true %}
-{% INCLUDEJS '@phpbbservices_digests/jquery.datetimepicker.js' %}
-<script>
-	$(document).ready(function(){
-		$('#phpbbservices_digests_test_date_hour').datetimepicker({
-			inline:true,
-			format: 'Y-m-d H:00:00',
-		})
-	});
-</script>
-{% endif %}
-{% endif %}

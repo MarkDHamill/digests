@@ -74,12 +74,13 @@ class digests extends \phpbb\cron\task\base
 	* @param \phpbb\filesystem		 			$filesystem				Filesystem object
 	*/
 
-	public function __construct(\phpbb\config\config $config, \phpbb\request\request $request, \phpbb\user $user, \phpbb\db\driver\factory $db, $php_ext, $phpbb_root_path, \phpbb\template\template $template, \phpbb\auth\auth $auth, $table_prefix, \phpbb\log\log $phpbb_log, \phpbb\language\language $language, \phpbb\notification\manager $notification_manager, ContainerInterface $phpbb_container, \phpbb\filesystem\filesystem $filesystem)
+	public function __construct(\phpbb\config\config $config, \phpbb\request\request $request, \phpbb\user $user, \phpbb\db\driver\factory $db, $php_ext, $phpbb_root_path, \phpbb\template\template $template, \phpbb\auth\auth $auth, $table_prefix, \phpbb\log\log $phpbb_log, \phpbb\language\language $language, \phpbb\notification\manager $notification_manager, ContainerInterface $phpbb_container, \phpbb\filesystem\filesystem $filesystem, \phpbbservices\digests\core\common $helper)
 	{
 		$this->auth = $auth;
 		$this->config = $config;
 		$this->db = $db;
 		$this->filesystem = $filesystem;
+		$this->helper = $helper;
 		$this->language = $language;
 		$this->phpbb_log = $phpbb_log;
 		$this->request = $request;
@@ -90,15 +91,6 @@ class digests extends \phpbb\cron\task\base
 		$this->table_prefix = $table_prefix;
 		$this->template = $template;
 		$this->user = $user;
-
-		/* Thanks to gregorlove for this fix! Without it, cron.php cannot be run successfully from the command line. */
-		$this->helper = new \phpbbservices\digests\core\common(
-			$this->language,
-			$this->phpbb_root_path,
-			$this->filesystem,
-			$this->phpbb_log,
-			$this->user
-		);
 
 		$this->cpfs = $this->phpbb_container->get('profilefields.manager');	// Used to grab custom profile fields
 		$this->forum_hierarchy = array();
@@ -2137,10 +2129,6 @@ class digests extends \phpbb\cron\task\base
 				$digest_toc .= ($is_html) ? "</tbody></table>\n<br>" : "\n";
 
 			}
-			else
-			{
-				$digest_toc = null;    // Avoid a PHP Notice
-			}
 
 			// Create Table of Contents header for posts
 			if ($is_html)
@@ -2179,12 +2167,6 @@ class digests extends \phpbb\cron\task\base
 				'DIGESTS_TOC' => $digest_toc,
 			));
 		}
-		else
-		{
-			$digest_toc = null;    // Avoid a PHP Notice
-		}
-
-		return;
 
 	}
 
@@ -2218,14 +2200,14 @@ class digests extends \phpbb\cron\task\base
 						AND b.user_id = ' . (int) $user_row['user_id'],
 			);
 
-			$sql3 = $this->db->sql_build_query('SELECT', $sql_array);
-			$result3 = $this->db->sql_query($sql3);
+			$sql = $this->db->sql_build_query('SELECT', $sql_array);
+			$result = $this->db->sql_query($sql);
 
-			while ($row3 = $this->db->sql_fetchrow($result3))
+			while ($row = $this->db->sql_fetchrow($result))
 			{
-				$bookmarked_topics[] = (int) $row3['topic_id'];
+				$bookmarked_topics[] = (int) $row['topic_id'];
 			}
-			$this->db->sql_freeresult($result3);
+			$this->db->sql_freeresult($result);
 
 			if (count($bookmarked_topics) == 0)
 			{
@@ -2247,7 +2229,6 @@ class digests extends \phpbb\cron\task\base
 		$fetched_forums = array();
 
 		// Get forum read permissions for this user. They are also usually stored in the user_permissions column, but sometimes the field is empty. This always works.
-		unset($allowed_forums);
 		$allowed_forums = array();
 
 		$forum_array = $this->auth->acl_raw_data_single_user($user_row['user_id']);
@@ -2292,15 +2273,15 @@ class digests extends \phpbb\cron\task\base
 										AND user_id = ' . (int) $user_row['user_id'],
 		);
 
-		$sql3 = $this->db->sql_build_query('SELECT', $sql_array);
+		$sql = $this->db->sql_build_query('SELECT', $sql_array);
 
-		$result3 = $this->db->sql_query($sql3);
-		while ($row3 = $this->db->sql_fetchrow($result3))
+		$result = $this->db->sql_query($sql);
+		while ($row = $this->db->sql_fetchrow($result))
 		{
-			$requested_forums[] = $row3['forum_id'];
-			$this->requested_forums_names[] = $row3['forum_name'];
+			$requested_forums[] = $row['forum_id'];
+			$this->requested_forums_names[] = $row['forum_name'];
 		}
-		$this->db->sql_freeresult($result3);
+		$this->db->sql_freeresult($result);
 		$requested_forums[] = 0;	// Add in global announcements forum
 
 		// Ensure there are no duplicates
@@ -2353,13 +2334,13 @@ class digests extends \phpbb\cron\task\base
 				'WHERE'		=> 'user_id = ' . (int) $user_row['user_id'] . ' AND foe = 1',
 			);
 
-			$sql3 = $this->db->sql_build_query('SELECT', $sql_array);
-			$result3 = $this->db->sql_query($sql3);
-			while ($row3 = $this->db->sql_fetchrow($result3))
+			$sql = $this->db->sql_build_query('SELECT', $sql_array);
+			$result = $this->db->sql_query($sql);
+			while ($row = $this->db->sql_fetchrow($result))
 			{
-				$foes[] = (int) $row3['zebra_id'];
+				$foes[] = (int) $row['zebra_id'];
 			}
-			$this->db->sql_freeresult($result3);
+			$this->db->sql_freeresult($result);
 
 		}
 

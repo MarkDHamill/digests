@@ -34,6 +34,7 @@ services:
             - '@notification_manager'
             - '@service_container'
             - '@filesystem'
+            - '@phpbbservices.digests.common'
         calls:
             - [set_name, [phpbbservices.digests.cron.task.cron_task]]
         tags:

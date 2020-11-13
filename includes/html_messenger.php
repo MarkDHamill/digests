@@ -1,9 +1,28 @@
 <?php
+/**
+ *
+ * This file is part of the phpBB Forum Software package.
+ *
+ * @copyright (c) phpBB Limited <https://www.phpbb.com>
+ * @license GNU General Public License, version 2 (GPL-2.0)
+ *
+ * For full copyright and license information, please see
+ * the docs/CREDITS.txt file.
+ *
+ */
 
 namespace phpbbservices\digests\includes;
 
+/**
+ * @ignore
+ */
+if (!defined('IN_PHPBB'))
+{
+	exit;
+}
+
 // The purpose of this class is to override the messenger class so HTML can be sent in email. The code is a copy and paste for the relevant events
-// from the 3.2.8 source for /includes/functions_messenger.php with minimal changes needed to add this functionality.
+// from the 3.3.2 source for /includes/functions_messenger.php with minimal changes needed to add this functionality.
 
 class html_messenger extends \messenger
 {

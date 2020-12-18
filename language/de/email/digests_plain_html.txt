@@ -8,6 +8,7 @@
 	<style>
 		body { width:100% !important; -webkit-text; size-adjust:100%; -ms-text-size-adjust:100%; margin:0; padding:0; }
 		.box { margin:5px; padding:5px; border-style:dashed; border-width:1px; }
+		img { max-width: 100%; max-height: auto; }
 		ol,ul { list-style-position: inside; }
 		.postbody { float: none; }
 		table { border-collapse: collapse; border: 1px solid black}

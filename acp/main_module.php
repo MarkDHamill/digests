@@ -122,7 +122,6 @@ class main_module
 						'phpbbservices_digests_user_digest_format'			=> array('lang' => 'DIGESTS_FORMAT_STYLING',			'validate' => 'string',	'type' => 'select', 'method' => 'digest_style_select', 'explain' => false),
 						'phpbbservices_digests_user_digest_send_hour_gmt'	=> array('lang' => 'DIGESTS_HOUR_SENT_GMT',				'validate' => 'int:-1:23',	'type' => 'select', 'method' => 'digest_send_hour_utc', 'explain' => false),
 						'phpbbservices_digests_user_digest_filter_type'		=> array('lang' => 'DIGESTS_FILTER_TYPE',				'validate' => 'string',	'type' => 'select', 'method' => 'digest_filter_type', 'explain' => false),
-						'phpbbservices_digests_user_check_all_forums'		=> array('lang' => 'DIGESTS_USER_DIGESTS_CHECK_ALL_FORUMS',	'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => false),
 						'phpbbservices_digests_user_digest_max_posts'		=> array('lang' => 'DIGESTS_COUNT_LIMIT',				'validate' => 'int:0',	'type' => 'text:5:5', 'explain' => true),
 						'phpbbservices_digests_user_digest_min_words'		=> array('lang' => 'DIGESTS_MIN_SIZE',					'validate' => 'int:0',	'type' => 'text:5:5', 'explain' => true),
 						'phpbbservices_digests_user_digest_new_posts_only'	=> array('lang' => 'DIGESTS_NEW_POSTS_ONLY',			'validate' => 'bool',	'type' => 'radio:yes_no', 'explain' => true),

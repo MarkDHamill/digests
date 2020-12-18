@@ -160,7 +160,6 @@ $lang = array_merge($lang, array(
 	'DIGESTS_UNSUBSCRIBE'									=> 'Odhlásit',
 	'DIGESTS_UNSUBSCRIBE_SUBJECT'							=> 'Byl jste odhlášen z odebírání souhrnů příspěvků emailem.',
 	'DIGESTS_UNSUBSCRIBED'									=> 'Není přihlášen k odběru',
-	'DIGESTS_USER_DIGESTS_CHECK_ALL_FORUMS'					=> 'Chcete jako výchozí nastavení zahrnout všechna fóra',
 	'DIGESTS_USER_DIGESTS_MAX_DISPLAY_WORDS'				=> 'Maximální počet slov zobrazených v příspěvku',
 	'DIGESTS_USER_DIGESTS_MAX_DISPLAY_WORDS_EXPLAIN'		=> 'Chcete-li zobrazit příspěvky celé, zadejte -1. Zadáte-li nulu (0), nezobrazí se text příspěvku vůbec.',
 	'DIGESTS_USER_DIGESTS_PM_MARK_READ'						=> 'Označit soukromou zprávu jako přečtenou, pokud je zaslána v souhrnu',
@@ -170,5 +169,4 @@ $lang = array_merge($lang, array(
 	'DIGESTS_WEEKLY_DIGESTS_DAY_EXPLAIN'					=> 'Den v týdnu je vztažen k GMT (UTC, nulový časový posun). V závislosti na zvolené hodině, odběratelé na západní polokouli mohou dostat týdenní souhrn již předchozí den.',
 	'DIGESTS_WEEKLY_ONLY'									=> 'Jen týdenní souhrny',
 	'DIGESTS_WITH_SELECTED'									=> 'S vybranými',
-
 ));

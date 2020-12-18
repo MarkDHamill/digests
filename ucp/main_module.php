@@ -396,7 +396,7 @@ class main_module
 				$rowset = $this->db->sql_fetchrowset($result);
 				$this->db->sql_freeresult($result);
 
-				$all_by_default = ((count($rowset) == 0) && $this->config['phpbbservices_digests_user_check_all_forums']) ? true : false;
+				$all_by_default = (count($rowset) == 0) ? true : false;
 
 				$allowed_forums = array();
 				

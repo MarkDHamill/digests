@@ -156,7 +156,6 @@ $lang = array_merge($lang, array(
 	'DIGESTS_UNSUBSCRIBE'									=> 'Désabonner',
 	'DIGESTS_UNSUBSCRIBE_SUBJECT'							=> 'Vous avez été désabonnés de la réception par courriels du résumé',
 	'DIGESTS_UNSUBSCRIBED'									=> 'Les non abonnés',
-	'DIGESTS_USER_DIGESTS_CHECK_ALL_FORUMS'					=> 'Envoyer tous les forums dans le résumé',
 	'DIGESTS_USER_DIGESTS_MAX_DISPLAY_WORDS'				=> 'Nombre maximum de mots à afficher dans un post',
 	'DIGESTS_USER_DIGESTS_MAX_DISPLAY_WORDS_EXPLAIN'		=> 'Saisir -1 pour afficher l&apos;intégralité du texte du post par défaut. Saisir zéro (0) signifie que l&apos;utilisateur ne verra pas du tout le texte du post.',	
 	'DIGESTS_USER_DIGESTS_PM_MARK_READ'						=> 'Marquer les messages privés comme lus lorsqu&apos;ils apparaissent dans le résumé',

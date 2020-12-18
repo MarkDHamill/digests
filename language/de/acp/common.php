@@ -18,7 +18,7 @@ if (empty($lang) || !is_array($lang))
 }
 
 $lang = array_merge($lang, array(
-	'DIGESTS_WEEKDAY' 					=> 'Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday',
+	'DIGESTS_WEEKDAY' 					=> 'Sonntag,Montag,Dienstag,Mittwoch,Donnerstag,Freitag,Samstag',
 ));
 
 $weekdays = explode(',', $lang['DIGESTS_WEEKDAY']);
@@ -157,7 +157,6 @@ $lang = array_merge($lang, array(
 	'DIGESTS_UNSUBSCRIBE'									=> 'Abonnement beenden',
 	'DIGESTS_UNSUBSCRIBE_SUBJECT'							=> 'Du erhältst ab jetzt keine E-Mail-Zusammenstellungen mehr',
 	'DIGESTS_UNSUBSCRIBED'									=> 'Noch nie abonniert',
-	'DIGESTS_USER_DIGESTS_CHECK_ALL_FORUMS'					=> 'Sollen alle Themenbereiche standardmäßig ausgewählt werden?',
 	'DIGESTS_USER_DIGESTS_MAX_DISPLAY_WORDS'				=> 'Maximal angezeigte Wortanzahl pro Beitrag',
 	'DIGESTS_USER_DIGESTS_MAX_DISPLAY_WORDS_EXPLAIN'		=> '-1 bedeutet dass immer der komplette Beitrag wiedergegeben wird. Null (0) bedeutet dagegen, dass gar kein Beitragsinhalt wiedergegeben wird.',
 	'DIGESTS_USER_DIGESTS_PM_MARK_READ'						=> 'Private Nachrichten als gelesen markieren, wenn sie in der Zusammenfassung erscheinen',
@@ -167,5 +166,4 @@ $lang = array_merge($lang, array(
 	'DIGESTS_WEEKLY_DIGESTS_DAY_EXPLAIN'					=> 'Der Wochentag basiert auf der UTC. Abhängig von der gewünschten Uhrzeit können Abonnenten in der westlichen Hemisphäre evtl. ihre wöchentlichen Zusammenfassungen schon einen Tag früher als erwartet zugesandt bekommen.',
 	'DIGESTS_WEEKLY_ONLY'									=> 'Nur wöchentliche Zusammenfassungen',
 	'DIGESTS_WITH_SELECTED'									=> 'Abonnement für ausgewählte Nutzer ändern',
-
 ));

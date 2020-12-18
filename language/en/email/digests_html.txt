@@ -22,6 +22,7 @@
 		h1,h3,p,div { margin-top:10px; margin-bottom:10px; clear: both; float: left; }
 		h4 { clear: both; float: left; }
 		hr { clear: both; }
+		img { max-width: 100%; max-height: auto; }
 		.newline { clear: both; float: none; }
 		ol,ul { list-style-position: inside; }
 		.postbody { width: 100%; }

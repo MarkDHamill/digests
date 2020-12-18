@@ -157,7 +157,6 @@ $lang = array_merge($lang, array(
 	'DIGESTS_UNSUBSCRIBE'									=> 'Darse de baja',
 	'DIGESTS_UNSUBSCRIBE_SUBJECT'							=> 'Has sido dado de baja de los correos de resumen',
 	'DIGESTS_UNSUBSCRIBED'									=> 'No registrado',
-	'DIGESTS_USER_DIGESTS_CHECK_ALL_FORUMS'					=> 'Todos los foros seleccionados por defecto',
 	'DIGESTS_USER_DIGESTS_MAX_DISPLAY_WORDS'				=> 'Número máximo de palabras a mostrar en una publicación',
 	'DIGESTS_USER_DIGESTS_MAX_DISPLAY_WORDS_EXPLAIN'		=> 'Establecido en -1 para mostrar el texto completo de la publicación de forma predeterminada. Establecer en cero (0) significa que, de forma predeterminada, el usuario no verá ningún mensaje de texto.',
 	'DIGESTS_USER_DIGESTS_PM_MARK_READ'						=> 'Marcar los mensajes privaods como leidos cuando aparecen en un resumen',

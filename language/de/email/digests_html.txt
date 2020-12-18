@@ -22,6 +22,7 @@
 		h1,h3,p,div { margin-top:10px; margin-bottom:10px; clear: both; float: left; }
 		h4 { clear: both; float: left; }
 		hr { clear: both; }
+		img { max-width: 100%; max-height: auto; }
 		.newline { clear: both; float: none; }
 		ol,ul { list-style-position: inside; }
 		.postbody { width: 100%; }
@@ -45,18 +46,18 @@
 	<div id="page-body">
 
 		<a id="top" accesskey="t"></a>
-		
+
 		<h1 class="black">{{ S_DIGESTS_TITLE }}</h1>
-	
+
 		<p>{{ lang('DIGESTS_SALUTATION') }} {{ S_DIGESTS_SALUTATION_BLURB }}</p>
-		
+
 		<p>{{ S_DIGESTS_INTRODUCTION }}</p>
-		
+
 		{{ DIGESTS_TOC }}
-		
+
 		<br>
 		<hr>
-		
+
 		{{ DIGESTS_CONTENT }}
 		<hr class="newline">
 		<p><span class="copyright"><em>{{ S_DIGESTS_PUBLISH_DATE }}</em></span></p>

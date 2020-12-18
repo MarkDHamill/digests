@@ -156,7 +156,6 @@ $lang = array_merge($lang, array(
 	'DIGESTS_UNSUBSCRIBE'									=> 'Unsubscribe',
 	'DIGESTS_UNSUBSCRIBE_SUBJECT'							=> 'You have been unsubscribed from receiving email digests',
 	'DIGESTS_UNSUBSCRIBED'									=> 'Has not subscribed',
-	'DIGESTS_USER_DIGESTS_CHECK_ALL_FORUMS'					=> 'All forums to be selected by default',
 	'DIGESTS_USER_DIGESTS_MAX_DISPLAY_WORDS'				=> 'Maximum words to display in a post',
 	'DIGESTS_USER_DIGESTS_MAX_DISPLAY_WORDS_EXPLAIN'		=> 'Set to -1 to show the full post text by default. Setting at zero (0) means by default  the user will see no post text at all.',
 	'DIGESTS_USER_DIGESTS_PM_MARK_READ'						=> 'Mark private messages as read when they appear in the digest',

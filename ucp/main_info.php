@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - digests
-* @copyright (c) 2020 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2021 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */

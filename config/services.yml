@@ -1,4 +1,23 @@
 services:
+    phpbbservices.digests.controller.acp:
+        class: phpbbservices\digests\controller\acp_controller
+        arguments:
+            - '@auth'
+            - '@config'
+            - '@dbal.conn'
+            - '@phpbbservices.digests.common'
+            - '@language'
+            - '@phpbbservices.digests.cron.task.cron_task'
+            - '@pagination'
+            - '@ext.manager'
+            - '@log'
+            - '@path_helper'
+            - '%core.root_path%'
+            - '%core.php_ext%'
+            - '@request'
+            - '%core.table_prefix%'
+            - '@template'
+            - '@user'
     phpbbservices.digests.listener:
         class: phpbbservices\digests\event\main_listener
         arguments:
@@ -32,10 +51,12 @@ services:
             - '@log'
             - '@language'
             - '@notification_manager'
-            - '@service_container'
             - '@filesystem'
             - '@phpbbservices.digests.common'
+            - '@profilefields.manager'
         calls:
             - [set_name, [phpbbservices.digests.cron.task.cron_task]]
         tags:
             - { name: cron.task }
+    _defaults:
+        public: true

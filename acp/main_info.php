@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - digests
-* @copyright (c) 2019 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2021 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -16,7 +16,7 @@ class main_info
 		return array(
 			'filename'	=> '\phpbbservices\digests\acp\main_module',
 			'title'		=> 'ACP_CAT_DIGESTS',
-			'version'	=> '3.2.12',
+			'version'	=> '3.3.5',
 			'modes'		=> array(
 				'digests_general'						=> array('title' => 'ACP_DIGESTS_GENERAL_SETTINGS',	'auth' => 'ext_phpbbservices/digests && acl_a_user', 'cat' => array('ACP_CAT_DIGESTS')),
 				'digests_user_defaults'					=> array('title' => 'ACP_DIGESTS_USER_DEFAULT_SETTINGS', 'auth' => 'ext_phpbbservices/digests && acl_a_user', 'cat' => array('ACP_CAT_DIGESTS')),

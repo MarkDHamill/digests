@@ -13,14 +13,6 @@
 
 namespace phpbbservices\digests\includes;
 
-/**
- * @ignore
- */
-if (!defined('IN_PHPBB'))
-{
-	exit;
-}
-
 // The purpose of this class is to override the messenger class so HTML can be sent in email. The code is a copy and paste for the relevant events
 // from the 3.3.2 source for /includes/functions_messenger.php with minimal changes needed to add this functionality.
 

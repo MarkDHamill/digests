@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Digests
-* @copyright (c) 2020 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2021 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -602,22 +602,26 @@ class main_module
 						
 					}
 				
-					$this->db->sql_freeresult($result);
-					
 					// Now out of the loop, it is important to remember to close any open <div> tags. Typically there is at least one.
-					while ((int) $row['parent_id'] != (int) end($parent_stack))
+
+					if (isset($row) && is_array($row))
 					{
-						array_pop($parent_stack);
-						$current_level--;
-						// Need to close the <div> tag
-						$this->template->assign_block_vars('forums', array(
-							'S_DIGESTS_DIV_CLOSE' 	=> true,
-							'S_DIGESTS_DIV_OPEN' 	=> false,
-							'S_DIGESTS_PRINT' 		=> false,
-							)
-						);
+						while ((int) $row['parent_id'] != (int) end($parent_stack))
+						{
+							array_pop($parent_stack);
+							$current_level--;
+							// Need to close the <div> tag
+							$this->template->assign_block_vars('forums', array(
+									'S_DIGESTS_DIV_CLOSE' 	=> true,
+									'S_DIGESTS_DIV_OPEN' 	=> false,
+									'S_DIGESTS_PRINT' 		=> false,
+								)
+							);
+						}
 					}
-					
+
+					$this->db->sql_freeresult($result);
+
 					$this->template->assign_vars(array(
 						'S_DIGESTS_ALL_BY_DEFAULT'		=> $all_by_default,
 						'S_DIGESTS_ALL_DISABLED'		=> ($disabled || $this->user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE),

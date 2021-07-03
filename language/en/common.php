@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Digests
-* @copyright (c) 2020 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2021 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -34,13 +34,15 @@ $lang = array_merge($lang, array(
 	'DIGESTS_COUNT_LIMIT_EXPLAIN'		=> 'Enter a number greater than zero if you want to limit the number of posts in the digest.',
 	'DIGESTS_DAILY'						=> 'Daily',
 	'DIGESTS_DATE'						=> 'Date',
-	'DIGESTS_DELIMITER'					=> ' :: ', // Used to help show the hierarchy of forum names from the index on down
+	'DIGESTS_DELIMITER'					=> ' &#8249; ', // Used to help show the hierarchy of forum names from the index on down. Should not change in language translations unless different character is used on breadcrumb menu.
 	'DIGESTS_DISABLED_MESSAGE'			=> 'To enable fields, select Basics and select a digest type',
 	'DIGESTS_DISCLAIMER'				=> 'You can change or delete your subscription from the board&rsquo;s <a href="%1$sucp.%3$s">User Control Panel</a>. If you have questions or feedback on your digests please send it to the <a href="mailto:%4$s?subject=Digests">%2$s webmaster</a>.',
 	'DIGESTS_EXPLANATION'				=> 'Digests are email summaries of posts that are sent to you periodically. Digests can be sent daily, weekly or monthly at an hour of the day you select. You can specify those particular forums for which you want posts or by default you can elect to receive all posts for all forums for which you can read. You can cancel your digest subscription at any time by simply coming back to this page. Most users find digests to be very useful. We encourage you to give them a try!',
 	'DIGESTS_FILTER_ERROR'				=> 'Digests mailer was called with an invalid user_digest_filter_type = %s',
 	'DIGESTS_FILTER_FOES'				=> 'Remove posts from my foes',
 	'DIGESTS_FILTER_TYPE'				=> 'Types of posts in digest',
+	'DIGESTS_FOREIGN_LINK_REMOVED'		=> '[ Removed foreign link. Click on link for post or topic to see this link. ]',
+	'DIGESTS_FOREIGN_LINK_REMOVED_TEXT'	=> '[ Removed foreign link. Read the board topic to see this link. ]',
 	'DIGESTS_FORMAT_HTML'				=> 'Styled',
 	'DIGESTS_FORMAT_HTML_EXPLAIN'		=> 'Styles are applied if your email program allows',
 	'DIGESTS_FORMAT_HTML_CLASSIC'		=> 'Styled, posts laid out inside tables',
@@ -58,6 +60,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_FREQUENCY_EXPLAIN'			=> 'Weekly digests are sent on %s. Monthly digests are sent on the first of the month. Coordinated Universal Time (UTC) is used for determining the day of the week.',
 	'DIGESTS_FREQUENCY_SHORT'			=> 'Digest type',
 	'DIGESTS_HOURS_ABBREVIATION' 		=> ' h',	// see: http://www.scienceeditingexperts.com/which-is-the-correct-abbreviation-for-hours-2h-2-h-2hs-2-hs-2hrs-or-2-hrs, DIGESTS_AM and DIGESTS_PM are used instead if specified in user_dateformat
+	'DIGESTS_INSTALL_REQUIREMENTS'		=> 'Your version of PHP must be &gt; 3.3.0 and &lt; 4.0 to install this extension. Please address this issue, then try enabling the extension again.',
 	'DIGESTS_INTRODUCTION' 				=> 'Here is the latest digest of posts from %s forums. Do <em>not</em> reply to this email to reply to topics, posts or private messages. But please <em>do</em> visit the board and join the discussion! (If the format of the digest looks off, make sure to download all remote content.)',
 	'DIGESTS_JUMP_TO_MSG'				=> 'Msg ID',
 	'DIGESTS_JUMP_TO_POST'				=> 'Post ID',
@@ -79,6 +82,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_NEW_POSTS_ONLY_EXPLAIN'	=> 'This will filter out any posts posted prior to the date and time you last visited this board. If you visit the board frequently and read most of the posts, this will keep redundant posts from appearing in your digest. It may also mean that you will miss some posts in forums that you did not read.',
 	'DIGESTS_NO_BOOKMARKED_POSTS'		=> 'There are no new bookmarked posts.',
 	'DIGESTS_NO_CONSTRAINT'				=> 'No constraint',
+	'DIGESTS_NO_FORUMS_AVAILABLE'		=> 'You do not have access to any forums',
 	'DIGESTS_NO_FORUMS_CHECKED' 		=> 'At least one forum must be checked',
 	'DIGESTS_NO_LIMIT'					=> 'No limit',
 	'DIGESTS_NO_POSTS'					=> 'There are no new posts.',

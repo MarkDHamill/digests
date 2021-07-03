@@ -8,8 +8,8 @@
 {% endif %}
 {% if S_INCLUDE_DIGESTS_JS %}
 	{# Includes ACP - JS #}
-	{% if not definition.INCLUDED_ACPDIGESTSJS %}
-		{% INCLUDEJS '@phpbbservices_digests/acp_digests.js' %}
+		{% if not definition.INCLUDED_ACPDIGESTSJS %}
+			{% INCLUDEJS '@phpbbservices_digests/acp_digests.js' %}
 		{% DEFINE INCLUDED_ACPDIGESTSJS = true %}
 	{% endif %}
 {% endif %}
@@ -36,7 +36,7 @@
 			toSubmit.push(name);
 		}
 		// Add the following fields so individual forum subscriptions changes can be detected
-		if (name.substr(0,4) === 'user')	{
+		if (name.substr(0,4) === 'user') {
 			var lastDashLoc = name.lastIndexOf('-');
 			if (lastDashLoc > 4) {
 				var userId = name.substring(5, lastDashLoc);
@@ -59,7 +59,7 @@
 				var lastDashLoc = thisElement.lastIndexOf('-');
 				if (lastDashLoc === 4 && thisElement.substr(0,5) === 'user-') {
 					if (toSubmit.includes(thisElement)) {
-						if (!isChecked){
+						if (!isChecked) {
 							var index = toSubmit.indexOf(thisElement);
 							if (index > -1) {
 								toSubmit.splice(index, 1);	// Remove it from array
@@ -96,34 +96,333 @@
 	</div>
 {% endif %}
 
-<form id="acp_digests" method="post" action="{{ U_ACTION }}" {% if S_EDIT_SUBSCRIBERS %}novalidate{% endif %}>
-	{% for option in options %}
-		{% if option.S_LEGEND %}
-			{% if not loop.first %}
-				</fieldset>
-			{% endif %}
-			<fieldset{% if S_EDIT_SUBSCRIBERS %} id="digests"{% endif %}>
-				<legend>{{ option.LEGEND }}</legend>
-		{% else %}
-			<dl>
-				<dt><label for="{{ option.KEY }}">{{ option.TITLE }}{{ lang('COLON') }}</label>{% if option.S_EXPLAIN %}<br><span>{{ option.TITLE_EXPLAIN }}</span>{% endif %}</dt>
-				<dd>{{ option.CONTENT }}</dd>
-			</dl>
-		{% endif %}
-	{% endfor %}
+<form id="{% if S_EDIT_SUBSCRIBERS %}digests{% else %}acp_digests{% endif %}" method="post" action="{{ U_ACTION }}"{% if S_EDIT_SUBSCRIBERS %} novalidate{% endif %}>
+	{% if S_DIGESTS_GENERAL %}
+	<fieldset>
+		<dl>
+			<dt><label for="phpbbservices_digests_enable_log1">{{ lang('DIGESTS_ENABLE_LOG') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_ENABLE_LOG_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_enable_log1" name="phpbbservices_digests_enable_log" type="radio" value="1" {% if S_DIGESTS_ENABLE_LOG == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_enable_log" type="radio" value="0" {% if S_DIGESTS_ENABLE_LOG == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_show_email1">{{ lang('DIGESTS_SHOW_EMAIL') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_SHOW_EMAIL_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_show_email1" name="phpbbservices_digests_show_email" type="radio" value="1" {% if S_DIGESTS_SHOW_EMAIL == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_show_email" type="radio" value="0" {% if S_DIGESTS_SHOW_EMAIL == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_debug1">{{ lang('DIGESTS_DEBUG') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_DEBUG_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_debug1" name="phpbbservices_digests_debug" type="radio" value="1" {% if S_DIGESTS_DEBUG == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_debug" type="radio" value="0" {% if S_DIGESTS_DEBUG == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_enable_auto_subscriptions1">{{ lang('DIGESTS_ENABLE_AUTO_SUBSCRIPTIONS') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_ENABLE_AUTO_SUBSCRIPTIONS_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_enable_auto_subscriptions1" name="phpbbservices_digests_enable_auto_subscriptions" type="radio" value="1" {% if S_DIGESTS_ENABLE_AUTO_SUBSCRIPTIONS == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_enable_auto_subscriptions" type="radio" value="0" {% if S_DIGESTS_ENABLE_AUTO_SUBSCRIPTIONS == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_registration_field1">{{ lang('DIGESTS_REGISTRATION_FIELD') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_REGISTRATION_FIELD_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_registration_field1" name="phpbbservices_digests_registration_field" type="radio" value="1" {% if S_DIGESTS_REGISTRATION_FIELD == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_registration_field" type="radio" value="0" {% if S_DIGESTS_REGISTRATION_FIELD == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_block_images1">{{ lang('DIGESTS_BLOCK_IMAGES') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_BLOCK_IMAGES_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_block_images1" name="phpbbservices_digests_block_images" type="radio" value="1" {% if S_DIGESTS_BLOCK_IMAGES == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_block_images" type="radio" value="0" {% if S_DIGESTS_BLOCK_IMAGES == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_notify_on_admin_changes1">{{ lang('DIGESTS_NOTIFY_ON_ADMIN_CHANGES') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_NOTIFY_ON_ADMIN_CHANGES_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_notify_on_admin_changes1" name="phpbbservices_digests_notify_on_admin_changes" type="radio" value="1" {% if S_DIGESTS_NOTIFY_ON_ADMIN_CHANGES == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_notify_on_admin_changes" type="radio" value="0" {% if S_DIGESTS_NOTIFY_ON_ADMIN_CHANGES == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_weekly_digest_day">{{ lang('DIGESTS_WEEKLY_DIGESTS_DAY') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_WEEKLY_DIGESTS_DAY_EXPLAIN') }}</dt>
+			<dd>
+				<label><select id="phpbbservices_digests_weekly_digest_day" name="phpbbservices_digests_weekly_digest_day">
+					{{ DOW_OPTIONS }}
+				</select></label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_max_cron_hrs">{{ lang('DIGESTS_MAX_CRON_HOURS') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_MAX_CRON_HOURS_EXPLAIN') }}</dt>
+			<dd>
+				<input id="phpbbservices_digests_max_cron_hrs" name="phpbbservices_digests_max_cron_hrs" type="number" value="{{ MAX_CRON_HOURS }}" min="0" max="24">
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_max_items">{{ lang('DIGESTS_MAX_ITEMS') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_MAX_ITEMS_EXPLAIN') }}</dt>
+			<dd>
+				<input id="phpbbservices_digests_max_items" name="phpbbservices_digests_max_items" type="number" value="{{ MAX_ITEMS }}" min="0">
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_min_popularity_size">{{ lang('DIGESTS_MIN_POPULARITY_SIZE') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_MIN_POPULARITY_SIZE_EXPLAIN') }}</dt>
+			<dd>
+				<input id="phpbbservices_digests_min_popularity_size" name="phpbbservices_digests_min_popularity_size" type="number" value="{{ MIN_POPULARITY_SIZE }}" min="0">
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_enable_custom_stylesheets1">{{ lang('DIGESTS_ENABLE_CUSTOM_STYLESHEET') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_ENABLE_CUSTOM_STYLESHEET_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_enable_custom_stylesheets1" name="phpbbservices_digests_enable_custom_stylesheets" type="radio" value="1" {% if S_DIGESTS_ENABLE_CUSTOM_STYLESHEET == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_enable_custom_stylesheets" type="radio" value="0" {% if S_DIGESTS_ENABLE_CUSTOM_STYLESHEET == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_custom_stylesheet_path">{{ lang('DIGESTS_CUSTOM_STYLESHEET_PATH') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_CUSTOM_STYLESHEET_PATH_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_custom_stylesheet_path" name="phpbbservices_digests_custom_stylesheet_path" type="text" size="40" maxlength="255" value={{ CUSTOM_STYLESHEET_PATH }}></label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_from_email_address">{{ lang('DIGESTS_FROM_EMAIL_ADDRESS') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_FROM_EMAIL_ADDRESS_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_from_email_address" name="phpbbservices_digests_from_email_address" type="email" size="40" maxlength="255" value={{ FROM_EMAIL_ADDRESS }}></label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_from_email_name">{{ lang('DIGESTS_FROM_EMAIL_NAME') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_FROM_EMAIL_NAME_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_from_email_name" name="phpbbservices_digests_from_email_name" type="text" size="40" maxlength="255" value={{ FROM_EMAIL_NAME }}></label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_reply_to_email_address">{{ lang('DIGESTS_REPLY_TO_EMAIL_ADDRESS') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_REPLY_TO_EMAIL_ADDRESS_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_reply_to_email_address" name="phpbbservices_digests_reply_to_email_address" type="email" size="40" maxlength="255" value={{ REPLY_TO_EMAIL_ADDRESS }}></label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_users_per_page">{{ lang('DIGESTS_USERS_PER_PAGE') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_USERS_PER_PAGE_EXPLAIN') }}</dt>
+			<dd>
+				<input id="phpbbservices_digests_users_per_page" name="phpbbservices_digests_users_per_page" type="number" value="{{ USERS_PER_PAGE }}" min="0">
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_include_forums">{{ lang('DIGESTS_INCLUDE_FORUMS') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_INCLUDE_FORUMS_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_include_forums" name="phpbbservices_digests_include_forums" type="text" size="15" maxlength="255" value={{ INCLUDE_FORUMS }}></label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_exclude_forums">{{ lang('DIGESTS_EXCLUDE_FORUMS') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_EXCLUDE_FORUMS_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_exclude_forums" name="phpbbservices_digests_exclude_forums" type="text" size="15" maxlength="255" value={{ EXCLUDE_FORUMS }}></label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_strip_tags">{{ lang('DIGESTS_STRIP_TAGS') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_STRIP_TAGS_EXPLAIN') }}</dt>
+			<dd>
+				<label><textarea id="phpbbservices_digests_strip_tags" name="phpbbservices_digests_strip_tags" rows="3" cols="85">{{ STRIP_TAGS }}</textarea></label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_foreign_urls1">{{ lang('DIGESTS_UNLINK_FOREIGN_URLS') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_UNLINK_FOREIGN_URLS_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_foreign_urls1" name="phpbbservices_digests_foreign_urls" type="radio" value="1" {% if S_DIGESTS_UNLINK_FOREIGN_URLS == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_foreign_urls" type="radio" value="0" {% if S_DIGESTS_UNLINK_FOREIGN_URLS == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_show_forum_path1">{{ lang('DIGESTS_SHOW_FORUM_PATH') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_SHOW_FORUM_PATH_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_show_forum_path1" name="phpbbservices_digests_show_forum_path" type="radio" value="1" {% if S_DIGESTS_SHOW_FORUM_PATH == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_show_forum_path" type="radio" value="0" {% if S_DIGESTS_SHOW_FORUM_PATH == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_lowercase_digest_type1">{{ lang('DIGESTS_LOWERCASE_DIGEST_TYPE') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_LOWERCASE_DIGEST_TYPE_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_lowercase_digest_type1" name="phpbbservices_digests_lowercase_digest_type" type="radio" value="1" {% if S_DIGESTS_LOWERCASE_DIGEST_TYPE == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_lowercase_digest_type" type="radio" value="0" {% if S_DIGESTS_LOWERCASE_DIGEST_TYPE == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_saluation_fields">{{ lang('DIGESTS_SALUTATION_FIELDS') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_SALUTATION_FIELDS_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_saluation_fields" name="phpbbservices_digests_saluation_fields" type="text" size="40" maxlength="255" value={{ SALUTATION_FIELDS }}></label>
+			</dd>
+		</dl>
+	</fieldset>
+	<p class="submit-buttons">
+		<input class="button1" type="submit" id="submit" name="submit" value="{{ lang('SUBMIT') }}" />
+		<input class="button2" type="reset" id="reset" name="reset" value="{{ lang('RESET') }}" />
+	</p>
+	{% endif %}
 
-	{% if S_AUTH %}
-		</fieldset>
-		{% for auth in loops.auth_tpl %}
-			{% INCLUDE ''~ auth_tpl.TEMPLATE_FILE ~'' %}
-			{% include 'overall_header.html' %}
-		{% endfor %}
-		<legend>{{ lang('L_ACP_SUBMIT_CHANGES') }}</legend>
+	{% if S_DIGESTS_USER_DEFAULTS %}
+	<fieldset>
+		<dl>
+			<dt><label for="phpbbservices_digests_user_digest_registration1">{{ lang('DIGESTS_REGISTER') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_REGISTER_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_user_digest_registration1" name="phpbbservices_digests_user_digest_registration" type="radio" value="1" {% if S_DIGESTS_REGISTER == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_user_digest_registration" type="radio" value="0" {% if S_DIGESTS_REGISTER == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_user_digest_type">{{ lang('DIGESTS_FREQUENCY') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_FREQUENCY_EXPLAIN') }}</dt>
+			<dd>
+				<label><select id="phpbbservices_digests_user_digest_type" name="phpbbservices_digests_user_digest_type">
+					{{ FREQUENCY }}
+				</select></label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_user_digest_format">{{ lang('DIGESTS_FORMAT_STYLING') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_FORMAT_STYLING_EXPLAIN') }}</dt>
+			<dd>
+				<label><select id="phpbbservices_digests_user_digest_format" name="phpbbservices_digests_user_digest_format">
+					{{ STYLING }}
+				</select></label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_user_digest_send_hour_gmt">{{ lang('DIGESTS_HOUR_SENT_GMT') ~ lang('COLON') }}</label></dt>
+			<dd>
+				<label><select id="phpbbservices_digests_user_digest_send_hour_gmt" name="phpbbservices_digests_user_digest_send_hour_gmt">
+					{{ HOUR_SENT }}
+				</select></label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_user_digest_filter_type">{{ lang('DIGESTS_FILTER_TYPE') ~ lang('COLON') }}</label></dt>
+			<dd>
+				<label><select id="phpbbservices_digests_user_digest_filter_type" name="phpbbservices_digests_user_digest_filter_type">
+					{{ FILTER_TYPE }}
+				</select></label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_user_digest_max_posts">{{ lang('DIGESTS_COUNT_LIMIT') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_COUNT_LIMIT_EXPLAIN') }}</dt>
+			<dd>
+				<input id="phpbbservices_digests_user_digest_max_posts" name="phpbbservices_digests_user_digest_max_posts" type="number" value="{{ COUNT_LIMIT }}" min="0">
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_user_digest_min_words">{{ lang('DIGESTS_MIN_SIZE') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_MIN_SIZE_EXPLAIN') }}</dt>
+			<dd>
+				<input id="phpbbservices_digests_user_digest_min_words" name="phpbbservices_digests_user_digest_min_words" type="number" value="{{ MIN_WORDS }}" min="0">
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_user_digest_new_posts_only1">{{ lang('DIGESTS_NEW_POSTS_ONLY') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_NEW_POSTS_ONLY_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_user_digest_new_posts_only1" name="phpbbservices_digests_user_digest_new_posts_only" type="radio" value="1" {% if S_DIGESTS_NEW_POSTS_ONLY == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_user_digest_new_posts_only" type="radio" value="0" {% if S_DIGESTS_NEW_POSTS_ONLY == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_user_digest_popular1">{{ lang('DIGESTS_SEE_POPULAR_TOPICS_ONLY') ~ lang('COLON') }}</label></dt>
+			<dd>
+				<label><input id="phpbbservices_digests_user_digest_popular1" name="phpbbservices_digests_user_digest_popular" type="radio" value="1" {% if S_DIGESTS_POPULAR_ONLY == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_user_digest_popular" type="radio" value="0" {% if S_DIGESTS_POPULAR_ONLY == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_user_digest_popularity_size">{{ lang('DIGESTS_MIN_POPULARITY_VALUE') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_MIN_POPULARITY_VALUE_EXPLAIN') }}</dt>
+			<dd>
+				<input id="phpbbservices_digests_user_digest_popularity_size" name="phpbbservices_digests_user_digest_popularity_size" type="number" value="{{ POPULARITY_SIZE }}" min="0">
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_user_digest_show_mine1">{{ lang('DIGESTS_REMOVE_YOURS') ~ lang('COLON') }}</label></dt>
+			<dd>
+				<label><input id="phpbbservices_digests_user_digest_show_mine1" name="phpbbservices_digests_user_digest_show_mine" type="radio" value="1" {% if S_DIGESTS_REMOVE_YOURS == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_user_digest_show_mine" type="radio" value="0" {% if S_DIGESTS_REMOVE_YOURS == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_user_digest_remove_foes1">{{ lang('DIGESTS_FILTER_FOES') ~ lang('COLON') }}</label></dt>
+			<dd>
+				<label><input id="phpbbservices_digests_user_digest_remove_foes1" name="phpbbservices_digests_user_digest_remove_foes" type="radio" value="1" {% if S_DIGESTS_REMOVE_FOES == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_user_digest_remove_foes" type="radio" value="0" {% if S_DIGESTS_REMOVE_FOES == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_user_digest_show_pms1">{{ lang('DIGESTS_SHOW_PMS') ~ lang('COLON') }}</label></dt>
+			<dd>
+				<label><input id="phpbbservices_digests_user_digest_show_pms1" name="phpbbservices_digests_user_digest_show_pms" type="radio" value="1" {% if S_DIGESTS_SHOW_PMS == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_user_digest_show_pms" type="radio" value="0" {% if S_DIGESTS_SHOW_PMS == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_user_digest_pm_mark_read1">{{ lang('DIGESTS_USER_DIGESTS_PM_MARK_READ') ~ lang('COLON') }}</label></dt>
+			<dd>
+				<label><input id="phpbbservices_digests_user_digest_pm_mark_read1" name="phpbbservices_digests_user_digest_pm_mark_read" type="radio" value="1" {% if S_DIGESTS_PM_MARK_READ == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_user_digest_pm_mark_read" type="radio" value="0" {% if S_DIGESTS_PM_MARK_READ == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_user_digest_sortby">{{ lang('DIGESTS_SORT_BY') ~ lang('COLON') }}</label></dt>
+			<dd>
+				<label><select id="phpbbservices_digests_user_digest_sortby" name="phpbbservices_digests_user_digest_sortby">
+					{{ SORT_BY }}
+				</select></label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_user_digest_max_display_words">{{ lang('DIGESTS_MAX_DISPLAY_WORDS') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_USER_DIGESTS_MAX_DISPLAY_WORDS_EXPLAIN') }}</dt>
+			<dd>
+				<input id="phpbbservices_digests_user_digest_max_display_words" name="phpbbservices_digests_user_digest_max_display_words" type="number" value="{{ MAX_DISPLAY_WORDS }}" min="-1">
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_user_digest_send_on_no_posts1">{{ lang('DIGESTS_SEND_ON_NO_POSTS') ~ lang('COLON') }}</label></dt>
+			<dd>
+				<label><input id="phpbbservices_digests_user_digest_send_on_no_posts1" name="phpbbservices_digests_user_digest_send_on_no_posts" type="radio" value="1" {% if S_DIGESTS_SEND_ON_NO_POSTS == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_user_digest_send_on_no_posts" type="radio" value="0" {% if S_DIGESTS_SEND_ON_NO_POSTS == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_user_digest_reset_lastvisit1">{{ lang('DIGESTS_LASTVISIT_RESET') ~ lang('COLON') }}</label></label><br>{{ lang('DIGESTS_LASTVISIT_RESET_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_user_digest_reset_lastvisit1" name="phpbbservices_digests_user_digest_reset_lastvisit" type="radio" value="1" {% if S_DIGESTS_RESET_LASTVISIT == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_user_digest_reset_lastvisit" type="radio" value="0" {% if S_DIGESTS_RESET_LASTVISIT == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_user_digest_attachments1">{{ lang('DIGESTS_SHOW_ATTACHMENTS') ~ lang('COLON') }}</label></label><br>{{ lang('DIGESTS_SHOW_ATTACHMENTS_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_user_digest_attachments1" name="phpbbservices_digests_user_digest_attachments" type="radio" value="1" {% if S_DIGESTS_ATTACHMENTS == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_user_digest_attachments" type="radio" value="0" {% if S_DIGESTS_ATTACHMENTS == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_user_digest_block_images1">{{ lang('DIGESTS_BLOCK_IMAGES') ~ lang('COLON') }}</label></label><br>{{ lang('DIGESTS_BLOCK_IMAGES_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_user_digest_block_images1" name="phpbbservices_digests_user_digest_block_images" type="radio" value="1" {% if S_DIGESTS_BLOCK_IMAGES == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_user_digest_block_images" type="radio" value="0" {% if S_DIGESTS_BLOCK_IMAGES == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_user_digest_toc1">{{ lang('DIGESTS_TOC') ~ lang('COLON') }}</label></label><br>{{ lang('DIGESTS_TOC_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_user_digest_toc1" name="phpbbservices_digests_user_digest_toc" type="radio" value="1" {% if S_DIGESTS_TOC == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_user_digest_toc" type="radio" value="0" {% if S_DIGESTS_TOC == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+	</fieldset>
+	<p class="submit-buttons">
+		<input class="button1" type="submit" id="submit" name="submit" value="{{ lang('SUBMIT') }}" />
+		<input class="button2" type="reset" id="reset" name="reset" value="{{ lang('RESET') }}" />
+	</p>
 	{% endif %}
 
 	{% if S_EDIT_SUBSCRIBERS %}
 	<dl>
-		<dt class="border-right-none"><label for="member">{{ lang('DIGESTS_SEARCH_FOR_MEMBER') }}{{ lang('COLON') }}</label><br>{{ lang('DIGESTS_SEARCH_FOR_MEMBER_EXPLAIN') }}</dt>
+		<dt class="border-right-none"><label for="member">{{ lang('DIGESTS_SEARCH_FOR_MEMBER') }}{{ lang('COLON') }}</label><p>{{ lang('DIGESTS_SEARCH_FOR_MEMBER_EXPLAIN') }}</p></dt>
 		<dd class="text-left"><input type="text" id="member" name="member" size="30" maxlength="255" value="{{ MEMBER }}" onchange="addToStack(this.name);" /></dd>
 	</dl>
 	<hr>
@@ -148,285 +447,285 @@
 				</tr>
 			</thead>
 			<tbody>
-				{% for digests_edit_subscribers in loops.digests_edit_subscribers %}
-					{% if digests_edit_subscribers.S_ROW_COUNT is even %}<tr class="row1">{% else %}<tr class="row2">{% endif %}
-						<td class="text-center" headers="h1"><input type="checkbox" class="radio" name="user-{{ digests_edit_subscribers.USER_ID }}" id="user-{{ digests_edit_subscribers.USER_ID }}" title = "{{ lang('DIGESTS_MARK_UNMARK_ROW') }}" onchange="addToStack(this.name);" /></td>
-						<td headers="h2">
-							<a id="imglink-{{ digests_edit_subscribers.S_ROW_COUNT }}">
-								<img id="plusminus-{{ digests_edit_subscribers.S_ROW_COUNT }}" src="{{ IMAGE_PATH }}expand.png" title="{{ lang('DIGESTS_EXPAND') }}" alt="{{ lang('DIGESTS_EXPAND') }}" />
-							</a>&nbsp;
-							<a id="link-{{ digests_edit_subscribers.S_ROW_COUNT }}">{{ digests_edit_subscribers.USERNAME }}</a>
-						</td>
-						<td headers="h3">{{ digests_edit_subscribers.USER_EMAIL }}</td>
-						<td class="text-center" headers="h4">
-							<select name="user-{{ digests_edit_subscribers.USER_ID }}-digest_type" title="{{ lang('DIGESTS_FREQUENCY_SHORT') }}" onchange="addToStack(this.name);">
-								<option value="NONE"{% if digests_edit_subscribers.S_DIGEST_NONE_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_NONE') }}</option>
-								<option value="DFLT">{{ lang('DIGESTS_DEFAULT') }}</option>
-								<option value="DAY"{% if digests_edit_subscribers.S_DIGEST_DAY_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_DAILY') }}</option>
-								<option value="WEEK"{% if digests_edit_subscribers.S_DIGEST_WEEK_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_WEEKLY') }}</option>
-								<option value="MNTH"{% if digests_edit_subscribers.S_DIGEST_MONTH_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_MONTHLY') }}</option>
-							</select>
-						</td>
-						<td class="text-center" headers="h5">
-							<select name="user-{{ digests_edit_subscribers.USER_ID }}-style" title="{{ lang('DIGESTS_FORMAT_STYLING') }}" onchange="addToStack(this.name);">
-								<option value="{{ DIGESTS_HTML_VALUE }}"{% if digests_edit_subscribers.S_DIGEST_HTML_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_FORMAT_HTML') }}</option>
-								<option value="{{ DIGESTS_HTML_CLASSIC_VALUE }}"{% if digests_edit_subscribers.S_DIGEST_HTML_CLASSIC_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_FORMAT_HTML_CLASSIC') }}</option>
-								<option value="{{ DIGESTS_PLAIN_VALUE }}"{% if digests_edit_subscribers.S_DIGEST_PLAIN_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_FORMAT_PLAIN') }}</option>
-								<option value="{{ DIGESTS_PLAIN_CLASSIC_VALUE }}"{% if digests_edit_subscribers.S_DIGEST_PLAIN_CLASSIC_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_FORMAT_PLAIN_CLASSIC') }}</option>
-								<option value="{{ DIGESTS_FORMAT_TEXT_VALUE }}"{% if digests_edit_subscribers.S_DIGEST_TEXT_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_FORMAT_TEXT') }}</option>
-							</select>
-						</td>
-						<td class="text-center" headers="h6">
-							<select name="user-{{ digests_edit_subscribers.USER_ID }}-send_hour" title="{{ lang('DIGESTS_HOUR_SENT') }}" onchange="addToStack(this.name);">
-								<option value="{{ digests_edit_subscribers.BOARD_OFFSET_0 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_0_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_0 }}</option>
-								<option value="{{ digests_edit_subscribers.BOARD_OFFSET_1 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_1_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_1 }}</option>
-								<option value="{{ digests_edit_subscribers.BOARD_OFFSET_2 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_2_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_2 }}</option>
-								<option value="{{ digests_edit_subscribers.BOARD_OFFSET_3 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_3_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_3 }}</option>
-								<option value="{{ digests_edit_subscribers.BOARD_OFFSET_4 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_4_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_4 }}</option>
-								<option value="{{ digests_edit_subscribers.BOARD_OFFSET_5 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_5_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_5 }}</option>
-								<option value="{{ digests_edit_subscribers.BOARD_OFFSET_6 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_6_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_6 }}</option>
-								<option value="{{ digests_edit_subscribers.BOARD_OFFSET_7 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_7_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_7 }}</option>
-								<option value="{{ digests_edit_subscribers.BOARD_OFFSET_8 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_8_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_8 }}</option>
-								<option value="{{ digests_edit_subscribers.BOARD_OFFSET_9 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_9_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_9 }}</option>
-								<option value="{{ digests_edit_subscribers.BOARD_OFFSET_10 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_10_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_10 }}</option>
-								<option value="{{ digests_edit_subscribers.BOARD_OFFSET_11 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_11_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_11 }}</option>
-								<option value="{{ digests_edit_subscribers.BOARD_OFFSET_12 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_12_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_12 }}</option>
-								<option value="{{ digests_edit_subscribers.BOARD_OFFSET_13 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_13_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_13 }}</option>
-								<option value="{{ digests_edit_subscribers.BOARD_OFFSET_14 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_14_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_14 }}</option>
-								<option value="{{ digests_edit_subscribers.BOARD_OFFSET_15 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_15_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_15 }}</option>
-								<option value="{{ digests_edit_subscribers.BOARD_OFFSET_16 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_16_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_16 }}</option>
-								<option value="{{ digests_edit_subscribers.BOARD_OFFSET_17 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_17_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_17 }}</option>
-								<option value="{{ digests_edit_subscribers.BOARD_OFFSET_18 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_18_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_18 }}</option>
-								<option value="{{ digests_edit_subscribers.BOARD_OFFSET_19 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_19_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_19 }}</option>
-								<option value="{{ digests_edit_subscribers.BOARD_OFFSET_20 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_20_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_20 }}</option>
-								<option value="{{ digests_edit_subscribers.BOARD_OFFSET_21 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_21_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_21 }}</option>
-								<option value="{{ digests_edit_subscribers.BOARD_OFFSET_22 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_22_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_22 }}</option>
-								<option value="{{ digests_edit_subscribers.BOARD_OFFSET_23 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_23_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_23 }}</option>
-							</select>
-						</td>
-						<td class="text-center" headers="h7">{{ digests_edit_subscribers.USER_DIGEST_HAS_UNSUBSCRIBED }}</td>
-						<td class="text-center" headers="h8">{{ digests_edit_subscribers.USER_LAST_VISIT }}</td>
-						<td class="text-center" headers="h9">{{ digests_edit_subscribers.USER_DIGEST_LAST_SENT }}</td>
-					</tr>
-					{% if digests_edit_subscribers.S_ROW_COUNT is even %}<tr class="row1"{% else %}<tr class="row2"{% endif %} id="user-{{ digests_edit_subscribers.S_ROW_COUNT }}-detail" style="display:none">
-						<td colspan="9">
-							<fieldset>
-								<legend>{{ lang('UCP_DIGESTS_FORUMS_SELECTION') }}</legend>
-								<dl>
-									<dt><label for="user-{{ digests_edit_subscribers.USER_ID }}-filter_type">{{ lang('DIGESTS_FILTER_TYPE') }}{{ lang('COLON') }}</label></dt>
-									<dd>
-										<select id="user-{{ digests_edit_subscribers.USER_ID }}-filter_type" name="user-{{ digests_edit_subscribers.USER_ID }}-FILTER_TYPE" onchange="addToStack(this.name);">
-											<option value="ALL" {% if digests_edit_subscribers.S_DIGEST_POST_ANY %}selected="selected"{% endif %}>{{ lang('DIGESTS_POSTS_TYPE_ANY') }}</option>
-											<option value="1ST" {% if digests_edit_subscribers.S_DIGEST_POST_FIRST %}selected="selected"{% endif %}>{{ lang('DIGESTS_POSTS_TYPE_FIRST') }}</option>
-											<option value="BM" {% if digests_edit_subscribers.S_DIGEST_POST_BM %}selected="selected"{% endif %}>{{ lang('DIGESTS_USE_BOOKMARKS') }}</option>
-										</select>
-									</dd>
-								</dl>
-								<dl>
-									<dt>
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-all_forums">{{ lang('DIGESTS_SELECT_FORUMS') }}{{ lang('COLON') }}</label><br>{{ lang('DIGESTS_SELECT_FORUMS_ADMIN_EXPLAIN') }}
-									</dt>
-									<dd>
-										<input type="checkbox" name="user-{{ digests_edit_subscribers.USER_ID }}-all_forums" id="user-{{ digests_edit_subscribers.USER_ID }}-all_forums" {% if digests_edit_subscribers.S_ALL_BY_DEFAULT %} checked="checked"{% endif %} onchange="addToStack(this.name);" />
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-all_forums"><b>{{ lang('DIGESTS_ALL_ALLOWED_FORUMS') }}</b></label><br><br>
-										<div id="user-{{ digests_edit_subscribers.USER_ID }}-0">
-											{% for forums in digests_edit_subscribers.forums %}
-												{% if forums.S_DIV_OPEN %}
-													<div id="div-{{ digests_edit_subscribers.USER_ID }}-{{ forums.CAT_ID }}" class="position-relative">
+			{% for digests_edit_subscribers in loops.digests_edit_subscribers %}
+				{% if digests_edit_subscribers.S_ROW_COUNT is even %}<tr class="row1">{% else %}<tr class="row2">{% endif %}
+					<td class="text-center" headers="h1"><input type="checkbox" class="radio" name="user-{{ digests_edit_subscribers.USER_ID }}" id="user-{{ digests_edit_subscribers.USER_ID }}" title = "{{ lang('DIGESTS_MARK_UNMARK_ROW') }}" onchange="addToStack(this.name);" /></td>
+					<td headers="h2">
+						<a id="imglink-{{ digests_edit_subscribers.USER_ID }}">
+							<img id="plusminus-{{ digests_edit_subscribers.USER_ID }}" src="{{ IMAGE_PATH }}expand.png" title="{{ lang('DIGESTS_EXPAND') }}" alt="{{ lang('DIGESTS_EXPAND') }}" />
+						</a>&nbsp;
+						<a id="link-{{ digests_edit_subscribers.USER_ID }}">{{ digests_edit_subscribers.USERNAME }}</a>
+					</td>
+					<td headers="h3">{{ digests_edit_subscribers.USER_EMAIL }}</td>
+					<td class="text-center" headers="h4">
+						<select name="user-{{ digests_edit_subscribers.USER_ID }}-digest_type" title="{{ lang('DIGESTS_FREQUENCY_SHORT') }}" onchange="addToStack(this.name);">
+							<option value="NONE"{% if digests_edit_subscribers.S_DIGEST_NONE_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_NONE') }}</option>
+							<option value="DFLT">{{ lang('DIGESTS_DEFAULT') }}</option>
+							<option value="DAY"{% if digests_edit_subscribers.S_DIGEST_DAY_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_DAILY') }}</option>
+							<option value="WEEK"{% if digests_edit_subscribers.S_DIGEST_WEEK_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_WEEKLY') }}</option>
+							<option value="MNTH"{% if digests_edit_subscribers.S_DIGEST_MONTH_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_MONTHLY') }}</option>
+						</select>
+					</td>
+					<td class="text-center" headers="h5">
+						<select name="user-{{ digests_edit_subscribers.USER_ID }}-style" title="{{ lang('DIGESTS_FORMAT_STYLING') }}" onchange="addToStack(this.name);">
+							<option value="{{ DIGESTS_HTML_VALUE }}"{% if digests_edit_subscribers.S_DIGEST_HTML_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_FORMAT_HTML') }}</option>
+							<option value="{{ DIGESTS_HTML_CLASSIC_VALUE }}"{% if digests_edit_subscribers.S_DIGEST_HTML_CLASSIC_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_FORMAT_HTML_CLASSIC') }}</option>
+							<option value="{{ DIGESTS_PLAIN_VALUE }}"{% if digests_edit_subscribers.S_DIGEST_PLAIN_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_FORMAT_PLAIN') }}</option>
+							<option value="{{ DIGESTS_PLAIN_CLASSIC_VALUE }}"{% if digests_edit_subscribers.S_DIGEST_PLAIN_CLASSIC_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_FORMAT_PLAIN_CLASSIC') }}</option>
+							<option value="{{ DIGESTS_FORMAT_TEXT_VALUE }}"{% if digests_edit_subscribers.S_DIGEST_TEXT_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_FORMAT_TEXT') }}</option>
+						</select>
+					</td>
+					<td class="text-center" headers="h6">
+						<select name="user-{{ digests_edit_subscribers.USER_ID }}-send_hour" title="{{ lang('DIGESTS_HOUR_SENT') }}" onchange="addToStack(this.name);">
+							<option value="{{ digests_edit_subscribers.BOARD_OFFSET_0 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_0_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_0 }}</option>
+							<option value="{{ digests_edit_subscribers.BOARD_OFFSET_1 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_1_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_1 }}</option>
+							<option value="{{ digests_edit_subscribers.BOARD_OFFSET_2 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_2_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_2 }}</option>
+							<option value="{{ digests_edit_subscribers.BOARD_OFFSET_3 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_3_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_3 }}</option>
+							<option value="{{ digests_edit_subscribers.BOARD_OFFSET_4 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_4_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_4 }}</option>
+							<option value="{{ digests_edit_subscribers.BOARD_OFFSET_5 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_5_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_5 }}</option>
+							<option value="{{ digests_edit_subscribers.BOARD_OFFSET_6 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_6_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_6 }}</option>
+							<option value="{{ digests_edit_subscribers.BOARD_OFFSET_7 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_7_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_7 }}</option>
+							<option value="{{ digests_edit_subscribers.BOARD_OFFSET_8 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_8_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_8 }}</option>
+							<option value="{{ digests_edit_subscribers.BOARD_OFFSET_9 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_9_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_9 }}</option>
+							<option value="{{ digests_edit_subscribers.BOARD_OFFSET_10 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_10_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_10 }}</option>
+							<option value="{{ digests_edit_subscribers.BOARD_OFFSET_11 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_11_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_11 }}</option>
+							<option value="{{ digests_edit_subscribers.BOARD_OFFSET_12 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_12_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_12 }}</option>
+							<option value="{{ digests_edit_subscribers.BOARD_OFFSET_13 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_13_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_13 }}</option>
+							<option value="{{ digests_edit_subscribers.BOARD_OFFSET_14 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_14_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_14 }}</option>
+							<option value="{{ digests_edit_subscribers.BOARD_OFFSET_15 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_15_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_15 }}</option>
+							<option value="{{ digests_edit_subscribers.BOARD_OFFSET_16 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_16_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_16 }}</option>
+							<option value="{{ digests_edit_subscribers.BOARD_OFFSET_17 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_17_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_17 }}</option>
+							<option value="{{ digests_edit_subscribers.BOARD_OFFSET_18 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_18_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_18 }}</option>
+							<option value="{{ digests_edit_subscribers.BOARD_OFFSET_19 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_19_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_19 }}</option>
+							<option value="{{ digests_edit_subscribers.BOARD_OFFSET_20 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_20_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_20 }}</option>
+							<option value="{{ digests_edit_subscribers.BOARD_OFFSET_21 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_21_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_21 }}</option>
+							<option value="{{ digests_edit_subscribers.BOARD_OFFSET_22 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_22_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_22 }}</option>
+							<option value="{{ digests_edit_subscribers.BOARD_OFFSET_23 }}"{% if digests_edit_subscribers.S_DIGEST_SEND_HOUR_23_CHECKED %} selected="selected"{% endif %}>{{ digests_edit_subscribers.DISPLAY_HOUR_23 }}</option>
+						</select>
+					</td>
+					<td class="text-center" headers="h7">{{ digests_edit_subscribers.USER_DIGEST_HAS_UNSUBSCRIBED }}</td>
+					<td class="text-center" headers="h8">{{ digests_edit_subscribers.USER_LAST_VISIT }}</td>
+					<td class="text-center" headers="h9">{{ digests_edit_subscribers.USER_DIGEST_LAST_SENT }}</td>
+				</tr>
+				{% if digests_edit_subscribers.S_ROW_COUNT is even %}<tr class="row1"{% else %}<tr class="row2"{% endif %} id="user-{{ digests_edit_subscribers.USER_ID }}-detail" style="display:none">
+					<td colspan="9">
+						<fieldset>
+							<legend>{{ lang('UCP_DIGESTS_FORUMS_SELECTION') }}</legend>
+							<dl>
+								<dt><label for="user-{{ digests_edit_subscribers.USER_ID }}-filter_type">{{ lang('DIGESTS_FILTER_TYPE') }}{{ lang('COLON') }}</label></dt>
+								<dd>
+									<select id="user-{{ digests_edit_subscribers.USER_ID }}-filter_type" name="user-{{ digests_edit_subscribers.USER_ID }}-FILTER_TYPE" onchange="addToStack(this.name);">
+										<option value="ALL" {% if digests_edit_subscribers.S_DIGEST_POST_ANY %}selected="selected"{% endif %}>{{ lang('DIGESTS_POSTS_TYPE_ANY') }}</option>
+										<option value="1ST" {% if digests_edit_subscribers.S_DIGEST_POST_FIRST %}selected="selected"{% endif %}>{{ lang('DIGESTS_POSTS_TYPE_FIRST') }}</option>
+										<option value="BM" {% if digests_edit_subscribers.S_DIGEST_POST_BM %}selected="selected"{% endif %}>{{ lang('DIGESTS_USE_BOOKMARKS') }}</option>
+									</select>
+								</dd>
+							</dl>
+							<dl>
+								<dt>
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-all_forums">{{ lang('DIGESTS_SELECT_FORUMS') }}{{ lang('COLON') }}</label><br>{{ lang('DIGESTS_SELECT_FORUMS_ADMIN_EXPLAIN') }}
+								</dt>
+								<dd>
+									<input type="checkbox" name="user-{{ digests_edit_subscribers.USER_ID }}-all_forums" id="user-{{ digests_edit_subscribers.USER_ID }}-all_forums" {% if digests_edit_subscribers.S_ALL_BY_DEFAULT %} checked="checked"{% endif %} onchange="addToStack(this.name);" />
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-all_forums"><b>{{ lang('DIGESTS_ALL_ALLOWED_FORUMS') }}</b></label><br><br>
+									<div id="user-{{ digests_edit_subscribers.USER_ID }}-0">
+										{% for forums in digests_edit_subscribers.forums %}
+											{% if forums.S_DIV_OPEN %}
+												<div id="div-{{ digests_edit_subscribers.USER_ID }}-{{ forums.DIV_ID }}" class="position-relative">
+											{% endif %}
+											{% if forums.S_PRINT %}
+												{% if forums.S_IS_FORUM %}
+													<input type="checkbox" name="user-{{ digests_edit_subscribers.USER_ID }}-forums[]" value="{{ digests_edit_subscribers.USER_ID }}-{{ forums.FORUM_ID }}" id="user-{{ digests_edit_subscribers.USER_ID }}-{{ forums.FORUM_ID }}"{% if forums.S_FORUM_SUBSCRIBED %} checked="checked"{% endif %} onchange="addToStack(this.name);">
+													<label for="user-{{ digests_edit_subscribers.USER_ID }}-{{ forums.FORUM_ID }}"><span class="point8-em">{{ forums.FORUM_LABEL }}</span></label><br>
 												{% endif %}
-												{% if forums.S_PRINT %}
-													{% if forums.S_IS_FORUM %}
-														<input type="checkbox" name="user-{{ digests_edit_subscribers.USER_ID }}-forums[]" value="{{ digests_edit_subscribers.USER_ID }}-{{ forums.FORUM_ID }}" id="user-{{ digests_edit_subscribers.USER_ID }}-{{ forums.FORUM_ID }}"{% if forums.S_FORUM_SUBSCRIBED %} checked="checked"{% endif %} onchange="addToStack(this.name);"/>
-														<label for="user-{{ digests_edit_subscribers.USER_ID }}-{{ forums.FORUM_ID }}"><span class="point8-em">{{ forums.FORUM_LABEL }}</span></label><br>
-													{% endif %}
-													{% if not forums.S_IS_FORUM %}
-														<span class="point8-em"><i>{{ forums.FORUM_LABEL }}</i></span><br>
-													{% endif %}
+												{% if not forums.S_IS_FORUM %}
+													<span class="point8-em"><i>{{ forums.FORUM_LABEL }}</i></span><br>
 												{% endif %}
-												{% if forums.S_DIV_CLOSE %}
-													</div>
-												{% endif %}
-											{% endfor %}
-										</div>
-									</dd>
-								</dl>
-							</fieldset>
-							<fieldset>
-								<legend>{{ lang('UCP_DIGESTS_POST_FILTERS') }}</legend>
-								<dl>
-									<dt>
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-max_posts">{{ lang('DIGESTS_COUNT_LIMIT') }}</label>
-									</dt>
-									<dd>
-										<input type="number" min="0" id="user-{{ digests_edit_subscribers.USER_ID }}-max_posts" name="user-{{ digests_edit_subscribers.USER_ID }}-max_posts" value="{{ digests_edit_subscribers.USER_DIGEST_MAX_POSTS }}" onchange="addToStack(this.name);" />
-									</dd>
-								</dl>
-								<dl>
-									<dt>
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-min_words">{{ lang('DIGESTS_MIN_SIZE') }}</label>
-									</dt>
-									<dd>
-										<input type="number" min="0" id="user-{{ digests_edit_subscribers.USER_ID }}-min_words" name="user-{{ digests_edit_subscribers.USER_ID }}-min_words" value="{{ digests_edit_subscribers.USER_DIGEST_MIN_WORDS }}" onchange="addToStack(this.name);" />
-									</dd>
-								</dl>
-								<dl>
-									<dt>
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-new_posts_only1">{{ lang('DIGESTS_NEW_POSTS_ONLY') }}</label>
-									</dt>
-									<dd>
-										<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-new_posts_only" id="user-{{ digests_edit_subscribers.USER_ID }}-new_posts_only1" value="1"{% if digests_edit_subscribers.S_DIGEST_NEW_POSTS_ONLY_CHECKED_YES %} checked="checked"{% endif %} onchange="addToStack(this.name);" />
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-new_posts_only1">{{ lang('YES') }}</label>&nbsp;
-										<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-new_posts_only" id="user-{{ digests_edit_subscribers.USER_ID }}-new_posts_only2" value="0"{% if digests_edit_subscribers.S_DIGEST_NEW_POSTS_ONLY_CHECKED_NO %} checked="checked"{% endif %} onchange="addToStack(this.name);" />
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-new_posts_only2">{{ lang('NO') }}</label>
-									</dd>
-								</dl>
-								<dl>
-									<dt>
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-show_mine1">{{ lang('DIGESTS_REMOVE_YOURS') }}</label>
-									</dt>
-									<dd>
-										<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-show_mine" id="user-{{ digests_edit_subscribers.USER_ID }}-show_mine1" value="1"{% if digests_edit_subscribers.S_DIGEST_SHOW_MINE_CHECKED_NO %} checked="checked"{% endif %} onchange="addToStack(this.name);" />
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-show_mine1">{{ lang('YES') }}</label>&nbsp;
-										<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-show_mine" id="user-{{ digests_edit_subscribers.USER_ID }}-show_mine2" value="0"{% if digests_edit_subscribers.S_DIGEST_SHOW_MINE_CHECKED_YES %} checked="checked"{% endif %} onchange="addToStack(this.name);" />
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-show_mine2">{{ lang('NO') }}</label>
-									</dd>
-								</dl>
-								<dl>
-									<dt>
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-filter_foes1">{{ lang('DIGESTS_FILTER_FOES') }}</label>
-									</dt>
-									<dd>
-										<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-filter_foes" id="user-{{ digests_edit_subscribers.USER_ID }}-filter_foes1" value="1"{% if digests_edit_subscribers.S_DIGEST_FILTER_FOES_CHECKED_YES %} checked="checked"{% endif %} onchange="addToStack(this.name);" />
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-filter_foes1">{{ lang('YES') }}</label>&nbsp;
-										<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-filter_foes" id="user-{{ digests_edit_subscribers.USER_ID }}-filter_foes2" value="0"{% if digests_edit_subscribers.S_DIGEST_FILTER_FOES_CHECKED_NO %} checked="checked"{% endif %} onchange="addToStack(this.name);" />
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-filter_foes2">{{ lang('NO') }}</label>
-									</dd>
-								</dl>
-								<dl>
-									<dt>
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-pms1">{{ lang('DIGESTS_PRIVATE_MESSAGES_IN_DIGEST') }}</label>
-									</dt>
-									<dd>
-										<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-pms" id="user-{{ digests_edit_subscribers.USER_ID }}-pms1" value="1"{% if digests_edit_subscribers.S_DIGEST_PRIVATE_MESSAGES_IN_DIGEST_YES %} checked="checked"{% endif %} onchange="addToStack(this.name);" />
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-pms1">{{ lang('YES') }}</label>&nbsp;
-										<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-pms" id="user-{{ digests_edit_subscribers.USER_ID }}-pms2" value="0"{% if digests_edit_subscribers.S_DIGEST_PRIVATE_MESSAGES_IN_DIGEST_NO %} checked="checked"{% endif %} onchange="addToStack(this.name);" />
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-pms2">{{ lang('NO') }}</label>
-									</dd>
-								</dl>
-								<dl>
-									<dt>
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-mark_read1">{{ lang('DIGESTS_MARK_READ') }}</label>
-									</dt>
-									<dd>
-										<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-mark_read" id="user-{{ digests_edit_subscribers.USER_ID }}-mark_read1" value="1"{% if digests_edit_subscribers.S_DIGEST_PM_MARK_READ_CHECKED_YES %} checked="checked"{% endif %} onchange="addToStack(this.name);" />
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-mark_read1">{{ lang('YES') }}</label>&nbsp;
-										<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-mark_read" id="user-{{ digests_edit_subscribers.USER_ID }}-mark_read2" value="0"{% if digests_edit_subscribers.S_DIGEST_PM_MARK_READ_CHECKED_NO %} checked="checked"{% endif %} onchange="addToStack(this.name);" />
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-mark_read2">{{ lang('NO') }}</label>
-									</dd>
-								</dl>
-							</fieldset>
-							<fieldset>
-								<legend>{{ lang('UCP_DIGESTS_ADDITIONAL_CRITERIA') }}</legend>
-								<dl>
-									<dt>
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-sortby">{{ lang('DIGESTS_SORT_BY') }}</label>
-									</dt>
-									<dd>
-										<select name="user-{{ digests_edit_subscribers.USER_ID }}-sortby" id="user-{{ digests_edit_subscribers.USER_ID }}-sortby" onchange="addToStack(this.name);">
-											<option value="board"{% if digests_edit_subscribers.S_BOARD_SELECTED %} selected="selected"{% endif %}>{{ lang('DIGESTS_SORT_USER_ORDER') }}</option>
-											<option value="standard"{% if digests_edit_subscribers.S_STANDARD_SELECTED %} selected="selected"{% endif %}>{{ lang('DIGESTS_SORT_FORUM_TOPIC') }}</option>
-											<option value="standard_desc"{% if digests_edit_subscribers.S_STANDARD_DESC_SELECTED %} selected="selected"{% endif %}>{{ lang('DIGESTS_SORT_FORUM_TOPIC_DESC') }}</option>
-											<option value="postdate"{% if digests_edit_subscribers.S_POSTDATE_SELECTED %} selected="selected"{% endif %}>{{ lang('DIGESTS_SORT_POST_DATE') }}</option>
-											<option value="postdate_desc"{% if digests_edit_subscribers.S_POSTDATE_DESC_SELECTED %} selected="selected"{% endif %}>{{ lang('DIGESTS_SORT_POST_DATE_DESC') }}</option>
-										</select>
-									</dd>
-								</dl>
-								<dl>
-									<dt>
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-max_display_words">{{ lang('DIGESTS_MAX_DISPLAY_WORDS') }}</label>
-									</dt>
-									<dd>
-										<input type="number" min="0" name="user-{{ digests_edit_subscribers.USER_ID }}-max_display_words" id="user-{{ digests_edit_subscribers.USER_ID }}-max_display_words" value="{{ digests_edit_subscribers.USER_DIGEST_MAX_DISPLAY_WORDS }}" onchange="addToStack(this.name);" />
-									</dd>
-								</dl>
-								<dl>
-									<dt>
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-no_post_text1">{{ lang('DIGESTS_NO_POST_TEXT') }}</label>
-									</dt>
-									<dd>
-										<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-no_post_text" id="user-{{ digests_edit_subscribers.USER_ID }}-no_post_text1" value="1"{% if digests_edit_subscribers.S_DIGEST_NO_POST_TEXT_CHECKED_YES %} checked="checked"{% endif %} onchange="addToStack(this.name);" />
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-no_post_text1"> {{ lang('YES') }}</label>&nbsp;
-										<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-no_post_text" id="user-{{ digests_edit_subscribers.USER_ID }}-no_post_text2" value="0"{% if digests_edit_subscribers.S_DIGEST_NO_POST_TEXT_CHECKED_NO %} checked="checked"{% endif %} onchange="addToStack(this.name);" />
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-no_post_text2"> {{ lang('NO') }}</label>
-									</dd>
-								</dl>
-								<dl>
-									<dt>
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-send_on_no_posts1">{{ lang('DIGESTS_SEND_ON_NO_POSTS') }}</label>
-									</dt>
-									<dd>
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-send_on_no_posts1">
-											<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-send_on_no_posts" id="user-{{ digests_edit_subscribers.USER_ID }}-send_on_no_posts1"{% if digests_edit_subscribers.S_DIGEST_SEND_ON_NO_POSTS_YES_CHECKED %} checked="checked"{% endif %} onchange="addToStack(this.name);" value="1" /> {{ lang('YES') }}</label>&nbsp;<label for="user-{{ digests_edit_subscribers.USER_ID }}-send_on_no_posts2">
-											<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-send_on_no_posts" id="user-{{ digests_edit_subscribers.USER_ID }}-send_on_no_posts2"{% if digests_edit_subscribers.S_DIGEST_SEND_ON_NO_POSTS_NO_CHECKED %} checked="checked"{% endif %} onchange="addToStack(this.name);" value="0" /> {{ lang('NO') }}
-										</label>
-									</dd>
-								</dl>
-								<dl>
-									<dt>
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-lastvisit1">{{ lang('DIGESTS_LASTVISIT_RESET') }}</label>
-									</dt>
-									<dd>
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-lastvisit1">
-											<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-lastvisit" id="user-{{ digests_edit_subscribers.USER_ID }}-lastvisit1" value="1"{% if digests_edit_subscribers.S_LASTVISIT_YES_CHECKED %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> {{ lang('YES') }}
-										</label>&nbsp;
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-lastvisit2">
-											<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-lastvisit" id="user-{{ digests_edit_subscribers.USER_ID }}-lastvisit2" value="0"{% if digests_edit_subscribers.S_LASTVISIT_NO_CHECKED %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> {{ lang('NO') }}
-										</label>
-									</dd>
-								</dl>
-								<dl>
-									<dt>
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-attachments1">{{ lang('DIGESTS_SHOW_ATTACHMENTS') }}</label>
-									</dt>
-									<dd>
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-attachments1">
-											<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-attachments" id="user-{{ digests_edit_subscribers.USER_ID }}-attachments1" value="1"{% if digests_edit_subscribers.S_ATTACHMENTS_YES_CHECKED %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> {{ lang('YES') }}
-										</label>&nbsp;
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-attachments2">
-											<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-attachments" id="user-{{ digests_edit_subscribers.USER_ID }}-attachments2" value="0"{% if digests_edit_subscribers.S_ATTACHMENTS_NO_CHECKED %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> {{ lang('NO') }}
-										</label>
-									</dd>
-								</dl>
-								<dl>
-									<dt>
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-blockimages1">{{ lang('DIGESTS_BLOCK_IMAGES') }}</label>
-									</dt>
-									<dd>
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-blockimages1">
-											<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-blockimages" id="user-{{ digests_edit_subscribers.USER_ID }}-blockimages1" value="1"{% if digests_edit_subscribers.S_BLOCK_IMAGES_YES_CHECKED %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> {{ lang('YES') }}
-										</label>&nbsp;
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-blockimages2">
-											<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-blockimages" id="user-{{ digests_edit_subscribers.USER_ID }}-blockimages2" value="0"{% if digests_edit_subscribers.S_BLOCK_IMAGES_NO_CHECKED %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> {{ lang('NO') }}
-										</label>
-									</dd>
-								</dl>
-								<dl>
-									<dt>
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-toc1">{{ lang('DIGESTS_TOC') }}{{ lang('COLON') }}</label>
-									</dt>
-									<dd>
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-toc1">
-											<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-toc" id="user-{{ digests_edit_subscribers.USER_ID }}-toc1" value="1"{% if digests_edit_subscribers.S_TOC_YES_CHECKED %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> {{ lang('YES') }}
-										</label>&nbsp;
-										<label for="user-{{ digests_edit_subscribers.USER_ID }}-toc2">
-											<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-toc" id="user-{{ digests_edit_subscribers.USER_ID }}-toc2" value="0"{% if digests_edit_subscribers.S_TOC_NO_CHECKED %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> {{ lang('NO') }}
-										</label>
-									</dd>
-								</dl>
-							</fieldset>
-						</td>
-					</tr>
-				{% endfor %}
+											{% endif %}
+											{% if forums.S_DIV_CLOSE %}
+												</div>
+											{% endif %}
+										{% endfor %}
+									</div>
+								</dd>
+							</dl>
+						</fieldset>
+						<fieldset>
+							<legend>{{ lang('UCP_DIGESTS_POST_FILTERS') }}</legend>
+							<dl>
+								<dt>
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-max_posts">{{ lang('DIGESTS_COUNT_LIMIT') }}</label>
+								</dt>
+								<dd>
+									<input type="number" min="0" id="user-{{ digests_edit_subscribers.USER_ID }}-max_posts" name="user-{{ digests_edit_subscribers.USER_ID }}-max_posts" value="{{ digests_edit_subscribers.USER_DIGEST_MAX_POSTS }}" onchange="addToStack(this.name);" />
+								</dd>
+							</dl>
+							<dl>
+								<dt>
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-min_words">{{ lang('DIGESTS_MIN_SIZE') }}</label>
+								</dt>
+								<dd>
+									<input type="number" min="0" id="user-{{ digests_edit_subscribers.USER_ID }}-min_words" name="user-{{ digests_edit_subscribers.USER_ID }}-min_words" value="{{ digests_edit_subscribers.USER_DIGEST_MIN_WORDS }}" onchange="addToStack(this.name);" />
+								</dd>
+							</dl>
+							<dl>
+								<dt>
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-new_posts_only1">{{ lang('DIGESTS_NEW_POSTS_ONLY') }}</label>
+								</dt>
+								<dd>
+									<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-new_posts_only" id="user-{{ digests_edit_subscribers.USER_ID }}-new_posts_only1" value="1"{% if digests_edit_subscribers.S_DIGEST_NEW_POSTS_ONLY_CHECKED_YES %} checked="checked"{% endif %} onchange="addToStack(this.name);" />
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-new_posts_only1">{{ lang('YES') }}</label>&nbsp;
+									<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-new_posts_only" id="user-{{ digests_edit_subscribers.USER_ID }}-new_posts_only2" value="0"{% if digests_edit_subscribers.S_DIGEST_NEW_POSTS_ONLY_CHECKED_NO %} checked="checked"{% endif %} onchange="addToStack(this.name);" />
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-new_posts_only2">{{ lang('NO') }}</label>
+								</dd>
+							</dl>
+							<dl>
+								<dt>
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-show_mine1">{{ lang('DIGESTS_REMOVE_YOURS') }}</label>
+								</dt>
+								<dd>
+									<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-show_mine" id="user-{{ digests_edit_subscribers.USER_ID }}-show_mine1" value="1"{% if digests_edit_subscribers.S_DIGEST_SHOW_MINE_CHECKED_NO %} checked="checked"{% endif %} onchange="addToStack(this.name);" />
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-show_mine1">{{ lang('YES') }}</label>&nbsp;
+									<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-show_mine" id="user-{{ digests_edit_subscribers.USER_ID }}-show_mine2" value="0"{% if digests_edit_subscribers.S_DIGEST_SHOW_MINE_CHECKED_YES %} checked="checked"{% endif %} onchange="addToStack(this.name);" />
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-show_mine2">{{ lang('NO') }}</label>
+								</dd>
+							</dl>
+							<dl>
+								<dt>
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-filter_foes1">{{ lang('DIGESTS_FILTER_FOES') }}</label>
+								</dt>
+								<dd>
+									<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-filter_foes" id="user-{{ digests_edit_subscribers.USER_ID }}-filter_foes1" value="1"{% if digests_edit_subscribers.S_DIGEST_FILTER_FOES_CHECKED_YES %} checked="checked"{% endif %} onchange="addToStack(this.name);" />
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-filter_foes1">{{ lang('YES') }}</label>&nbsp;
+									<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-filter_foes" id="user-{{ digests_edit_subscribers.USER_ID }}-filter_foes2" value="0"{% if digests_edit_subscribers.S_DIGEST_FILTER_FOES_CHECKED_NO %} checked="checked"{% endif %} onchange="addToStack(this.name);" />
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-filter_foes2">{{ lang('NO') }}</label>
+								</dd>
+							</dl>
+							<dl>
+								<dt>
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-pms1">{{ lang('DIGESTS_PRIVATE_MESSAGES_IN_DIGEST') }}</label>
+								</dt>
+								<dd>
+									<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-pms" id="user-{{ digests_edit_subscribers.USER_ID }}-pms1" value="1"{% if digests_edit_subscribers.S_DIGEST_PRIVATE_MESSAGES_IN_DIGEST_YES %} checked="checked"{% endif %} onchange="addToStack(this.name);" />
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-pms1">{{ lang('YES') }}</label>&nbsp;
+									<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-pms" id="user-{{ digests_edit_subscribers.USER_ID }}-pms2" value="0"{% if digests_edit_subscribers.S_DIGEST_PRIVATE_MESSAGES_IN_DIGEST_NO %} checked="checked"{% endif %} onchange="addToStack(this.name);" />
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-pms2">{{ lang('NO') }}</label>
+								</dd>
+							</dl>
+							<dl>
+								<dt>
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-mark_read1">{{ lang('DIGESTS_MARK_READ') }}</label>
+								</dt>
+								<dd>
+									<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-mark_read" id="user-{{ digests_edit_subscribers.USER_ID }}-mark_read1" value="1"{% if digests_edit_subscribers.S_DIGEST_PM_MARK_READ_CHECKED_YES %} checked="checked"{% endif %} onchange="addToStack(this.name);" />
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-mark_read1">{{ lang('YES') }}</label>&nbsp;
+									<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-mark_read" id="user-{{ digests_edit_subscribers.USER_ID }}-mark_read2" value="0"{% if digests_edit_subscribers.S_DIGEST_PM_MARK_READ_CHECKED_NO %} checked="checked"{% endif %} onchange="addToStack(this.name);" />
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-mark_read2">{{ lang('NO') }}</label>
+								</dd>
+							</dl>
+						</fieldset>
+						<fieldset>
+							<legend>{{ lang('UCP_DIGESTS_ADDITIONAL_CRITERIA') }}</legend>
+							<dl>
+								<dt>
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-sortby">{{ lang('DIGESTS_SORT_BY') }}</label>
+								</dt>
+								<dd>
+									<select name="user-{{ digests_edit_subscribers.USER_ID }}-sortby" id="user-{{ digests_edit_subscribers.USER_ID }}-sortby" onchange="addToStack(this.name);">
+										<option value="board"{% if digests_edit_subscribers.S_BOARD_SELECTED %} selected="selected"{% endif %}>{{ lang('DIGESTS_SORT_USER_ORDER') }}</option>
+										<option value="standard"{% if digests_edit_subscribers.S_STANDARD_SELECTED %} selected="selected"{% endif %}>{{ lang('DIGESTS_SORT_FORUM_TOPIC') }}</option>
+										<option value="standard_desc"{% if digests_edit_subscribers.S_STANDARD_DESC_SELECTED %} selected="selected"{% endif %}>{{ lang('DIGESTS_SORT_FORUM_TOPIC_DESC') }}</option>
+										<option value="postdate"{% if digests_edit_subscribers.S_POSTDATE_SELECTED %} selected="selected"{% endif %}>{{ lang('DIGESTS_SORT_POST_DATE') }}</option>
+										<option value="postdate_desc"{% if digests_edit_subscribers.S_POSTDATE_DESC_SELECTED %} selected="selected"{% endif %}>{{ lang('DIGESTS_SORT_POST_DATE_DESC') }}</option>
+									</select>
+								</dd>
+							</dl>
+							<dl>
+								<dt>
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-max_display_words">{{ lang('DIGESTS_MAX_DISPLAY_WORDS') }}</label>
+								</dt>
+								<dd>
+									<input type="number" min="0" name="user-{{ digests_edit_subscribers.USER_ID }}-max_display_words" id="user-{{ digests_edit_subscribers.USER_ID }}-max_display_words" value="{{ digests_edit_subscribers.USER_DIGEST_MAX_DISPLAY_WORDS }}" onchange="addToStack(this.name);" />
+								</dd>
+							</dl>
+							<dl>
+								<dt>
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-no_post_text1">{{ lang('DIGESTS_NO_POST_TEXT') }}</label>
+								</dt>
+								<dd>
+									<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-no_post_text" id="user-{{ digests_edit_subscribers.USER_ID }}-no_post_text1" value="1"{% if digests_edit_subscribers.S_DIGEST_NO_POST_TEXT_CHECKED_YES %} checked="checked"{% endif %} onchange="addToStack(this.name);" />
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-no_post_text1"> {{ lang('YES') }}</label>&nbsp;
+									<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-no_post_text" id="user-{{ digests_edit_subscribers.USER_ID }}-no_post_text2" value="0"{% if digests_edit_subscribers.S_DIGEST_NO_POST_TEXT_CHECKED_NO %} checked="checked"{% endif %} onchange="addToStack(this.name);" />
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-no_post_text2"> {{ lang('NO') }}</label>
+								</dd>
+							</dl>
+							<dl>
+								<dt>
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-send_on_no_posts1">{{ lang('DIGESTS_SEND_ON_NO_POSTS') }}</label>
+								</dt>
+								<dd>
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-send_on_no_posts1">
+										<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-send_on_no_posts" id="user-{{ digests_edit_subscribers.USER_ID }}-send_on_no_posts1"{% if digests_edit_subscribers.S_DIGEST_SEND_ON_NO_POSTS_YES_CHECKED %} checked="checked"{% endif %} onchange="addToStack(this.name);" value="1" /> {{ lang('YES') }}</label>&nbsp;<label for="user-{{ digests_edit_subscribers.USER_ID }}-send_on_no_posts2">
+									<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-send_on_no_posts" id="user-{{ digests_edit_subscribers.USER_ID }}-send_on_no_posts2"{% if digests_edit_subscribers.S_DIGEST_SEND_ON_NO_POSTS_NO_CHECKED %} checked="checked"{% endif %} onchange="addToStack(this.name);" value="0" /> {{ lang('NO') }}
+								</label>
+								</dd>
+							</dl>
+							<dl>
+								<dt>
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-lastvisit1">{{ lang('DIGESTS_LASTVISIT_RESET') }}</label>
+								</dt>
+								<dd>
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-lastvisit1">
+										<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-lastvisit" id="user-{{ digests_edit_subscribers.USER_ID }}-lastvisit1" value="1"{% if digests_edit_subscribers.S_LASTVISIT_YES_CHECKED %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> {{ lang('YES') }}
+									</label>&nbsp;
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-lastvisit2">
+										<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-lastvisit" id="user-{{ digests_edit_subscribers.USER_ID }}-lastvisit2" value="0"{% if digests_edit_subscribers.S_LASTVISIT_NO_CHECKED %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> {{ lang('NO') }}
+									</label>
+								</dd>
+							</dl>
+							<dl>
+								<dt>
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-attachments1">{{ lang('DIGESTS_SHOW_ATTACHMENTS') }}</label>
+								</dt>
+								<dd>
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-attachments1">
+										<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-attachments" id="user-{{ digests_edit_subscribers.USER_ID }}-attachments1" value="1"{% if digests_edit_subscribers.S_ATTACHMENTS_YES_CHECKED %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> {{ lang('YES') }}
+									</label>&nbsp;
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-attachments2">
+										<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-attachments" id="user-{{ digests_edit_subscribers.USER_ID }}-attachments2" value="0"{% if digests_edit_subscribers.S_ATTACHMENTS_NO_CHECKED %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> {{ lang('NO') }}
+									</label>
+								</dd>
+							</dl>
+							<dl>
+								<dt>
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-blockimages1">{{ lang('DIGESTS_BLOCK_IMAGES') }}</label>
+								</dt>
+								<dd>
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-blockimages1">
+										<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-blockimages" id="user-{{ digests_edit_subscribers.USER_ID }}-blockimages1" value="1"{% if digests_edit_subscribers.S_BLOCK_IMAGES_YES_CHECKED %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> {{ lang('YES') }}
+									</label>&nbsp;
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-blockimages2">
+										<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-blockimages" id="user-{{ digests_edit_subscribers.USER_ID }}-blockimages2" value="0"{% if digests_edit_subscribers.S_BLOCK_IMAGES_NO_CHECKED %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> {{ lang('NO') }}
+									</label>
+								</dd>
+							</dl>
+							<dl>
+								<dt>
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-toc1">{{ lang('DIGESTS_TOC') }}{{ lang('COLON') }}</label>
+								</dt>
+								<dd>
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-toc1">
+										<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-toc" id="user-{{ digests_edit_subscribers.USER_ID }}-toc1" value="1"{% if digests_edit_subscribers.S_TOC_YES_CHECKED %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> {{ lang('YES') }}
+									</label>&nbsp;
+									<label for="user-{{ digests_edit_subscribers.USER_ID }}-toc2">
+										<input type="radio" name="user-{{ digests_edit_subscribers.USER_ID }}-toc" id="user-{{ digests_edit_subscribers.USER_ID }}-toc2" value="0"{% if digests_edit_subscribers.S_TOC_NO_CHECKED %} checked="checked"{% endif %} onchange="addToStack(this.name);" /> {{ lang('NO') }}
+									</label>
+								</dd>
+							</dl>
+						</fieldset>
+					</td>
+				</tr>
+			{% endfor %}
 			</tbody>
 		</table>
 		<div class="pagination">
@@ -485,14 +784,14 @@
 			<select id="for_hrs" name="for_hrs[]" multiple="multiple">
 				<option value="-1" selected="selected">{{ lang('DIGESTS_ALL_HOURS') }}</option>
 				{% for digests_balance_load in loops.digests_balance_load %}
-					<option value="{{ digests_balance_load.HOUR_UTC }}">{{ digests_balance_load.HOUR }}</option>
+				<option value="{{ digests_balance_load.HOUR_UTC }}">{{ digests_balance_load.HOUR }}</option>
 				{% endfor %}
 			</select>&nbsp;
 			<label for="to_hrs"><strong>{{ lang('DIGESTS_BALANCE_APPLY_HOURS') }}{{ lang('COLON') }}</strong></label>
 			<select id="to_hrs" name="to_hrs[]" multiple="multiple">
 				<option value="-1" selected="selected">{{ lang('DIGESTS_ALL_HOURS') }}</option>
 				{% for digests_balance_load in loops.digests_balance_load %}
-					<option value="{{ digests_balance_load.HOUR_UTC }}">{{ digests_balance_load.HOUR }}</option>
+				<option value="{{ digests_balance_load.HOUR_UTC }}">{{ digests_balance_load.HOUR }}</option>
 				{% endfor %}
 			</select>
 		</p>
@@ -539,22 +838,113 @@
 			<input class="button1" type="submit" id="submit" name="submit" value="{{ lang('DIGESTS_BALANCE_LOAD') }}" />
 			<input class="button2" type="reset" id="reset" name="reset" value="{{ lang('RESET') }}" />
 		</p>
-	{% elseif S_EDIT_SUBSCRIBERS %}
+		{% elseif S_EDIT_SUBSCRIBERS %}
 		<p class="quick">
 			<input class="button1" type="submit" id="submit" name="submit" value="{{ lang('SUBMIT') }}" />&nbsp;
 			<input class="button2" type="reset" id="reset" name="reset" value="{{ lang('RESET') }}" />
 		</p>
-	{% else %}
+		{% endif %}
+
+		{% if S_EDIT_SUBSCRIBERS %}
+		<fieldset class="quick">
+			<p class="small"><a href="#" onclick="marklist('acp_digests', 'user-', true);">{{ lang('MARK_ALL') }}</a> &bull; <a href="#" onclick="marklist('acp_digests', 'user-', false);">{{ lang('UNMARK_ALL') }}</a></p>
+		</fieldset>
+	</fieldset>
+	{% endif %}
+
+	{% if S_DIGESTS_MASS_SUBSCRIBE_UNSUBSCRIBE %}
+	<fieldset>
+		<dl>
+			<dt><label for="phpbbservices_digests_reset_cron_run_time1">{{ lang('DIGESTS_ENABLE_SUBSCRIBE_UNSUBSCRIBE') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_ENABLE_SUBSCRIBE_UNSUBSCRIBE_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_enable_subscribe_unsubscribe1" name="phpbbservices_digests_enable_subscribe_unsubscribe" type="radio" value="1" {% if S_DIGESTS_ENABLE_SUBSCRIBE_UNSUBSCRIBE == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_enable_subscribe_unsubscribe" type="radio" value="0" {% if S_DIGESTS_ENABLE_SUBSCRIBE_UNSUBSCRIBE == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_subscribe_all1">{{ lang('DIGESTS_SUBSCRIBE_ALL') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_SUBSCRIBE_ALL_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_subscribe_all1" name="phpbbservices_digests_subscribe_all" type="radio" value="1" {% if S_DIGESTS_SUBSCRIBE_ALL == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_subscribe_all" type="radio" value="0" {% if S_DIGESTS_SUBSCRIBE_ALL == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_include_admins1">{{ lang('DIGESTS_INCLUDE_ADMINS') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_INCLUDE_ADMINS_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_include_admins1" name="phpbbservices_digests_include_admins" type="radio" value="1" {% if S_DIGESTS_INCLUDE_ADMINS == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_include_admins" type="radio" value="0" {% if S_DIGESTS_INCLUDE_ADMINS == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+	</fieldset>
+	<p class="submit-buttons">
+		<input class="button1" type="submit" id="submit" name="submit" value="{{ lang('SUBMIT') }}" />&nbsp;
+		<input class="button2" type="reset" id="reset" name="reset" value="{{ lang('RESET') }}" />
+	</p>
+
+	{% endif %}
+
+	{% if S_DIGESTS_MANUAL_RUN %}
+	<fieldset>
+		<dl>
+			<dt><label for="phpbbservices_digests_test1">{{ lang('DIGESTS_RESET_CRON_RUN_TIME') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_RESET_CRON_RUN_TIME_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_test1" name="phpbbservices_digests_test" type="radio" value="1" {% if S_DIGESTS_RUN_TEST == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_test" type="radio" value="0" {% if S_DIGESTS_RUN_TEST == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_test_clear_spool1">{{ lang('DIGESTS_RUN_TEST_CLEAR_SPOOL') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_RUN_TEST_CLEAR_SPOOL_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_test_clear_spool1" name="phpbbservices_digests_test_clear_spool" type="radio" value="1" {% if S_DIGESTS_RUN_TEST_CLEAR_SPOOL == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_test_clear_spool" type="radio" value="0" {% if S_DIGESTS_RUN_TEST_CLEAR_SPOOL == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_test_date_hour">{{ lang('DIGESTS_RUN_TEST_DATE_HOUR') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_RUN_TEST_DATE_HOUR_EXPLAIN') }}</dt>
+			<dd>
+				<input id="phpbbservices_digests_test_date_hour" name="phpbbservices_digests_test_date_hour" type="text" value="{{ TEST_DATE_HOUR }}" size="19" maxlength="19">
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_test_spool1">{{ lang('DIGESTS_RUN_TEST_SPOOL') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_RUN_TEST_SPOOL_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_test_spool1" name="phpbbservices_digests_test_spool" type="radio" value="1" {% if S_DIGESTS_RUN_TEST_SPOOL == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_test_spool" type="radio" value="0" {% if S_DIGESTS_RUN_TEST_SPOOL == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_test_send_to_admin1">{{ lang('DIGESTS_RUN_TEST_SEND_TO_ADMIN') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_RUN_TEST_SEND_TO_ADMIN_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_test_send_to_admin1" name="phpbbservices_digests_test_send_to_admin" type="radio" value="1" {% if S_DIGESTS_RUN_TEST_SEND_TO_ADMIN == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_test_send_to_admin" type="radio" value="0" {% if S_DIGESTS_RUN_TEST_SEND_TO_ADMIN == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_test_email_address1">{{ lang('DIGESTS_RUN_TEST_EMAIL_ADDRESS') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_RUN_TEST_EMAIL_ADDRESS_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_test_email_address1" name="phpbbservices_digests_test_email_address" type="email" size="40" maxlength="255" value={{ TEST_EMAIL_ADDRESS }}></label>
+			</dd>
+		</dl>
+	</fieldset>
+	<p class="submit-buttons">
+		<input class="button1" type="submit" id="submit" name="submit" value="{{ lang('SUBMIT') }}" />&nbsp;
+		<input class="button2" type="reset" id="reset" name="reset" value="{{ lang('RESET') }}" />
+	</p>
+	{% endif %}
+
+	{% if S_DIGESTS_RESET_MAILER %}
+	<fieldset>
+		<dl>
+			<dt><label for="phpbbservices_digests_reset_cron_run_time1">{{ lang('DIGESTS_RESET_CRON_RUN_TIME') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_RESET_CRON_RUN_TIME_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_reset_cron_run_time1" name="phpbbservices_digests_reset_cron_run_time" type="radio" value="1" {% if S_DIGESTS_RESET_CRON_RUN_TIME == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_reset_cron_run_time" type="radio" value="0" {% if S_DIGESTS_RESET_CRON_RUN_TIME == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
 		<p class="submit-buttons">
 			<input class="button1" type="submit" id="submit" name="submit" value="{{ lang('SUBMIT') }}" />&nbsp;
 			<input class="button2" type="reset" id="reset" name="reset" value="{{ lang('RESET') }}" />
 		</p>
-	{% endif %}
-
-	{% if S_EDIT_SUBSCRIBERS %}
-		<fieldset class="quick">
-			<p class="small"><a href="#" onclick="marklist('acp_digests', 'user-', true);">{{ lang('MARK_ALL') }}</a> &bull; <a href="#" onclick="marklist('acp_digests', 'user-', false);">{{ lang('UNMARK_ALL') }}</a></p>
-		</fieldset>
 	</fieldset>
 	{% endif %}
 

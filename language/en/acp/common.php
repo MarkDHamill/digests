@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Digests
-* @copyright (c) 2020 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2021 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -46,10 +46,12 @@ $lang = array_merge($lang, array(
 	'DIGESTS_BASED_ON'										=> '(Based on UTC%+d)',
 	'DIGESTS_COLLAPSE'										=> 'Collapse',
 	'DIGESTS_COMMA'											=> ', ',		// Used  in salutations and to separate items in lists
-	'DIGESTS_CREATE_DIRECTORY_ERROR'							=> 'Unable to create the folder %s. This may be due to insufficient permissions. The file permissions on the folder should be set to publicly writeable (777 on Unix-based systems).',
+	'DIGESTS_CREATE_DIRECTORY_ERROR'						=> 'Unable to create the folder %s. This may be due to insufficient permissions. The file permissions on the folder should be set to publicly writeable (777 on Unix-based systems).',
 	'DIGESTS_CURRENT_VERSION_INFO'							=> 'You are running version <strong>%s</strong>.',
 	'DIGESTS_CUSTOM_STYLESHEET_PATH'						=> 'Custom stylesheet path',
 	'DIGESTS_CUSTOM_STYLESHEET_PATH_EXPLAIN'				=> 'This setting only applies if the enable custom stylesheet box is enabled. If it is enabled, this stylesheet will be applied to all styled digests. The path should be a relative path from your phpBB styles folder and should normally be in the theme subfolder. Note: you are responsible for creating this stylesheet and placing it in a file with the name entered here on the appropriate location on your server. Example: prosilver/theme/digest_stylesheet.css. For information on creating stylesheets, click <a href="http://www.w3schools.com/css/">here</a>.',
+	'DIGESTS_DEBUG'											=> 'Enable digests debugging',
+	'DIGESTS_DEBUG_EXPLAIN'									=> 'Used for technical debugging. This will write certain key troubleshooting information, such as database queries used to assemble digests, to the admin log. Generally, you need advanced development skills to interpret this information.',
 	'DIGESTS_DEFAULT'										=> 'Subscribe using default settings',
 	'DIGESTS_DAILY_ONLY'									=> 'Daily digests only',
 	'DIGESTS_ENABLE_AUTO_SUBSCRIPTIONS'						=> 'Enable automatic subscriptions',
@@ -96,6 +98,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_MAX_ITEMS'										=> 'Maximum posts allowed in any digest',
 	'DIGESTS_MAX_ITEMS_EXPLAIN'								=> 'For performance reasons, you may need to set an absolute limit to the number of posts in any one digest. If you set this to 0 (zero) this allows a digest to be of an unlimited size. You may use any whole number in this field. Please note that a digest is constrained by the number of posts in the type of digest requested (daily, weekly or monthly) as well as other criteria the user may set.',
 	'DIGESTS_MAIL_FREQUENCY' 								=> 'Digest frequency',
+	'DIGESTS_MAILER_RESET' 									=> 'The digest’s mailer was reset',
 	'DIGESTS_MIGRATE_UNSUPPORTED_VERSION'					=> 'Upgrades of the digests modification (for phpBB 3.0) are supported from version 2.2.6 forward. You have version %s. The extension cannot be migrated or installed. Please seek help on the discussion forum for the extension on phpbb.com.',
 	'DIGESTS_MIN_POPULARITY_SIZE'							=> 'Minimum topic post count popularity',
 	'DIGESTS_MIN_POPULARITY_SIZE_EXPLAIN'					=> 'This sets the minimum number of posts per day needed for a topic to considered popular. A subscriber cannot set a value below this value. This value is applied to the subscriber&rsquo;s time period only: day, week or month, so it reflects recent topic popularity.',
@@ -139,7 +142,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_SHOW_EMAIL'									=> 'Show email address in log',
 	'DIGESTS_SHOW_EMAIL_EXPLAIN'							=> 'If this is enabled, the subscriber&rsquo;s email address is shown in entries in the admin log by the username of the subscriber. This can be useful in troubleshooting digest mailer issues.',
 	'DIGESTS_SHOW_FORUM_PATH'								=> 'Show forum path in digest',
-	'DIGESTS_SHOW_FORUM_PATH_EXPLAIN'						=> 'If enabled, digest forum names will show the categories and forums a forum is nested within, for example: &ldquo;Category 1 :: Forum 1 :: Category A :: Forum B&rdquo;, going as deep as categories and forums are nested on your board. Otherwise only the name of the forum containing will be shown, &ldquo;Forum B&rdquo; in this example.',
+	'DIGESTS_SHOW_FORUM_PATH_EXPLAIN'						=> 'If enabled, digest forum names will show the categories and forums a forum is nested within, for example: &ldquo;Category 1 &#8249; Forum 1 &#8249; Category A &#8249; Forum B&rdquo;, going as deep as categories and forums are nested on your board. Otherwise only the name of the forum containing will be shown, &ldquo;Forum B&rdquo; in this example.',
 	'DIGESTS_SORT_ORDER'									=> 'Sort order',
 	'DIGESTS_STOPPED_SUBSCRIBING'							=> 'Has unsubscribed',
 	'DIGESTS_STRIP_TAGS'									=> 'Tags to strip from digests',
@@ -153,6 +156,8 @@ $lang = array_merge($lang, array(
 	'DIGESTS_SUBSCRIBERS_DAILY'                           	=> 'Daily subscribers',
 	'DIGESTS_SUBSCRIBERS_WEEKLY'                           	=> 'Weekly subscribers',
 	'DIGESTS_SUBSCRIBERS_MONTHLY'                           => 'Monthly subscribers',
+	'DIGESTS_UNLINK_FOREIGN_URLS'							=> 'Remove foreign URLs from digests',
+	'DIGESTS_UNLINK_FOREIGN_URLS_EXPLAIN'					=> 'Removes links in digests to other domains. Some email systems will flag emails containing links to other domains as likely spam. This could cause digests to be sent to spam folders or keep digests from being sent by the outgoing email server.',
 	'DIGESTS_UNSUBSCRIBE'									=> 'Unsubscribe',
 	'DIGESTS_UNSUBSCRIBE_SUBJECT'							=> 'You have been unsubscribed from receiving email digests',
 	'DIGESTS_UNSUBSCRIBED'									=> 'Has not subscribed',

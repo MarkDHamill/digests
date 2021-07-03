@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Digests
-* @copyright (c) 2019 Mark D. Hamill (mark@phpbbservices.com)
+* @copyright (c) 2021 Mark D. Hamill (mark@phpbbservices.com)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -19,7 +19,6 @@ class digests extends \phpbb\cron\task\base
 	protected $config;
 	protected $db;
 	protected $language;
-	protected $phpbb_container;
 	protected $phpbb_log;
 	protected $phpbb_notifications;
 	protected $phpbb_root_path;
@@ -33,7 +32,9 @@ class digests extends \phpbb\cron\task\base
 	
 	private $board_url;					// Digests need an absolute URL to the forum to embed links to topic, posts, forum and private messages
 	private $cpfs;						// Used to access custom profile fields class
+	private $debug;						// Let's us know if we are in debug mode
 	private $date_limit;				// A logical range of dates that posts must be within
+	private $digests_last_run;			// Remembers when digests were last run in case of abmormal program terminition
 	private $email_address_override;	// Used if admin wants manual mailer to send him/her a digest at an email address specified for this run
 	private $email_templates_path;		// Relative path to where the language specific email templates are located
 	private $helper;					// Object for extension's helper class
@@ -70,21 +71,23 @@ class digests extends \phpbb\cron\task\base
 	* @param \phpbb\log\log 					$phpbb_log 				phpBB log object
 	* @param \phpbb\language\language 			$language 				Language object
 	* @param \phpbb\notification\manager 		$notification_manager 	Notifications manager
-	* @param ContainerInterface 				$phpbb_container 		Container
 	* @param \phpbb\filesystem		 			$filesystem				Filesystem object
+	* @param \phpbbservices\digests\core\common $helper 				Digests helper object
+	* @param \phpbb\profilefields\manager		$cpfs					Custom profile fields manager
 	*/
 
-	public function __construct(\phpbb\config\config $config, \phpbb\request\request $request, \phpbb\user $user, \phpbb\db\driver\factory $db, $php_ext, $phpbb_root_path, \phpbb\template\template $template, \phpbb\auth\auth $auth, $table_prefix, \phpbb\log\log $phpbb_log, \phpbb\language\language $language, \phpbb\notification\manager $notification_manager, ContainerInterface $phpbb_container, \phpbb\filesystem\filesystem $filesystem, \phpbbservices\digests\core\common $helper)
+	public function __construct(\phpbb\config\config $config, \phpbb\request\request $request, \phpbb\user $user, \phpbb\db\driver\factory $db, $php_ext, $phpbb_root_path, \phpbb\template\template $template, \phpbb\auth\auth $auth, $table_prefix, \phpbb\log\log $phpbb_log, \phpbb\language\language $language, \phpbb\notification\manager $notification_manager, \phpbb\filesystem\filesystem $filesystem, \phpbbservices\digests\core\common $helper, \phpbb\profilefields\manager $cpfs)
 	{
+
 		$this->auth = $auth;
 		$this->config = $config;
+		$this->cpfs = $cpfs;
 		$this->db = $db;
 		$this->filesystem = $filesystem;
 		$this->helper = $helper;
 		$this->language = $language;
 		$this->phpbb_log = $phpbb_log;
 		$this->request = $request;
-		$this->phpbb_container = $phpbb_container;
 		$this->phpbb_notifications = $notification_manager;
 		$this->phpbb_root_path = $phpbb_root_path;
 		$this->phpEx = $php_ext;
@@ -92,9 +95,35 @@ class digests extends \phpbb\cron\task\base
 		$this->template = $template;
 		$this->user = $user;
 
-		$this->cpfs = $this->phpbb_container->get('profilefields.manager');	// Used to grab custom profile fields
+		$this->debug = (bool) $this->config['phpbbservices_digests_debug'];
+		$this->digests_last_run = $this->config['phpbbservices_digests_cron_task_last_gc'];
 		$this->forum_hierarchy = array();
 		$this->run_mode = constants::DIGESTS_RUN_REGULAR;
+	}
+
+	public function digests_error_handler($error_level, $error_message, $error_file, $error_line, $error_context=null)
+	{
+
+		// This function should intelligently handle sudden errors that may occur when digests are run, such as hosting resource
+		// limitations that abruptly kick in.
+
+		// Note the error in the phpBB error log
+		$this->phpbb_log->add('critical', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_CRITICAL_ERROR', false, array($error_level, $error_message, $error_file, $error_line));
+
+		// Reset the phpBB digests cron since it was not run successfully
+		$this->config->set('phpbbservices_digests_cron_task_last_gc', $this->digests_last_run);
+
+		// Unlock the phpBB cron
+		$this->config->set('cron_lock', 0);
+
+		// Indicate that digests terminated abnormally in the admin log
+		if ($this->config['phpbbservices_digests_enable_log'])
+		{
+			$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ABEND');
+		}
+
+		die();
+
 	}
 
 	/**
@@ -116,9 +145,17 @@ class digests extends \phpbb\cron\task\base
 
 		// Get date and hour digests were last run, as a Unix timestamp
 		$top_of_hour_ts = $this->top_of_hour_timestamp($this->config['phpbbservices_digests_cron_task_last_gc']);
+		$should_run = (bool) ($top_of_hour_ts + $this->config['phpbbservices_digests_cron_task_gc'] <= time());
+
+		if ($this->debug)
+		{
+			$should_run_str = ($should_run) ? $this->language->lang('YES') : $this->language->lang('NO');
+			$run_after_str = date('c', $top_of_hour_ts + $this->config['phpbbservices_digests_cron_task_gc']);	// ISO-8601 date
+			$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_DEBUG_SHOULD_RUN', false, array($should_run_str, $run_after_str));
+		}
 
 		// Run this cron only if the current time is at or before the date and hour digests were last run, plus 1 hour.
-		return (bool) ($top_of_hour_ts + $this->config['phpbbservices_digests_cron_task_gc'] <= time());
+		return $should_run;
 	}
 
 	/**
@@ -128,11 +165,23 @@ class digests extends \phpbb\cron\task\base
 	*/
 	public function run()
 	{
-		
+
+		// Uncomment the next statement to test the error handler. You will likely get a white screen if run through the manual
+		// mailer, but appropriate error messages should be in phpBB's error log, the value of cron_lock in phpbb_config should
+		// be 0 unlocking any crons, and the value of phpbbservices_filterbycountry_cron_task_last_gc should be unchanged.
+		//self::digests_error_handler(E_USER_ERROR, 'Digests error handler testing', 'test.php', '123');
+
+		if (!defined('IN_DIGESTS_TEST'))
+		{
+			// Set error handler to help trap lack of resources and similar issues. We don't set it for the manual mailer
+			// because it overrides trigger_error. Also, since digests are being run manually, if it fails for this reason
+			// it will be seen.
+			set_error_handler(array($this, 'digests_error_handler'));
+		}
 		$now = time();
 
 		// Populate the forum hierarchy array. This is used when the full path to a forum is requested to be shown in digests.
-		$this->create_forum_hierarchy();
+		$this->create_forums_hierarchy();
 
 		// In system cron (CLI) mode, the $user object may not have an IP assigned. If so, use the server's IP. This will
 		// allow logging to succeed since the IP is written to the log.
@@ -285,8 +334,11 @@ class digests extends \phpbb\cron\task\base
 				}
 				else if ($this->run_mode !== constants::DIGESTS_RUN_MANUAL)
 				{
+					$last_completion_time = $now + ($i * 60 * 60);
 					// Note that the hour was processed successfully. If run manually, we don't want to mess with the configuration variable.
-					$this->config->set('phpbbservices_digests_cron_task_last_gc', $now + ($i * 60 * 60));
+					$this->config->set('phpbbservices_digests_cron_task_last_gc', $last_completion_time);
+					// Since an hour was completed successfully, change when digests last ran an hour successfully in case of a subsequent crash.
+					$this->digests_last_run = $last_completion_time;
 				}
 			}
 		}
@@ -363,7 +415,8 @@ class digests extends \phpbb\cron\task\base
 		{
 			$current_hour_utc_plus_30 = $current_hour_utc_plus_30 - 24;	// A very unlikely situation
 		}
-		
+		$current_date_utc = date('Y-m-d' , $this->utc_time);
+
 		// Create SQL fragment to fetch users wanting a daily digest
 		if (!(isset($daily_digest_sql)))
 		{
@@ -487,6 +540,10 @@ class digests extends \phpbb\cron\task\base
 		}
 
 		$sql = $this->db->sql_build_query('SELECT', $sql_array);
+		if ($this->debug)
+		{
+			$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_DEBUG_SQL_CURRENT_HOUR', false, array($current_date_utc, $current_hour_utc, $sql));
+		}
 
 		$result = $this->db->sql_query($sql);
 		$rowset = $this->db->sql_fetchrowset($result);	// Gets users and their metadata that are receiving digests for this hour
@@ -543,6 +600,10 @@ class digests extends \phpbb\cron\task\base
 
 			// Build query
 			$sql_posts = $this->db->sql_build_query('SELECT', $sql_array);
+			if ($this->debug)
+			{
+				$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_DEBUG_POSTS_CURRENT_HOUR', false, array($current_date_utc, $current_hour_utc, $sql_posts));
+			}
 
 			$result_posts = $this->db->sql_query($sql_posts);    // Fetch the data
 			$posts_rowset = $this->db->sql_fetchrowset($result_posts); // Get all the posts as a set
@@ -1065,6 +1126,8 @@ class digests extends \phpbb\cron\task\base
 			$this->db->sql_freeresult($result_posts);
 
 		}
+
+		unset($rowset, $posts_rowset);
 
 		return true;	// Successful run if all digests were processed for the requested hour.
 		
@@ -1649,6 +1712,24 @@ class digests extends \phpbb\cron\task\base
 				{
 					$post_text = str_replace('<br>', "\n\n", $post_text);
 					$post_text = html_entity_decode(strip_tags($post_text));
+
+					if ((bool) $this->config['phpbbservices_digests_foreign_urls'])
+					{
+						// Find all domain names within the post text that are not for the board's domain and substitute the
+						// foreign domain name with link removed text. This is to reduce the likelihood a given digest
+						// will be flagged as spam because it contains foreign domain links.
+						$matches_found = preg_match('/(http|https|ftp|ftps)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?/', $post_text, $matches);
+						if ((bool) $matches_found)
+						{
+							foreach ($matches as $match)
+							{
+								if (trim($match) !== trim($this->config['server_name']))
+								{
+									$post_text = str_replace($match, $this->language->lang('DIGESTS_FOREIGN_LINK_REMOVED_TEXT'), $post_text);
+								}
+							}
+						}
+					}
 				}
 				else
 				{
@@ -1680,6 +1761,29 @@ class digests extends \phpbb\cron\task\base
 							$post_text = utf8_decode($dom->saveHTML($dom->documentElement)); // Fix provided by whocarez
 						}
 					}
+
+					// Remove foreign links, if this option is enabled. Links outside of the domain will have text substituted. This will
+					// make it less likely that digests will get flagged as spam by email systems.
+					if ((bool) $this->config['phpbbservices_digests_foreign_urls'])
+					{
+						$dom = new \DOMDocument();
+						$dom->loadHTML($post_text, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD); // Fix provided by whocarez
+
+						$anchors = $dom->getElementsByTagName('a');
+
+						for ($i=$anchors->length-1;$i>=0;$i--)
+						{
+							$item = $anchors->item($i);
+							$url = $item->attributes->getNamedItem('href')->nodeValue;
+							if (!strstr($url, trim($this->config['server_name'])))
+							{
+								$substitute = $dom->createElement('span', $this->language->lang('DIGESTS_FOREIGN_LINK_REMOVED'));
+								$item->parentNode->replaceChild($substitute, $item);	// Replace anchor tag with foreign link removed notice.
+							}
+						}
+						$post_text = utf8_decode($dom->saveHTML($dom->documentElement));
+					}
+
 				}
 	
 				if ($last_forum_id != (int) $post_row['forum_id'])
@@ -1852,7 +1956,7 @@ class digests extends \phpbb\cron\task\base
 		
 	}
 
-	private function create_forum_hierarchy()
+	private function create_forums_hierarchy()
 	{
 
 		// Populates an internal array used to show the full path to a forum when it is requested to be shown in digests.
@@ -2316,7 +2420,6 @@ class digests extends \phpbb\cron\task\base
 
 	private function get_foes(&$user_row)
 	{
-
 		// Returns an array of foes for the subscriber, if any. If none, an empty array is returned.
 		$foes = array();
 

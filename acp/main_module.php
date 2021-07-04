@@ -34,6 +34,7 @@ class main_module
 
 		/** @var \phpbb\language\language $language */
 		$this->language = $phpbb_container->get('language');
+		$this->language->add_lang('common', 'phpbbservices/digests');
 
 		// Load a template from adm/style for our ACP pages
 		$this->tpl_name = 'acp_digests';

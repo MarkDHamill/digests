@@ -1,9 +1,0 @@
-Milá/milý {{ USERNAME }},
-
-oznamujeme vám, že administrátor fóra {{ FORUM_NAME }} vás přihlásil k odběru souhrnů emailem (frekvence {{ DIGESTS_TYPE }}, formát {{ DIGESTS_FORMAT }}). Nastavení si můžete změnit ve fóru v uživatelském panelu (po přihlášení), záložka "Souhrny emailem". Pokud si nepřejete souhrny dostávat, můžete se odhlásit tamtéž vybráním frekvence zasílání "Žádné (neposílat)". Můžete použít tento odkaz:
-
-{{ DIGESTS_UCP_LINK }}
-
-S pozdravem,
-
-{{ FORUM_NAME }} - administrátor

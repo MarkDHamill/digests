@@ -96,7 +96,7 @@
 	</div>
 {% endif %}
 
-<form id="{% if S_EDIT_SUBSCRIBERS %}digests{% else %}acp_digests{% endif %}" method="post" action="{{ U_ACTION }}"{% if S_EDIT_SUBSCRIBERS %} novalidate{% endif %}>
+<form id="{% if S_EDIT_SUBSCRIBERS %}acp_digests{% else %}digests{% endif %}" method="post" action="{{ U_ACTION }}"{% if S_EDIT_SUBSCRIBERS %} novalidate{% endif %}>
 	{% if S_DIGESTS_GENERAL %}
 	<fieldset>
 		<dl>

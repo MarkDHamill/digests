@@ -1,8 +1,0 @@
-Hallo {{ USERNAME }},
-
-ein Administrator von {{ FORUM_NAME }} hat eben für deinen Account den regelmäßigen Empfang von E-Mail-Zusammenfassungen deaktiviert.
-
-Für Rückfragen stehen wir gerne zur Verfügung.
-
-Herzlichen Gruß,
-das Administrationsteam von {{ FORUM_NAME }}

@@ -1,5 +1,5 @@
 # Digests
-Digests extension for phpBB 3.2 and 3.3
+Digests extension for phpBB 3.3
 
 Please note that when deployed the extension will go under ext/phpbbservices/digests. Only the digests tree is shown in GitHub.
 
@@ -9,7 +9,7 @@ Digests no longer requires that a cron job be run hourly, but it's generally a g
 
 After installation, there are recommended steps for testing digests. See: https://www.phpbb.com/customise/db/extension/digests_extension/faq/2736
 
-The following translations exist and are included in the extension. In some cases the translation may be out of date. There may be a newer translation in the translator's GitHub archive. The links are below. Translations are placed in /ext/phpbbservices/digests/language, ex: /ext/phpbbservices/digests/language/fr for French.
+Czech, French, German and Spanish language translations exist. The translation may be out of date. Translations must be placed int the extension's language folder /ext/phpbbservices/digests/language, ex: /ext/phpbbservices/digests/language/fr for French. Thanks to our translators for providing these translations!
 
 Czech: https://github.com/petr-hendl/phpBBDigests-cs/
 French: https://github.com/bonnaphil/digests-fr

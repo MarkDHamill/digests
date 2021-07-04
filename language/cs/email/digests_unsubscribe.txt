@@ -1,7 +1,0 @@
-Milá/milý {{ USERNAME }},
-
-oznamujeme vám, že administrátor fóra {{ FORUM_NAME }} vás odhlásil z odběrů souhrnů emailem.
-
-S pozdravem,
-
-{{ FORUM_NAME }} - administrátor

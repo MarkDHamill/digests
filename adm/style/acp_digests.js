@@ -77,8 +77,8 @@ $(document).ready(function() {
 	// max_input_var resource limitation on the Edit subscribers screen. The field should also not be marked as required,
 	// to avoid a potential Javascript error that could stop form submission.
 	$('#acp_digests').submit(function() {
-		if ($('#digests').length === 1) {
-			// Logic only applies on edit subscribers screen because stack won't exist otherwise. #digests is an
+		if ($('#acp_digests').length === 1) {
+			// Logic only applies on edit subscribers screen because stack won't exist otherwise. #acp_digests is an
 			// ID only on the edit subscribers screen.
 			$('input, select').each(function() {
 				if (!inStack($(this).attr('name'))) {

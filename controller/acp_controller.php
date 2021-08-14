@@ -1062,7 +1062,7 @@ class acp_controller
 				{
 					foreach ($request_vars as $key => $value)
 					{
-						if (substr($key,0,5) == 'user-' && strpos($key, '-', 5) > 5)
+						if (substr($key,0,5) == 'user-' && strpos($key, '-', 4) > 3)
 						{
 							unset($request_vars[$key]);
 						}

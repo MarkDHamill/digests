@@ -32,6 +32,13 @@ table {
 .border-right-none {
 	border-right-style:none;
 }
+fieldset.sort-filter {
+	background-color: #FFF;
+	font-size: 13px;
+	padding: 10px;
+	border-radius: 3px;
+	border: 1px solid #CCCFD3;
+}
 .layout-fixed {
 	table-layout: fixed; width: 100%;
 }
@@ -59,4 +66,7 @@ table {
 }
 .width-80 {
 	width:80px;
+}
+#with_selected {
+	font-size: 1em;
 }

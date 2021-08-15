@@ -421,11 +421,44 @@
 	{% endif %}
 
 	{% if S_EDIT_SUBSCRIBERS %}
-	<dl>
-		<dt class="border-right-none"><label for="member">{{ lang('DIGESTS_SEARCH_FOR_MEMBER') }}{{ lang('COLON') }}</label><p>{{ lang('DIGESTS_SEARCH_FOR_MEMBER_EXPLAIN') }}</p></dt>
-		<dd class="text-left"><input type="text" id="member" name="member" size="30" maxlength="255" value="{{ MEMBER }}" onchange="addToStack(this.name);" /></dd>
-	</dl>
-	<hr>
+	<fieldset class="display-options sort-filter">
+		<legend>{{ lang('DIGESTS_SORTING_AND_FILTERING') }}</legend>
+		<dl>
+			<dt class="border-right-none"><label for="member">{{ lang('DIGESTS_SEARCH_FOR_MEMBER') }}{{ lang('COLON') }}</label><p>{{ lang('DIGESTS_SEARCH_FOR_MEMBER_EXPLAIN') }}</p></dt>
+			<dd class="text-left"><input type="text" id="member" name="member" size="30" maxlength="255" value="{{ MEMBER }}" onchange="addToStack(this.name);" /></dd>
+		</dl>
+		<hr>
+		<label for="subscribe">{{ lang('DIGESTS_SHOW') }}{{ lang('COLON') }}</label>
+		<select id="subscribe" name="subscribe" onchange="addToStack(this.name);">
+			<option value="a"{{ ALL_SELECTED }}>{{ lang('DIGESTS_ALL') }}</option>
+			<option value="s"{{ SUBSCRIBE_SELECTED }}>{{ lang('DIGESTS_SUBSCRIBED') }}</option>
+			<option value="u"{{ UNSUBSCRIBE_SELECTED }}>{{ lang('DIGESTS_UNSUBSCRIBED') }}</option>
+			<option value="t"{{ STOPPED_SUBSCRIBING_SELECTED }}>{{ lang('DIGESTS_STOPPED_SUBSCRIBING') }}</option>
+			<option value="d"{{ DAILY_SELECTED }}>{{ lang('DIGESTS_DAILY_ONLY') }}</option>
+			<option value="w"{{ WEEKLY_SELECTED }}>{{ lang('DIGESTS_WEEKLY_ONLY') }}</option>
+			<option value="m"{{ MONTHLY_SELECTED }}>{{ lang('DIGESTS_MONTHLY_ONLY') }}</option>
+		</select>&nbsp;
+		<label for="sortby">{{ lang('SORT_BY') }}{{ lang('COLON') }}</label>
+		<select id="sortby" name="sortby" onchange="addToStack(this.name);">
+			<option value="u"{{ USERNAME_SELECTED }}>{{ lang('USERNAME') }}</option>
+			<option value="e"{{ EMAIL_SELECTED }}>{{ lang('EMAIL_ADDRESS') }}</option>
+			<option value="f"{{ FREQUENCY_SELECTED }}>{{ lang('DIGESTS_FREQUENCY_SHORT') }}</option>
+			<option value="s"{{ FORMAT_SELECTED }}>{{ lang('DIGESTS_FORMAT_STYLING') }}</option>
+			<option value="h"{{ HOUR_SELECTED }}>{{ lang('DIGESTS_HOUR_SENT') }}</option>
+			<option value="b"{{ HAS_UNSUBSCRIBED_SELECTED }}>{{ lang('DIGESTS_HAS_UNSUBSCRIBED') }}</option>
+			<option value="l"{{ LASTVISIT_SELECTED }}>{{ lang('LAST_VISIT') }}</option>
+			<option value="t"{{ LAST_SENT_SELECTED }}>{{ lang('DIGESTS_LAST_SENT') }}</option>
+		</select>&nbsp;
+		<label for="sortorder">{{ lang('DIGESTS_SORT_ORDER') }}{{ lang('COLON') }}</label>
+		<select id="sortorder" name="sortorder" onchange="addToStack(this.name);">
+			<option value="a"{{ ASCENDING_SELECTED }}>{{ lang('ASCENDING') }}</option>
+			<option value="d"{{ DESCENDING_SELECTED }}>{{ lang('DESCENDING') }}</option>
+		</select>&nbsp;
+		<input class="button2" type="submit" name="sort" id="sort" value="{{ lang('GO') }}" />
+	</fieldset>
+	<fieldset class="quick">
+		<p class="small"><a href="#" onclick="marklist('acp_digests', 'user-', true);">{{ lang('MARK_ALL') }}</a> &bull; <a href="#" onclick="marklist('acp_digests', 'user-', false);">{{ lang('UNMARK_ALL') }}</a></p>
+	</fieldset>
 	<div class="pagination">
 		{% if loops.pagination|length %}
 			{% INCLUDE 'pagination.html' %}
@@ -460,7 +493,7 @@
 					<td class="text-center" headers="h4">
 						<select name="user-{{ digests_edit_subscribers.USER_ID }}-digest_type" title="{{ lang('DIGESTS_FREQUENCY_SHORT') }}" onchange="addToStack(this.name);">
 							<option value="NONE"{% if digests_edit_subscribers.S_DIGEST_NONE_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_NONE') }}</option>
-							<option value="DFLT">{{ lang('DIGESTS_DEFAULT') }}</option>
+							<option value="DFLT">{{ lang('DIGESTS_DEFAULT_SHORT') }}</option>
 							<option value="DAY"{% if digests_edit_subscribers.S_DIGEST_DAY_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_DAILY') }}</option>
 							<option value="WEEK"{% if digests_edit_subscribers.S_DIGEST_WEEK_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_WEEKLY') }}</option>
 							<option value="MNTH"{% if digests_edit_subscribers.S_DIGEST_MONTH_CHECKED %} selected="selected"{% endif %}>{{ lang('DIGESTS_MONTHLY') }}</option>
@@ -733,42 +766,6 @@
 				{% INCLUDE 'pagination.html' %}
 			{% endif %}
 		</div>
-		<fieldset class="display-options">
-			<label for="selected">{{ lang('DIGESTS_WITH_SELECTED') }}{{ lang('COLON') }}</label>
-			<select id="selected" name="selected" onchange="addToStack(this.name);">
-				<option value="i"{{ IGNORE_SELECTED }}>{{ lang('DIGESTS_IGNORE') }}</option>
-				<option value="n"{{ NONE_SELECTED }}>{{ lang('DIGESTS_UNSUBSCRIBE') }}</option>
-				<option value="d"{{ DEFAULT_SELECTED }}>{{ lang('DIGESTS_DEFAULT') }}</option>
-			</select>&nbsp;
-			<label for="subscribe">{{ lang('DIGESTS_SHOW') }}{{ lang('COLON') }}</label>
-			<select id="subscribe" name="subscribe" onchange="addToStack(this.name);">
-				<option value="a"{{ ALL_SELECTED }}>{{ lang('DIGESTS_ALL') }}</option>
-				<option value="s"{{ SUBSCRIBE_SELECTED }}>{{ lang('DIGESTS_SUBSCRIBED') }}</option>
-				<option value="u"{{ UNSUBSCRIBE_SELECTED }}>{{ lang('DIGESTS_UNSUBSCRIBED') }}</option>
-				<option value="t"{{ STOPPED_SUBSCRIBING_SELECTED }}>{{ lang('DIGESTS_STOPPED_SUBSCRIBING') }}</option>
-				<option value="d"{{ DAILY_SELECTED }}>{{ lang('DIGESTS_DAILY_ONLY') }}</option>
-				<option value="w"{{ WEEKLY_SELECTED }}>{{ lang('DIGESTS_WEEKLY_ONLY') }}</option>
-				<option value="m"{{ MONTHLY_SELECTED }}>{{ lang('DIGESTS_MONTHLY_ONLY') }}</option>
-			</select>&nbsp;
-			<label for="sortby">{{ lang('SORT_BY') }}{{ lang('COLON') }}</label>
-			<select id="sortby" name="sortby" onchange="addToStack(this.name);">
-				<option value="u"{{ USERNAME_SELECTED }}>{{ lang('USERNAME') }}</option>
-				<option value="e"{{ EMAIL_SELECTED }}>{{ lang('EMAIL_ADDRESS') }}</option>
-				<option value="f"{{ FREQUENCY_SELECTED }}>{{ lang('DIGESTS_FREQUENCY_SHORT') }}</option>
-				<option value="s"{{ FORMAT_SELECTED }}>{{ lang('DIGESTS_FORMAT_STYLING') }}</option>
-				<option value="h"{{ HOUR_SELECTED }}>{{ lang('DIGESTS_HOUR_SENT') }}</option>
-				<option value="b"{{ HAS_UNSUBSCRIBED_SELECTED }}>{{ lang('DIGESTS_HAS_UNSUBSCRIBED') }}</option>
-				<option value="l"{{ LASTVISIT_SELECTED }}>{{ lang('LAST_VISIT') }}</option>
-				<option value="t"{{ LAST_SENT_SELECTED }}>{{ lang('DIGESTS_LAST_SENT') }}</option>
-			</select>&nbsp;
-			<label for="sortorder">{{ lang('DIGESTS_SORT_ORDER') }}{{ lang('COLON') }}</label>
-			<select id="sortorder" name="sortorder" onchange="addToStack(this.name);">
-				<option value="a"{{ ASCENDING_SELECTED }}>{{ lang('ASCENDING') }}</option>
-				<option value="d"{{ DESCENDING_SELECTED }}>{{ lang('DESCENDING') }}</option>
-			</select>&nbsp;
-			<input class="button2" type="submit" name="sort" id="sort" value="{{ lang('GO') }}" />
-		</fieldset>
-		<hr>
 	{% endif %}
 
 	{% if S_BALANCE_LOAD %}
@@ -840,6 +837,12 @@
 		</p>
 		{% elseif S_EDIT_SUBSCRIBERS %}
 		<p class="quick">
+			<label for="selected" id="with_selected">{{ lang('DIGESTS_WITH_SELECTED') }}{{ lang('COLON') }}</label>
+			<select id="selected" name="selected" onchange="addToStack(this.name);">
+				<option value="i"{{ IGNORE_SELECTED }}>{{ lang('DIGESTS_IGNORE') }}</option>
+				<option value="n"{{ NONE_SELECTED }}>{{ lang('DIGESTS_UNSUBSCRIBE') }}</option>
+				<option value="d"{{ DEFAULT_SELECTED }}>{{ lang('DIGESTS_DEFAULT') }}</option>
+			</select>&nbsp;
 			<input class="button1" type="submit" id="submit" name="submit" value="{{ lang('SUBMIT') }}" />&nbsp;
 			<input class="button2" type="reset" id="reset" name="reset" value="{{ lang('RESET') }}" />
 		</p>

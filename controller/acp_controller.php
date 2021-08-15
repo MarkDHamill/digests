@@ -1045,35 +1045,26 @@ class acp_controller
 			if ($mode === 'digests_edit_subscribers')
 			{
 
-				// The "selected" input control indicates whether to do mass actions or not. With mass actions only the select control and
-				// the marked checkboxes matter. Other controls are ignored.
+				// The "selected" input control indicates whether to do mass actions or not.
 				$selected = $this->request->variable('selected', 'i', true);
-				$mass_action = ($selected == 'i') ? false : true;
-				$use_defaults = false;
-				$use_defaults_pass = false;
-				unset($sql_ary, $sql_ary2);
+				$change_details = ($selected == 'i') ? true : false;
+				$unsubscribe = ($selected == 'n') ? true : false;
+				$subscribe_defaults = ($selected == 'd') ? true : false;
+				$temp_subscribe_defaults = false; // Tracks if subscribe using defaults is wanted for a particular user when in change check rows only mode ($selected == 'i')
 
-				// Get the entire POST request variables as an array for parsing
-				unset($requests_vars);
+				unset($sql_ary, $sql_ary2, $requests_vars);
+
+				// Get the entire POST request variables as an array for parsing. Only fields for subscribers requiring change should be in
+				// the request variables.
 				$request_vars = $this->request->get_super_global(\phpbb\request\request_interface::POST);
 
-				// If a mass action, we want to remove all post variables with the user-99-col_name pattern. It makes the logic easier by effectively ignoring them.
-				if ($mass_action)
-				{
-					foreach ($request_vars as $key => $value)
-					{
-						if (substr($key,0,5) == 'user-' && strpos($key, '-', 4) > 3)
-						{
-							unset($request_vars[$key]);
-						}
-					}
-				}
-
-				// Now let's sort the request variables so we process one can user at a time
+				// Sort the request variables so we process one can user at a time
 				ksort($request_vars);
 
 				// Set some flags
 				$current_user_id = NULL;
+				$temp_subscribe_defaults = false;
+				$user_fields_found = 0;
 
 				foreach ($request_vars as $name => $value)
 				{
@@ -1082,80 +1073,48 @@ class acp_controller
 					if (substr($name,0,5) === 'user-')
 					{
 
+						$user_fields_found++;
+
 						// Parse for the user_id, which is embedded in the form field name. Format is user-99-column_name where 99
-						// is the user id. The mark switch is in the form user-99.
+						// is the user id. The mark_all checkbox is the form field user-99.
 						$delimiter_pos = strpos($name, '-', 5);
 						if ($delimiter_pos === false)
 						{
 							// This is the mark_all checkbox for a given user
 							$delimiter_pos = strlen($name);
 						}
+
 						$user_id = substr($name, 5, $delimiter_pos - 5);
-						$var_part = substr($name, $delimiter_pos + 1);
+						$column_name_fragment = substr($name,$delimiter_pos + 1);
+
+						// Make this user subscribe using digest defaults because it was selected individually for the digest type?
+						if ($selected && ($this->request->variable('user-' . $user_id . '-digest_type', constants::DIGESTS_NONE_VALUE, true) == constants::DIGESTS_DEFAULT_VALUE))
+						{
+							$temp_subscribe_defaults = true;
+						}
 
 						if ($current_user_id === NULL)
 						{
 							$current_user_id = $user_id;
 						}
-						else if ($current_user_id !== $user_id)
+
+						if ($current_user_id !== $user_id)
 						{
 
 							// Save this subscriber's digest settings
-							if (isset($sql_ary) && count($sql_ary) > 0)
+							if ($unsubscribe)
 							{
-								$sql = 'UPDATE ' . USERS_TABLE . ' 
-								SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
-								WHERE user_id = ' . (int) $current_user_id;
+								// Remove digest subscription explicitly; old settings are retained in case user resubscribes
+								$sql = 'UPDATE ' . USERS_TABLE . "
+										SET user_digest_type = '" . constants::DIGESTS_NONE_VALUE . "'
+										WHERE user_id = " . (int) $current_user_id;
 								$this->db->sql_query($sql);
 							}
-
-							// If there are any individual forum subscriptions for this user, remove the old ones.
-							$sql = 'DELETE FROM ' . $this->table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' 
-								WHERE user_id = ' . (int) $current_user_id;
-							$this->db->sql_query($sql);
-
-							// Now save the individual forum subscriptions, if any
-							if (!$mass_action && isset($sql_ary2) && count($sql_ary2) > 0)
+							else if ($subscribe_defaults || $temp_subscribe_defaults)	// Subscribe user with digest defaults
 							{
-								$this->db->sql_multi_insert($this->table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE, $sql_ary2);
-							}
+								unset($sql_ary);
 
-							// Also want to save some information to an array to be used for sending emails to affected users.
-							$digest_notify_list[] = $current_user_id;
-
-							// We need to set/reset these variables so we can detect if individual forum subscriptions will need to be processed.
-							$current_user_id = $user_id;
-							$use_defaults = false;
-							$use_defaults_pass = false;
-							unset($sql_ary, $sql_ary2);
-
-						}
-
-						if ($mass_action)
-						{
-
-							// We need to save the digest settings for this mass user. There should only be one request variable for the user.
-
-							// Do a mass action only if the mark variable for the user_id is checked
-							if ($value == 'on')
-							{
-								switch ($selected)
-								{
-									case 'd':
-										// Use the default digest type
-										$sql_ary['user_digest_type'] = $this->config['phpbbservices_digests_user_digest_type'];
-									break;
-
-									case 'n':
-										// Remove user's subscription (mass action)
-										$sql_ary['user_digest_type'] = constants::DIGESTS_NONE_VALUE;
-									break;
-
-									default:
-									break;
-								}
-
-								// Create a digest subscription using board defaults
+								$sql_ary['user_digest_type'] 				= $this->config['phpbbservices_digests_user_digest_type'];
 								$sql_ary['user_digest_format'] 				= $this->config['phpbbservices_digests_user_digest_format'];
 								$sql_ary['user_digest_show_mine'] 			= ($this->config['phpbbservices_digests_user_digest_show_mine'] == 1) ? 0 : 1;
 								$sql_ary['user_digest_send_on_no_posts'] 	= $this->config['phpbbservices_digests_user_digest_send_on_no_posts'];
@@ -1174,144 +1133,139 @@ class acp_controller
 								$sql_ary['user_digest_attachments'] 		= $this->config['phpbbservices_digests_user_digest_attachments'];
 								$sql_ary['user_digest_block_images']		= $this->config['phpbbservices_digests_user_digest_block_images'];
 								$sql_ary['user_digest_toc']					= $this->config['phpbbservices_digests_user_digest_toc'];
+
+								$sql = 'UPDATE ' . USERS_TABLE . ' 
+										SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
+										WHERE user_id = ' . (int) $current_user_id;
+								$this->db->sql_query($sql);
+
+								$temp_subscribe_defaults = false;
 							}
+							else if (isset($sql_ary) && count($sql_ary) > 0)	// Change individual settings on a per user basis, $change_details == true
+							{
+								$sql = 'UPDATE ' . USERS_TABLE . ' 
+										SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
+										WHERE user_id = ' . (int) $current_user_id;
+								$this->db->sql_query($sql);
+							}
+
+							// If there are any individual forum subscriptions for this user, remove the old ones.
+							$sql = 'DELETE FROM ' . $this->table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' 
+									WHERE user_id = ' . (int) $current_user_id;
+							$this->db->sql_query($sql);
+
+							// Now save the individual forum subscriptions, if any
+							if ($change_details && isset($sql_ary2) && count($sql_ary2) > 0)
+							{
+								$this->db->sql_multi_insert($this->table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE, $sql_ary2);
+							}
+
+							// Also want to save some information to an array to be used for sending emails to affected users.
+							if ($this->config['phpbbservices_digests_notify_on_admin_changes'])
+							{
+								$digest_notify_list[] = $current_user_id;
+							}
+
+							// We need to set/reset these variables so we can detect if individual forum subscriptions will need to be processed.
+							$current_user_id = $user_id;
+							unset($sql_ary, $sql_ary2);
 
 						}
 
-						else	// Process individual subscriptions
-
+						if ($change_details)
 						{
-
-							// We need to get these variables so we can detect if individual forum subscriptions will need to be processed.
-							$var = 'user-' . $current_user_id . '-all_forums';
-							$all_forums = $this->request->variable($var, '', true);
-							$var = 'user-' . $current_user_id . '-filter_type';
-							$filter_type = $this->request->variable($var, '', true);
-
-							// No mass action, so associate the database columns with its requested value
-							if (!$use_defaults && ($var_part == 'digest_type') && ($value == constants::DIGESTS_DEFAULT_VALUE))
+							switch ($column_name_fragment)
 							{
-								$use_defaults = true;
-								unset($sql_ary);
+								case 'digest_type':
+									$sql_ary['user_digest_type'] = $value;
+								break;
+
+								case 'style':
+									$sql_ary['user_digest_format'] = $value;
+								break;
+
+								case 'send_hour':
+									$sql_ary['user_digest_send_hour_gmt'] = $value;
+								break;
+
+								case 'filter_type':
+									$sql_ary['user_digest_filter_type'] = $value;
+								break;
+
+								case 'max_posts':
+									$sql_ary['user_digest_max_posts'] = $value;
+								break;
+
+								case 'min_words':
+									$sql_ary['user_digest_min_words'] = $value;
+								break;
+
+								case 'new_posts_only':
+									$sql_ary['user_digest_new_posts_only'] = $value;
+								break;
+
+								case 'show_mine':
+									$sql_ary['user_digest_show_mine'] = ($value == '0') ? '1' : '0';
+								break;
+
+								case 'filter_foes':
+									$sql_ary['user_digest_remove_foes'] = $value;
+								break;
+
+								case 'pms':
+									$sql_ary['user_digest_show_pms'] = $value;
+								break;
+
+								case 'mark_read':
+									$sql_ary['user_digest_pm_mark_read'] = $value;
+								break;
+
+								case 'sortby':
+									$sql_ary['user_digest_sortby'] = $value;
+								break;
+
+								case 'max_display_words':
+									$sql_ary['user_digest_max_display_words'] = $value;
+								break;
+
+								case 'no_post_text':
+									$sql_ary['user_digest_no_post_text'] = $value;
+								break;
+
+								case 'send_on_no_posts':
+									$sql_ary['user_digest_send_on_no_posts'] = $value;
+								break;
+
+								case 'lastvisit':
+									$sql_ary['user_digest_reset_lastvisit'] = $value;
+								break;
+
+								case 'attachments':
+									$sql_ary['user_digest_attachments'] = $value;
+								break;
+
+								case 'blockimages':
+									$sql_ary['user_digest_block_images'] = $value;
+								break;
+
+								case 'toc':
+									$sql_ary['user_digest_toc'] = $value;
+								break;
+
+								default;
+								break;
 							}
 
-							if ($use_defaults)
-							{
-								if (!$use_defaults_pass)
-								{
-									// Create a digest subscription using board defaults. but do it only once for the user_id
-									$sql_ary['user_digest_type'] 				= $this->config['phpbbservices_digests_user_digest_type'];
-									$sql_ary['user_digest_format'] 				= $this->config['phpbbservices_digests_user_digest_format'];
-									$sql_ary['user_digest_show_mine'] 			= ($this->config['phpbbservices_digests_user_digest_show_mine'] == 1) ? 0 : 1;
-									$sql_ary['user_digest_send_on_no_posts'] 	= $this->config['phpbbservices_digests_user_digest_send_on_no_posts'];
-									$sql_ary['user_digest_send_hour_gmt'] 		= ($this->config['phpbbservices_digests_user_digest_send_hour_gmt'] == -1) ? rand(0,23) : $this->config['phpbbservices_digests_user_digest_send_hour_gmt'];
-									$sql_ary['user_digest_show_pms'] 			= $this->config['phpbbservices_digests_user_digest_show_pms'];
-									$sql_ary['user_digest_max_posts'] 			= $this->config['phpbbservices_digests_user_digest_max_posts'];
-									$sql_ary['user_digest_min_words'] 			= $this->config['phpbbservices_digests_user_digest_min_words'];
-									$sql_ary['user_digest_remove_foes'] 		= $this->config['phpbbservices_digests_user_digest_remove_foes'];
-									$sql_ary['user_digest_sortby'] 				= $this->config['phpbbservices_digests_user_digest_sortby'];
-									$sql_ary['user_digest_max_display_words'] 	= ($this->config['phpbbservices_digests_user_digest_max_display_words'] == -1) ? 0 : $this->config['phpbbservices_digests_user_digest_max_display_words'];
-									$sql_ary['user_digest_reset_lastvisit'] 	= $this->config['phpbbservices_digests_user_digest_reset_lastvisit'];
-									$sql_ary['user_digest_filter_type'] 		= $this->config['phpbbservices_digests_user_digest_filter_type'];
-									$sql_ary['user_digest_pm_mark_read'] 		= $this->config['phpbbservices_digests_user_digest_pm_mark_read'];
-									$sql_ary['user_digest_new_posts_only'] 		= $this->config['phpbbservices_digests_user_digest_new_posts_only'];
-									$sql_ary['user_digest_no_post_text']		= ($this->config['phpbbservices_digests_user_digest_max_display_words'] == 0) ? 1 : 0;
-									$sql_ary['user_digest_attachments'] 		= $this->config['phpbbservices_digests_user_digest_attachments'];
-									$sql_ary['user_digest_block_images']		= $this->config['phpbbservices_digests_user_digest_block_images'];
-									$sql_ary['user_digest_toc']					= $this->config['phpbbservices_digests_user_digest_toc'];
-									$use_defaults_pass = true;
-								}
-							}
-							else
-							{
-								switch ($var_part)
-								{
-									case 'digest_type':
-										$sql_ary['user_digest_type'] = $value;
-									break;
-
-									case 'style':
-										$sql_ary['user_digest_format'] = $value;
-									break;
-
-									case 'send_hour':
-										$sql_ary['user_digest_send_hour_gmt'] = $value;
-									break;
-
-									case 'filter_type':
-										$sql_ary['user_digest_filter_type'] = $value;
-									break;
-
-									case 'max_posts':
-										$sql_ary['user_digest_max_posts'] = $value;
-									break;
-
-									case 'min_words':
-										$sql_ary['user_digest_min_words'] = $value;
-									break;
-
-									case 'new_posts_only':
-										$sql_ary['user_digest_new_posts_only'] = $value;
-									break;
-
-									case 'show_mine':
-										$sql_ary['user_digest_show_mine'] = ($value == '0') ? '1' : '0';
-									break;
-
-									case 'filter_foes':
-										$sql_ary['user_digest_remove_foes'] = $value;
-									break;
-
-									case 'pms':
-										$sql_ary['user_digest_show_pms'] = $value;
-									break;
-
-									case 'mark_read':
-										$sql_ary['user_digest_pm_mark_read'] = $value;
-									break;
-
-									case 'sortby':
-										$sql_ary['user_digest_sortby'] = $value;
-									break;
-
-									case 'max_display_words':
-										$sql_ary['user_digest_max_display_words'] = $value;
-									break;
-
-									case 'no_post_text':
-										$sql_ary['user_digest_no_post_text'] = $value;
-									break;
-
-									case 'send_on_no_posts':
-										$sql_ary['user_digest_send_on_no_posts'] = $value;
-									break;
-
-									case 'lastvisit':
-										$sql_ary['user_digest_reset_lastvisit'] = $value;
-									break;
-
-									case 'attachments':
-										$sql_ary['user_digest_attachments'] = $value;
-									break;
-
-									case 'blockimages':
-										$sql_ary['user_digest_block_images'] = $value;
-									break;
-
-									case 'toc':
-										$sql_ary['user_digest_toc'] = $value;
-									break;
-
-									default;
-									break;
-								}
-
-							}
-
-							if ($var_part === 'forums')
+							if ($column_name_fragment === 'forums')
 							{
 								// There are some individual user forum subscriptions.  We should save them, but only if the
 								// all forums checkbox is not set AND the user should not get posts for bookmarked topics only.
+
+								// We need to get these variables so we can detect if individual forum subscriptions will need to be processed.
+								$var = 'user-' . $current_user_id . '-all_forums';
+								$all_forums = $this->request->variable($var, '', true);
+								$var = 'user-' . $current_user_id . '-filter_type';
+								$filter_type = $this->request->variable($var, '', true);
 
 								if (($all_forums !== 'on') && (trim($filter_type) !== constants::DIGESTS_BOOKMARKS))
 								{
@@ -1320,17 +1274,15 @@ class acp_controller
 									{
 										// To decode $user_forum, the user_id is to the left of the -, the forum_id is to its right
 										$delimiter_pos = strpos($user_forum, '-');
-										$subscriber_user_id = (int) substr($user_forum, 0, $delimiter_pos);
 										$subscriber_forum_id = (int) substr($user_forum, $delimiter_pos + 1);
 
 										// Write this forum subscription
 										$sql_ary2[] = array(
-											'user_id'		=> $subscriber_user_id,
+											'user_id'		=> $current_user_id,
 											'forum_id'		=> $subscriber_forum_id);
 									}
 								}
 							}
-
 						}
 
 					} // $request_vars variable is named user-*
@@ -1340,30 +1292,67 @@ class acp_controller
 				// Process last user
 
 				// Save this subscriber's digest settings
-				if (isset($sql_ary) && count($sql_ary) > 0)
+				if ($unsubscribe)
+				{
+					// Remove digest subscription explicitly; old settings are retained in case user resubscribes
+					$sql = 'UPDATE ' . USERS_TABLE . "
+							SET user_digest_type = '" . constants::DIGESTS_NONE_VALUE . "'
+							WHERE user_id = " . (int) $current_user_id;
+					$this->db->sql_query($sql);
+				}
+				else if ($subscribe_defaults || $temp_subscribe_defaults)	// Subscribe user with digest defaults
+				{
+					unset($sql_ary);
+
+					$sql_ary['user_digest_type'] 				= $this->config['phpbbservices_digests_user_digest_type'];
+					$sql_ary['user_digest_format'] 				= $this->config['phpbbservices_digests_user_digest_format'];
+					$sql_ary['user_digest_show_mine'] 			= ($this->config['phpbbservices_digests_user_digest_show_mine'] == 1) ? 0 : 1;
+					$sql_ary['user_digest_send_on_no_posts'] 	= $this->config['phpbbservices_digests_user_digest_send_on_no_posts'];
+					$sql_ary['user_digest_send_hour_gmt'] 		= ($this->config['phpbbservices_digests_user_digest_send_hour_gmt'] == -1) ? rand(0,23) : $this->config['phpbbservices_digests_user_digest_send_hour_gmt'];
+					$sql_ary['user_digest_show_pms'] 			= $this->config['phpbbservices_digests_user_digest_show_pms'];
+					$sql_ary['user_digest_max_posts'] 			= $this->config['phpbbservices_digests_user_digest_max_posts'];
+					$sql_ary['user_digest_min_words'] 			= $this->config['phpbbservices_digests_user_digest_min_words'];
+					$sql_ary['user_digest_remove_foes'] 		= $this->config['phpbbservices_digests_user_digest_remove_foes'];
+					$sql_ary['user_digest_sortby'] 				= $this->config['phpbbservices_digests_user_digest_sortby'];
+					$sql_ary['user_digest_max_display_words'] 	= ($this->config['phpbbservices_digests_user_digest_max_display_words'] == -1) ? 0 : $this->config['phpbbservices_digests_user_digest_max_display_words'];
+					$sql_ary['user_digest_reset_lastvisit'] 	= $this->config['phpbbservices_digests_user_digest_reset_lastvisit'];
+					$sql_ary['user_digest_filter_type'] 		= $this->config['phpbbservices_digests_user_digest_filter_type'];
+					$sql_ary['user_digest_pm_mark_read'] 		= $this->config['phpbbservices_digests_user_digest_pm_mark_read'];
+					$sql_ary['user_digest_new_posts_only'] 		= $this->config['phpbbservices_digests_user_digest_new_posts_only'];
+					$sql_ary['user_digest_no_post_text']		= ($this->config['phpbbservices_digests_user_digest_max_display_words'] == 0) ? 1 : 0;
+					$sql_ary['user_digest_attachments'] 		= $this->config['phpbbservices_digests_user_digest_attachments'];
+					$sql_ary['user_digest_block_images']		= $this->config['phpbbservices_digests_user_digest_block_images'];
+					$sql_ary['user_digest_toc']					= $this->config['phpbbservices_digests_user_digest_toc'];
+
+					$sql = 'UPDATE ' . USERS_TABLE . ' 
+										SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
+										WHERE user_id = ' . (int) $current_user_id;
+					$this->db->sql_query($sql);
+				}
+				else if (isset($sql_ary) && count($sql_ary) > 0)	// Change individual settings on a per user basic, $change_details == true
 				{
 					$sql = 'UPDATE ' . USERS_TABLE . ' 
-					SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
-					WHERE user_id = ' . (int) $current_user_id;
+							SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
+							WHERE user_id = ' . (int) $current_user_id;
 					$this->db->sql_query($sql);
 				}
 
 				// If there are any individual forum subscriptions for this user, remove the old ones.
-				if (!is_null($current_user_id))
-				{
-					$sql = 'DELETE FROM ' . $this->table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' 
+				$sql = 'DELETE FROM ' . $this->table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' 
 						WHERE user_id = ' . (int) $current_user_id;
-					$this->db->sql_query($sql);
-				}
+				$this->db->sql_query($sql);
 
 				// Now save the individual forum subscriptions, if any
-				if (!$mass_action && isset($sql_ary2) && count($sql_ary2) > 0)
+				if ($change_details && isset($sql_ary2) && count($sql_ary2) > 0)
 				{
 					$this->db->sql_multi_insert($this->table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE, $sql_ary2);
 				}
 
 				// Also want to save some information to an array to be used for sending emails to affected users.
-				$digest_notify_list[] = $current_user_id;
+				if ($this->config['phpbbservices_digests_notify_on_admin_changes'])
+				{
+					$digest_notify_list[] = $current_user_id;
+				}
 
 				// Notify users whose subscriptions were changed
 				if ($this->config['phpbbservices_digests_notify_on_admin_changes'])
@@ -1371,7 +1360,14 @@ class acp_controller
 					$this->notify_subscribers($digest_notify_list, 'digests_subscription_edited');
 				}
 
-				$message = $this->language->lang('CONFIG_UPDATED');
+				if ($user_fields_found > 0)
+				{
+					$message = $this->language->lang('CONFIG_UPDATED');
+				}
+				else
+				{
+					$message = $this->language->lang('DIGESTS_NO_USERS_SELECTED');
+				}
 
 			}
 
@@ -1459,8 +1455,6 @@ class acp_controller
 					foreach ($rowset as $row)
 					{
 
-						$digest_notify_list[] = $row['user_id'];
-
 						if ($current_hour !== $row['user_digest_send_hour_gmt'])
 						{
 							$current_hour = $row['user_digest_send_hour_gmt'];
@@ -1490,6 +1484,12 @@ class acp_controller
 							WHERE user_id = ' . (int)  $row['user_id'];
 
 							$this->db->sql_query($sql2);
+
+							if ($row['user_digest_send_hour_gmt'] != $new_hour)
+							{
+								$digest_notify_list[] = $row['user_id'];
+							}
+
 							$rebalanced++;
 
 						}

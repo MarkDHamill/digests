@@ -17,6 +17,22 @@ if (empty($lang) || !is_array($lang))
 	$lang = array();
 }
 
+// DEVELOPERS PLEASE NOTE
+//
+// All language files should use UTF-8 as their encoding and the files must not contain a BOM.
+//
+// Placeholders can now contain order information, e.g. instead of
+// 'Page %s of %s' you can (and should) write 'Page %1$s of %2$s', this allows
+// translators to re-order the output of data while ensuring it remains correct
+//
+// You do not need this where single placeholders are used, e.g. 'Message %d' is fine
+// equally where a string contains only two placeholders which are used to wrap text
+// in a url you again do not need to specify an order e.g., 'Click %sHERE%s' is fine
+//
+// Some characters you may want to copy&paste:
+// ’ » “ ” …
+//
+
 $lang = array_merge($lang, array(
 	'DIGESTS_WEEKDAY' 					=> 'Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday',
 ));
@@ -52,7 +68,8 @@ $lang = array_merge($lang, array(
 	'DIGESTS_CUSTOM_STYLESHEET_PATH_EXPLAIN'				=> 'This setting only applies if the enable custom stylesheet box is enabled. If it is enabled, this stylesheet will be applied to all styled digests. The path should be a relative path from your phpBB styles folder and should normally be in the theme subfolder. Note: you are responsible for creating this stylesheet and placing it in a file with the name entered here on the appropriate location on your server. Example: prosilver/theme/digest_stylesheet.css. For information on creating stylesheets, click <a href="http://www.w3schools.com/css/">here</a>.',
 	'DIGESTS_DEBUG'											=> 'Enable digests debugging',
 	'DIGESTS_DEBUG_EXPLAIN'									=> 'Used for technical debugging. This will write certain key troubleshooting information, such as database queries used to assemble digests, to the admin log. Generally, you need advanced development skills to interpret this information.',
-	'DIGESTS_DEFAULT'										=> 'Subscribe using default settings',
+	'DIGESTS_DEFAULT'										=> 'Subscribe checked rows only using defaults',
+	'DIGESTS_DEFAULT_SHORT'									=> 'Subscribe using defaults',
 	'DIGESTS_DAILY_ONLY'									=> 'Daily digests only',
 	'DIGESTS_ENABLE_AUTO_SUBSCRIPTIONS'						=> 'Enable automatic subscriptions',
 	'DIGESTS_ENABLE_AUTO_SUBSCRIPTIONS_EXPLAIN'				=> 'If you want new users to automatically get digests, select yes. The digests&rsquo; default settings will be automatically applied. (These are set in the digests&rsquo; user default settings). Enabling this option will <em>not</em> create subscriptions for currently unsubscribed users, inactive members or for new members who chose not to receive a digest during registration. You can set these individually using the edit subscribers function, or globally with the mass subscribe/unsubscribe option.',
@@ -74,7 +91,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_HAS_UNSUBSCRIBED'								=> 'Has unsubscribed',
 	'DIGESTS_HOUR_SENT'										=> 'Hour sent (based on UTC%+d)',
 	'DIGESTS_HOUR_SENT_GMT'									=> 'Default hour sent (UTC)',
-	'DIGESTS_IGNORE'										=> 'Ignore global actions',
+	'DIGESTS_IGNORE'										=> 'Change checked rows only',
 	'DIGESTS_ILLOGICAL_DATE'								=> 'Your date and time is invalid. Please fix and resubmit, using a date and time format like YYYY-MM-DD HH:MM:SS.',
 	'DIGESTS_INCLUDE_ADMINS'								=> 'Include administrators',
 	'DIGESTS_INCLUDE_ADMINS_EXPLAIN'						=> 'This will subscribe or unsubscribe administrators in addition to normal users.',
@@ -136,7 +153,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_SALUTATION_FIELDS'								=> 'Select salutation fields',
 	'DIGESTS_SALUTATION_FIELDS_EXPLAIN'						=> 'Enter the custom profile field names, if any, you want to substitute for the username in the digest salutation. If left blank, the username is used. Enter the field identification name(s) found on the custom profile fields page. Separate multiple field names with commas. <em>Note:</em> The fields must be of type “Single text field”. If none of the custom profile fields exist or there is no value for the fields for the subscriber, the username will be used instead. Example: firstname,lastname (if you created custom profile fields with these names). One space will be placed between each custom profile field in the digest salutation.',
 	'DIGESTS_SEARCH_FOR_MEMBER'								=> 'Search for member',
-	'DIGESTS_SEARCH_FOR_MEMBER_EXPLAIN'						=> 'Enter the full or partial member name or email address to look then press Return or Enter. Leave blank to see all members. Member name searches are not case sensitive. <em>Note</em>: There must be an @ symbol in the field for an email search to be performed.',
+	'DIGESTS_SEARCH_FOR_MEMBER_EXPLAIN'						=> 'Enter the full or partial member name or email address to look for, then press <strong>Go</strong>. Leave blank to disable this kind of search. Member name searches are not case sensitive. <em>Note</em>: There must be an @ symbol in the field for an email search to be performed.',
 	'DIGESTS_SELECT_FORUMS_ADMIN_EXPLAIN'					=> 'The list of forums includes only those forums this user is allowed to read. If you wish to give this user access to additional forums not shown here, expand their forum user or group permissions. Note although you can fine tune the forums that appear in their digest, if their digest type is &ldquo;None&rdquo; no digest will actually be sent.',
 	'DIGESTS_SHOW'											=> 'Show',
 	'DIGESTS_SHOW_EMAIL'									=> 'Show email address in log',
@@ -144,6 +161,7 @@ $lang = array_merge($lang, array(
 	'DIGESTS_SHOW_FORUM_PATH'								=> 'Show forum path in digest',
 	'DIGESTS_SHOW_FORUM_PATH_EXPLAIN'						=> 'If enabled, digest forum names will show the categories and forums a forum is nested within, for example: &ldquo;Category 1 &#8249; Forum 1 &#8249; Category A &#8249; Forum B&rdquo;, going as deep as categories and forums are nested on your board. Otherwise only the name of the forum containing will be shown, &ldquo;Forum B&rdquo; in this example.',
 	'DIGESTS_SORT_ORDER'									=> 'Sort order',
+	'DIGESTS_SORTING_AND_FILTERING'							=> 'Sorting and filtering',
 	'DIGESTS_STOPPED_SUBSCRIBING'							=> 'Has unsubscribed',
 	'DIGESTS_STRIP_TAGS'									=> 'Tags to strip from digests',
 	'DIGESTS_STRIP_TAGS_EXPLAIN'							=> 'Mail servers may reject emails or blacklist senders containing certain HTML tags, or place digests in a spam mail folder. Type the name of the tags (without &lt; or &gt; characters) to exclude, separated by commas. For example, to remove the video and iframe tags, enter &ldquo;video,iframe&rdquo; in this field. Avoid entering common tags like h1, p and div as these are essential to rendering digests.',
@@ -158,12 +176,13 @@ $lang = array_merge($lang, array(
 	'DIGESTS_SUBSCRIBERS_MONTHLY'                           => 'Monthly subscribers',
 	'DIGESTS_UNLINK_FOREIGN_URLS'							=> 'Remove foreign URLs from digests',
 	'DIGESTS_UNLINK_FOREIGN_URLS_EXPLAIN'					=> 'Removes links in digests to other domains. Some email systems will flag emails containing links to other domains as likely spam. This could cause digests to be sent to spam folders or keep digests from being sent by the outgoing email server.',
-	'DIGESTS_UNSUBSCRIBE'									=> 'Unsubscribe',
+	'DIGESTS_UNSUBSCRIBE'									=> 'Unsubscribe checked rows only',
 	'DIGESTS_UNSUBSCRIBE_SUBJECT'							=> 'You have been unsubscribed from receiving email digests',
 	'DIGESTS_UNSUBSCRIBED'									=> 'Has not subscribed',
 	'DIGESTS_USER_DIGESTS_MAX_DISPLAY_WORDS'				=> 'Maximum words to display in a post',
 	'DIGESTS_USER_DIGESTS_MAX_DISPLAY_WORDS_EXPLAIN'		=> 'Set to -1 to show the full post text by default. Setting at zero (0) means by default  the user will see no post text at all.',
 	'DIGESTS_USER_DIGESTS_PM_MARK_READ'						=> 'Mark private messages as read when they appear in the digest',
+	'DIGESTS_NO_USERS_SELECTED'								=> 'No changes made! You must mark one or more checkboxes to make subscription changes for users.',
 	'DIGESTS_USERS_PER_PAGE'								=> 'Subscribers per page',
 	'DIGESTS_USERS_PER_PAGE_EXPLAIN'						=> 'This controls how many rows of digest subscribers an administrator sees per page when they select the edit subscribers option. It is recommended you leave this at 20. Setting this value too high may trigger a PHP max_input_vars error.',
 	'DIGESTS_WEEKLY_DIGESTS_DAY'							=> 'Select the day of the week for sending out weekly digests',

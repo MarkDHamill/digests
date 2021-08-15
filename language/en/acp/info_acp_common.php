@@ -17,6 +17,22 @@ if (empty($lang) || !is_array($lang))
 	$lang = array();
 }
 
+// DEVELOPERS PLEASE NOTE
+//
+// All language files should use UTF-8 as their encoding and the files must not contain a BOM.
+//
+// Placeholders can now contain order information, e.g. instead of
+// 'Page %s of %s' you can (and should) write 'Page %1$s of %2$s', this allows
+// translators to re-order the output of data while ensuring it remains correct
+//
+// You do not need this where single placeholders are used, e.g. 'Message %d' is fine
+// equally where a string contains only two placeholders which are used to wrap text
+// in a url you again do not need to specify an order e.g., 'Click %sHERE%s' is fine
+//
+// Some characters you may want to copy&paste:
+// ’ » “ ” …
+//
+
 $lang = array_merge($lang, array(
 
 	'PLURAL_RULE'											=> 1,
@@ -28,7 +44,7 @@ $lang = array_merge($lang, array(
 	'ACP_DIGESTS_USER_DEFAULT_SETTINGS'						=> 'User default settings',
 	'ACP_DIGESTS_USER_DEFAULT_SETTINGS_EXPLAIN'				=> 'These settings allow administrators to set the defaults users see when they subscribe to a digest.',
 	'ACP_DIGESTS_EDIT_SUBSCRIBERS'							=> 'Edit subscribers',
-	'ACP_DIGESTS_EDIT_SUBSCRIBERS_EXPLAIN'					=> 'This page allows you to see who is or is not receiving digests. You can selectively subscribe or unsubscribe members, and edit all digest details of individual subscribers. By marking rows with the checkbox in the first column, you can subscribe these members with defaults or unsubscribe them. Do this by selecting the appropriate controls near the bottom of the page then pressing Submit. Also note you can use these controls to sort and filter the list in conjunction with the Go button.',
+	'ACP_DIGESTS_EDIT_SUBSCRIBERS_EXPLAIN'					=> 'This page allows you to see who is or is not receiving digests and change their individual digest settings. <strong>Actions are taken on checked rows only.</strong> Use the “Mark all” and “Unmark all” links to quickly check and uncheck all rows on the page.<br><br>You can quickly subscribe users with your digest defaults, or unsubscribe users, by checking the rows for the affected users, then selecting “Subscribe checked rows only using defaults” or “Unsubscribe checked rows only” in the“ With selected” dropdown at the bottom right corner of the page.',
 	'ACP_DIGESTS_BALANCE_LOAD'								=> 'Balance load',
 	'ACP_DIGESTS_BALANCE_LOAD_EXPLAIN'						=> 'If too many digests going out at certain hours are causing performance issues, this will rebalance digest subscriptions so that roughly the same number of digests are sent for each hour wanted. The table below shows the current number and names of digest subscribers for each hour with <strong>overallocated hours bolded</strong>. This function updates digest send hours minimally. Changes occur only on those hours where the number of subscribers exceeds the average load, and only for subscribers that exceed the hourly average for that hour. <em>Caution</em>: subscribers may be upset that their subscription times were changed and may receive an email notification, depending on the setting in digests general settings. If you want you can restrict the balancing to a digest type, balance for specified hours and apply balancing to specified hours.',
 	'ACP_DIGESTS_BALANCE_OPTIONS'							=> 'Balancing options',

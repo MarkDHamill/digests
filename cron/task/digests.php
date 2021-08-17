@@ -665,41 +665,42 @@ class digests extends \phpbb\cron\task\base
 
 				// Set various variables and flags based on the requested digest format.
 
+				$unsubscribe_link = sprintf($this->board_url . "app.{$this->phpEx}/digests/unsubscribe?u=%s&amp;e=%s", $row['user_id'], $row['user_email']);
 				switch ($row['user_digest_format'])
 				{
 
 					case constants::DIGESTS_TEXT_VALUE:
 						$html_messenger->template('digests_text', '', $this->email_templates_path);
 						$is_html = false;
-						$disclaimer = str_replace('&rsquo;', "'", strip_tags($this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx, $this->config['board_contact'])));
+						$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER_TEXT', $this->board_url, $this->config['sitename'], $this->phpEx, $this->config['board_contact'], $unsubscribe_link);
 						$this->layout_with_html_tables = false;
 					break;
 
 					case constants::DIGESTS_PLAIN_VALUE:
 						$html_messenger->template('digests_plain_html', '', $this->email_templates_path);
 						$is_html = true;
-						$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx . '?i=-phpbbservices-digests-ucp-main_module&mode=basics', $this->config['board_contact']);
+						$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER_HTML', $this->board_url, $this->config['sitename'], $this->phpEx . '?i=-phpbbservices-digests-ucp-main_module&mode=basics', $this->config['board_contact'], $unsubscribe_link);
 						$this->layout_with_html_tables = false;
 					break;
 
 					case constants::DIGESTS_PLAIN_CLASSIC_VALUE:
 						$html_messenger->template('digests_plain_html', '', $this->email_templates_path);
 						$is_html = true;
-						$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx . '?i=-phpbbservices-digests-ucp-main_module&mode=basics', $this->config['board_contact']);
+						$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER_HTML', $this->board_url, $this->config['sitename'], $this->phpEx . '?i=-phpbbservices-digests-ucp-main_module&mode=basics', $this->config['board_contact'], $unsubscribe_link);
 						$this->layout_with_html_tables = true;
 					break;
 
 					case constants::DIGESTS_HTML_VALUE:
 						$html_messenger->template('digests_html', '', $this->email_templates_path);
 						$is_html = true;
-						$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx . '?i=-phpbbservices-digests-ucp-main_module&mode=basics', $this->config['board_contact']);
+						$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER_HTML', $this->board_url, $this->config['sitename'], $this->phpEx . '?i=-phpbbservices-digests-ucp-main_module&mode=basics', $this->config['board_contact'], $unsubscribe_link);
 						$this->layout_with_html_tables = false;
 					break;
 
 					case constants::DIGESTS_HTML_CLASSIC_VALUE:
 						$html_messenger->template('digests_html', '', $this->email_templates_path);
 						$is_html = true;
-						$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER', $this->board_url, $this->config['sitename'], $this->phpEx . '?i=-phpbbservices-digests-ucp-main_module&mode=basics', $this->config['board_contact']);
+						$disclaimer = $this->language->lang('DIGESTS_DISCLAIMER_HTML', $this->board_url, $this->config['sitename'], $this->phpEx . '?i=-phpbbservices-digests-ucp-main_module&mode=basics', $this->config['board_contact'], $unsubscribe_link);
 						$this->layout_with_html_tables = true;
 					break;
 

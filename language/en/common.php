@@ -52,7 +52,12 @@ $lang = array_merge($lang, array(
 	'DIGESTS_DATE'						=> 'Date',
 	'DIGESTS_DELIMITER'					=> ' &#8249; ', // Used to help show the hierarchy of forum names from the index on down. Should not change in language translations unless different character is used on breadcrumb menu.
 	'DIGESTS_DISABLED_MESSAGE'			=> 'To enable fields, select Basics and select a digest type',
-	'DIGESTS_DISCLAIMER'				=> 'You can change or delete your subscription from the board&rsquo;s <a href="%1$sucp.%3$s">User Control Panel</a>. If you have questions or feedback on your digests please send it to the <a href="mailto:%4$s?subject=Digests">%2$s webmaster</a>.',
+	'DIGESTS_DISCLAIMER_HTML'			=> '<p><a href="%5$s">One-click unsubscribe</a></p><p>You can also change or delete your subscription from the board&rsquo;s <a href="%1$sucp.%3$s">User Control Panel</a>.</p><p>If you have questions or feedback on your digests, please send them to the <a href="mailto:%4$s?subject=Digests">%2$s webmaster</a>.</p>',
+	'DIGESTS_DISCLAIMER_TEXT'			=> 'One-click unsubscribe: %5$s
+	
+You can also change or delete your subscription from the board\'s User Control Panel.
+	
+If you have questions or feedback on your digests, please send them to the webmaster: %4$s.',
 	'DIGESTS_EXPLANATION'				=> 'Digests are email summaries of posts that are sent to you periodically. Digests can be sent daily, weekly or monthly at an hour of the day you select. You can specify those particular forums for which you want posts or by default you can elect to receive all posts for all forums for which you can read. You can cancel your digest subscription at any time by simply coming back to this page. Most users find digests to be very useful. We encourage you to give them a try!',
 	'DIGESTS_FILTER_ERROR'				=> 'Digests mailer was called with an invalid user_digest_filter_type = %s',
 	'DIGESTS_FILTER_FOES'				=> 'Remove posts from my foes',
@@ -161,6 +166,8 @@ $lang = array_merge($lang, array(
 	'DIGESTS_TOC_EXPLAIN'				=> 'If the board is active, you might want to include a table of contents in your digest. In styled digests, the table of contents includes links that let you jump to a particular post or private message in the digest.',
 	'DIGESTS_UNKNOWN'					=> 'Unknown',
 	'DIGESTS_UNREAD'					=> 'Unread',
+	'DIGESTS_UNSUBSCRIBE_FAILURE'		=> 'Sorry, but we were unable to unsubscribe you from receiving digests.',
+	'DIGESTS_UNSUBSCRIBE_SUCCESS'		=> 'You have been unsubscribed from receiving further digests.',
 	'DIGESTS_UPDATED'					=> 'Your digest settings were saved',
 	'DIGESTS_USE_BOOKMARKS'				=> 'Bookmarked topics only',
 	'DIGESTS_WEEKDAY' 					=> 'Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday',

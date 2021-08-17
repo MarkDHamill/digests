@@ -1,0 +1,7 @@
+Dear {{ USERNAME }},
+
+As requested, you are no longer subscribed to receive digests from the board {{ FORUM_NAME }}.
+
+Sincerely,
+
+{{ FORUM_NAME }} Administration Team

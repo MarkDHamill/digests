@@ -172,4 +172,159 @@ class common
 
 	}
 
+	function notify_subscribers ($digest_notify_list, $email_template = '')
+	{
+
+		// This function parses $digest_notify_list, an array of user_ids that represent users that had their digest subscriptions changed, and sends them an email
+		// letting them know an action has occurred.
+
+		$emails_sent = 0;
+
+		if (isset($digest_notify_list) && (count($digest_notify_list) > 0))
+		{
+
+			if (!class_exists('messenger'))
+			{
+				include($this->phpbb_root_path . 'includes/functions_messenger.' . $this->phpEx); // Used to send emails
+			}
+
+			$sql_array = array(
+				'SELECT'	=> 'username, user_email, user_lang, user_digest_type, user_digest_format',
+
+				'FROM'		=> array(
+					USERS_TABLE	=> 'u',
+				),
+
+				'WHERE'		=> $this->db->sql_in_set('user_id', $digest_notify_list),
+			);
+
+			$sql = $this->db->sql_build_query('SELECT', $sql_array);
+
+			$result = $this->db->sql_query($sql);
+			$rowset = $this->db->sql_fetchrowset($result);
+
+			// E-mail setup
+			$messenger = new \messenger();
+
+			foreach ($rowset as $row)
+			{
+
+				switch ($email_template)
+				{
+					case 'digests_unsubscribe_one_click':
+						$digest_notify_template = $email_template;
+						$digest_email_subject = $this->language->lang('DIGESTS_UNSUBSCRIBE_SUCCESS');
+					break;
+
+					case 'digests_subscription_edited':
+						$digest_notify_template = $email_template;
+						$digest_email_subject = $this->language->lang('DIGESTS_SUBSCRIBE_EDITED');
+					break;
+
+					default:
+						// Mass subscribe/unsubscribe
+						$digest_notify_template = ($this->config['phpbbservices_digests_subscribe_all']) ? 'digests_subscribe' : 'digests_unsubscribe';
+						$digest_email_subject = ($this->config['phpbbservices_digests_subscribe_all']) ? $this->language->lang('DIGESTS_SUBSCRIBE_SUBJECT') : $this->language->lang('DIGESTS_UNSUBSCRIBE_SUBJECT');
+					break;
+				}
+
+				// Set up associations between digest types as constants and their language equivalents
+				switch ($row['user_digest_type'])
+				{
+					case constants::DIGESTS_WEEKLY_VALUE:
+						$digest_type_text = strtolower($this->language->lang('DIGESTS_WEEKLY'));
+					break;
+
+					case constants::DIGESTS_MONTHLY_VALUE:
+						$digest_type_text = strtolower($this->language->lang('DIGESTS_MONTHLY'));
+					break;
+
+					case constants::DIGESTS_NONE_VALUE:
+						$digest_type_text = strtolower($this->language->lang('DIGESTS_NONE'));
+					break;
+
+					case constants::DIGESTS_DAILY_VALUE:
+					default:
+						$digest_type_text = strtolower($this->language->lang('DIGESTS_DAILY'));
+					break;
+				}
+
+				// Set up associations between digest formats as constants and their language equivalents
+				switch ($row['user_digest_format'])
+				{
+					case constants::DIGESTS_HTML_CLASSIC_VALUE:
+						$digest_format_text = $this->language->lang('DIGESTS_FORMAT_HTML_CLASSIC');
+					break;
+
+					case constants::DIGESTS_PLAIN_VALUE:
+						$digest_format_text = $this->language->lang('DIGESTS_FORMAT_PLAIN');
+					break;
+
+					case constants::DIGESTS_PLAIN_CLASSIC_VALUE:
+						$digest_format_text = $this->language->lang('DIGESTS_FORMAT_PLAIN_CLASSIC');
+					break;
+
+					case constants::DIGESTS_TEXT_VALUE:
+						$digest_format_text = strtolower($this->language->lang('DIGESTS_FORMAT_TEXT'));
+					break;
+
+					case constants::DIGESTS_HTML_VALUE:
+					default:
+						$digest_format_text = $this->language->lang('DIGESTS_FORMAT_HTML');
+					break;
+				}
+
+				$messenger->template('@phpbbservices_digests/' . $digest_notify_template, $row['user_lang']);
+				$messenger->to($row['user_email']);
+
+				$from_addr = ($this->config['phpbbservices_digests_from_email_address'] == '') ? $this->config['board_email'] : $this->config['phpbbservices_digests_from_email_address'];
+				$from_name = ($this->config['phpbbservices_digests_from_email_name'] == '') ? $this->config['board_contact'] : $this->config['phpbbservices_digests_from_email_name'];
+
+				// SMTP delivery must strip text names due to likely bug in messenger class
+				if ($this->config['smtp_delivery'])
+				{
+					$messenger->from($from_addr);
+				}
+				else
+				{
+					$messenger->from($from_addr . ' <' . $from_name . '>');
+				}
+
+				$messenger->replyto($from_addr);
+				$messenger->subject($digest_email_subject);
+
+				$messenger->assign_vars(array(
+						'DIGESTS_FORMAT'		=> $digest_format_text,
+						'DIGESTS_TYPE'			=> $digest_type_text,
+						'DIGESTS_UCP_LINK'		=> generate_board_url() . '/' . 'ucp.' . $this->phpEx,
+						'FORUM_NAME'			=> $this->config['sitename'],
+						'USERNAME'				=> $row['username'],
+					)
+				);
+
+				$mail_sent = $messenger->send(NOTIFY_EMAIL, false);
+
+				if (!$mail_sent)
+				{
+					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_NOTIFICATION_ERROR', false, array($row['user_email']));
+				}
+				else
+				{
+					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_NOTIFICATION_SENT', false, array($row['user_email'], $row['username']));
+					$emails_sent++;
+				}
+
+				$messenger->reset();
+
+			}
+
+			$messenger->save_queue(); // save queued emails for later delivery, if applicable
+			$this->db->sql_freeresult($result); // Query be gone!
+
+		}
+
+		return $emails_sent;
+
+	}
+
 }

@@ -58,5 +58,13 @@ services:
             - [set_name, [phpbbservices.digests.cron.task.cron_task]]
         tags:
             - { name: cron.task }
+    phpbbservices.digests.controller.unsubscribe:
+        class: phpbbservices\digests\controller\unsubscribe
+        arguments:
+            - '@request'
+            - '@user'
+            - '@dbal.conn'
+            - '@controller.helper'
+            - '@language'
     _defaults:
         public: true

@@ -16,28 +16,38 @@ class common
 	 * Constructor
 	*/
 
+	protected $config;
+	protected $db;
 	protected $filesystem;
 	protected $language;
 	protected $phpbb_log;
 	protected $phpbb_root_path;
+	protected $phpEx;
 	protected $user;
 
 	/**
 	 * Constructor.
 	 *
-	 * @param \phpbb\language\language 	$language 			Language object
-	 * @param string					$phpbb_root_path	Relative path to phpBB root
+	 * @param \phpbb\config\config 		$config 			The config
+	 * @param \phpbb\db\driver\factory 	$db 				The database factory object
 	 * @param \phpbb\filesystem		 	$filesystem			Filesystem object
+	 * @param \phpbb\language\language 	$language 			Language object
 	 * @param \phpbb\log\log 			$phpbb_log 			phpBB log object
+	 * @param string					$phpbb_root_path	Relative path to phpBB root
+	 * @param string 					$php_ext 			PHP file suffix
 	 * @param \phpbb\user 				$user 				The user object
+	 *
 	 */
 
-	public function __construct(\phpbb\language\language $language, $phpbb_root_path, \phpbb\filesystem\filesystem $filesystem, \phpbb\log\log $phpbb_log, \phpbb\user $user)
+	public function __construct(\phpbb\language\language $language, $phpbb_root_path, \phpbb\filesystem\filesystem $filesystem, \phpbb\log\log $phpbb_log, \phpbb\user $user, $php_ext, \phpbb\config\config $config, \phpbb\db\driver\factory $db)
 	{
+		$this->config = $config;
+		$this->db = $db;
 		$this->filesystem = $filesystem;
 		$this->language = $language;
 		$this->phpbb_log = $phpbb_log;
 		$this->phpbb_root_path = $phpbb_root_path;
+		$this->phpEx = $php_ext;
 		$this->user = $user;
 	}
 	

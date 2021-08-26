@@ -36,6 +36,9 @@ services:
             - '@filesystem'
             - '@log'
             - '@user'
+            - '%core.php_ext%'
+            - '@config'
+            - '@dbal.conn'
     phpbbservices.digests.cron.task.cron_task:
         class: phpbbservices\digests\cron\task\digests
         arguments:

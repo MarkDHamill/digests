@@ -9,6 +9,8 @@
 
 namespace phpbbservices\digests\core;
 
+use phpbbservices\digests\constants\constants;
+
 class common
 {
 

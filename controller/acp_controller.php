@@ -16,22 +16,22 @@ use phpbbservices\digests\constants\constants;
  */
 class acp_controller
 {
-	private $auth;
-	private $config;
-	private $db;
-	private $helper;
-	private $language;
-	private $mailer;
-	private $pagination;
-	private $phpbb_extension_manager;
-	private $phpbb_log;
-	private $phpbb_path_helper;
-	private $phpbb_root_path;
-	private $phpEx;
-	private $request;
-	private $table_prefix;
-	private $template;
-	private $user;
+	protected $auth;
+	protected $config;
+	protected $db;
+	protected $helper;
+	protected $language;
+	protected $mailer;
+	protected $pagination;
+	protected $phpbb_extension_manager;
+	protected $phpbb_log;
+	protected $phpbb_path_helper;
+	protected $phpbb_root_path;
+	protected $phpEx;
+	protected $request;
+	protected $table_prefix;
+	protected $template;
+	protected $user;
 
 	/** @var string Custom form action */
 	//protected $u_action;

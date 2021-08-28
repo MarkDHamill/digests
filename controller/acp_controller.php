@@ -16,6 +16,7 @@ use phpbbservices\digests\constants\constants;
  */
 class acp_controller
 {
+
 	protected $auth;
 	protected $config;
 	protected $db;

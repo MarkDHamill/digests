@@ -57,6 +57,7 @@ services:
             - '@filesystem'
             - '@phpbbservices.digests.common'
             - '@profilefields.manager'
+            - '@dispatcher'
         calls:
             - [set_name, [phpbbservices.digests.cron.task.cron_task]]
         tags:
@@ -68,6 +69,13 @@ services:
             - '@user'
             - '@dbal.conn'
             - '@controller.helper'
+            - '@language'
+    phpbbservices.digests.includes.html_messenger:
+        class: phpbbservices\digests\includes\html_messenger
+        arguments:
+            - '@config'
+            - '@user'
+            - '@dispatcher'
             - '@language'
     _defaults:
         public: true

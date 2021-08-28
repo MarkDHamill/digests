@@ -19,6 +19,32 @@ namespace phpbbservices\digests\includes;
 class html_messenger extends \messenger
 {
 
+	protected $config;
+	protected $user;
+	protected $phpbb_dispatcher;
+	protected $language;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param string					$use_queue			Whether to use phpBB's queue (true|false)
+	 * @param \phpbb\config\config		$config				Config object
+	 * @param \phpbb\language\language	$language			Language object
+	 * @param \phpbb\event\dispatcher	$phpbb_dispatcher	Dispatcher object
+	 * @param \phpbb\user				$user				User object
+	 *
+	 */
+	function __construct($use_queue = true, \phpbb\config\config $config, \phpbb\user $user, \phpbb\event\dispatcher $phpbb_dispatcher, \phpbb\language\language $language)
+	{
+		$this->config 			= $config;
+		$this->language 		= $language;
+		$this->phpbb_dispatcher = $phpbb_dispatcher;
+		$this->user 			= $user;
+
+		$this->use_queue 		= (!$this->config['email_package_size']) ? false : $use_queue;
+		$this->subject 			= '';
+	}
+
 	/**
 	 * Send the mail out to the recipients set previously in var $this->addresses
 	 *
@@ -32,13 +58,12 @@ class html_messenger extends \messenger
 
 	function send($method = NOTIFY_EMAIL, $break = false, $is_html = false, $is_digest = false)
 	{
-		global $config, $user, $phpbb_dispatcher;;
 
 		// We add some standard variables we always use, no need to specify them always
 		$this->assign_vars(array(
 			'U_BOARD'	=> generate_board_url(),
-			'EMAIL_SIG'	=> str_replace('<br />', "\n", "-- \n" . htmlspecialchars_decode($config['board_email_sig'])),
-			'SITENAME'	=> htmlspecialchars_decode($config['sitename']),
+			'EMAIL_SIG'	=> str_replace('<br />', "\n", "-- \n" . htmlspecialchars_decode($this->config['board_email_sig'])),
+			'SITENAME'	=> htmlspecialchars_decode($this->config['sitename']),
 		));
 
 		$subject = $this->subject;
@@ -55,7 +80,7 @@ class html_messenger extends \messenger
 		 * @since 3.2.4-RC1
 		 */
 		$vars = array('method', 'break', 'subject', 'template');
-		extract($phpbb_dispatcher->trigger_event('phpbbservices.digests.modify_notification_template', compact($vars)));
+		extract($this->phpbb_dispatcher->trigger_event('phpbbservices.digests.modify_notification_template', compact($vars)));
 
 		// Parse message through template
 		$message = trim($this->template->assign_display('body'));
@@ -72,7 +97,7 @@ class html_messenger extends \messenger
 		* @since 3.1.11-RC1
 		*/
 		$vars = array('method', 'break', 'subject', 'message');
-		extract($phpbb_dispatcher->trigger_event('phpbbservices.digests.modify_notification_message', compact($vars)));
+		extract($this->phpbb_dispatcher->trigger_event('phpbbservices.digests.modify_notification_message', compact($vars)));
 
 		$this->subject = $subject;
 		$this->msg = $message;
@@ -87,12 +112,12 @@ class html_messenger extends \messenger
 		$match = array();
 		if (!$is_digest && preg_match('#^(Subject:(.*?))$#m', $this->msg, $match))
 		{
-			$this->subject = (trim($match[2]) != '') ? trim($match[2]) : (($this->subject != '') ? $this->subject : $user->lang['NO_EMAIL_SUBJECT']);
+			$this->subject = (trim($match[2]) != '') ? trim($match[2]) : (($this->subject != '') ? $this->subject : $this->language->lang['NO_EMAIL_SUBJECT']);
 			$drop_header .= '[\r\n]*?' . preg_quote($match[1], '#');
 		}
 		else
 		{
-			$this->subject = (($this->subject != '') ? $this->subject : $user->lang['NO_EMAIL_SUBJECT']);
+			$this->subject = (($this->subject != '') ? $this->subject : $this->language->lang['NO_EMAIL_SUBJECT']);
 		}
 
 		if (preg_match('#^(List-Unsubscribe:(.*?))$#m', $this->msg, $match))
@@ -137,7 +162,6 @@ class html_messenger extends \messenger
 	*/
 	function build_header($to, $cc, $bcc, $is_html = false)
 	{
-		global $config, $phpbb_dispatcher;
 
 		// We could use keys here, but we won't do this for 3.0.x to retain backwards compatibility
 		$headers = array();
@@ -155,8 +179,8 @@ class html_messenger extends \messenger
 		}
 
 		$headers[] = 'Reply-To: ' . $this->replyto;
-		$headers[] = 'Return-Path: <' . $config['board_email'] . '>';
-		$headers[] = 'Sender: <' . $config['board_email'] . '>';
+		$headers[] = 'Return-Path: <' . $this->config['board_email'] . '>';
+		$headers[] = 'Sender: <' . $this->config['board_email'] . '>';
 		$headers[] = 'MIME-Version: 1.0';
 		$headers[] = 'Message-ID: <' . $this->generate_message_id() . '>';
 		$headers[] = 'Date: ' . date('r', time());
@@ -177,7 +201,7 @@ class html_messenger extends \messenger
 		 * @since 3.1.11-RC1
 		 */
 		$vars = array('headers');
-		extract($phpbb_dispatcher->trigger_event('phpbbservices.digests.modify_email_headers', compact($vars)));
+		extract($this->phpbb_dispatcher->trigger_event('phpbbservices.digests.modify_email_headers', compact($vars)));
 
 		if (count($this->extra_headers))
 		{
@@ -192,9 +216,8 @@ class html_messenger extends \messenger
 	*/
 	function msg_email($is_html=false)
 	{
-		global $config, $phpbb_dispatcher;
 
-		if (empty($config['email_enable']))
+		if (empty($this->config['email_enable']))
 		{
 			return false;
 		}
@@ -207,18 +230,18 @@ class html_messenger extends \messenger
 		}
 
 		$use_queue = false;
-		if ($config['email_package_size'] && $this->use_queue)
+		if ($this->config['email_package_size'] && $this->use_queue)
 		{
 			if (empty($this->queue))
 			{
 				$this->queue = new \queue();
-				$this->queue->init('email', $config['email_package_size']);
+				$this->queue->init('email', $this->config['email_package_size']);
 			}
 			$use_queue = true;
 		}
 
-		$contact_name = htmlspecialchars_decode($config['board_contact_name']);
-		$board_contact = (($contact_name !== '') ? '"' . mail_encode($contact_name) . '" ' : '') . '<' . $config['board_contact'] . '>';
+		$contact_name = htmlspecialchars_decode($this->config['board_contact_name']);
+		$board_contact = (($contact_name !== '') ? '"' . mail_encode($contact_name) . '" ' : '') . '<' . $this->config['board_contact'] . '>';
 
 		$break = false;
 		$addresses = $this->addresses;
@@ -240,7 +263,7 @@ class html_messenger extends \messenger
 			'subject',
 			'msg',
 		);
-		extract($phpbb_dispatcher->trigger_event('phpbbservices.digests.notification_message_email', compact($vars)));
+		extract($this->phpbb_dispatcher->trigger_event('phpbbservices.digests.notification_message_email', compact($vars)));
 
 		if ($break)
 		{
@@ -257,7 +280,7 @@ class html_messenger extends \messenger
 			$this->from = $board_contact;
 		}
 
-		$encode_eol = ($config['smtp_delivery']) ? "\r\n" : PHP_EOL;
+		$encode_eol = ($this->config['smtp_delivery']) ? "\r\n" : PHP_EOL;
 
 		// Build to, cc and bcc strings
 		$to = $cc = $bcc = '';
@@ -283,7 +306,7 @@ class html_messenger extends \messenger
 			$mail_to = ($to == '') ? 'undisclosed-recipients:;' : $to;
 			$err_msg = '';
 
-			if ($config['smtp_delivery'])
+			if ($this->config['smtp_delivery'])
 			{
 				$result = smtpmail($this->addresses, mail_encode($this->subject), wordwrap(utf8_wordwrap($this->msg), 997, "\n", true), $err_msg, $headers);
 			}

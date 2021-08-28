@@ -19,6 +19,7 @@ class digests extends \phpbb\cron\task\base
 	protected $config;
 	protected $db;
 	protected $language;
+	protected $phpbb_dispatcher;
 	protected $phpbb_log;
 	protected $phpbb_notifications;
 	protected $phpbb_root_path;
@@ -59,24 +60,25 @@ class digests extends \phpbb\cron\task\base
 	/**
 	* Constructor.
 	*
-	* @param \phpbb\config\config 				$config 				The config
-	* @param \phpbb\request\request 			$request 				The request object
-	* @param \phpbb\user 						$user 					The user object
-	* @param \phpbb\db\driver\factory 			$db 					The database factory object
-	* @param string								$php_ext 				PHP file suffix
-	* @param string								$phpbb_root_path		Relative path to phpBB root
-	* @param \phpbb\template\template 			$template 				The template engine object
 	* @param \phpbb\auth\auth 					$auth 					The auth object
-	* @param string								$table_prefix 			Prefix for phpbb's database tables
-	* @param \phpbb\log\log 					$phpbb_log 				phpBB log object
-	* @param \phpbb\language\language 			$language 				Language object
-	* @param \phpbb\notification\manager 		$notification_manager 	Notifications manager
+	* @param \phpbb\config\config 				$config 				The config
+	* @param \phpbb\profilefields\manager		$cpfs					Custom profile fields manager
+	* @param \phpbb\db\driver\factory 			$db 					The database factory object
 	* @param \phpbb\filesystem		 			$filesystem				Filesystem object
 	* @param \phpbbservices\digests\core\common $helper 				Digests helper object
-	* @param \phpbb\profilefields\manager		$cpfs					Custom profile fields manager
+	* @param \phpbb\language\language 			$language 				Language object
+	* @param \phpbb\notification\manager 		$notification_manager 	Notifications manager
+	* @param string								$php_ext 				PHP file suffix
+	* @param \phpbb\event\dispatcher			$phpbb_dispatcher		Dispatcher object
+	* @param \phpbb\log\log 					$phpbb_log 				phpBB log object
+	* @param string								$phpbb_root_path		Relative path to phpBB root
+	* @param \phpbb\request\request 			$request 				The request object
+	* @param string								$table_prefix 			Prefix for phpbb's database tables
+	* @param \phpbb\template\template 			$template 				The template engine object
+	* @param \phpbb\user 						$user 					The user object
 	*/
 
-	public function __construct(\phpbb\config\config $config, \phpbb\request\request $request, \phpbb\user $user, \phpbb\db\driver\factory $db, $php_ext, $phpbb_root_path, \phpbb\template\template $template, \phpbb\auth\auth $auth, $table_prefix, \phpbb\log\log $phpbb_log, \phpbb\language\language $language, \phpbb\notification\manager $notification_manager, \phpbb\filesystem\filesystem $filesystem, \phpbbservices\digests\core\common $helper, \phpbb\profilefields\manager $cpfs)
+	public function __construct(\phpbb\config\config $config, \phpbb\request\request $request, \phpbb\user $user, \phpbb\db\driver\factory $db, $php_ext, $phpbb_root_path, \phpbb\template\template $template, \phpbb\auth\auth $auth, $table_prefix, \phpbb\log\log $phpbb_log, \phpbb\language\language $language, \phpbb\notification\manager $notification_manager, \phpbb\filesystem\filesystem $filesystem, \phpbbservices\digests\core\common $helper, \phpbb\profilefields\manager $cpfs, \phpbb\event\dispatcher $phpbb_dispatcher)
 	{
 
 		$this->auth = $auth;
@@ -86,11 +88,12 @@ class digests extends \phpbb\cron\task\base
 		$this->filesystem = $filesystem;
 		$this->helper = $helper;
 		$this->language = $language;
+		$this->phpbb_dispatcher = $phpbb_dispatcher;
 		$this->phpbb_log = $phpbb_log;
-		$this->request = $request;
 		$this->phpbb_notifications = $notification_manager;
 		$this->phpbb_root_path = $phpbb_root_path;
 		$this->phpEx = $php_ext;
+		$this->request = $request;
 		$this->table_prefix = $table_prefix;
 		$this->template = $template;
 		$this->user = $user;
@@ -634,7 +637,7 @@ class digests extends \phpbb\cron\task\base
 				{
 					include($this->phpbb_root_path . 'includes/functions_messenger.' . $this->phpEx);
 				}
-				$html_messenger = new \phpbbservices\digests\includes\html_messenger();
+				$html_messenger = new \phpbbservices\digests\includes\html_messenger(true, $this->config, $this->user, $this->phpbb_dispatcher, $this->language);
 
 				// Set the text showing the digest type
 				switch ($row['user_digest_type'])

@@ -34,9 +34,6 @@ class acp_controller
 	protected $template;
 	protected $user;
 
-	/** @var string Custom form action */
-	//protected $u_action;
-
 	/**
 	 * Constructor.
 	 *

@@ -332,7 +332,6 @@ class html_messenger extends \messenger
 			);
 		}
 
-
 		return true;
 	}
 

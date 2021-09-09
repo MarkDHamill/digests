@@ -18,6 +18,18 @@ services:
             - '%core.table_prefix%'
             - '@template'
             - '@user'
+    phpbbservices.digests.controller.ucp:
+        class: phpbbservices\digests\controller\ucp_controller
+        arguments:
+            - '@auth'
+            - '@config'
+            - '@dbal.conn'
+            - '@phpbbservices.digests.common'
+            - '@language'
+            - '@request'
+            - '%core.table_prefix%'
+            - '@template'
+            - '@user'
     phpbbservices.digests.listener:
         class: phpbbservices\digests\event\main_listener
         arguments:

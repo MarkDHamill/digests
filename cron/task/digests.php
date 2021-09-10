@@ -10,7 +10,6 @@
 namespace phpbbservices\digests\cron\task;
 
 use phpbbservices\digests\constants\constants;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class digests extends \phpbb\cron\task\base
 {

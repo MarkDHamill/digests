@@ -9,8 +9,6 @@
 
 namespace phpbbservices\digests\acp;
 
-use phpbbservices\digests\constants\constants;
-
 class main_module
 {
 

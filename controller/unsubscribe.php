@@ -26,15 +26,15 @@ class unsubscribe
 	/**
 	 * Constructor
 	 *
-	 * @param \phpbb\request\request 	$request 	The request object
-	 * @param \phpbb\user 				$user 		The user object
-	 * @param \phpbb\db\driver\factory 	$db 		The database factory object
-	 * @param \phpbb\controller\helper	$helper		Controller helper object
-	 * @param \phpbb\language\language $language Language object
+	 * @param \phpbb\request\request 				$request 	The request object
+	 * @param \phpbb\user 							$user 		The user object
+	 * @param \phpbb\db\driver\factory 				$db 		The database factory object
+	 * @param \phpbbservices\digests\core\common	$helper		Digests helper object
+	 * @param \phpbb\language\language 				$language 	Language object
 	 *
 	 *
 	 */
-	public function __construct(\phpbb\request\request $request, \phpbb\user $user, \phpbb\db\driver\factory $db, \phpbb\controller\helper $helper, \phpbb\language\language $language)
+	public function __construct(\phpbb\request\request $request, \phpbb\user $user, \phpbb\db\driver\factory $db, \phpbbservices\digests\core\common $helper, \phpbb\language\language $language)
 	{
 		$this->db 		= $db;
 		$this->helper	= $helper;
@@ -44,9 +44,7 @@ class unsubscribe
 	}
 
 	/**
-	 * Controller handler for route /digests/
-	 *
-	 * @return \Symfony\Component\HttpFoundation\Response A Symfony Response object
+	 * Controller handler for digests unsubscribe logic
 	 */
 	public function handle()
 	{

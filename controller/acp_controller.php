@@ -44,7 +44,7 @@ class acp_controller
 	 * @param \phpbb\language\language					$language					Language object
 	 * @param \phpbbservices\digests\cron\task\digests	$mailer						Digests mailer object
 	 * @param \phpbb\pagination 						$pagination					Pagination object
-	 * @param \phpbb\extension 							$phpbb_extension_manager	phpBB extension manager object
+	 * @param \phpbb\extension\manager 					$phpbb_extension_manager	phpBB extension manager object
 	 * @param \phpbb\log\log 							$phpbb_log 					phpBB log object
 	 * @param \phpbb\path_helper						$phpbb_path_helper 			phpBB path helper object
 	 * @param string									$phpbb_root_path			Relative path to phpBB root
@@ -900,19 +900,6 @@ class acp_controller
 			break;
 
 			case 'digests_test':
-				$this->template->assign_vars(array(
-					'L_TITLE'									=> $this->language->lang('ACP_DIGESTS_TEST'),
-					'L_TITLE_EXPLAIN'							=> $this->language->lang('ACP_DIGESTS_TEST_EXPLAIN'),
-					'S_DIGESTS_MANUAL_RUN'						=> true, // Run this module
-					'S_DIGESTS_RUN_TEST'						=> (bool) $this->config['phpbbservices_digests_test'],
-					'S_DIGESTS_RUN_TEST_SEND_TO_ADMIN'			=> (bool) $this->config['phpbbservices_digests_test_send_to_admin'],
-					'S_DIGESTS_RUN_TEST_CLEAR_SPOOL'			=> (bool) $this->config['phpbbservices_digests_test_clear_spool'],
-					'S_DIGESTS_RUN_TEST_SPOOL'					=> (bool) $this->config['phpbbservices_digests_test_spool'],
-					'S_INCLUDE_DIGESTS_MANUAL_MAILER'			=> true,	// Allows inclusion of date and hour picker
-					'TEST_DATE_HOUR'							=> $this->config['phpbbservices_digests_test_date_hour'],
-					'TEST_EMAIL_ADDRESS'						=> $this->config['phpbbservices_digests_test_email_address'],
-				));
-
 				// Show subscribers for the current hour. This gives admins some idea who or if anyone will received digests for the current hour.
 
 				$server_timezone = (float) date('O')/100;	// Server timezone offset from UTC, in hours. Digests are mailed based on UTC time, so rehosting is unaffected.
@@ -922,6 +909,7 @@ class acp_controller
 				$current_hour_utc = (int) date('G', $utc_time); // 0 thru 23
 
 				// Get subscribers for current hour
+				$current_hour_subscribers = array();
 				$sql_array = array(
 					'SELECT'	=> 'username, user_digest_type',
 
@@ -929,7 +917,7 @@ class acp_controller
 						USERS_TABLE	=> 'u',
 					),
 
-					'WHERE'		=> $this->db->sql_in_set('user_digest_send_hour_gmt', $current_hour_utc) . ' AND ' . $this->db->sql_in_set('user_digest_type', constants::DIGESTS_NONE_VALUE, true),
+					'WHERE'		=> $this->db->sql_in_set('user_digest_send_hour_gmt', array($current_hour_utc)) . ' AND ' . $this->db->sql_in_set('user_digest_type', array(constants::DIGESTS_NONE_VALUE), true),
 
 					'ORDER_BY'	=> 'username',
 				);
@@ -958,6 +946,20 @@ class acp_controller
 					}
 					$current_hour_subscribers[] = $row['username'] . ' (' . $digest_type . ')';
 				}
+
+				$this->template->assign_vars(array(
+					'L_TITLE'									=> $this->language->lang('ACP_DIGESTS_TEST'),
+					'L_TITLE_EXPLAIN'							=> sprintf($this->language->lang('ACP_DIGESTS_TEST_EXPLAIN'),implode($this->language->lang('DIGESTS_COMMA'), $current_hour_subscribers)),
+					'S_DIGESTS_MANUAL_RUN'						=> true, // Run this module
+					'S_DIGESTS_RUN_TEST'						=> (bool) $this->config['phpbbservices_digests_test'],
+					'S_DIGESTS_RUN_TEST_SEND_TO_ADMIN'			=> (bool) $this->config['phpbbservices_digests_test_send_to_admin'],
+					'S_DIGESTS_RUN_TEST_CLEAR_SPOOL'			=> (bool) $this->config['phpbbservices_digests_test_clear_spool'],
+					'S_DIGESTS_RUN_TEST_SPOOL'					=> (bool) $this->config['phpbbservices_digests_test_spool'],
+					'S_INCLUDE_DIGESTS_MANUAL_MAILER'			=> true,	// Allows inclusion of date and hour picker
+					'TEST_DATE_HOUR'							=> $this->config['phpbbservices_digests_test_date_hour'],
+					'TEST_EMAIL_ADDRESS'						=> $this->config['phpbbservices_digests_test_email_address'],
+				));
+
 
 
 			break;
@@ -1045,10 +1047,9 @@ class acp_controller
 
 				// The "selected" input control indicates whether to do mass actions or not.
 				$selected = $this->request->variable('selected', 'i', true);
-				$change_details = ($selected == 'i') ? true : false;
-				$unsubscribe = ($selected == 'n') ? true : false;
-				$subscribe_defaults = ($selected == 'd') ? true : false;
-				$temp_subscribe_defaults = false; // Tracks if subscribe using defaults is wanted for a particular user when in change check rows only mode ($selected == 'i')
+				$change_details = $selected == 'i';
+				$unsubscribe = $selected == 'n';
+				$subscribe_defaults = $selected == 'd';
 
 				unset($sql_ary, $sql_ary2, $requests_vars);
 
@@ -1061,7 +1062,6 @@ class acp_controller
 
 				// Set some flags
 				$current_user_id = NULL;
-				$temp_subscribe_defaults = false;
 				$user_fields_found = 0;
 
 				foreach ($request_vars as $name => $value)
@@ -1085,12 +1085,6 @@ class acp_controller
 						$user_id = substr($name, 5, $delimiter_pos - 5);
 						$column_name_fragment = substr($name,$delimiter_pos + 1);
 
-						// Make this user subscribe using digest defaults because it was selected individually for the digest type?
-						if ($selected && ($this->request->variable('user-' . $user_id . '-digest_type', constants::DIGESTS_NONE_VALUE, true) == constants::DIGESTS_DEFAULT_VALUE))
-						{
-							$temp_subscribe_defaults = true;
-						}
-
 						if ($current_user_id === NULL)
 						{
 							$current_user_id = $user_id;
@@ -1108,36 +1102,15 @@ class acp_controller
 										WHERE user_id = " . (int) $current_user_id;
 								$this->db->sql_query($sql);
 							}
-							else if ($subscribe_defaults || $temp_subscribe_defaults)	// Subscribe user with digest defaults
+							else if ($subscribe_defaults)	// Subscribe user with digest defaults
 							{
-								unset($sql_ary);
-
-								$sql_ary['user_digest_type'] 				= $this->config['phpbbservices_digests_user_digest_type'];
-								$sql_ary['user_digest_format'] 				= $this->config['phpbbservices_digests_user_digest_format'];
-								$sql_ary['user_digest_show_mine'] 			= ($this->config['phpbbservices_digests_user_digest_show_mine'] == 1) ? 0 : 1;
-								$sql_ary['user_digest_send_on_no_posts'] 	= $this->config['phpbbservices_digests_user_digest_send_on_no_posts'];
-								$sql_ary['user_digest_send_hour_gmt'] 		= ($this->config['phpbbservices_digests_user_digest_send_hour_gmt'] == -1) ? rand(0,23) : $this->config['phpbbservices_digests_user_digest_send_hour_gmt'];
-								$sql_ary['user_digest_show_pms'] 			= $this->config['phpbbservices_digests_user_digest_show_pms'];
-								$sql_ary['user_digest_max_posts'] 			= $this->config['phpbbservices_digests_user_digest_max_posts'];
-								$sql_ary['user_digest_min_words'] 			= $this->config['phpbbservices_digests_user_digest_min_words'];
-								$sql_ary['user_digest_remove_foes'] 		= $this->config['phpbbservices_digests_user_digest_remove_foes'];
-								$sql_ary['user_digest_sortby'] 				= $this->config['phpbbservices_digests_user_digest_sortby'];
-								$sql_ary['user_digest_max_display_words'] 	= ($this->config['phpbbservices_digests_user_digest_max_display_words'] == -1) ? 0 : $this->config['phpbbservices_digests_user_digest_max_display_words'];
-								$sql_ary['user_digest_reset_lastvisit'] 	= $this->config['phpbbservices_digests_user_digest_reset_lastvisit'];
-								$sql_ary['user_digest_filter_type'] 		= $this->config['phpbbservices_digests_user_digest_filter_type'];
-								$sql_ary['user_digest_pm_mark_read'] 		= $this->config['phpbbservices_digests_user_digest_pm_mark_read'];
-								$sql_ary['user_digest_new_posts_only'] 		= $this->config['phpbbservices_digests_user_digest_new_posts_only'];
-								$sql_ary['user_digest_no_post_text']		= ($this->config['phpbbservices_digests_user_digest_max_display_words'] == 0) ? 1 : 0;
-								$sql_ary['user_digest_attachments'] 		= $this->config['phpbbservices_digests_user_digest_attachments'];
-								$sql_ary['user_digest_block_images']		= $this->config['phpbbservices_digests_user_digest_block_images'];
-								$sql_ary['user_digest_toc']					= $this->config['phpbbservices_digests_user_digest_toc'];
+								$sql_ary = $this->create_digests_default_sql();
 
 								$sql = 'UPDATE ' . USERS_TABLE . ' 
 										SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
 										WHERE user_id = ' . (int) $current_user_id;
-								$this->db->sql_query($sql);
 
-								$temp_subscribe_defaults = false;
+								$this->db->sql_query($sql);
 							}
 							else if (isset($sql_ary) && count($sql_ary) > 0)	// Change individual settings on a per user basis, $change_details == true
 							{
@@ -1298,33 +1271,13 @@ class acp_controller
 							WHERE user_id = " . (int) $current_user_id;
 					$this->db->sql_query($sql);
 				}
-				else if ($subscribe_defaults || $temp_subscribe_defaults)	// Subscribe user with digest defaults
+				else if ($subscribe_defaults)	// Subscribe user with digest defaults
 				{
-					unset($sql_ary);
-
-					$sql_ary['user_digest_type'] 				= $this->config['phpbbservices_digests_user_digest_type'];
-					$sql_ary['user_digest_format'] 				= $this->config['phpbbservices_digests_user_digest_format'];
-					$sql_ary['user_digest_show_mine'] 			= ($this->config['phpbbservices_digests_user_digest_show_mine'] == 1) ? 0 : 1;
-					$sql_ary['user_digest_send_on_no_posts'] 	= $this->config['phpbbservices_digests_user_digest_send_on_no_posts'];
-					$sql_ary['user_digest_send_hour_gmt'] 		= ($this->config['phpbbservices_digests_user_digest_send_hour_gmt'] == -1) ? rand(0,23) : $this->config['phpbbservices_digests_user_digest_send_hour_gmt'];
-					$sql_ary['user_digest_show_pms'] 			= $this->config['phpbbservices_digests_user_digest_show_pms'];
-					$sql_ary['user_digest_max_posts'] 			= $this->config['phpbbservices_digests_user_digest_max_posts'];
-					$sql_ary['user_digest_min_words'] 			= $this->config['phpbbservices_digests_user_digest_min_words'];
-					$sql_ary['user_digest_remove_foes'] 		= $this->config['phpbbservices_digests_user_digest_remove_foes'];
-					$sql_ary['user_digest_sortby'] 				= $this->config['phpbbservices_digests_user_digest_sortby'];
-					$sql_ary['user_digest_max_display_words'] 	= ($this->config['phpbbservices_digests_user_digest_max_display_words'] == -1) ? 0 : $this->config['phpbbservices_digests_user_digest_max_display_words'];
-					$sql_ary['user_digest_reset_lastvisit'] 	= $this->config['phpbbservices_digests_user_digest_reset_lastvisit'];
-					$sql_ary['user_digest_filter_type'] 		= $this->config['phpbbservices_digests_user_digest_filter_type'];
-					$sql_ary['user_digest_pm_mark_read'] 		= $this->config['phpbbservices_digests_user_digest_pm_mark_read'];
-					$sql_ary['user_digest_new_posts_only'] 		= $this->config['phpbbservices_digests_user_digest_new_posts_only'];
-					$sql_ary['user_digest_no_post_text']		= ($this->config['phpbbservices_digests_user_digest_max_display_words'] == 0) ? 1 : 0;
-					$sql_ary['user_digest_attachments'] 		= $this->config['phpbbservices_digests_user_digest_attachments'];
-					$sql_ary['user_digest_block_images']		= $this->config['phpbbservices_digests_user_digest_block_images'];
-					$sql_ary['user_digest_toc']					= $this->config['phpbbservices_digests_user_digest_toc'];
+					$sql_ary = $this->create_digests_default_sql();
 
 					$sql = 'UPDATE ' . USERS_TABLE . ' 
-										SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
-										WHERE user_id = ' . (int) $current_user_id;
+							SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
+							WHERE user_id = ' . (int) $current_user_id;
 					$this->db->sql_query($sql);
 				}
 				else if (isset($sql_ary) && count($sql_ary) > 0)	// Change individual settings on a per user basic, $change_details == true
@@ -1347,6 +1300,7 @@ class acp_controller
 				}
 
 				// Also want to save some information to an array to be used for sending emails to affected users.
+				$digest_notify_list = array();
 				if ($this->config['phpbbservices_digests_notify_on_admin_changes'])
 				{
 					$digest_notify_list[] = $current_user_id;
@@ -1388,6 +1342,7 @@ class acp_controller
 				// Determine the average number of subscribers per hour. We need to assume at least one subscriber per hour to avoid
 				// resetting user's preferred digest time unnecessarily. If the average is 3 per hour, the first 3 already subscribed
 				// will not have their digest arrival time changed.
+				$avg_per_hour = $this->average_subscribers_per_hour();
 				$avg_subscribers_per_hour = max($avg_per_hour, 1);
 
 				// Get oversubscribed hours, place in an array
@@ -1795,7 +1750,7 @@ class acp_controller
 
 	}
 	
-	function average_subscribers_per_hour ()
+	function average_subscribers_per_hour()
 	{
 
 		// This function returns the average number of digest subscribers per hour.
@@ -1839,7 +1794,7 @@ class acp_controller
 				USERS_TABLE		=> 'u',
 			),
 
-			'WHERE' 	=> $this->db->sql_in_set('user_digest_send_hour_gmt', $hour_utc),
+			'WHERE' 	=> $this->db->sql_in_set('user_digest_send_hour_gmt', array($hour_utc)),
 
 			'ORDER_BY'	=> 'username'
 		);
@@ -1858,7 +1813,7 @@ class acp_controller
 
 	}
 
-	function dow_select()
+	function dow_select ()
 	{
 		// Returns a string containing HTML that gives the days of the week as <option> tags inside a <select> tag
 		// with the day of the week used for sending weekly digests selected.
@@ -1876,7 +1831,7 @@ class acp_controller
 		return $dow_options;
 	}
 
-	function digest_type_select()
+	function digest_type_select ()
 	{
 		// Returns a string containing HTML, basically a set of option tags so the admin can pick daily, weekly
 		// or monthly digests as the default digest type.
@@ -1891,7 +1846,7 @@ class acp_controller
 		return $digest_types;
 	}
 
-	function digest_style_select()
+	function digest_style_select ()
 	{
 		// Returns a string containing HTML, basically a set of option tags so the admin can pick the default digest format.
 
@@ -1909,7 +1864,7 @@ class acp_controller
 		return $digest_styles;
 	}
 
-	function digest_send_hour_utc()
+	function digest_send_hour_utc ()
 	{
 		// Returns a set of option tags for all the hours of the day selecting a send hour for digests including the default
 		// to assign a random hour. The values should be interpreted as UTC hour.
@@ -1956,6 +1911,33 @@ class acp_controller
 		$digest_sort_order .= '<option value="' . constants::DIGESTS_SORTBY_POSTDATE_DESC . '"' . $selected . '>' . $this->language->lang('DIGESTS_SORT_POST_DATE_DESC') . '</option>';
 
 		return $digest_sort_order;
+	}
+
+	function create_digests_default_sql ()
+	{
+
+		$sql_ary['user_digest_type'] 				= $this->config['phpbbservices_digests_user_digest_type'];
+		$sql_ary['user_digest_format'] 				= $this->config['phpbbservices_digests_user_digest_format'];
+		$sql_ary['user_digest_show_mine'] 			= ($this->config['phpbbservices_digests_user_digest_show_mine'] == 1) ? 0 : 1;
+		$sql_ary['user_digest_send_on_no_posts'] 	= $this->config['phpbbservices_digests_user_digest_send_on_no_posts'];
+		$sql_ary['user_digest_send_hour_gmt'] 		= ($this->config['phpbbservices_digests_user_digest_send_hour_gmt'] == -1) ? rand(0,23) : $this->config['phpbbservices_digests_user_digest_send_hour_gmt'];
+		$sql_ary['user_digest_show_pms'] 			= $this->config['phpbbservices_digests_user_digest_show_pms'];
+		$sql_ary['user_digest_max_posts'] 			= $this->config['phpbbservices_digests_user_digest_max_posts'];
+		$sql_ary['user_digest_min_words'] 			= $this->config['phpbbservices_digests_user_digest_min_words'];
+		$sql_ary['user_digest_remove_foes'] 		= $this->config['phpbbservices_digests_user_digest_remove_foes'];
+		$sql_ary['user_digest_sortby'] 				= $this->config['phpbbservices_digests_user_digest_sortby'];
+		$sql_ary['user_digest_max_display_words'] 	= ($this->config['phpbbservices_digests_user_digest_max_display_words'] == -1) ? 0 : $this->config['phpbbservices_digests_user_digest_max_display_words'];
+		$sql_ary['user_digest_reset_lastvisit'] 	= $this->config['phpbbservices_digests_user_digest_reset_lastvisit'];
+		$sql_ary['user_digest_filter_type'] 		= $this->config['phpbbservices_digests_user_digest_filter_type'];
+		$sql_ary['user_digest_pm_mark_read'] 		= $this->config['phpbbservices_digests_user_digest_pm_mark_read'];
+		$sql_ary['user_digest_new_posts_only'] 		= $this->config['phpbbservices_digests_user_digest_new_posts_only'];
+		$sql_ary['user_digest_no_post_text']		= ($this->config['phpbbservices_digests_user_digest_max_display_words'] == 0) ? 1 : 0;
+		$sql_ary['user_digest_attachments'] 		= $this->config['phpbbservices_digests_user_digest_attachments'];
+		$sql_ary['user_digest_block_images']		= $this->config['phpbbservices_digests_user_digest_block_images'];
+		$sql_ary['user_digest_toc']					= $this->config['phpbbservices_digests_user_digest_toc'];
+
+		return ($sql_ary);
+
 	}
 
 }

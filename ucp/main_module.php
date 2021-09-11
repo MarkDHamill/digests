@@ -17,6 +17,9 @@ class main_module
 	public $tpl_name;
 	public $u_action;
 
+	protected $language;
+	protected $phpbb_container;
+
 	/**
 	 * Main UCP module
 	 *

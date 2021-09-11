@@ -76,7 +76,7 @@ class main_listener implements EventSubscriberInterface
 		// This logic supports the subscribe a user to a digest automatically feature, if enabled. It also handles a subscription if the user is presented
 		// the option to subscribe on registration and they select yes.
 		
-		$subscribe_on_registration = ($this->request->variable('digest', '0') == '1') ? true : false;	// Test if user wanted to subscribe to digests on registration
+		$subscribe_on_registration = $this->request->variable('digest', '0') == '1';	// Test if user wanted to subscribe to digests on registration
 
 		$is_human = ($event['sql_ary']['user_type'] == USER_IGNORE) ? false : true;
 		if ($is_human && ($this->config['phpbbservices_digests_enable_auto_subscriptions'] == 1 || $subscribe_on_registration))
@@ -114,7 +114,7 @@ class main_listener implements EventSubscriberInterface
 
 		// Fields on registration for that allow a user to subscribe to digests, if this feature is enabled.
 		$this->template->assign_vars(array(
-			'S_DIGESTS'							=> (!$this->config['phpbbservices_digests_enable_auto_subscriptions'] && $this->config['phpbbservices_digests_registration_field']) ? true : false,	
+			'S_DIGESTS'							=> !$this->config['phpbbservices_digests_enable_auto_subscriptions'] && $this->config['phpbbservices_digests_registration_field'],
 			'S_DIGESTS_REGISTER_CHECKED_YES' 	=> ($this->config['phpbbservices_digests_user_digest_registration']) ? true : false,
 			'S_DIGESTS_REGISTER_CHECKED_NO' 	=> ($this->config['phpbbservices_digests_user_digest_registration']) ? false : true,
 			)
@@ -123,7 +123,15 @@ class main_listener implements EventSubscriberInterface
 	}
 
 	/**
-	 * @param data $event
+	 * Event after the user(s) delete action has been performed
+	 *
+	 * @event core.delete_user_after
+	 * @var string	mode				Mode of posts deletion (retain|delete)
+	 * @var array	user_ids			ID(s) of the deleted user(s)
+	 * @var bool	retain_username		True if username should be retained, false otherwise
+	 * @var array	user_rows			Array containing data of the deleted user(s)
+	 * @since 3.1.0-a1
+	 * @changed 3.2.2-RC1 Added user_rows
 	 */
 	public function delete_user_after($event)
 	{

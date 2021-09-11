@@ -22,6 +22,8 @@ class ucp_controller
 	protected $db;
 	protected $helper;
 	protected $language;
+	protected $phpbb_root_path;
+	protected $phpEx;
 	protected $request;
 	protected $table_prefix;
 	protected $template;
@@ -37,18 +39,22 @@ class ucp_controller
 	 * @param \phpbb\db\driver\factory 					$db 						The database factory object
 	 * @param \phpbbservices\digests\core\common		$helper						Digests helper object
 	 * @param \phpbb\language\language					$language					Language object
+	 * @param string									$php_ext 					PHP file suffix
+	 * @param string									$phpbb_root_path			Relative path to phpBB root
 	 * @param \phpbb\request\request					$request					Request object
 	 * @param string									$table_prefix 				Prefix for phpbb's database tables
 	 * @param \phpbb\template\template					$template					Template object
 	 * @param \phpbb\user								$user						User object
 	 */
-	public function __construct(\phpbb\auth\auth $auth, \phpbb\config\config $config, \phpbb\db\driver\factory $db, \phpbbservices\digests\core\common $helper, \phpbb\language\language $language, \phpbb\request\request $request, $table_prefix, \phpbb\template\template $template, \phpbb\user $user)
+	public function __construct(\phpbb\auth\auth $auth, \phpbb\config\config $config, \phpbb\db\driver\factory $db, \phpbbservices\digests\core\common $helper, \phpbb\language\language $language, \phpbb\request\request $request, $table_prefix, \phpbb\template\template $template, \phpbb\user $user, $phpbb_root_path, $php_ext)
 	{
 		$this->auth = $auth;
 		$this->config = $config;
 		$this->db = $db;
 		$this->helper = $helper;
 		$this->language = $language;
+		$this->phpEx = $php_ext;
+		$this->phpbb_root_path = $phpbb_root_path;
 		$this->request = $request;
 		$this->table_prefix	= $table_prefix;
 		$this->template = $template;
@@ -64,7 +70,7 @@ class ucp_controller
 	{
 
 		$form_key = 'phpbbservices/digests';
-		$submit = ($this->request->is_set_post('submit')) ? true : false;
+		$submit = $this->request->is_set_post('submit');
 
 		if ($submit && !check_form_key($form_key))
 		{
@@ -74,7 +80,6 @@ class ucp_controller
 
 		if ($submit)
 		{
-
 			// Save settings for each mode
 			switch ($mode)
 			{
@@ -400,7 +405,7 @@ class ucp_controller
 				$rowset = $this->db->sql_fetchrowset($result);
 				$this->db->sql_freeresult($result);
 
-				$all_by_default = (count($rowset) == 0) ? true : false;
+				$all_by_default = count($rowset) == 0;
 
 				$allowed_forums = array();
 

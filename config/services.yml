@@ -30,6 +30,8 @@ services:
             - '%core.table_prefix%'
             - '@template'
             - '@user'
+            - '%core.root_path%'
+            - '%core.php_ext%'
     phpbbservices.digests.listener:
         class: phpbbservices\digests\event\main_listener
         arguments:
@@ -66,7 +68,6 @@ services:
             - '@log'
             - '@language'
             - '@notification_manager'
-            - '@filesystem'
             - '@phpbbservices.digests.common'
             - '@profilefields.manager'
             - '@dispatcher'

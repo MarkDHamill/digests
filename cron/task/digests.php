@@ -16,7 +16,9 @@ class digests extends \phpbb\cron\task\base
 
 	protected $auth;
 	protected $config;
+	protected $cpfs;
 	protected $db;
+	protected $helper;
 	protected $language;
 	protected $phpbb_dispatcher;
 	protected $phpbb_log;
@@ -31,13 +33,11 @@ class digests extends \phpbb\cron\task\base
 	// Most of these private variables are needed because the create_content function does much of the assembly work and it needs a lot of common information
 	
 	private $board_url;					// Digests need an absolute URL to the forum to embed links to topic, posts, forum and private messages
-	private $cpfs;						// Used to access custom profile fields class
 	private $debug;						// Let's us know if we are in debug mode
 	private $date_limit;				// A logical range of dates that posts must be within
 	private $digests_last_run;			// Remembers when digests were last run in case of abmormal program terminition
 	private $email_address_override;	// Used if admin wants manual mailer to send him/her a digest at an email address specified for this run
 	private $email_templates_path;		// Relative path to where the language specific email templates are located
-	private $helper;					// Object for extension's helper class
 	private $forum_hierarchy;			// An array of forum_ids and their parent forum_ids.
 	private $layout_with_html_tables;	// Layout posts in the email as HTML tables, similar to the phpBB2 digests mod
 	private $list_id;					// Used in determining forum access privileges for a subscriber
@@ -45,7 +45,6 @@ class digests extends \phpbb\cron\task\base
 	private $path_prefix;				// Appended to paths to find files in the correct location
 	private $posts_in_digest;			// # of posts in a digest for a particular subscriber
 	private $read_id;					// Used in determining forum access privileges for a subscriber
-	private $requested_forums_names;	// If user specifies forums for posts wanted, this will contain the forum names
 	private $run_mode;					// phpBB (regular) cron, system cron or manual
 	private $salutation_fields;			// Contains fields to be used in the salutation, as an array
 	private $server_timezone;			// Offset in hours from UTC for server
@@ -53,7 +52,6 @@ class digests extends \phpbb\cron\task\base
 	private $time;						// Current time (or requested start time if running an out of cycle digest)
 	private $toc;						// Table of contents array
 	private $toc_pm_count;				// Table of contents private message count
-	private $utc_time;					// UTC time when digest mailer run
 	private $utc_month_lastday_end;		// The last day of the month when a monthly digest is wanted
 
 	/**
@@ -63,7 +61,6 @@ class digests extends \phpbb\cron\task\base
 	* @param \phpbb\config\config 				$config 				The config
 	* @param \phpbb\profilefields\manager		$cpfs					Custom profile fields manager
 	* @param \phpbb\db\driver\factory 			$db 					The database factory object
-	* @param \phpbb\filesystem		 			$filesystem				Filesystem object
 	* @param \phpbbservices\digests\core\common $helper 				Digests helper object
 	* @param \phpbb\language\language 			$language 				Language object
 	* @param \phpbb\notification\manager 		$notification_manager 	Notifications manager
@@ -77,14 +74,13 @@ class digests extends \phpbb\cron\task\base
 	* @param \phpbb\user 						$user 					The user object
 	*/
 
-	public function __construct(\phpbb\config\config $config, \phpbb\request\request $request, \phpbb\user $user, \phpbb\db\driver\factory $db, $php_ext, $phpbb_root_path, \phpbb\template\template $template, \phpbb\auth\auth $auth, $table_prefix, \phpbb\log\log $phpbb_log, \phpbb\language\language $language, \phpbb\notification\manager $notification_manager, \phpbb\filesystem\filesystem $filesystem, \phpbbservices\digests\core\common $helper, \phpbb\profilefields\manager $cpfs, \phpbb\event\dispatcher $phpbb_dispatcher)
+	public function __construct(\phpbb\config\config $config, \phpbb\request\request $request, \phpbb\user $user, \phpbb\db\driver\factory $db, $php_ext, $phpbb_root_path, \phpbb\template\template $template, \phpbb\auth\auth $auth, $table_prefix, \phpbb\log\log $phpbb_log, \phpbb\language\language $language, \phpbb\notification\manager $notification_manager, \phpbbservices\digests\core\common $helper, \phpbb\profilefields\manager $cpfs, \phpbb\event\dispatcher $phpbb_dispatcher)
 	{
 
 		$this->auth = $auth;
 		$this->config = $config;
 		$this->cpfs = $cpfs;
 		$this->db = $db;
-		$this->filesystem = $filesystem;
 		$this->helper = $helper;
 		$this->language = $language;
 		$this->phpbb_dispatcher = $phpbb_dispatcher;
@@ -397,7 +393,7 @@ class digests extends \phpbb\cron\task\base
 				substr($this->config['phpbbservices_digests_test_date_hour'],0,4));
 			// To determine UTC in manual mode, we need to use the administrator's timezone and offset from it.
 			$hour_offset = $this->helper->make_tz_offset ($this->user->data['user_timezone']);
-			$this->utc_time = $this->time - (int) ($hour_offset * 60 * 60);	// Convert server time (or requested run date) into UTC
+			$utc_time = $this->time - (int) ($hour_offset * 60 * 60);	// Convert server time (or requested run date) into UTC
 			if ($this->config['phpbbservices_digests_enable_log'])
 			{
 				$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_SIMULATION_DATE_TIME', false, array(
@@ -407,17 +403,17 @@ class digests extends \phpbb\cron\task\base
 		else
 		{
 			$this->time = $now + ($hour * (60 * 60));	// Timestamp for hour to be processed
-			$this->utc_time = $this->time - (int) ($this->server_timezone * 60 * 60);	// Convert server time (or requested run date) into UTC
+			$utc_time = $this->time - (int) ($this->server_timezone * 60 * 60);	// Convert server time (or requested run date) into UTC
 		}
 
 		// Get the current hour in UTC, so applicable digests can be sent out for this hour
-		$current_hour_utc = date('G', $this->utc_time); // 0 thru 23
-		$current_hour_utc_plus_30 = date('G', $this->utc_time) + .5;
+		$current_hour_utc = date('G', $utc_time); // 0 thru 23
+		$current_hour_utc_plus_30 = date('G', $utc_time) + .5;
 		if ($current_hour_utc_plus_30 >= 24)
 		{
 			$current_hour_utc_plus_30 = $current_hour_utc_plus_30 - 24;	// A very unlikely situation
 		}
-		$current_date_utc = date('Y-m-d' , $this->utc_time);
+		$current_date_utc = date('Y-m-d' , $utc_time);
 
 		// Create SQL fragment to fetch users wanting a daily digest
 		if (!(isset($daily_digest_sql)))
@@ -428,14 +424,14 @@ class digests extends \phpbb\cron\task\base
 		// Create SQL fragment to also fetch users wanting a weekly digest, if today is the day weekly digests should go out
 		if (!(isset($weekly_digest_sql)))
 		{
-			$weekly_digest_sql = (date('w', $this->utc_time) == $this->config['phpbbservices_digests_weekly_digest_day']) ? ' OR (' . $this->db->sql_in_set('user_digest_type', array(constants::DIGESTS_WEEKLY_VALUE)) . ')': '';
+			$weekly_digest_sql = (date('w', $utc_time) == $this->config['phpbbservices_digests_weekly_digest_day']) ? ' OR (' . $this->db->sql_in_set('user_digest_type', array(constants::DIGESTS_WEEKLY_VALUE)) . ')': '';
 		}
 		
 		// Create SQL fragment to also fetch users wanting a monthly digest. This only happens if the current UTC day is the first of the month.
-		$utc_year = (int) date('Y', $this->utc_time);
-		$utc_month = (int) date('m', $this->utc_time);	// Two-digit month, with leading zeroes
-		$utc_day = (int) date('d', $this->utc_time);		// Two-digit day of month, with leading zeroes
-		$utc_hour = (int) date('H', $this->utc_time);	// Two digit 24 hour, with leading zeroes
+		$utc_year = (int) date('Y', $utc_time);
+		$utc_month = (int) date('m', $utc_time);	// Two-digit month, with leading zeroes
+		$utc_day = (int) date('d', $utc_time);	// Two-digit day of month, with leading zeroes
+		$utc_hour = (int) date('H', $utc_time);	// Two digit 24 hour, with leading zeroes
 		
 		if ($utc_day == 1) // Since it's the first day of the month in UTC, monthly digests are run too
 		{
@@ -463,8 +459,8 @@ class digests extends \phpbb\cron\task\base
 			$utc_month_1st_begin = 0; 	// Make PhpStorm happy
 		}
 
-		$formatted_date = date('Y-m-d', $this->utc_time);	// Format is YYYY-MM-DD with 2 digit months and days
-		$formatted_hour = date('H', $this->utc_time);	// Use a two-digit 24 hour.
+		$formatted_date = date('Y-m-d', $utc_time);	// Format is YYYY-MM-DD with 2 digit months and days
+		$formatted_hour = date('H', $utc_time);	// Use a two-digit 24 hour.
 
 		if ($this->config['phpbbservices_digests_enable_log'])
 		{
@@ -563,7 +559,7 @@ class digests extends \phpbb\cron\task\base
 				// In the case of monthly digests, it's important to include posts that support daily and weekly digests as well, hence dates of posts
 				// retrieved may exceed post dates for the previous month. Logic to exclude posts past the end of the previous month in the case of
 				// monthly digests must be handled in the create_content function to skip these.
-				$date_limit_sql = ' AND p.post_time >= ' . $utc_month_1st_begin . ' AND p.post_time <= ' . max($this->utc_month_lastday_end, $this->utc_time);
+				$date_limit_sql = ' AND p.post_time >= ' . $utc_month_1st_begin . ' AND p.post_time <= ' . max($this->utc_month_lastday_end, $utc_time);
 			}
 			else if ($weekly_digest_sql !== '')    // Weekly
 			{
@@ -777,7 +773,7 @@ class digests extends \phpbb\cron\task\base
 					$this->max_posts = (int) $row['user_digest_max_posts'];
 				}
 
-				$recipient_time = $this->utc_time + (float) ($this->helper->make_tz_offset($row['user_timezone']) * 60 * 60);
+				$recipient_time = $utc_time + (float) ($this->helper->make_tz_offset($row['user_timezone']) * 60 * 60);
 
 				// Identify the language translator, if one exists and they choose to identify him/herself
 				if (trim($this->language->lang('DIGESTS_TRANSLATOR_NAME') == ''))
@@ -858,7 +854,7 @@ class digests extends \phpbb\cron\task\base
 						'WHERE' => 'pt.msg_id = pm.msg_id
 										AND pt.author_id = u.user_id
 										AND pt.user_id = ' . (int) $row['user_id'] . '
-										AND ((pm_unread = 1 AND folder_id <> ' . PRIVMSGS_OUTBOX .') OR (pm_new = 1 AND ' . $this->db->sql_in_set('folder_id', PRIVMSGS_NO_BOX, PRIVMSGS_HOLD_BOX) . '))',	// Logic used by function update_pm_counts() in /includes/functions_privmsgs.php
+										AND ((pm_unread = 1 AND folder_id <> ' . PRIVMSGS_OUTBOX .') OR (pm_new = 1 AND ' . $this->db->sql_in_set('folder_id', array(PRIVMSGS_NO_BOX, PRIVMSGS_HOLD_BOX)) . '))',	// Logic used by function update_pm_counts() in /includes/functions_privmsgs.php
 
 						'ORDER_BY' => 'message_time',
 					);
@@ -1319,6 +1315,8 @@ class digests extends \phpbb\cron\task\base
 			$fetched_forums = $this->get_fetched_forums($user_row);
 
 			// Sort posts by the user's preference.
+			$left_id = array();
+			$right_id = array();
 
 			switch($user_row['user_digest_sortby'])
 			{
@@ -2081,7 +2079,7 @@ class digests extends \phpbb\cron\task\base
 				$anchor_end = '';
 				$image_text = '';
 				$thumbnail_parameter = '';
-				$is_thumbnail = ($attachment_row['thumbnail'] == 1) ? true : false;
+				$is_thumbnail = ($attachment_row['thumbnail'] == 1);
 				// Logic to resize the image, if needed
 				if ($is_thumbnail)
 				{
@@ -2333,8 +2331,6 @@ class digests extends \phpbb\cron\task\base
 
 		// Returns an array of forum_ids that the user is allowed to read. If none, an empty array is returned
 
-		$fetched_forums = array();
-
 		// Get forum read permissions for this user. They are also usually stored in the user_permissions column, but sometimes the field is empty. This always works.
 		$allowed_forums = array();
 
@@ -2366,7 +2362,6 @@ class digests extends \phpbb\cron\task\base
 
 		// Get the requested forums and their names. If none are specified in the phpbb_digests_subscribed_forums table, then all allowed forums are assumed
 		$requested_forums = array();
-		$this->requested_forums_names = array();
 
 		$sql_array = array(
 			'SELECT'	=> 's.forum_id, forum_name',
@@ -2386,7 +2381,6 @@ class digests extends \phpbb\cron\task\base
 		while ($row = $this->db->sql_fetchrow($result))
 		{
 			$requested_forums[] = $row['forum_id'];
-			$this->requested_forums_names[] = $row['forum_name'];
 		}
 		$this->db->sql_freeresult($result);
 		$requested_forums[] = 0;	// Add in global announcements forum

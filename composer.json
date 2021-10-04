@@ -4,7 +4,7 @@
     "description": "Sends daily, weekly or monthly digests of posts or bookmarked topics to subscribers via email.",
     "homepage": "https://www.phpbbservices.com/my-software/digests_wp/digests-extension",
     "version": "3.3.10",
-    "time": "2021-09-10",
+    "time": "2021-10-04",
     "license": "GPL-2.0-only",
     "authors": [
         {
@@ -16,7 +16,9 @@
     ],
     "require": {
         "php": ">=7.1.3,<=8.0.*",
-        "composer/installers": "~1.0"
+        "composer/installers": "~1.0",
+        "ext-libxml": "*",
+        "ext-dom": "*"
     },
     "extra": {
         "display-name": "Digests",

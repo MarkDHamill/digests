@@ -86,7 +86,6 @@ services:
     phpbbservices.digests.includes.html_messenger:
         class: phpbbservices\digests\includes\html_messenger
         arguments:
-            - '@config'
             - '@user'
             - '@dispatcher'
             - '@language'

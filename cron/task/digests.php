@@ -632,7 +632,7 @@ class digests extends \phpbb\cron\task\base
 				{
 					include($this->phpbb_root_path . 'includes/functions_messenger.' . $this->phpEx);
 				}
-				$html_messenger = new \phpbbservices\digests\includes\html_messenger(true, $this->config, $this->user, $this->phpbb_dispatcher, $this->language);
+				$html_messenger = new \phpbbservices\digests\includes\html_messenger($this->user, $this->phpbb_dispatcher, $this->language,true);
 
 				// Set the text showing the digest type
 				switch ($row['user_digest_type'])

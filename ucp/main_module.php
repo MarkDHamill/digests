@@ -9,8 +9,6 @@
 
 namespace phpbbservices\digests\ucp;
 
-use phpbbservices\digests\constants\constants;
-
 class main_module
 {
 

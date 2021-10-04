@@ -27,16 +27,20 @@ class html_messenger extends \messenger
 	/**
 	 * Constructor.
 	 *
-	 * @param string					$use_queue			Whether to use phpBB's queue (true|false)
-	 * @param \phpbb\config\config		$config				Config object
 	 * @param \phpbb\language\language	$language			Language object
 	 * @param \phpbb\event\dispatcher	$phpbb_dispatcher	Dispatcher object
+	 * @param bool						$use_queue			Whether to use phpBB's queue (true|false)
 	 * @param \phpbb\user				$user				User object
 	 *
 	 */
-	function __construct($use_queue = true, \phpbb\config\config $config, \phpbb\user $user, \phpbb\event\dispatcher $phpbb_dispatcher, \phpbb\language\language $language)
+	function __construct(\phpbb\user $user, \phpbb\event\dispatcher $phpbb_dispatcher, \phpbb\language\language $language, $use_queue = true)
 	{
-		$this->config 			= $config;
+
+		global $config;
+		$this->config = $config;
+		
+		parent::__construct($use_queue);
+
 		$this->language 		= $language;
 		$this->phpbb_dispatcher = $phpbb_dispatcher;
 		$this->user 			= $user;

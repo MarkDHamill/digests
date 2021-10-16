@@ -19,7 +19,6 @@ namespace phpbbservices\digests\includes;
 class html_messenger extends \messenger
 {
 
-	protected $config;
 	protected $user;
 	protected $phpbb_dispatcher;
 	protected $language;

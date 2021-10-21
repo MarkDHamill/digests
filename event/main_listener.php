@@ -41,7 +41,7 @@ class main_listener implements EventSubscriberInterface
 	* @param string						$table_prefix 	Prefix for phpbb's database tables
 	* @param \phpbb\db\driver\factory 	$db 			The database factory object
 	*/
-	public function __construct(\phpbb\config\config $config, \phpbb\template\template $template, \phpbb\request\request $request, $table_prefix, \phpbb\db\driver\factory $db)
+	public function __construct(\phpbb\config\config $config, \phpbb\template\template $template, \phpbb\request\request $request, string $table_prefix, \phpbb\db\driver\factory $db)
 	{
 		$this->config = $config;
 		$this->template = $template;

@@ -74,7 +74,7 @@ class digests extends \phpbb\cron\task\base
 	* @param \phpbb\user 						$user 					The user object
 	*/
 
-	public function __construct(\phpbb\config\config $config, \phpbb\request\request $request, \phpbb\user $user, \phpbb\db\driver\factory $db, $php_ext, $phpbb_root_path, \phpbb\template\template $template, \phpbb\auth\auth $auth, $table_prefix, \phpbb\log\log $phpbb_log, \phpbb\language\language $language, \phpbb\notification\manager $notification_manager, \phpbbservices\digests\core\common $helper, \phpbb\profilefields\manager $cpfs, \phpbb\event\dispatcher $phpbb_dispatcher)
+	public function __construct(\phpbb\config\config $config, \phpbb\request\request $request, \phpbb\user $user, \phpbb\db\driver\factory $db, string $php_ext, string $phpbb_root_path, \phpbb\template\template $template, \phpbb\auth\auth $auth, string $table_prefix, \phpbb\log\log $phpbb_log, \phpbb\language\language $language, \phpbb\notification\manager $notification_manager, \phpbbservices\digests\core\common $helper, \phpbb\profilefields\manager $cpfs, \phpbb\event\dispatcher $phpbb_dispatcher)
 	{
 
 		$this->auth = $auth;
@@ -99,7 +99,7 @@ class digests extends \phpbb\cron\task\base
 		$this->run_mode = constants::DIGESTS_RUN_REGULAR;
 	}
 
-	public function digests_error_handler($error_level, $error_message, $error_file, $error_line, $error_context=null)
+	public function digests_error_handler($error_level, $error_message, $error_file, $error_line)
 	{
 
 		// This function should intelligently handle sudden errors that may occur when digests are run, such as hosting resource
@@ -632,7 +632,7 @@ class digests extends \phpbb\cron\task\base
 				{
 					include($this->phpbb_root_path . 'includes/functions_messenger.' . $this->phpEx);
 				}
-				$html_messenger = new \phpbbservices\digests\includes\html_messenger($this->user, $this->phpbb_dispatcher, $this->language,true);
+				$html_messenger = new \phpbbservices\digests\includes\html_messenger($this->user, $this->phpbb_dispatcher, $this->language, true);
 
 				// Set the text showing the digest type
 				switch ($row['user_digest_type'])
@@ -652,10 +652,8 @@ class digests extends \phpbb\cron\task\base
 					default:
 						// The database may be corrupted if the digest type for a subscriber is invalid.
 						// Write an error to the log and continue to the next subscriber.
-						$digest_type = '';    // Make PhpStorm happy
 						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_BAD_DIGEST_TYPE', false, array($row['user_digest_type'], $row['username']));
 						continue 2;
-					break;
 				}
 
 				$digest_type = ($this->config['phpbbservices_digests_lowercase_digest_type']) ? strtolower($digest_type) : $digest_type;
@@ -705,11 +703,8 @@ class digests extends \phpbb\cron\task\base
 					default:
 						// The database may be corrupted if the digest format for a subscriber is invalid.
 						// Write an error to the log and continue to the next subscriber.
-						$is_html = false;    // Keep PhpStorm happy
-						$disclaimer = '';    // Keep PhpStorm happy
 						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FORMAT_ERROR', false, array($row['user_digest_type'], $row['username']));
 						continue 2;
-					break;
 
 				}
 
@@ -1132,7 +1127,7 @@ class digests extends \phpbb\cron\task\base
 		
 	}
 	
-	private function create_content(&$posts_rowset, &$pm_rowset, &$user_row, $is_html, $utc_month_1st_begin)
+	private function create_content($posts_rowset, $pm_rowset, $user_row, $is_html, $utc_month_1st_begin)
 	{
 
 		// This function creates most of the content for an individual digests and is handled by the main templating system, NOT the email templating system
@@ -2275,7 +2270,7 @@ class digests extends \phpbb\cron\task\base
 
 	}
 
-	private function get_bookmarked_topics(&$user_row)
+	private function get_bookmarked_topics($user_row)
 	{
 
 		// If bookmarked topics only is checked, returns an array of bookmarked topic_ids. Otherwise
@@ -2326,7 +2321,7 @@ class digests extends \phpbb\cron\task\base
 
 	}
 
-	private function get_fetched_forums(&$user_row)
+	private function get_fetched_forums($user_row)
 	{
 
 		// Returns an array of forum_ids that the user is allowed to read. If none, an empty array is returned
@@ -2415,7 +2410,7 @@ class digests extends \phpbb\cron\task\base
 
 	}
 
-	private function get_foes(&$user_row)
+	private function get_foes($user_row)
 	{
 		// Returns an array of foes for the subscriber, if any. If none, an empty array is returned.
 		$foes = array();

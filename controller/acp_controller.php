@@ -54,7 +54,7 @@ class acp_controller
 	 * @param \phpbb\template\template					$template					Template object
 	 * @param \phpbb\user								$user						User object
 	 */
-	public function __construct(\phpbb\auth\auth $auth, \phpbb\config\config $config, \phpbb\db\driver\factory $db, \phpbbservices\digests\core\common $helper, \phpbb\language\language $language, \phpbbservices\digests\cron\task\digests $mailer, \phpbb\pagination $pagination, \phpbb\extension\manager $phpbb_extension_manager, \phpbb\log\log $phpbb_log, \phpbb\path_helper $phpbb_path_helper, $phpbb_root_path, $php_ext, \phpbb\request\request $request, $table_prefix, \phpbb\template\template $template, \phpbb\user $user)
+	public function __construct(\phpbb\auth\auth $auth, \phpbb\config\config $config, \phpbb\db\driver\factory $db, \phpbbservices\digests\core\common $helper, \phpbb\language\language $language, \phpbbservices\digests\cron\task\digests $mailer, \phpbb\pagination $pagination, \phpbb\extension\manager $phpbb_extension_manager, \phpbb\log\log $phpbb_log, \phpbb\path_helper $phpbb_path_helper, string $phpbb_root_path, string $php_ext, \phpbb\request\request $request, string $table_prefix, \phpbb\template\template $template, \phpbb\user $user)
 	{
 		$this->auth						= $auth;
 		$this->config					= $config;

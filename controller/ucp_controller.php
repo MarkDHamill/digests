@@ -46,7 +46,7 @@ class ucp_controller
 	 * @param \phpbb\template\template					$template					Template object
 	 * @param \phpbb\user								$user						User object
 	 */
-	public function __construct(\phpbb\auth\auth $auth, \phpbb\config\config $config, \phpbb\db\driver\factory $db, \phpbbservices\digests\core\common $helper, \phpbb\language\language $language, \phpbb\request\request $request, $table_prefix, \phpbb\template\template $template, \phpbb\user $user, $phpbb_root_path, $php_ext)
+	public function __construct(\phpbb\auth\auth $auth, \phpbb\config\config $config, \phpbb\db\driver\factory $db, \phpbbservices\digests\core\common $helper, \phpbb\language\language $language, \phpbb\request\request $request, string $table_prefix, \phpbb\template\template $template, \phpbb\user $user, string $phpbb_root_path, string $php_ext)
 	{
 		$this->auth = $auth;
 		$this->config = $config;

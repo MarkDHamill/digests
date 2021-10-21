@@ -41,7 +41,7 @@ class common
 	 *
 	 */
 
-	public function __construct(\phpbb\language\language $language, $phpbb_root_path, \phpbb\filesystem\filesystem $filesystem, \phpbb\log\log $phpbb_log, \phpbb\user $user, $php_ext, \phpbb\config\config $config, \phpbb\db\driver\factory $db)
+	public function __construct(\phpbb\language\language $language, string $phpbb_root_path, \phpbb\filesystem\filesystem $filesystem, \phpbb\log\log $phpbb_log, \phpbb\user $user, string $php_ext, \phpbb\config\config $config, \phpbb\db\driver\factory $db)
 	{
 		$this->config = $config;
 		$this->db = $db;

@@ -89,5 +89,3 @@ services:
             - '@user'
             - '@dispatcher'
             - '@language'
-    _defaults:
-        public: true

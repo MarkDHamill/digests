@@ -35,6 +35,10 @@ class html_messenger extends \messenger
 	function __construct(\phpbb\user $user, \phpbb\event\dispatcher $phpbb_dispatcher, \phpbb\language\language $language, $use_queue = true)
 	{
 
+		// Since this class overwrites the messenger class, and the $config service in the messenger class is in a global
+		// variable, we need to reference it here as a global variable instead of injecting it. This avoids a
+		// The "config" service is private error triggered in Container.php. Thanks to 3Di for figuring this out!
+
 		global $config;
 		$this->config = $config;
 		

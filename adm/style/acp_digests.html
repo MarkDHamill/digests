@@ -889,7 +889,7 @@
 	{% if S_DIGESTS_MANUAL_RUN %}
 	<fieldset>
 		<dl>
-			<dt><label for="phpbbservices_digests_test1">{{ lang('DIGESTS_RESET_CRON_RUN_TIME') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_RESET_CRON_RUN_TIME_EXPLAIN') }}</dt>
+			<dt><label for="phpbbservices_digests_test1">{{ lang('DIGESTS_RUN_TEST') ~ lang('COLON') }}</label></dt>
 			<dd>
 				<label><input id="phpbbservices_digests_test1" name="phpbbservices_digests_test" type="radio" value="1" {% if S_DIGESTS_RUN_TEST == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
 				<label><input name="phpbbservices_digests_test" type="radio" value="0" {% if S_DIGESTS_RUN_TEST == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>

@@ -77,7 +77,7 @@ class digests extends \phpbb\cron\task\base
 	public function __construct(\phpbb\config\config $config, \phpbb\request\request $request, \phpbb\user $user, \phpbb\db\driver\factory $db, string $php_ext, string $phpbb_root_path, \phpbb\template\template $template, \phpbb\auth\auth $auth, string $table_prefix, \phpbb\log\log $phpbb_log, \phpbb\language\language $language, \phpbb\notification\manager $notification_manager, \phpbbservices\digests\core\common $helper, \phpbb\profilefields\manager $cpfs, \phpbb\event\dispatcher $phpbb_dispatcher)
 	{
 
-		$this->auth = $auth;
+ 	 	$this->auth = $auth;
 		$this->config = $config;
 		$this->cpfs = $cpfs;
 		$this->db = $db;
@@ -97,30 +97,6 @@ class digests extends \phpbb\cron\task\base
 		$this->digests_last_run = $this->config['phpbbservices_digests_cron_task_last_gc'];
 		$this->forum_hierarchy = array();
 		$this->run_mode = constants::DIGESTS_RUN_REGULAR;
-	}
-
-	public function digests_error_handler($error_level, $error_message, $error_file, $error_line)
-	{
-
-		// This function should intelligently handle sudden errors that may occur when digests are run, such as hosting resource
-		// limitations that abruptly kick in.
-
-		// Note the error in the phpBB error log
-		$this->phpbb_log->add('critical', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_CRITICAL_ERROR', false, array($error_level, $error_message, $error_file, $error_line));
-
-		// Reset the phpBB digests cron since it was not run successfully
-		$this->config->set('phpbbservices_digests_cron_task_last_gc', $this->digests_last_run);
-
-		// Unlock the phpBB cron
-		$this->config->set('cron_lock', 0);
-
-		// Indicate that digests terminated abnormally in the admin log
-		if ($this->config['phpbbservices_digests_enable_log'])
-		{
-			$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ABEND');
-		}
-
-		die();
 
 	}
 
@@ -164,18 +140,6 @@ class digests extends \phpbb\cron\task\base
 	public function run()
 	{
 
-		// Uncomment the next statement to test the error handler. You will likely get a white screen if run through the manual
-		// mailer, but appropriate error messages should be in phpBB's error log, the value of cron_lock in phpbb_config should
-		// be 0 unlocking any crons, and the value of phpbbservices_filterbycountry_cron_task_last_gc should be unchanged.
-		//self::digests_error_handler(E_USER_ERROR, 'Digests error handler testing', 'test.php', '123');
-
-		if (!defined('IN_DIGESTS_TEST'))
-		{
-			// Set error handler to help trap lack of resources and similar issues. We don't set it for the manual mailer
-			// because it overrides trigger_error. Also, since digests are being run manually, if it fails for this reason
-			// it will be seen.
-			set_error_handler(array($this, 'digests_error_handler'));
-		}
 		$now = time();
 
 		// Populate the forum hierarchy array. This is used when the full path to a forum is requested to be shown in digests.

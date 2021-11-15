@@ -81,7 +81,7 @@ services:
             - '@request'
             - '@user'
             - '@dbal.conn'
-            - '@controller.helper'
+            - '@phpbbservices.digests.common'
             - '@language'
     phpbbservices.digests.includes.html_messenger:
         class: phpbbservices\digests\includes\html_messenger

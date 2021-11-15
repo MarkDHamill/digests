@@ -3,8 +3,8 @@
     "type": "phpbb-extension",
     "description": "Sends daily, weekly or monthly digests of posts or bookmarked topics to subscribers via email.",
     "homepage": "https://www.phpbbservices.com/my-software/digests_wp/digests-extension",
-    "version": "3.3.10",
-    "time": "2021-10-21",
+    "version": "3.3.11",
+    "time": "2021-11-15",
     "license": "GPL-2.0-only",
     "authors": [
         {

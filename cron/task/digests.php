@@ -31,7 +31,7 @@ class digests extends \phpbb\cron\task\base
 	protected $user;
 
 	// Most of these private variables are needed because the create_content function does much of the assembly work and it needs a lot of common information
-	
+
 	private $board_url;					// Digests need an absolute URL to the forum to embed links to topic, posts, forum and private messages
 	private $debug;						// Let's us know if we are in debug mode
 	private $date_limit;				// A logical range of dates that posts must be within
@@ -290,6 +290,12 @@ class digests extends \phpbb\cron\task\base
 				$success = $this->mail_digests($now, $i);
 				if (!$success)
 				{
+					// Reset the phpBB digests cron since it was not run successfully
+					$this->config->set('phpbbservices_digests_cron_task_last_gc', $this->digests_last_run);
+
+					// Unlock the phpBB cron
+					$this->config->set('cron_lock', 0);
+
 					// Notify admins when mailing digests fails through an error log entry
 					$this->phpbb_log->add('critical', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_EMAILING_FAILURE', false, array(date('Y-m-d', $now), date('H', $now)));
 					return false;
@@ -574,6 +580,15 @@ class digests extends \phpbb\cron\task\base
 
 			foreach ($rowset as $row)
 			{
+
+				// It's possible to run out of resources while running digests. This will happen mostly on shared hosting.
+				// In this event, we want to try to gracefully exit this function and call attention to it as a critical issue
+				// by placing it in the phpBB error log.
+				if (!still_on_time())
+				{
+					$this->phpbb_log->add('critical', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_NO_RESOURCES', false, array($row['username'], $current_hour_utc));
+					return false;
+				}
 
 				// Each traverse through this loop sends out exactly one digest
 

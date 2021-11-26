@@ -40,7 +40,7 @@ $lang = array_merge($lang, array(
 	'ACP_CAT_DIGESTS'										=> 'Digests',
 	'ACP_DIGESTS_SETTINGS'									=> 'Digest settings',
 	'ACP_DIGESTS_GENERAL_SETTINGS'							=> 'General settings',
-	'ACP_DIGESTS_GENERAL_SETTINGS_EXPLAIN'					=> 'These are the general digests settings. Please note that if timely delivery of digests must be guaranteed then you must set up and enable phpBB&rsquo;s <strong><a href="https://wiki.phpbb.com/Modular_cron#Use_system_cron">system cron</a></strong> feature. Otherwise the next time there is board traffic, digests for the current and previous hours will be mailed. For more information, see the FAQ for the Digests extension on the forums at phpbb.com.',
+	'ACP_DIGESTS_GENERAL_SETTINGS_EXPLAIN'					=> 'These are the general digests settings. Please note that if timely delivery of digests must be guaranteed then you must set up and enable phpBB&rsquo;s <strong><a href="https://www.phpbb.com/customise/db/extension/digests_extension/faq/2716">system cron</a></strong> feature. Otherwise the next time there is board traffic, digests for the current and previous hours will be mailed. For more information, see the FAQ for the Digests extension on the forums at phpbb.com.',
 	'ACP_DIGESTS_USER_DEFAULT_SETTINGS'						=> 'User default settings',
 	'ACP_DIGESTS_USER_DEFAULT_SETTINGS_EXPLAIN'				=> 'These settings allow administrators to set the defaults users see when they subscribe to a digest.',
 	'ACP_DIGESTS_EDIT_SUBSCRIBERS'							=> 'Edit subscribers',

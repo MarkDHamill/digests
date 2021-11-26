@@ -182,11 +182,11 @@ class acp_controller
 
 				// Translate time zone information and set other switches
 				$this->template->assign_vars(array(
-					'L_DIGESTS_BASED_ON'							=> $this->language->lang('DIGESTS_BASED_ON', $my_time_zone),
-					'L_DIGESTS_HOUR_SENT'               			=> $this->language->lang('DIGESTS_HOUR_SENT', $my_time_zone),
-					'S_EDIT_SUBSCRIBERS'							=> true,	// In this module
-					'S_INCLUDE_DIGESTS_CSS'							=> true,	// Need to include special Digests CSS
-					'S_INCLUDE_DIGESTS_JS'							=> true,	// Need to include special Digests Javascript
+					'L_DIGESTS_BASED_ON'			=> $this->language->lang('DIGESTS_BASED_ON', $my_time_zone),
+					'L_DIGESTS_HOUR_SENT'           => $this->language->lang('DIGESTS_HOUR_SENT', $my_time_zone),
+					'S_EDIT_SUBSCRIBERS'			=> true,	// In this module
+					'S_INCLUDE_DIGESTS_CSS'			=> true,	// Need to include special Digests CSS
+					'S_INCLUDE_DIGESTS_JS'			=> true,	// Need to include special Digests Javascript
 				));
 
 				// Set up subscription filter
@@ -625,6 +625,7 @@ class acp_controller
 							'S_TOC_NO_CHECKED' 					=> ($row['user_digest_toc'] == 0),
 							'S_TOC_YES_CHECKED' 				=> ($row['user_digest_toc'] == 1),
 							'USERNAME'							=> $row['username'],
+							'USER_ADMIN_PATH'					=> append_sid("index.$this->phpEx?i=acp_users&icat=12&mode=overview&username=" . htmlentities($row['username'])),
 							'USER_DIGEST_FORMAT'				=> $digest_format,
 							'USER_DIGEST_HAS_UNSUBSCRIBED'		=> ($row['user_digest_has_unsubscribed']) ? 'x' : '-',
 							'USER_DIGEST_LAST_SENT'				=> $user_digest_last_sent,
@@ -1597,6 +1598,9 @@ class acp_controller
 
 				// This allows the digests to go out next time cron.php is run.
 				$this->config->set('phpbbservices_digests_cron_task_last_gc', 0);
+
+				// Unlock the phpBB cron, just in case it was locked.
+				$this->config->set('cron_lock', 0);
 
 				// This resets all the date/time stamps for when a digest was last sent to a user.
 				$sql_ary = array('user_digest_last_sent' => 0);

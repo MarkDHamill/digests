@@ -293,9 +293,6 @@ class digests extends \phpbb\cron\task\base
 					// Reset the phpBB digests cron since it was not run successfully
 					$this->config->set('phpbbservices_digests_cron_task_last_gc', $this->digests_last_run);
 
-					// Unlock the phpBB cron
-					$this->config->set('cron_lock', 0);
-
 					// Notify admins when mailing digests fails through an error log entry
 					$this->phpbb_log->add('critical', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_EMAILING_FAILURE', false, array(date('Y-m-d', $now), date('H', $now)));
 					return false;
@@ -909,7 +906,7 @@ class digests extends \phpbb\cron\task\base
 					if ($handle === false)
 					{
 						// Since this indicates a major problem, let's abort now. It's likely a global write error.
-						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILE_OPEN_ERROR', false, array($this->store_path));
+						$this->phpbb_log->add('critical', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILE_OPEN_ERROR', false, array($this->store_path));
 						if ($this->config['phpbbservices_digests_enable_log'])
 						{
 							$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END');
@@ -921,7 +918,7 @@ class digests extends \phpbb\cron\task\base
 					if ($success === false)
 					{
 						// Since this indicates a major problem, let's abort now.  It's likely a global write error.
-						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILE_WRITE_ERROR', false, array($this->store_path . $file_name));
+						$this->phpbb_log->add('critical', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILE_WRITE_ERROR', false, array($this->store_path . $file_name));
 						if ($this->config['phpbbservices_digests_enable_log'])
 						{
 							$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END');
@@ -933,7 +930,7 @@ class digests extends \phpbb\cron\task\base
 					if ($success === false)
 					{
 						// Since this indicates a major problem, let's abort now
-						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILE_CLOSE_ERROR', false, array($this->store_path . $file_name));
+						$this->phpbb_log->add('critical', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_FILE_CLOSE_ERROR', false, array($this->store_path . $file_name));
 						if ($this->config['phpbbservices_digests_enable_log'])
 						{
 							$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END');

@@ -421,7 +421,7 @@
 	{% endif %}
 
 	{% if S_EDIT_SUBSCRIBERS %}
-	<fieldset class="display-options sort-filter">
+	<fieldset id="sort-filter" class="display-options sort-filter">
 		<legend>{{ lang('DIGESTS_SORTING_AND_FILTERING') }}</legend>
 		<dl>
 			<dt class="border-right-none"><label for="member">{{ lang('DIGESTS_SEARCH_FOR_MEMBER') }}{{ lang('COLON') }}</label><p>{{ lang('DIGESTS_SEARCH_FOR_MEMBER_EXPLAIN') }}</p></dt>
@@ -889,20 +889,6 @@
 	{% if S_DIGESTS_MANUAL_RUN %}
 	<fieldset>
 		<dl>
-			<dt><label for="phpbbservices_digests_test1">{{ lang('DIGESTS_RUN_TEST') ~ lang('COLON') }}</label></dt>
-			<dd>
-				<label><input id="phpbbservices_digests_test1" name="phpbbservices_digests_test" type="radio" value="1" {% if S_DIGESTS_RUN_TEST == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
-				<label><input name="phpbbservices_digests_test" type="radio" value="0" {% if S_DIGESTS_RUN_TEST == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
-			</dd>
-		</dl>
-		<dl>
-			<dt><label for="phpbbservices_digests_test_clear_spool1">{{ lang('DIGESTS_RUN_TEST_CLEAR_SPOOL') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_RUN_TEST_CLEAR_SPOOL_EXPLAIN') }}</dt>
-			<dd>
-				<label><input id="phpbbservices_digests_test_clear_spool1" name="phpbbservices_digests_test_clear_spool" type="radio" value="1" {% if S_DIGESTS_RUN_TEST_CLEAR_SPOOL == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
-				<label><input name="phpbbservices_digests_test_clear_spool" type="radio" value="0" {% if S_DIGESTS_RUN_TEST_CLEAR_SPOOL == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
-			</dd>
-		</dl>
-		<dl>
 			<dt><label for="phpbbservices_digests_test_date_hour">{{ lang('DIGESTS_RUN_TEST_DATE_HOUR') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_RUN_TEST_DATE_HOUR_EXPLAIN') }}</dt>
 			<dd>
 				<input id="phpbbservices_digests_test_date_hour" name="phpbbservices_digests_test_date_hour" type="text" value="{{ TEST_DATE_HOUR }}" size="19" maxlength="19">
@@ -950,6 +936,23 @@
 		</p>
 	</fieldset>
 	{% endif %}
+
+	{% if S_DIGESTS_CLEAR_CACHED %}
+	<fieldset>
+		<dl>
+			<dt><label for="phpbbservices_digests_test_clear_spool1">{{ lang('DIGESTS_RUN_TEST_CLEAR_SPOOL') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_RUN_TEST_CLEAR_SPOOL_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_test_clear_spool1" name="phpbbservices_digests_test_clear_spool" type="radio" value="1" {% if S_DIGESTS_RUN_TEST_CLEAR_SPOOL == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_test_clear_spool" type="radio" value="0" {% if S_DIGESTS_RUN_TEST_CLEAR_SPOOL == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<p class="submit-buttons">
+			<input class="button1" type="submit" id="submit" name="submit" value="{{ lang('SUBMIT') }}" />&nbsp;
+			<input class="button2" type="reset" id="reset" name="reset" value="{{ lang('RESET') }}" />
+		</p>
+	</fieldset>
+	{% endif %}
+
 
 	{{ S_FORM_TOKEN }}
 	</fieldset>

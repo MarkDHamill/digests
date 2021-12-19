@@ -34,6 +34,8 @@ class acp_controller
 	protected $template;
 	protected $user;
 
+	private $digests_storage_path;
+
 	/**
 	 * Constructor.
 	 *
@@ -72,6 +74,9 @@ class acp_controller
 		$this->table_prefix				= $table_prefix;
 		$this->template					= $template;
 		$this->user						= $user;
+
+		$this->digests_storage_path = $this->phpbb_root_path . 'store/phpbbservices/digests';
+
 	}
 
 	/**
@@ -162,9 +167,14 @@ class acp_controller
 			break;
 
 			case 'digests_edit_subscribers':
+
+				// Change form URL to add start parameter so after form submittal we end up back on the same page.
+				$u_action .= '&amp;start=' . $this->request->variable('start', 0);
+
 				$this->template->assign_vars(array(
 					'L_TITLE'								=> $this->language->lang('ACP_DIGESTS_EDIT_SUBSCRIBERS'),
 					'L_TITLE_EXPLAIN'						=> $this->language->lang('ACP_DIGESTS_EDIT_SUBSCRIBERS_EXPLAIN'),
+					'U_ACTION'								=> $u_action,
 				));
 
 				// Grab some URL parameters that are used in sorting and filtering
@@ -952,17 +962,25 @@ class acp_controller
 					'L_TITLE'									=> $this->language->lang('ACP_DIGESTS_TEST'),
 					'L_TITLE_EXPLAIN'							=> sprintf($this->language->lang('ACP_DIGESTS_TEST_EXPLAIN'),implode($this->language->lang('DIGESTS_COMMA'), $current_hour_subscribers)),
 					'S_DIGESTS_MANUAL_RUN'						=> true, // Run this module
-					'S_DIGESTS_RUN_TEST'						=> (bool) $this->config['phpbbservices_digests_test'],
 					'S_DIGESTS_RUN_TEST_SEND_TO_ADMIN'			=> (bool) $this->config['phpbbservices_digests_test_send_to_admin'],
-					'S_DIGESTS_RUN_TEST_CLEAR_SPOOL'			=> (bool) $this->config['phpbbservices_digests_test_clear_spool'],
 					'S_DIGESTS_RUN_TEST_SPOOL'					=> (bool) $this->config['phpbbservices_digests_test_spool'],
 					'S_INCLUDE_DIGESTS_MANUAL_MAILER'			=> true,	// Allows inclusion of date and hour picker
 					'TEST_DATE_HOUR'							=> $this->config['phpbbservices_digests_test_date_hour'],
 					'TEST_EMAIL_ADDRESS'						=> $this->config['phpbbservices_digests_test_email_address'],
 				));
 
+			break;
 
+			case 'digests_clear_cached':
 
+				$cached_files = $this->get_cached_files_list();
+				$cached_files_list = count($cached_files) > 0 ? implode($this->language->lang('DIGESTS_COMMA'), $cached_files) : $this->language->lang('DIGESTS_NO_FILES');
+				$this->template->assign_vars(array(
+					'L_TITLE'									=> $this->language->lang('ACP_DIGESTS_CLEAR_CACHED_DIGESTS'),
+					'L_TITLE_EXPLAIN'							=> sprintf($this->language->lang('ACP_DIGESTS_CLEAR_CACHED_DIGESTS_EXPLAIN'),count($cached_files), $cached_files_list),
+					'S_DIGESTS_CLEAR_CACHED'					=> true, // Run this module
+					'S_DIGESTS_RUN_TEST_CLEAR_SPOOL'			=> (bool) $this->config['phpbbservices_digests_test_clear_spool'],
+				));
 			break;
 
 			default:
@@ -1620,70 +1638,19 @@ class acp_controller
 
 				define('IN_DIGESTS_TEST', true);
 				$proceed = true;
-				$digests_storage_path = $this->phpbb_root_path . 'store/phpbbservices/digests';
 
 				// Store the form field settings
-				$this->config->set('phpbbservices_digests_test', $this->request->variable('phpbbservices_digests_test', 0));
-				$this->config->set('phpbbservices_digests_test_clear_spool', $this->request->variable('phpbbservices_digests_test_clear_spool', 0));
 				$this->config->set('phpbbservices_digests_test_date_hour', $this->request->variable('phpbbservices_digests_test_date_hour', ''));
 				$this->config->set('phpbbservices_digests_test_send_to_admin', $this->request->variable('phpbbservices_digests_test_send_to_admin', 0));
 				$this->config->set('phpbbservices_digests_test_spool', $this->request->variable('phpbbservices_digests_test_spool', 0));
 				$this->config->set('phpbbservices_digests_test_email_address', $this->request->variable('phpbbservices_digests_test_email_address', ''));
 
-				if (!$this->config['phpbbservices_digests_test'] && !$this->config['phpbbservices_digests_test_clear_spool'])
-				{
-					$message = $this->language->lang('DIGESTS_MAILER_NOT_RUN');
-					$proceed = false;
-				}
-
 				// Create the store/phpbbservices/digests folder. It should exist already.
 				if (!$this->helper->make_directories())
 				{
 					$message_type = E_USER_WARNING;
-					$message = sprintf($this->language->lang('DIGESTS_CREATE_DIRECTORY_ERROR'), $digests_storage_path);
+					$message = sprintf($this->language->lang('DIGESTS_CREATE_DIRECTORY_ERROR'), $this->digests_storage_path);
 					$proceed = false;
-				}
-
-				if ($proceed && $this->config['phpbbservices_digests_test_clear_spool'])
-				{
-
-					// Clear the digests store folder of .txt and .html files, if so instructed
-
-					$all_cleared = true;
-
-					foreach (new \DirectoryIterator($digests_storage_path) as $file_info)
-					{
-						$file_name = $file_info->getFilename();
-						// Exclude dot files, hidden files and non "real" files, and real files if they don't have the .html or .txt suffix
-						if ((substr($file_name, 0, 1) !== '.') && $file_info->isFile() && ($file_info->getExtension() == 'html' || $file_info->getExtension() == 'txt'))
-						{
-							$deleted = unlink($digests_storage_path . '/' . $file_name); // delete file
-							if (!$deleted)
-							{
-								$all_cleared = false;
-							}
-						}
-					}
-
-					if ($this->config['phpbbservices_digests_enable_log'])
-					{
-						if ($all_cleared)
-						{
-							$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_CACHE_CLEARED');
-						}
-						else
-						{
-							$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_CLEAR_SPOOL_ERROR');
-						}
-					}
-
-					if (!$all_cleared)
-					{
-						$message_type = E_USER_WARNING;
-						$message = $this->language->lang('DIGESTS_RUN_TEST_CLEAR_SPOOL_ERROR');
-						$proceed = false;
-					}
-
 				}
 
 				if ($proceed && (trim($this->config['phpbbservices_digests_test_date_hour']) !== ''))
@@ -1701,7 +1668,7 @@ class acp_controller
 				}
 
 				// Get ready to manually mail digests
-				if ($proceed && $this->config['phpbbservices_digests_test'])
+				if ($proceed)
 				{
 
 					// Call the mailer's run method. The logic for sending a digest is embedded in this method, which is normally run as a cron task.
@@ -1726,6 +1693,69 @@ class acp_controller
 
 			}
 
+			if ($mode === 'digests_clear_cached')
+			{
+
+				// Store the form field setting
+				$this->config->set('phpbbservices_digests_test_clear_spool', $this->request->variable('phpbbservices_digests_test_clear_spool', 0));
+
+				if (!$this->config['phpbbservices_digests_test_clear_spool'])
+				{
+					$message = $this->language->lang('DIGESTS_CLEAR_CACHE_NOT_RUN');
+				}
+				else
+				{
+					// Clear the digests store folder of .txt and .html files
+					$all_cleared = true;
+
+					if (!is_dir($this->digests_storage_path))
+					{
+						// If the digests store directory does not exist, we need to bail
+						$all_cleared = false;
+					}
+					else
+					{
+						foreach (new \DirectoryIterator($this->digests_storage_path) as $file_info)
+						{
+							$file_name = $file_info->getFilename();
+							// Exclude dot files, hidden files and non "real" files, and real files if they don't have the .html or .txt suffix
+							if ((substr($file_name, 0, 1) !== '.') && $file_info->isFile() && ($file_info->getExtension() == 'html' || $file_info->getExtension() == 'txt'))
+							{
+								$deleted = unlink($this->digests_storage_path . '/' . $file_name); // delete file
+								if (!$deleted)
+								{
+									$all_cleared = false;
+								}
+							}
+						}
+					}
+
+					if ($this->config['phpbbservices_digests_enable_log'])
+					{
+						if ($all_cleared)
+						{
+							$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_CACHE_CLEARED');
+						}
+						else
+						{
+							$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_CLEAR_SPOOL_ERROR');
+						}
+					}
+
+					if (!$all_cleared)
+					{
+						$message_type = E_USER_WARNING;
+						$message = $this->language->lang('DIGESTS_RUN_TEST_CLEAR_SPOOL_ERROR');
+					}
+					else
+					{
+						$message = strip_tags($this->language->lang('LOG_CONFIG_DIGESTS_CACHE_CLEARED'));
+					}
+
+				}
+
+			}
+
 			if (!isset($message_type))
 			{
 				$message_type = E_USER_NOTICE;
@@ -1743,7 +1773,7 @@ class acp_controller
 				}
 			}
 
-			if ($mode !== 'digests_test')
+			if ($mode !== 'digests_test' && $mode !== 'digests_clear_cached')
 			{
 				$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_' . strtoupper($mode));
 			}
@@ -1942,6 +1972,29 @@ class acp_controller
 
 		return ($sql_ary);
 
+	}
+
+	function get_cached_files_list()
+	{
+		// This function returns an array of digest cached files. These will have either a .html or .txt suffix and are stored in the
+		// /store/phpbbservices/digests folder.
+
+		$cached_files = array();
+
+		if (is_dir($this->digests_storage_path))
+		{
+			foreach (new \DirectoryIterator($this->digests_storage_path) as $file_info)
+			{
+				$file_name = $file_info->getFilename();
+				// Exclude dot files, hidden files and non "real" files, and real files if they don't have the .html or .txt suffix
+				if ((substr($file_name, 0, 1) !== '.') && $file_info->isFile() && ($file_info->getExtension() == 'html' || $file_info->getExtension() == 'txt'))
+				{
+					$cached_files[] = $file_name;
+				}
+			}
+		}
+
+		return $cached_files;
 	}
 
 }

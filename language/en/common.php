@@ -110,6 +110,7 @@ If you have questions or feedback on your digests, please send them to the webma
 	'DIGESTS_NO_POST_TEXT'				=> 'Show no post text at all',
 	'DIGESTS_NO_PRIVATE_MESSAGES'		=> 'You have no new or unread private messages.',
 	'DIGESTS_NO_TIMEZONE'				=> 'You must <a href="%s">specify your timezone</a> in your profile before you can run digests.',
+	'DIGESTS_NO_FILES'					=> '<em>No files</em>',
 	'DIGESTS_NONE'						=> 'None (unsubscribe)',
 	'DIGESTS_ON'						=> 'on',
 	'DIGESTS_OPEN_QUOTE'				=> '&ldquo;',

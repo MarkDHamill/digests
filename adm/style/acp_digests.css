@@ -49,6 +49,12 @@ fieldset.sort-filter {
 	position:relative;
 	left: 20px;
 }
+#sort-filter label, #sort-filter input, #sort-filter select {
+	font-size: .85em;
+}
+#sort-filter dt label {
+	font-size: 1em;
+}
 .text-center {
 	text-align:center;
 }

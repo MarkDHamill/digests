@@ -247,7 +247,7 @@ class html_messenger extends \messenger
 			$use_queue = true;
 		}
 
-		$contact_name = htmlspecialchars_decode($this->config['board_contact_name']);
+		$contact_name = htmlspecialchars_decode($this->config['board_contact_name'], ENT_COMPAT);
 		$board_contact = (($contact_name !== '') ? '"' . mail_encode($contact_name) . '" ' : '') . '<' . $this->config['board_contact'] . '>';
 
 		$break = false;

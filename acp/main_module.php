@@ -70,6 +70,10 @@ class main_module
 				$this->page_title = $this->language->lang('ACP_DIGESTS_RESET_CRON_RUN_TIME');
 			break;
 
+			case 'digests_clear_cached':
+				$this->page_title = $this->language->lang('ACP_DIGESTS_CLEAR_CACHED_DIGESTS');
+			break;
+
 		}
 
 		// Load the display options handle in our ACP controller, passing the mode

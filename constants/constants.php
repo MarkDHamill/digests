@@ -14,7 +14,6 @@ class constants {
 	const DIGESTS_ALL = 'ALL';
 	const DIGESTS_BOOKMARKS = 'BM';
 	const DIGESTS_DAILY_VALUE = 'DAY';
-	const DIGESTS_DEFAULT_VALUE = 'DFLT';
 	const DIGESTS_FIRST = '1ST';
 	const DIGESTS_HTML_VALUE = 'HTML';
 	const DIGESTS_HTML_CLASSIC_VALUE = 'HTMC';
@@ -34,7 +33,6 @@ class constants {
 	const DIGESTS_SORTBY_POSTDATE_DESC = 'postdate_desc';
 	const DIGESTS_SORTBY_STANDARD = 'standard';
 	const DIGESTS_SORTBY_STANDARD_DESC = 'standard_desc';
-	const DIGESTS_SUBSCRIBED_FORUMS_TABLE = 'digests_subscribed_forums';
 	const DIGESTS_TEXT_VALUE = 'TEXT';
 	const DIGESTS_WEEKLY_VALUE = 'WEEK';
 

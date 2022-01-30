@@ -26,8 +26,10 @@ class digests extends \phpbb\cron\task\base
 	protected $phpbb_root_path;
 	protected $phpEx;
 	protected $request;
+	protected $report_details_table;
+	protected $report_table;
+	protected $subscribed_forums_table;
 	protected $template;
-	protected $table_prefix;
 	protected $user;
 
 	// Most of these private variables are needed because the create_content function does much of the assembly work and it needs a lot of common information
@@ -35,7 +37,6 @@ class digests extends \phpbb\cron\task\base
 	private $board_url;					// Digests need an absolute URL to the forum to embed links to topic, posts, forum and private messages
 	private $debug;						// Let's us know if we are in debug mode
 	private $date_limit;				// A logical range of dates that posts must be within
-	private $digests_last_run;			// Remembers when digests were last run in case of abmormal program terminition
 	private $email_address_override;	// Used if admin wants manual mailer to send him/her a digest at an email address specified for this run
 	private $email_templates_path;		// Relative path to where the language specific email templates are located
 	private $forum_hierarchy;			// An array of forum_ids and their parent forum_ids.
@@ -43,7 +44,6 @@ class digests extends \phpbb\cron\task\base
 	private $list_id;					// Used in determining forum access privileges for a subscriber
 	private $max_posts;					// Maximum number of posts in a digest
 	private $path_prefix;				// Appended to paths to find files in the correct location
-	private $posts_in_digest;			// # of posts in a digest for a particular subscriber
 	private $read_id;					// Used in determining forum access privileges for a subscriber
 	private $run_mode;					// phpBB (regular) cron, system cron or manual
 	private $salutation_fields;			// Contains fields to be used in the salutation, as an array
@@ -68,13 +68,15 @@ class digests extends \phpbb\cron\task\base
 	* @param \phpbb\event\dispatcher			$phpbb_dispatcher		Dispatcher object
 	* @param \phpbb\log\log 					$phpbb_log 				phpBB log object
 	* @param string								$phpbb_root_path		Relative path to phpBB root
+	* @param string								$report_details_table	Extension's digests report details table
+	* @param string								$report_table			Extension's digests report table
+	* @param string								$subscribed_forums_table	Extension's subscribed forums table
 	* @param \phpbb\request\request 			$request 				The request object
-	* @param string								$table_prefix 			Prefix for phpbb's database tables
 	* @param \phpbb\template\template 			$template 				The template engine object
 	* @param \phpbb\user 						$user 					The user object
 	*/
 
-	public function __construct(\phpbb\config\config $config, \phpbb\request\request $request, \phpbb\user $user, \phpbb\db\driver\factory $db, string $php_ext, string $phpbb_root_path, \phpbb\template\template $template, \phpbb\auth\auth $auth, string $table_prefix, \phpbb\log\log $phpbb_log, \phpbb\language\language $language, \phpbb\notification\manager $notification_manager, \phpbbservices\digests\core\common $helper, \phpbb\profilefields\manager $cpfs, \phpbb\event\dispatcher $phpbb_dispatcher)
+	public function __construct(\phpbb\config\config $config, \phpbb\request\request $request, \phpbb\user $user, \phpbb\db\driver\factory $db, string $php_ext, string $phpbb_root_path, \phpbb\template\template $template, \phpbb\auth\auth $auth, \phpbb\log\log $phpbb_log, \phpbb\language\language $language, \phpbb\notification\manager $notification_manager, \phpbbservices\digests\core\common $helper, \phpbb\profilefields\manager $cpfs, \phpbb\event\dispatcher $phpbb_dispatcher, string $subscribed_forums_table, string $report_table, string $report_details_table)
 	{
 
  	 	$this->auth = $auth;
@@ -89,7 +91,9 @@ class digests extends \phpbb\cron\task\base
 		$this->phpbb_root_path = $phpbb_root_path;
 		$this->phpEx = $php_ext;
 		$this->request = $request;
-		$this->table_prefix = $table_prefix;
+		$this->report_details_table = $report_details_table;
+		$this->report_table = $report_table;
+		$this->subscribed_forums_table = $subscribed_forums_table;
 		$this->template = $template;
 		$this->user = $user;
 
@@ -141,6 +145,14 @@ class digests extends \phpbb\cron\task\base
 	{
 
 		$now = time();
+
+		$max_execution_time = (function_exists('ini_get')) ? (float) @ini_get('max_execution_time') : (float) @get_cfg_var('max_execution_time');
+
+		// This array keeps statistics on the work accomplished in this mailer run
+		$run_statistics = array(
+			'success'	=> true,
+			'digests_mailed' => 0,
+			'digests_skipped' => 0);
 
 		// Populate the forum hierarchy array. This is used when the full path to a forum is requested to be shown in digests.
 		$this->create_forums_hierarchy();
@@ -210,7 +222,7 @@ class digests extends \phpbb\cron\task\base
 				// Care must be taken not to miss an hour. For example, if a phpBB cron was run at 11:29 and next at 13:06 then digests must be sent for
 				// hours 12 and 13, not just 13. The following algorithm should handle these cases by adding 1 to $hours_to_do.
 				$year_last_ran = (int) date('Y', $this->config['phpbbservices_digests_cron_task_last_gc']);
-				$day_last_ran = (int) date('z', $this->config['phpbbservices_digests_cron_task_last_gc']);	// 0 thru 365/366
+				$day_last_ran = (int) date('z', $this->config['phpbbservices_digests_cron_task_last_gc']);	// 0 thru 365
 				$hour_last_ran = (int) date('g', $this->config['phpbbservices_digests_cron_task_last_gc']);
 				$minute_last_ran = (int) date('i', $this->config['phpbbservices_digests_cron_task_last_gc']);
 				$second_last_ran = (int) date('s', $this->config['phpbbservices_digests_cron_task_last_gc']);
@@ -222,7 +234,7 @@ class digests extends \phpbb\cron\task\base
 				$second_now = (int) date('s', $now);
 
 				// If the year or day differs from when digests was last run, or if these are the same but the hour differs, we look at the minute last ran
-				// and compare it  with the minute now. If the minute now is less than the minute last run we have to increment $hours_to_do to capture the missing hour.
+				// and compare it with the minute now. If the minute now is less than the minute last run we have to increment $hours_to_do to capture the missing hour.
 				if ($year_now !== $year_last_ran || $day_now !== $day_last_ran ||
 					($year_now == $year_last_ran && $day_now == $day_last_ran && $hour_now !== $hour_last_ran))
 				{
@@ -287,36 +299,62 @@ class digests extends \phpbb\cron\task\base
 		{
 			for ($i=(1 - $hours_to_do); ($i <= 0); $i++)
 			{
-				$success = $this->mail_digests($now, $i);
-				if (!$success)
+				$start_time = microtime(true); // returns float Unix timestamp to at least 2 decimal places, ex: 1641160711.04
+
+				// The mail_digests function returns an array which reports on what it mailed and if all went well
+				$hourly_report = $this->mail_digests($now, $i);
+
+				// Update the run statistics
+				$run_statistics['success'] = $hourly_report['success'];
+				$run_statistics['digests_mailed'] = $run_statistics['digests_mailed'] + $hourly_report['digests_mailed'];
+				$run_statistics['digests_skipped'] = $run_statistics['digests_skipped'] + $hourly_report['digests_skipped'];
+
+				$end_time = microtime(true);
+				$execution_time = $end_time - $start_time;
+				$execution_time = round($execution_time,2);
+				$execution_time = number_format($execution_time, 2);
+
+				$memory_used_mb = number_format((memory_get_usage() / (1024 * 1024)), 2); // Memory used in MB to process digests for this hour
+
+				if ($run_statistics['success'] == false)
 				{
 					// Reset the phpBB digests cron since it was not run successfully
 					$this->config->set('phpbbservices_digests_cron_task_last_gc', $this->digests_last_run);
 
 					// Notify admins when mailing digests fails through an error log entry
-					$this->phpbb_log->add('critical', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_EMAILING_FAILURE', false, array(date('Y-m-d', $now), date('H', $now)));
+					$this->phpbb_log->add('critical', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_EMAILING_FAILURE', false, array(date('Y-m-d', $now), date('H', $now), $execution_time, $max_execution_time, $memory_used_mb, $hourly_report['digests_mailed'], $hourly_report['digests_skipped'], $hours_to_do));
 					return false;
 				}
-				else if ($this->run_mode !== constants::DIGESTS_RUN_MANUAL)
+				else
 				{
-					$last_completion_time = $now + ($i * 60 * 60);
-					// Note that the hour was processed successfully. If run manually, we don't want to mess with the configuration variable.
-					$this->config->set('phpbbservices_digests_cron_task_last_gc', $last_completion_time);
-					// Since an hour was completed successfully, change when digests last ran an hour successfully in case of a subsequent crash.
-					$this->digests_last_run = $last_completion_time;
+					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_EMAILING_SUCCESS', false, array(date('Y-m-d', $now), date('H', $now), $execution_time, $max_execution_time, $memory_used_mb, $hourly_report['digests_mailed'], $hourly_report['digests_skipped'], $hours_to_do));
+					if ($this->run_mode !== constants::DIGESTS_RUN_MANUAL)
+					{
+						$last_completion_time = $now + ($i * 60 * 60);
+						// Note that the hour was processed successfully. If run manually, we don't want to mess with the configuration variable.
+						$this->config->set('phpbbservices_digests_cron_task_last_gc', $last_completion_time);
+						// Since an hour was completed successfully, change when digests last ran an hour successfully in case of a subsequent crash.
+						$this->digests_last_run = $last_completion_time;
+
+					}
 				}
+				// Save report statistics for this hour for later analysis
+				$this->save_report_statistics($hourly_report['utc_time'], $start_time, $end_time, $hourly_report['digests_mailed'], $hourly_report['digests_skipped'], $execution_time, $memory_used_mb, $this->run_mode, $hourly_report['details']);
 			}
+			// To keep the digests report table at a reasonable size, remove any rows from the table that represent data older than the configuration setting.
+			$this->remove_old_report_statistics($hourly_report['utc_time']);
 		}
 		else
 		{
 			// This condition should never occur as it suggests a programmatic bug, but if it does let's at least be aware of it.
 			$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_INCONSISTENT_DATES', false, array($this->config['phpbbservices_digests_cron_task_last_gc'], $now));
+			return false;
 		}
 
 		// Display a digest mail end processing message. It is captured in a log.
 		if ($this->config['phpbbservices_digests_enable_log'])
 		{
-			$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END');
+			$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END', false, array($run_statistics['digests_mailed'], $run_statistics['digests_skipped']));
 		}
 
 		return true;
@@ -333,16 +371,20 @@ class digests extends \phpbb\cron\task\base
 		//                                                                                                           //
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		
-		static $daily_digest_sql, $weekly_digest_sql, $now_info;
+		static $daily_digest_sql, $weekly_digest_sql;
+
+		// This array is returned by the function and reports on the work done for the hour.
+		$hourly_report = array(
+			'utc_time'	=> 0,
+			'success'	=> true,
+			'digests_mailed' => 0,
+			'digests_skipped' => 0);
+
+		$report_details = array();
 
 		// Reset to a maximum execution time for this function, since we don't know how many digests
 		// must be processed for a particular hour or how long it may take. Other PHP settings may overrule this.
 		@set_time_limit(0);
-
-		if (!isset($now_info))
-		{
-			$now_info = getdate($now);
-		}
 
 		// We track the last language used in the digest. It's possible a forum will support multiple languages.
 		// If so we'll change the language files to accommodate the subscriber.
@@ -361,17 +403,13 @@ class digests extends \phpbb\cron\task\base
 			// To determine UTC in manual mode, we need to use the administrator's timezone and offset from it.
 			$hour_offset = $this->helper->make_tz_offset ($this->user->data['user_timezone']);
 			$utc_time = $this->time - (int) ($hour_offset * 60 * 60);	// Convert server time (or requested run date) into UTC
-			if ($this->config['phpbbservices_digests_enable_log'])
-			{
-				$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_SIMULATION_DATE_TIME', false, array(
-					$this->config['phpbbservices_digests_test_date_hour']));
-			}
 		}
 		else
 		{
 			$this->time = $now + ($hour * (60 * 60));	// Timestamp for hour to be processed
 			$utc_time = $this->time - (int) ($this->server_timezone * 60 * 60);	// Convert server time (or requested run date) into UTC
 		}
+		$hourly_report['utc_time'] = $this->top_of_hour_timestamp($utc_time); // This value needs to always be for the top of the hour so hourly data can always be found correctly
 
 		// Get the current hour in UTC, so applicable digests can be sent out for this hour
 		$current_hour_utc = date('G', $utc_time); // 0 thru 23
@@ -578,19 +616,20 @@ class digests extends \phpbb\cron\task\base
 			foreach ($rowset as $row)
 			{
 
+				// Each traverse through this loop sends out exactly one digest
+
 				// It's possible to run out of resources while running digests. This will happen mostly on shared hosting.
 				// In this event, we want to try to gracefully exit this function and call attention to it as a critical issue
 				// by placing it in the phpBB error log.
 				if (!still_on_time())
 				{
 					$this->phpbb_log->add('critical', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_NO_RESOURCES', false, array($row['username'], $current_hour_utc));
-					return false;
+					$hourly_report['success'] = false;
+					return $hourly_report;
 				}
 
-				// Each traverse through this loop sends out exactly one digest
-
 				// Load the appropriate language files based on the user's preferred language. The board default language
-				// is probably English, which may not be what we want since phpBB supports multiple languages depending on
+				// is probably British English, which may not be what we want since phpBB supports multiple languages depending on
 				// the language packs installed and which language the user chooses.
 				if ($row['user_lang'] !== $last_language)
 				{
@@ -608,7 +647,7 @@ class digests extends \phpbb\cron\task\base
 				{
 					include($this->phpbb_root_path . 'includes/functions_messenger.' . $this->phpEx);
 				}
-				$html_messenger = new \phpbbservices\digests\includes\html_messenger($this->user, $this->phpbb_dispatcher, $this->language, true);
+				$html_messenger = new \phpbbservices\digests\includes\html_messenger($this->user, $this->phpbb_dispatcher, $this->language, (bool) $this->config['email_package_size']);
 
 				// Set the text showing the digest type
 				switch ($row['user_digest_type'])
@@ -895,7 +934,8 @@ class digests extends \phpbb\cron\task\base
 						{
 							$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END');
 						}
-						return false;
+						$hourly_report['success'] = false;
+						return $hourly_report;
 					}
 
 					// Save digests as file in the store/phpbbservices/digests folder instead of emailing.
@@ -911,7 +951,8 @@ class digests extends \phpbb\cron\task\base
 						{
 							$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END');
 						}
-						return false;
+						$hourly_report['success'] = false;
+						return $hourly_report;
 					}
 
 					$success = @fwrite($handle, htmlspecialchars_decode($email_content));
@@ -923,7 +964,8 @@ class digests extends \phpbb\cron\task\base
 						{
 							$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END');
 						}
-						return false;
+						$hourly_report['success'] = false;
+						return $hourly_report;
 					}
 
 					$success = @fclose($handle);
@@ -935,7 +977,8 @@ class digests extends \phpbb\cron\task\base
 						{
 							$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END');
 						}
-						return false;
+						$hourly_report['success'] = false;
+						return $hourly_report;
 					}
 
 					// Note in the log that a digest was written to the store folder
@@ -954,13 +997,15 @@ class digests extends \phpbb\cron\task\base
 					// if there are unread private messages AND the user wants to see private messages in the digest.
 
 					// Try to send this digest
-					if ($row['user_digest_send_on_no_posts'] || $this->posts_in_digest > 0 || (is_array($pm_rowset) && count($pm_rowset) > 0) && $row['user_digest_show_pms'])
+					$okay_to_send = $row['user_digest_send_on_no_posts'] || $this->posts_in_digest > 0 || (is_array($pm_rowset) && count($pm_rowset) > 0) && $row['user_digest_show_pms'];
+					if ($okay_to_send)
 					{
 
 						$mail_sent = $html_messenger->send(NOTIFY_EMAIL, false, $is_html, true);     // digest mailed?
 
 						if (!$mail_sent)
 						{
+							$hourly_report['success'] = false;
 							// Something went wrong when sending the digest. Errors now go into the error log for more visibility.
 							if ($this->config['phpbbservices_digests_show_email'])
 							{
@@ -975,17 +1020,18 @@ class digests extends \phpbb\cron\task\base
 						{
 							// save queue for later delivery (if applicable)
 							$html_messenger->save_queue();
+							$hourly_report['digests_mailed']++;
 
 							// Digest should have been mailed successfully
 							if ($this->config['phpbbservices_digests_enable_log'])
 							{
 								if ($this->config['phpbbservices_digests_show_email'])
 								{
-									$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD', false, array($this->language->lang('DIGESTS_SENT_TO'), $row['username'], $row['user_email'], $utc_year . '-' . str_pad($utc_month, 2, '0', STR_PAD_LEFT) . '-' . str_pad($utc_day, 2, '0', STR_PAD_LEFT), $current_hour_utc, $this->posts_in_digest, (is_array($pm_rowset)) ? count($pm_rowset) : 0));
+									$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD', false, array(lcfirst($digest_type), $this->language->lang('DIGESTS_SENT_TO'), $row['username'], $row['user_email'], $utc_year . '-' . str_pad($utc_month, 2, '0', STR_PAD_LEFT) . '-' . str_pad($utc_day, 2, '0', STR_PAD_LEFT), $current_hour_utc, $this->posts_in_digest, (is_array($pm_rowset)) ? count($pm_rowset) : 0));
 								}
 								else
 								{
-									$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_NO_EMAIL', false, array($this->language->lang('DIGESTS_SENT_TO'), $row['username'], $utc_year . '-' . str_pad($utc_month, 2, '0', STR_PAD_LEFT) . '-' . str_pad($utc_day, 2, '0', STR_PAD_LEFT), $current_hour_utc, $this->posts_in_digest, (is_array($pm_rowset)) ? count($pm_rowset) : 0));
+									$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_NO_EMAIL', false, array(lcfirst($digest_type), $this->language->lang('DIGESTS_SENT_TO'),	$row['username'],$utc_year . '-' . str_pad($utc_month, 2, '0', STR_PAD_LEFT) . '-' . str_pad($utc_day, 2, '0', STR_PAD_LEFT), $current_hour_utc, $this->posts_in_digest, (is_array($pm_rowset)) ? count($pm_rowset) : 0));
 								}
 							}
 						}
@@ -1073,6 +1119,7 @@ class digests extends \phpbb\cron\task\base
 					else
 					{
 						// Don't send a digest -- the user doesn't want one because there are no qualifying posts
+						$hourly_report['digests_skipped']++;
 						if ($this->config['phpbbservices_digests_enable_log'])
 						{
 							if ($this->config['phpbbservices_digests_show_email'])
@@ -1086,6 +1133,15 @@ class digests extends \phpbb\cron\task\base
 						}
 					}
 
+					// Collect report detail information for this subscriber
+					$report_details[$row['user_id']] = array(
+						'digest_type' => $row['user_digest_type'],
+						'posts_in_digest' => $this->posts_in_digest,
+						'msgs_in_digest' => is_array($pm_rowset) ? count($pm_rowset) : 0,
+						'creation_time' => time(),
+						'status' => $okay_to_send,
+						'sent' => ($okay_to_send && $mail_sent) ? true : false,
+					);
 				}
 
 				// Reset messenger object for the next subscriber, bug fix provided by robdocmagic
@@ -1097,9 +1153,12 @@ class digests extends \phpbb\cron\task\base
 
 		}
 
-		unset($rowset, $posts_rowset);
+		// Append $report_details array to $hourly_report array
+		$hourly_report['details'] = $report_details;
 
-		return true;	// Successful run if all digests were processed for the requested hour.
+		unset($rowset, $posts_rowset, $report_details);
+
+		return $hourly_report;
 		
 	}
 	
@@ -2338,8 +2397,8 @@ class digests extends \phpbb\cron\task\base
 			'SELECT'	=> 's.forum_id, forum_name',
 
 			'FROM'		=> array(
-				$this->table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE	=> 's',
-				FORUMS_TABLE														=> 'f',
+				$this->subscribed_forums_table	=> 's',
+				FORUMS_TABLE					=> 'f',
 			),
 
 			'WHERE'		=> 's.forum_id = f.forum_id 
@@ -2416,6 +2475,111 @@ class digests extends \phpbb\cron\task\base
 		}
 
 		return $foes;
+	}
+
+	private function save_report_statistics($utc_date_hour, $started, $ended, $mailed, $skipped, $exec_time, $memory_used, $cron_type, $details)
+	{
+
+		// This function saves an hour's statistics to the phpbb_digests_report table.
+		//
+		// $utc_date_hour - UNIX timestamp for the date and hour digests were went. This should always be set to evaluate to the top of the hour.
+		// $started - UNIX timestamp for when digests started processing for a particular day + hour
+		// $ended - UNIX timestamp for when digests started processing for a particular day + hour
+		// $mailed - number of digests mailed
+		// $skipped - number of digests that skipped being mailed due to a user's digest criteria
+		// $exec_time - execution time to create the digests for this particular day + hour
+		// $memory_used - memory used to create the digests for this particular day + hour, in MB
+		// $cron_type - see constants.php: indicates if system cron, phpBB cron or manual mailer was used (1, 2 or 3)
+		// $details - array of user data on digests sent for the hour, used to populate the phpbb_digests_report_details_table
+
+		$data = [
+			'date_hour_sent_utc'	=> (int) $utc_date_hour,
+			'started'	=> (int) number_format($started,0, '.',''), // Timestamp, but trim two decimal places
+			'ended'	=> (int) number_format($ended,0, '.',''), // Timestamp, but trim two decimal places
+			'mailed'	=> (int) $mailed,
+			'skipped'	=> (int) $skipped,
+			'execution_time_secs'	=> (float) number_format($exec_time, 2, '.', ''), // Make sure not to lose 2 decimal digits from string value
+			'memory_used_mb'	=> (float) number_format($memory_used, 2, '.', ''), // Make sure not to lose 2 decimal digits from string value
+			'cron_type'	=> $cron_type,	// See the constants file: 1=system cron, 2=phpBB cron
+		];
+
+		// If the row is already in the table (unlikely), update it, otherwise insert the row
+		$sql = 'SELECT * FROM ' . $this->report_table . ' WHERE ' .
+				$this->db->sql_build_array('SELECT',	array('date_hour_sent_utc'	=> $utc_date_hour));
+		$result = $this->db->sql_query($sql);
+		$rowset = $this->db->sql_fetchrowset($result);
+		if (count($rowset) == 1)
+		{
+			$data['mailed'] = $data['mailed'] + $rowset[0]['mailed'];
+			$data['skipped'] = $data['skipped'] + $rowset[0]['skipped'];
+
+			$digests_report_id = $rowset[0]['digests_report_id'];
+			$sql2 = 'UPDATE ' . $this->report_table . ' SET ' .
+				$this->db->sql_build_array('UPDATE',	$data) . '
+				WHERE digests_report_id = ' . (int) $digests_report_id;
+			$this->db->sql_query($sql2);
+		}
+		else
+		{
+			$sql2 = 'INSERT INTO ' . $this->report_table . ' ' . $this->db->sql_build_array('INSERT', $data);
+			$this->db->sql_query($sql2);
+			$digests_report_id = $this->db->sql_nextid();
+		}
+		$this->db->sql_freeresult($result);
+
+		// Save the report details data
+		foreach ($details as $detail)
+		{
+			// We need the key from the report table row that was just inserted, as it's a foreign key that is needed here
+			$detail['digests_report_id'] = (int) $digests_report_id;
+			// We also need the user_id in the $detail array so we can use sql_build_array()
+			$detail['user_id'] = key($details);
+
+			// If row to insert already exists (should only be a manual mailer issue), delete it first.
+			$sql = 'DELETE FROM ' . $this->report_details_table . ' WHERE ' . $this->db->sql_build_array('DELETE', array('digests_report_id' => (int) $digests_report_id, 'user_id' => key($details)));
+			$this->db->sql_query($sql);
+
+			// Insert row of fresh data
+			$sql = 'INSERT INTO ' . $this->report_details_table . ' ' . $this->db->sql_build_array('INSERT', $detail);
+			$this->db->sql_query($sql);
+		}
+
+	}
+
+	private function remove_old_report_statistics($now)
+	{
+
+		// Removes report statistics older than the report statistics configuration setting
+		//
+		// $now = UNIX timestamp, usually for the current hour, but could be offset by a number of hours. It should
+		//		  represent a top of hour timestamp only.
+
+		$reporting_days = (int) $this->config['phpbbservices_digests_reporting_days'];
+		if ($reporting_days > 0)
+		{
+			// Remove rows from report details table first to maintain referential integrity
+			$sql = 'SELECT digests_report_id FROM ' . $this->report_table . ' WHERE date_hour_sent_utc <= ' . (int) $now - ($reporting_days * 24 * 60 * 60);
+			$result = $this->db->sql_query($sql);
+			$rowset = $this->db->sql_fetchrowset($result);
+			$digests_report_ids = array();
+			foreach ($rowset as $row)
+			{
+				$digests_report_ids[] = (int) $row['digests_report_id'];
+			}
+
+			if (count($rowset) > 0)
+			{
+				$sql2 = 'DELETE FROM ' . $this->report_details_table . ' WHERE ' . $this->db->sql_in_set('digests_report_id', $digests_report_ids);
+				$this->db->sql_query($sql2);
+			}
+
+			// Now remove from the primary reports table
+			$sql2 = 'DELETE FROM ' . $this->report_table . ' WHERE date_hour_sent_utc <= ' . (int) $now - ($reporting_days * 24 * 60 * 60);
+			$this->db->sql_query($sql2);
+
+			$this->db->sql_freeresult($result);
+		}
+
 	}
 
 }

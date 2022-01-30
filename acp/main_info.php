@@ -26,6 +26,7 @@ class main_info
 				'digests_test'							=> array('title' => 'ACP_DIGESTS_TEST', 'auth' => 'ext_phpbbservices/digests && acl_a_user', 'cat' => array('ACP_CAT_DIGESTS')),
 				'digests_reset_cron_run_time'			=> array('title' => 'ACP_DIGESTS_RESET_CRON_RUN_TIME', 'auth' => 'ext_phpbbservices/digests && acl_a_user', 'cat' => array('ACP_CAT_DIGESTS')),
 				'digests_clear_cached'					=> array('title' => 'ACP_DIGESTS_CLEAR_CACHED_DIGESTS', 'auth' => 'ext_phpbbservices/digests && acl_a_user', 'cat' => array('ACP_CAT_DIGESTS')),
+				'digests_report'						=> array('title' => 'ACP_DIGESTS_REPORTS', 'auth' => 'ext_phpbbservices/digests && acl_a_user', 'cat' => array('ACP_CAT_DIGESTS')),
 			),
 		);
 	}

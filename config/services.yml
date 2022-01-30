@@ -1,3 +1,6 @@
+imports:
+    - { resource: tables.yml }
+
 services:
     phpbbservices.digests.controller.acp:
         class: phpbbservices\digests\controller\acp_controller
@@ -15,9 +18,11 @@ services:
             - '%core.root_path%'
             - '%core.php_ext%'
             - '@request'
-            - '%core.table_prefix%'
             - '@template'
             - '@user'
+            - '%phpbbservices.digests.tables.digests_subscribed_forums_table%'
+            - '%phpbbservices.digests.tables.digests_report_table%'
+            - '%phpbbservices.digests.tables.digests_report_details_table%'
     phpbbservices.digests.controller.ucp:
         class: phpbbservices\digests\controller\ucp_controller
         arguments:
@@ -27,19 +32,19 @@ services:
             - '@phpbbservices.digests.common'
             - '@language'
             - '@request'
-            - '%core.table_prefix%'
             - '@template'
             - '@user'
             - '%core.root_path%'
             - '%core.php_ext%'
+            - '%phpbbservices.digests.tables.digests_subscribed_forums_table%'
     phpbbservices.digests.listener:
         class: phpbbservices\digests\event\main_listener
         arguments:
             - '@config'
             - '@template'
             - '@request'
-            - '%core.table_prefix%'
             - '@dbal.conn'
+            - '%phpbbservices.digests.tables.digests_subscribed_forums_table%'
         tags:
             - { name: event.listener }
     phpbbservices.digests.common:
@@ -64,13 +69,15 @@ services:
             - '%core.root_path%'
             - '@template'
             - '@auth'
-            - '%core.table_prefix%'
             - '@log'
             - '@language'
             - '@notification_manager'
             - '@phpbbservices.digests.common'
             - '@profilefields.manager'
             - '@dispatcher'
+            - '%phpbbservices.digests.tables.digests_subscribed_forums_table%'
+            - '%phpbbservices.digests.tables.digests_report_table%'
+            - '%phpbbservices.digests.tables.digests_report_details_table%'
         calls:
             - [set_name, [phpbbservices.digests.cron.task.cron_task]]
         tags:
@@ -83,6 +90,7 @@ services:
             - '@dbal.conn'
             - '@phpbbservices.digests.common'
             - '@language'
+            - '%phpbbservices.digests.tables.digests_subscribed_forums_table%'
     phpbbservices.digests.includes.html_messenger:
         class: phpbbservices\digests\includes\html_messenger
         arguments:

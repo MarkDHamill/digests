@@ -1,0 +1,4 @@
+parameters:
+    phpbbservices.digests.tables.digests_subscribed_forums_table: '%core.table_prefix%digests_subscribed_forums'
+    phpbbservices.digests.tables.digests_report_table: '%core.table_prefix%digests_report'
+    phpbbservices.digests.tables.digests_report_details_table: '%core.table_prefix%digests_report_details'

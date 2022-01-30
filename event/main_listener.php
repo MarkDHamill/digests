@@ -20,34 +20,29 @@ use phpbbservices\digests\constants\constants;
 */
 class main_listener implements EventSubscriberInterface
 {
-	/* @var \phpbb\config\config */
-	protected $config;
-	
-	/* @var \phpbb\template\template */
-	protected $template;	
-	
-	/* @var \phpbb\request\request */
-	protected $request;
 
-	protected $table_prefix;
+	protected $config;
 	protected $db;
+	protected $request;
+	protected $subscribed_forums_table;
+	protected $template;
 
 	/**
 	* Constructor
 	*
-	* @param \phpbb\config\config		$config
-	* @param \phpbb\template\template	$template		Template object
-	* @param \phpbb\request\request		$request		Request object
-	* @param string						$table_prefix 	Prefix for phpbb's database tables
+	* @param \phpbb\config\config		$config			Config object
 	* @param \phpbb\db\driver\factory 	$db 			The database factory object
+	* @param \phpbb\request\request		$request		Request object
+	* @param string						$subscribed_forums_table	Extension's subscribed forums table
+	* @param \phpbb\template\template	$template		Template object
 	*/
-	public function __construct(\phpbb\config\config $config, \phpbb\template\template $template, \phpbb\request\request $request, string $table_prefix, \phpbb\db\driver\factory $db)
+	public function __construct(\phpbb\config\config $config, \phpbb\template\template $template, \phpbb\request\request $request, \phpbb\db\driver\factory $db, string $subscribed_forums_table)
 	{
 		$this->config = $config;
-		$this->template = $template;
-		$this->request = $request;
-		$this->table_prefix = $table_prefix;
 		$this->db = $db;
+		$this->request = $request;
+		$this->subscribed_forums_table = $subscribed_forums_table;
+		$this->template = $template;
 	}
 
 	static public function getSubscribedEvents()
@@ -139,7 +134,7 @@ class main_listener implements EventSubscriberInterface
 		// whether there are any posts to be retained.
 		if (($event['mode'] == 'remove') || ($event['mode'] == 'retain'))
 		{
-			$sql = 'DELETE FROM ' . $this->table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' 
+			$sql = 'DELETE FROM ' . $this->subscribed_forums_table . ' 
 				WHERE ' . $this->db->sql_in_set('user_id' , $event['user_ids']);
 			$this->db->sql_query($sql);
 		}

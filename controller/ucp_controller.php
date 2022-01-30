@@ -25,7 +25,7 @@ class ucp_controller
 	protected $phpbb_root_path;
 	protected $phpEx;
 	protected $request;
-	protected $table_prefix;
+	protected $subscribed_forums_table;
 	protected $template;
 	protected $user;
 
@@ -42,11 +42,11 @@ class ucp_controller
 	 * @param string									$php_ext 					PHP file suffix
 	 * @param string									$phpbb_root_path			Relative path to phpBB root
 	 * @param \phpbb\request\request					$request					Request object
-	 * @param string									$table_prefix 				Prefix for phpbb's database tables
+	 * @param string									$subscribed_forums_table	Extension's subscribed forums table
 	 * @param \phpbb\template\template					$template					Template object
 	 * @param \phpbb\user								$user						User object
 	 */
-	public function __construct(\phpbb\auth\auth $auth, \phpbb\config\config $config, \phpbb\db\driver\factory $db, \phpbbservices\digests\core\common $helper, \phpbb\language\language $language, \phpbb\request\request $request, string $table_prefix, \phpbb\template\template $template, \phpbb\user $user, string $phpbb_root_path, string $php_ext)
+	public function __construct(\phpbb\auth\auth $auth, \phpbb\config\config $config, \phpbb\db\driver\factory $db, \phpbbservices\digests\core\common $helper, \phpbb\language\language $language, \phpbb\request\request $request, \phpbb\template\template $template, \phpbb\user $user, string $phpbb_root_path, string $php_ext, string $subscribed_forums_table)
 	{
 		$this->auth = $auth;
 		$this->config = $config;
@@ -56,7 +56,7 @@ class ucp_controller
 		$this->phpEx = $php_ext;
 		$this->phpbb_root_path = $phpbb_root_path;
 		$this->request = $request;
-		$this->table_prefix	= $table_prefix;
+		$this->subscribed_forums_table = $subscribed_forums_table;
 		$this->template = $template;
 		$this->user = $user;
 	}
@@ -90,7 +90,7 @@ class ucp_controller
 					if ($this->request->variable('digest_type', constants::DIGESTS_DAILY_VALUE) == constants::DIGESTS_NONE_VALUE)
 					{
 
-						$sql = 'DELETE FROM ' . $this->table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' 
+						$sql = 'DELETE FROM ' . $this->subscribed_forums_table . ' 
 								WHERE user_id = ' . (int) $this->user->data['user_id'];
 						$this->db->sql_query($sql);
 
@@ -162,7 +162,7 @@ class ucp_controller
 				case constants::DIGESTS_MODE_FORUMS_SELECTION:
 
 					// If there are any individual forum subscriptions, remove the old ones and create the new ones
-					$sql = 'DELETE FROM ' . $this->table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE . ' 
+					$sql = 'DELETE FROM ' . $this->subscribed_forums_table . ' 
 							WHERE user_id = ' . (int) $this->user->data['user_id'];
 					$this->db->sql_query($sql);
 
@@ -182,7 +182,7 @@ class ucp_controller
 						}
 						if (isset($sql_ary))
 						{
-							$this->db->sql_multi_insert($this->table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE, $sql_ary);
+							$this->db->sql_multi_insert($this->subscribed_forums_table, $sql_ary);
 						}
 					}
 					unset($sql_ary);
@@ -393,7 +393,7 @@ class ucp_controller
 					'SELECT'	=> 'forum_id',
 
 					'FROM'		=> array(
-						$this->table_prefix . constants::DIGESTS_SUBSCRIBED_FORUMS_TABLE	=> 'sf',
+						$this->subscribed_forums_table	=> 'sf',
 					),
 
 					'WHERE'		=> 'user_id = ' . (int) $this->user->data['user_id'],
@@ -749,7 +749,7 @@ class ucp_controller
 				'L_DIGESTS_DISABLED_MESSAGE' 	=> ($this->user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE) ? '<p><em>' . $this->language->lang('DIGESTS_DISABLED_MESSAGE') . '</em></p>' : '',
 				'L_DIGESTS_MODE'				=> $this->language->lang('UCP_DIGESTS_' . strtoupper($mode)),
 				'L_DIGESTS_TRANSLATOR'			=> $translator,
-				'L_POWERED_BY'					=> sprintf($this->language->lang('POWERED_BY'), '<a href="' . $this->config['phpbbservices_digests_page_url'] . '" class="postlink" onclick="window.open(this.href);return false;">' . $this->language->lang('DIGESTS_POWERED_BY') . '</a>'),
+				'L_POWERED_BY'					=> $this->language->lang('POWERED_BY', '<a href="' . $this->config['phpbbservices_digests_page_url'] . '" class="postlink" onclick="window.open(this.href);return false;">' . $this->language->lang('DIGESTS_POWERED_BY') . '</a>'),
 				'S_DIGESTS_CONTROL_DISABLED' 	=> ($this->user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE),
 				'S_DIGESTS_SHOW_BUTTONS'		=> $show_buttons,
 				'U_DIGESTS_ACTION'  			=> $u_action,

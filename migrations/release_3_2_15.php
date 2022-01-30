@@ -33,8 +33,11 @@ class release_3_2_15 extends \phpbb\db\migration\migration
 	public function clean_up()
 	{
 		// Prior to Digests 3.2.15, if a user was deleted in the ACP, their digest subscribed forums were not deleted.
-		$this->db->sql_query('DELETE FROM ' . $this->table_prefix . 'digests_subscribed_forums
-			WHERE user_id NOT IN (SELECT user_id FROM ' . $this->table_prefix . 'users)');
+		if ($this->db_tools->sql_table_exists($this->table_prefix . 'digests_subscribed_forums'))
+		{
+			$this->db->sql_query('DELETE FROM ' . $this->table_prefix . 'digests_subscribed_forums
+				WHERE user_id NOT IN (SELECT user_id FROM ' . $this->table_prefix . 'users)');
+		}
 	}
 
 	public function remove_files()
@@ -44,7 +47,6 @@ class release_3_2_15 extends \phpbb\db\migration\migration
 		global $phpbb_container;
 
 		$filesystem = $phpbb_container->get('filesystem');
-
 		$filepath = $this->phpbb_root_path . 'store/phpbbservices/digests';
 		if ($filesystem->exists($filepath))
 		{

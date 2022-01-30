@@ -1,11 +1,5 @@
 {% include 'overall_header.html' %}
-{% if S_INCLUDE_DIGESTS_CSS %}
-	{# Includes ACP - CSS #}
-	{% if not definition.INCLUDED_ACPDIGESTSCSS %}
-		{% INCLUDECSS '@phpbbservices_digests/acp_digests.css' %}
-		{% DEFINE INCLUDED_ACPDIGESTSCSS = true %}
-	{% endif %}
-{% endif %}
+{% INCLUDECSS '@phpbbservices_digests/acp_digests.css' %}
 {% if S_INCLUDE_DIGESTS_JS %}
 	{# Includes ACP - JS #}
 		{% if not definition.INCLUDED_ACPDIGESTSJS %}
@@ -104,6 +98,19 @@
 			<dd>
 				<label><input id="phpbbservices_digests_enable_log1" name="phpbbservices_digests_enable_log" type="radio" value="1" {% if S_DIGESTS_ENABLE_LOG == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
 				<label><input name="phpbbservices_digests_enable_log" type="radio" value="0" {% if S_DIGESTS_ENABLE_LOG == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_reporting_enable1">{{ lang('DIGESTS_REPORTING_ENABLE') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_REPORTING_ENABLE_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_reporting_enable1" name="phpbbservices_digests_reporting_enable" type="radio" value="1" {% if S_DIGESTS_REPORTING_ENABLE == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_reporting_enable" type="radio" value="0" {% if S_DIGESTS_REPORTING_ENABLE == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_reporting_days">{{ lang('DIGESTS_REPORTING_DAYS') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_REPORTING_DAYS_EXPLAIN') }}</dt>
+			<dd>
+				<input id="phpbbservices_digests_reporting_days" name="phpbbservices_digests_reporting_days" type="number" value="{{ REPORTING_DAYS }}" min="0">
 			</dd>
 		</dl>
 		<dl>
@@ -206,9 +213,9 @@
 			</dd>
 		</dl>
 		<dl>
-			<dt><label for="phpbbservices_digests_users_per_page">{{ lang('DIGESTS_USERS_PER_PAGE') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_USERS_PER_PAGE_EXPLAIN') }}</dt>
+			<dt><label for="phpbbservices_digests_rows_per_page">{{ lang('DIGESTS_ROWS_PER_PAGE') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_ROWS_PER_PAGE_EXPLAIN') }}</dt>
 			<dd>
-				<input id="phpbbservices_digests_users_per_page" name="phpbbservices_digests_users_per_page" type="number" value="{{ USERS_PER_PAGE }}" min="0">
+				<input id="phpbbservices_digests_rows_per_page" name="phpbbservices_digests_rows_per_page" type="number" value="{{ ROWS_PER_PAGE }}" min="0">
 			</dd>
 		</dl>
 		<dl>
@@ -424,7 +431,7 @@
 	<fieldset id="sort-filter" class="display-options sort-filter">
 		<legend>{{ lang('DIGESTS_SORTING_AND_FILTERING') }}</legend>
 		<dl>
-			<dt class="border-right-none"><label for="member">{{ lang('DIGESTS_SEARCH_FOR_MEMBER') }}{{ lang('COLON') }}</label><p>{{ lang('DIGESTS_SEARCH_FOR_MEMBER_EXPLAIN') }}</p></dt>
+			<dt class="border-right-none"><label for="member">{{ lang('DIGESTS_SEARCH_FOR_MEMBER') }}{{ lang('COLON') }}</label><br><br>{{ lang('DIGESTS_SEARCH_FOR_MEMBER_EXPLAIN') }}</dt>
 			<dd class="text-left"><input type="text" id="member" name="member" size="30" maxlength="255" value="{{ MEMBER }}" onchange="addToStack(this.name);" /></dd>
 		</dl>
 		<hr>
@@ -487,7 +494,7 @@
 						<a id="imglink-{{ digests_edit_subscribers.USER_ID }}">
 							<img id="plusminus-{{ digests_edit_subscribers.USER_ID }}" src="{{ IMAGE_PATH }}expand.png" title="{{ lang('DIGESTS_EXPAND') }}" alt="{{ lang('DIGESTS_EXPAND') }}" />
 						</a>&nbsp;
-						<a href="{{ digests_edit_subscribers.USER_ADMIN_PATH }}">{{ digests_edit_subscribers.USERNAME }}</a>
+						<a href="{{ digests_edit_subscribers.USER_ADMIN_PATH }}" title="{{ lang('DIGESTS_MANAGE_THIS_USER') }}">{{ digests_edit_subscribers.USERNAME }}</a>
 					</td>
 					<td headers="h3">{{ digests_edit_subscribers.USER_EMAIL }}</td>
 					<td class="text-center" headers="h4">
@@ -540,7 +547,7 @@
 					<td class="text-center" headers="h8">{{ digests_edit_subscribers.USER_LAST_VISIT }}</td>
 					<td class="text-center" headers="h9">{{ digests_edit_subscribers.USER_DIGEST_LAST_SENT }}</td>
 				</tr>
-				{% if digests_edit_subscribers.S_ROW_COUNT is even %}<tr class="row1"{% else %}<tr class="row2"{% endif %} id="user-{{ digests_edit_subscribers.USER_ID }}-detail" style="display:none">
+			{% if digests_edit_subscribers.S_ROW_COUNT is even %}<tr class="row1"{% else %}<tr class="row2"{% endif %} id="user-{{ digests_edit_subscribers.USER_ID }}-detail" style="display:none">
 					<td colspan="9">
 						<fieldset>
 							<legend>{{ lang('UCP_DIGESTS_FORUMS_SELECTION') }}</legend>
@@ -846,9 +853,9 @@
 			<input class="button1" type="submit" id="submit" name="submit" value="{{ lang('SUBMIT') }}" />&nbsp;
 			<input class="button2" type="reset" id="reset" name="reset" value="{{ lang('RESET') }}" />
 		</p>
-		{% endif %}
+	{% endif %}
 
-		{% if S_EDIT_SUBSCRIBERS %}
+	{% if S_EDIT_SUBSCRIBERS %}
 		<fieldset class="quick">
 			<p class="small"><a href="#" onclick="marklist('acp_digests', 'user-', true);">{{ lang('MARK_ALL') }}</a> &bull; <a href="#" onclick="marklist('acp_digests', 'user-', false);">{{ lang('UNMARK_ALL') }}</a></p>
 		</fieldset>
@@ -911,7 +918,7 @@
 		<dl>
 			<dt><label for="phpbbservices_digests_test_email_address1">{{ lang('DIGESTS_RUN_TEST_EMAIL_ADDRESS') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_RUN_TEST_EMAIL_ADDRESS_EXPLAIN') }}</dt>
 			<dd>
-				<label><input id="phpbbservices_digests_test_email_address1" name="phpbbservices_digests_test_email_address" type="email" size="40" maxlength="255" value={{ TEST_EMAIL_ADDRESS }}></label>
+				<label><input id="phpbbservices_digests_test_email_address1" name="phpbbservices_digests_test_email_address" type="email" size="40" maxlength="255" value="{{ TEST_EMAIL_ADDRESS }}"></label>
 			</dd>
 		</dl>
 	</fieldset>
@@ -940,10 +947,17 @@
 	{% if S_DIGESTS_CLEAR_CACHED %}
 	<fieldset>
 		<dl>
-			<dt><label for="phpbbservices_digests_test_clear_spool1">{{ lang('DIGESTS_RUN_TEST_CLEAR_SPOOL') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_RUN_TEST_CLEAR_SPOOL_EXPLAIN') }}</dt>
+			<dt><label for="phpbbservices_digests_test_clear_spool1">{{ lang('DIGESTS_RUN_TEST_CLEAR_SPOOL') ~ lang('COLON') }}</label></dt>
 			<dd>
 				<label><input id="phpbbservices_digests_test_clear_spool1" name="phpbbservices_digests_test_clear_spool" type="radio" value="1" {% if S_DIGESTS_RUN_TEST_CLEAR_SPOOL == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
 				<label><input name="phpbbservices_digests_test_clear_spool" type="radio" value="0" {% if S_DIGESTS_RUN_TEST_CLEAR_SPOOL == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt><label for="phpbbservices_digests_clear_report1">{{ lang('DIGESTS_CLEAR_REPORT') ~ lang('COLON') }}</label><br>{{ lang('DIGESTS_CLEAR_REPORT_EXPLAIN') }}</dt>
+			<dd>
+				<label><input id="phpbbservices_digests_clear_report1" name="phpbbservices_digests_clear_report" type="radio" value="1" {% if S_DIGESTS_CLEAR_REPORT == 1 %} checked="checked"{% endif %} class="radio"> {{ lang('YES') }}</label>
+				<label><input name="phpbbservices_digests_clear_report" type="radio" value="0" {% if S_DIGESTS_CLEAR_REPORT == 0 %} checked="checked"{% endif %} class="radio"> {{ lang('NO') }}</label>
 			</dd>
 		</dl>
 		<p class="submit-buttons">
@@ -953,6 +967,52 @@
 	</fieldset>
 	{% endif %}
 
+	{% if S_REPORTS %}
+	<div class="pagination">
+		{% if loops.pagination|length %}
+		{% INCLUDE 'pagination.html' %}
+		{% endif %}
+	</div>
+	<fieldset>
+		<table>
+			<thead>
+				<tr>
+					<th><a href="{{ REPORTS_URL }}&amp;sort={{ SORT_DIR }}&amp;sort_field=date_hour_sent_utc">{{ lang('DIGESTS_DATE_HOUR') }}</a></th>
+					<th><a href="{{ REPORTS_URL }}&amp;sort={{ SORT_DIR }}&amp;sort_field=started">{{ lang('DIGESTS_PROCESS_STARTED') }}</a></th>
+					<th><a href="{{ REPORTS_URL }}&amp;sort={{ SORT_DIR }}&amp;sort_field=ended">{{ lang('DIGESTS_PROCESS_ENDED') }}</a></th>
+					<th class="text-center"><a href="{{ REPORTS_URL }}&amp;sort={{ SORT_DIR }}&amp;sort_field=mailed">{{ lang('DIGESTS_MAILED') }}</a></th>
+					<th class="text-center"><a href="{{ REPORTS_URL }}&amp;sort={{ SORT_DIR }}&amp;sort_field=skipped">{{ lang('DIGESTS_SKIPPED') }}</a></th>
+					<th class="text-center"><a href="{{ REPORTS_URL }}&amp;sort={{ SORT_DIR }}&amp;sort_field=execution_time_secs">{{ lang('DIGESTS_EXECUTION_TIME') }}</a></th>
+					<th class="text-center"><a href="{{ REPORTS_URL }}&amp;sort={{ SORT_DIR }}&amp;sort_field=memory_used_mb">{{ lang('DIGESTS_MEMORY_USED') }}</a></th>
+					<th><a href="{{ REPORTS_URL }}&amp;sort={{ SORT_DIR }}&amp;sort_field=cron_type">{{ lang('DIGESTS_CRON_TYPE') }}</a></th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for digests_reports in loops.digests_reports %}
+				{% if digests_reports.S_ROW_COUNT is even %}<tr class="row1">{% else %}<tr class="row2">{% endif %}
+					<td>{{ digests_reports.DATE_HOUR }}</td>
+					<td>{{ digests_reports.PROCESS_STARTED }}</td>
+					<td>{{ digests_reports.PROCESS_ENDED }}</td>
+					<td class="text-center{% if digests_reports.S_SHOW_MAILED_TOOLTIP %}" title="{{ digests_reports.MAILED_TOOLTIP }}"{% else %}"{% endif %}>{% if digests_reports.MAILED > 0 %}<a onclick="alert('{{ digests_reports.MAILED_DETAILS }}')">{{ digests_reports.MAILED }}</a>{% else %}{{ digests_reports.MAILED }}{% endif %}</td>
+					<td class="text-center{% if digests_reports.S_SHOW_SKIPPED_TOOLTIP %}" title="{{ digests_reports.SKIPPED_TOOLTIP }}"{% else %}"{% endif %}>{% if digests_reports.SKIPPED > 0 %}<a onclick="alert('{{ digests_reports.SKIPPED_DETAILS }}')">{{ digests_reports.SKIPPED }}</a>{% else %}{{ digests_reports.SKIPPED }}{% endif %}</td>
+					<td class="text-center">{{ digests_reports.EXECUTION_TIME }}</td>
+					<td class="text-center">{{ digests_reports.MEMORY_USED }}</td>
+					<td>{{ digests_reports.CRON_TYPE }}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		<p class="submit-buttons">
+			<input class="button1" type="submit" id="submit" name="submit" value="{{ lang('SUBMIT') }}" />&nbsp;
+			<input class="button2" type="reset" id="reset" name="reset" value="{{ lang('RESET') }}" />
+		</p>
+	</fieldset>
+	<div class="pagination">
+		{% if loops.pagination|length %}
+		{% INCLUDE 'pagination.html' %}
+		{% endif %}
+	</div>
+	{% endif %}
 
 	{{ S_FORM_TOKEN }}
 	</fieldset>

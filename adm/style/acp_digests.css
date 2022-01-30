@@ -1,14 +1,16 @@
-input[type="number"]
+#balance_table tr:nth-child(odd)
 {
-	text-align: right;
-	width: 5em !important;
+	background-color: #DCEBFE !important;
 }
-.overflow-x
-{
-	overflow-x:auto;
+.border-right-none {
+	border-right-style:none;
 }
 #digests {
 	background-color: inherit;
+}
+#down tr:nth-child(3)
+{
+	background-color: #DCEBFE !important;
 }
 fieldset {
 	padding: 0;
@@ -17,20 +19,11 @@ fieldset {
 	margin: 5px 0;
 	overflow-x: auto;
 }
-table {
-	border-spacing: 1px;
-	border-collapse: separate;
+fieldset dd {
+	border-left: 0;
 }
-#down tr:nth-child(3)
-{
-	background-color: #DCEBFE !important;
-}
-#balance_table tr:nth-child(odd)
-{
-	background-color: #DCEBFE !important;
-}
-.border-right-none {
-	border-right-style:none;
+fieldset dt {
+	padding-right: 5px; margin-right: 5px;
 }
 fieldset.sort-filter {
 	background-color: #FFF;
@@ -39,8 +32,17 @@ fieldset.sort-filter {
 	border-radius: 3px;
 	border: 1px solid #CCCFD3;
 }
+input[type="number"]
+{
+	text-align: right;
+	width: 5em !important;
+}
 .layout-fixed {
 	table-layout: fixed; width: 100%;
+}
+.overflow-x
+{
+	overflow-x:auto;
 }
 .point8-em {
 	font-size:.8em;
@@ -49,11 +51,18 @@ fieldset.sort-filter {
 	position:relative;
 	left: 20px;
 }
-#sort-filter label, #sort-filter input, #sort-filter select {
-	font-size: .85em;
+.responsive th a:visited, .responsive th a:link {
+	color: #ffffff;
 }
 #sort-filter dt label {
 	font-size: 1em;
+}
+#sort-filter label, #sort-filter input, #sort-filter select {
+	font-size: .85em;
+}
+table {
+	border-spacing: 1px;
+	border-collapse: separate;
 }
 .text-center {
 	text-align:center;

@@ -21,6 +21,7 @@ class unsubscribe
 	protected $helper;
 	protected $language;
 	protected $request;
+	protected $subscribed_forums_table;
 	protected $user;
 
 	/**
@@ -31,15 +32,17 @@ class unsubscribe
 	 * @param \phpbb\db\driver\factory 				$db 		The database factory object
 	 * @param \phpbbservices\digests\core\common	$helper		Digests helper object
 	 * @param \phpbb\language\language 				$language 	Language object
+	 * @param string								$subscribed_forums_table	Extension's subscribed forums table
 	 *
 	 *
 	 */
-	public function __construct(\phpbb\request\request $request, \phpbb\user $user, \phpbb\db\driver\factory $db, \phpbbservices\digests\core\common $helper, \phpbb\language\language $language)
+	public function __construct(\phpbb\request\request $request, \phpbb\user $user, \phpbb\db\driver\factory $db, \phpbbservices\digests\core\common $helper, \phpbb\language\language $language, string $subscribed_forums_table)
 	{
 		$this->db 		= $db;
 		$this->helper	= $helper;
 		$this->language = $language;
 		$this->request 	= $request;
+		$this->subscribed_forums_table = $subscribed_forums_table;
 		$this->user 	= $user;
 	}
 
@@ -64,14 +67,21 @@ class unsubscribe
 
 			if (count($rowset) == 1 && trim($rowset[0]['user_email']) == trim($email))
 			{
-				// This unsubscribe request should be valid
+				// This unsubscribe request should be valid because the user_id matches the email address in the request
 				$sql2 = 'UPDATE ' . USERS_TABLE . "
 					SET user_digest_type = '" . constants::DIGESTS_NONE_VALUE . "'
 					WHERE user_id = " . (int) $user_id;
 				$this->db->sql_query($sql2);
 				$success = true;
+
+				// Delete any forum subscriptions
+				$sql2 = 'DELETE FROM ' . $this->subscribed_forums_table . ' 
+					WHERE user_id = ' . (int) $user_id;
+				$this->db->sql_query($sql2);
+
 			}
 			$this->db->sql_freeresult($result);
+
 		}
 
 		if ($success)

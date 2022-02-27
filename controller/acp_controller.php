@@ -1046,7 +1046,7 @@ class acp_controller
 					{
 						case constants::DIGESTS_RUN_REGULAR:
 						default:
-							$cron_type = $this->language->lang('DIGESTS_CRON_TYPE_REGULAR');
+							$cron_type = $this->language->lang('DIGESTS_CRON_TYPE_PHPBB');
 						break;
 						case constants::DIGESTS_RUN_SYSTEM:
 							$cron_type = $this->language->lang('DIGESTS_CRON_TYPE_SYSTEM');

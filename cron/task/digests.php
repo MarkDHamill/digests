@@ -213,6 +213,7 @@ class digests extends \phpbb\cron\task\base
 			else
 			{
 				$hours_to_do = floor(($now - $this->config['phpbbservices_digests_cron_task_last_gc']) / (60 * 60));
+
 				// $this->config['phpbbservices_digests_max_cron_hrs'] may override $hours_to_do if it is not zero
 				if ($this->config['phpbbservices_digests_max_cron_hrs'] != 0)
 				{
@@ -222,13 +223,13 @@ class digests extends \phpbb\cron\task\base
 				// Care must be taken not to miss an hour. For example, if a phpBB cron was run at 11:29 and next at 13:06 then digests must be sent for
 				// hours 12 and 13, not just 13. The following algorithm should handle these cases by adding 1 to $hours_to_do.
 				$year_last_ran = (int) date('Y', $this->config['phpbbservices_digests_cron_task_last_gc']);
-				$day_last_ran = (int) date('z', $this->config['phpbbservices_digests_cron_task_last_gc']);	// 0 thru 365
+				$day_last_ran = (int) date('z', $this->config['phpbbservices_digests_cron_task_last_gc']);	// 0 thru 364/365
 				$hour_last_ran = (int) date('g', $this->config['phpbbservices_digests_cron_task_last_gc']);
 				$minute_last_ran = (int) date('i', $this->config['phpbbservices_digests_cron_task_last_gc']);
 				$second_last_ran = (int) date('s', $this->config['phpbbservices_digests_cron_task_last_gc']);
 
 				$year_now = (int) date('Y', $now);
-				$day_now = (int) date('z', $now);	// 0 thru 365/366
+				$day_now = (int) date('z', $now);	// 0 thru 364/365
 				$hour_now = (int) date('g', $now);
 				$minute_now = (int) date('i', $now);
 				$second_now = (int) date('s', $now);
@@ -335,7 +336,6 @@ class digests extends \phpbb\cron\task\base
 						$this->config->set('phpbbservices_digests_cron_task_last_gc', $last_completion_time);
 						// Since an hour was completed successfully, change when digests last ran an hour successfully in case of a subsequent crash.
 						$this->digests_last_run = $last_completion_time;
-
 					}
 				}
 				// Save report statistics for this hour for later analysis
@@ -676,7 +676,7 @@ class digests extends \phpbb\cron\task\base
 
 				// Set various variables and flags based on the requested digest format.
 
-				$unsubscribe_link = sprintf($this->board_url . "app.{$this->phpEx}/digests/unsubscribe?u=%s&amp;e=%s", $row['user_id'], $row['user_email']);
+				$unsubscribe_link = sprintf($this->board_url . "app.{$this->phpEx}/digests/unsubscribe?u=%s&amp;s=%s", $row['user_id'], $row['user_form_salt']);
 				switch ($row['user_digest_format'])
 				{
 
@@ -1599,7 +1599,13 @@ class digests extends \phpbb\cron\task\base
 				{
 					break;
 				}
-				
+
+				// Skip post if post is not in an allowed forum
+				if (!in_array($post_row['forum_id'], $fetched_forums))
+				{
+					continue;
+				}
+
 				// Skip post if new posts only logic applies, or if for some reason its timestamp is before the allowed daily, weekly or monthly digest range.
 				if (($user_row['user_digest_new_posts_only']) && ($post_row['post_time'] < max($this->date_limit, $user_row['user_lastvisit'])))
 				{
@@ -1645,15 +1651,7 @@ class digests extends \phpbb\cron\task\base
 						continue;
 					}
 				}
-				else
-				{
-					// Skip post if post is not in an allowed forum
-					if (!in_array($post_row['forum_id'], $fetched_forums))
-					{
-						continue;
-					}
-				}
-			
+
 				// Skip post if first post logic applies and not a first post
 				if (($user_row['user_digest_filter_type'] == constants::DIGESTS_FIRST) && ($post_row['topic_first_post_id'] != $post_row['post_id']))
 				{
@@ -2359,7 +2357,7 @@ class digests extends \phpbb\cron\task\base
 	private function get_fetched_forums($user_row)
 	{
 
-		// Returns an array of forum_ids that the user is allowed to read. If none, an empty array is returned
+		// Returns an array of forum_ids that the user is allowed to read.
 
 		// Get forum read permissions for this user. They are also usually stored in the user_permissions column, but sometimes the field is empty. This always works.
 		$allowed_forums = array();
@@ -2555,10 +2553,12 @@ class digests extends \phpbb\cron\task\base
 		//		  represent a top of hour timestamp only.
 
 		$reporting_days = (int) $this->config['phpbbservices_digests_reporting_days'];
+		$date_limit = max(0, $now - ($reporting_days * 24 * 60 * 60));
+
 		if ($reporting_days > 0)
 		{
 			// Remove rows from report details table first to maintain referential integrity
-			$sql = 'SELECT digests_report_id FROM ' . $this->report_table . ' WHERE date_hour_sent_utc <= ' . (int) $now - ($reporting_days * 24 * 60 * 60);
+			$sql = 'SELECT digests_report_id FROM ' . $this->report_table . ' WHERE date_hour_sent_utc <= ' . (int) $date_limit;
 			$result = $this->db->sql_query($sql);
 			$rowset = $this->db->sql_fetchrowset($result);
 			$digests_report_ids = array();
@@ -2574,7 +2574,7 @@ class digests extends \phpbb\cron\task\base
 			}
 
 			// Now remove from the primary reports table
-			$sql2 = 'DELETE FROM ' . $this->report_table . ' WHERE date_hour_sent_utc <= ' . (int) $now - ($reporting_days * 24 * 60 * 60);
+			$sql2 = 'DELETE FROM ' . $this->report_table . ' WHERE date_hour_sent_utc <= ' . (int) $date_limit;
 			$this->db->sql_query($sql2);
 
 			$this->db->sql_freeresult($result);

@@ -513,7 +513,8 @@ class digests extends \phpbb\cron\task\base
 								") 
 								AND (user_digest_send_hour_gmt = " . (int) $current_hour_utc . " OR user_digest_send_hour_gmt = " . (float) $current_hour_utc_plus_30 . ") 
 								AND user_inactive_reason = 0 " . $allowed_user_types . "
-								AND user_digest_type <> '" . constants::DIGESTS_NONE_VALUE . "'",
+								AND user_digest_type <> '" . constants::DIGESTS_NONE_VALUE . "' 
+								AND user_digest_last_sent_for <> " . $hourly_report['utc_time'],
 			
 				'ORDER_BY'	=> 'user_lang',
 			);
@@ -536,8 +537,9 @@ class digests extends \phpbb\cron\task\base
 								") 
 								AND (user_digest_send_hour_gmt = " . (int) $current_hour_utc . " OR user_digest_send_hour_gmt = " . (float) $current_hour_utc_plus_30 . ") 
 								AND user_inactive_reason = 0 " . $allowed_user_types . "
-								AND user_digest_type <> '" . constants::DIGESTS_NONE_VALUE . "'",
-			
+								AND user_digest_type <> '" . constants::DIGESTS_NONE_VALUE . "' 
+								AND user_digest_last_sent_for <> " . $hourly_report['utc_time'],
+
 				'ORDER_BY'	=> 'user_lang',
 			);
 		}
@@ -915,6 +917,8 @@ class digests extends \phpbb\cron\task\base
 					'DIGESTS_CONTENT' => $digest_content,
 				));
 
+				$mail_sent = true;	// Assume a digest mailing will be sent successfully.
+
 				// Email the digest or save it locally.
 				if (($this->run_mode == constants::DIGESTS_RUN_MANUAL) && ($this->config['phpbbservices_digests_test_spool']))
 				{
@@ -1142,6 +1146,22 @@ class digests extends \phpbb\cron\task\base
 						'status' => $okay_to_send,
 						'sent' => ($okay_to_send && $mail_sent) ? true : false,
 					);
+				}
+
+				if ($mail_sent && $this->run_mode !== constants::DIGESTS_RUN_MANUAL)
+				{
+					// Except for a manual mailing, record the current top of hour timestamp so we know what date and
+					// hour this digest was mailed for. In the event of a resource error occurring, this should keep
+					// digests from being sent more than once to the subscriber. This also captures the case where the
+					// user does not want a digest if some criteria were not met.
+					$sql_ary = array(
+						'user_digest_last_sent_for' => $hourly_report['utc_time'],
+					);
+
+					$sql2 = 'UPDATE ' . USERS_TABLE . '
+								SET ' . $this->db->sql_build_array('UPDATE', $sql_ary) . '
+								WHERE user_id = ' . (int) $row['user_id'];
+					$this->db->sql_query($sql2);
 				}
 
 				// Reset messenger object for the next subscriber, bug fix provided by robdocmagic

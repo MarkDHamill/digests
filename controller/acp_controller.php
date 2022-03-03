@@ -1934,13 +1934,17 @@ class acp_controller
 
 			if ($mode == 'digests_test')
 			{
-				// This code will place the module links in the ACP sidebar, which otherwise would disappear if any digests are created for the hour.
-				$module_id	= $this->request->variable('i', '');
-				$mode		= $this->request->variable('mode', '');
-				$module 	= new \p_master();
-				$module->list_modules('acp');
-				$module->set_active($module_id, $mode);
-				$module->assign_tpl_vars(append_sid("{$this->phpbb_root_path}adm/index.{$this->phpEx}"));
+				// This code will place the module links in the ACP sidebar if they have disappeared. They can disappear
+				// when the digests mailer uses the templating system (any digests are processed for an hour).
+				if (!isset($module))
+				{
+					$module_id	= $this->request->variable('i', '');
+					$mode		= $this->request->variable('mode', '');
+					$module 	= new \p_master();
+					$module->list_modules('acp');
+					$module->set_active($module_id, $mode);
+					$module->assign_tpl_vars(append_sid("{$this->phpbb_root_path}adm/index.{$this->phpEx}"));
+				}
 			}
 
 			trigger_error($message . adm_back_link($u_action), $message_type);

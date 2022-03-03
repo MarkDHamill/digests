@@ -23,6 +23,7 @@ class main_listener implements EventSubscriberInterface
 
 	protected $config;
 	protected $db;
+	protected $report_details_table;
 	protected $request;
 	protected $subscribed_forums_table;
 	protected $template;
@@ -32,14 +33,16 @@ class main_listener implements EventSubscriberInterface
 	*
 	* @param \phpbb\config\config		$config			Config object
 	* @param \phpbb\db\driver\factory 	$db 			The database factory object
+	* @param string						$report_details_table		Extension's digests report details table
 	* @param \phpbb\request\request		$request		Request object
 	* @param string						$subscribed_forums_table	Extension's subscribed forums table
 	* @param \phpbb\template\template	$template		Template object
 	*/
-	public function __construct(\phpbb\config\config $config, \phpbb\template\template $template, \phpbb\request\request $request, \phpbb\db\driver\factory $db, string $subscribed_forums_table)
+	public function __construct(\phpbb\config\config $config, \phpbb\template\template $template, \phpbb\request\request $request, \phpbb\db\driver\factory $db, string $subscribed_forums_table, string $report_details_table)
 	{
 		$this->config = $config;
 		$this->db = $db;
+		$this->report_details_table = $report_details_table;
 		$this->request = $request;
 		$this->subscribed_forums_table = $subscribed_forums_table;
 		$this->template = $template;
@@ -130,11 +133,15 @@ class main_listener implements EventSubscriberInterface
 	 */
 	public function delete_user_after($event)
 	{
-		// If a user is being deleted in the ACP, delete any individual forum subscriptions. This is true regardless of
-		// whether there are any posts to be retained.
+		// If a user is being deleted in the ACP, delete any individual forum subscriptions and report statistics.
+		// This is true regardless of whether there are any posts to be retained.
 		if (($event['mode'] == 'remove') || ($event['mode'] == 'retain'))
 		{
 			$sql = 'DELETE FROM ' . $this->subscribed_forums_table . ' 
+				WHERE ' . $this->db->sql_in_set('user_id' , $event['user_ids']);
+			$this->db->sql_query($sql);
+
+			$sql = 'DELETE FROM ' . $this->report_details_table . ' 
 				WHERE ' . $this->db->sql_in_set('user_id' , $event['user_ids']);
 			$this->db->sql_query($sql);
 		}

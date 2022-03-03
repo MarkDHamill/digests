@@ -45,6 +45,7 @@ services:
             - '@request'
             - '@dbal.conn'
             - '%phpbbservices.digests.tables.digests_subscribed_forums_table%'
+            - '%phpbbservices.digests.tables.digests_report_details_table%'
         tags:
             - { name: event.listener }
     phpbbservices.digests.common:

@@ -1088,17 +1088,17 @@ class acp_controller
 
 					$this->template->assign_block_vars('digests_reports', array(
 						'CRON_TYPE'					=> $cron_type,
-						'DATE_HOUR'         		=> date($this->user->data['user_dateformat'],$row['date_hour_sent_utc']),
+						'DATE_HOUR'         		=> $this->user->format_date($row['date_hour_sent_utc'], $this->user->data['user_dateformat']),
 						'EXECUTION_TIME'			=> $row['execution_time_secs'],
-						'MAILED'					=> $row['mailed'] > 0 ? "<strong>{$row['mailed']}</strong>" : $row['mailed'],
+						'MAILED'					=> $row['mailed'] > 0 ? "<strong>&nbsp;{$row['mailed']}&nbsp;</strong>" : $row['mailed'],
 						'MAILED_DETAILS'			=> $mailed_details,
 						'MAILED_TOOLTIP'			=> $mailed_tooltip,
 						'MEMORY_USED'				=> $row['memory_used_mb'],
-						'PROCESS_ENDED'				=> date($this->user->data['user_dateformat'],$row['ended']),
-						'PROCESS_STARTED'   		=> date($this->user->data['user_dateformat'],$row['started']),
+						'PROCESS_ENDED'				=> $this->user->format_date($row['ended'],$this->user->data['user_dateformat']),
+						'PROCESS_STARTED'   		=> $this->user->format_date($row['started'],$this->user->data['user_dateformat']),
 						'S_SHOW_MAILED_TOOLTIP'		=> $show_mailed_tooltip,
 						'S_SHOW_SKIPPED_TOOLTIP'	=> $show_skipped_tooltip,
-						'SKIPPED'					=> $row['skipped'] > 0 ? "<strong>{$row['skipped']}</strong>" : $row['skipped'],
+						'SKIPPED'					=> $row['skipped'] > 0 ? "<strong>&nbsp;{$row['skipped']}&nbsp;</strong>" : $row['skipped'],
 						'SKIPPED_DETAILS'			=> $skipped_details,
 						'SKIPPED_TOOLTIP'			=> $skipped_tooltip,
 					));

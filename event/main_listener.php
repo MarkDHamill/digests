@@ -110,7 +110,7 @@ class main_listener implements EventSubscriberInterface
 	public function ucp_register_data_before($event)
 	{
 
-		// Fields on registration for that allow a user to subscribe to digests, if this feature is enabled.
+		// Fields on registration form that allow a user to subscribe to digests, if this feature is enabled.
 		$this->template->assign_vars(array(
 			'S_DIGESTS'							=> !$this->config['phpbbservices_digests_enable_auto_subscriptions'] && $this->config['phpbbservices_digests_registration_field'],
 			'S_DIGESTS_REGISTER_CHECKED_YES' 	=> ($this->config['phpbbservices_digests_user_digest_registration']) ? true : false,

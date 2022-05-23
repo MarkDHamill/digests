@@ -13,5 +13,6 @@ Czech, French, German and Spanish language translations exist. The translation m
 
 Czech: https://github.com/petr-hendl/phpBBDigests-cs/
 French: https://github.com/bonnaphil/digests-fr
+French: https://github.com/ssl-origin/digests-fr/releases
 German: https://github.com/Praggle/digests/releases
 Spanish: https://github.com/fernandoch777/digests-es

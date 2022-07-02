@@ -2500,7 +2500,7 @@ class digests extends \phpbb\cron\task\base
 
 		// This function saves an hour's statistics to the phpbb_digests_report table.
 		//
-		// $utc_date_hour - UNIX timestamp for the date and hour digests were went. This should always be set to evaluate to the top of the hour.
+		// $utc_date_hour - UNIX timestamp for the date and hour digests were sent. This should always be set to evaluate to the top of the hour.
 		// $started - UNIX timestamp for when digests started processing for a particular day + hour
 		// $ended - UNIX timestamp for when digests started processing for a particular day + hour
 		// $mailed - number of digests mailed

@@ -55,6 +55,7 @@ class main_listener implements EventSubscriberInterface
 			'core.user_add_modify_data'			=> 'subscribe_digests_on_registration',
 			'core.ucp_register_data_before'		=> 'ucp_register_data_before',
 			'core.delete_user_after'			=> 'delete_user_after',
+			'core.user_active_flip_before'		=> 'set_no_digest_subscription'
 		);
 	}
 	
@@ -124,7 +125,7 @@ class main_listener implements EventSubscriberInterface
 	 * Event after the user(s) delete action has been performed
 	 *
 	 * @event core.delete_user_after
-	 * @var string	mode				Mode of posts deletion (retain|delete)
+	 * @var string	mode				Mode of posts deletion (retain|remove)
 	 * @var array	user_ids			ID(s) of the deleted user(s)
 	 * @var bool	retain_username		True if username should be retained, false otherwise
 	 * @var array	user_rows			Array containing data of the deleted user(s)
@@ -145,5 +146,31 @@ class main_listener implements EventSubscriberInterface
 				WHERE ' . $this->db->sql_in_set('user_id' , $event['user_ids']);
 			$this->db->sql_query($sql);
 		}
+	}
+
+	/**
+	 * Check or modify activated/deactivated users data before submitting it to the database
+	 *
+	 * @event core.user_active_flip_before
+	 * @var	string	mode			User type changing mode, can be: flip|activate|deactivate
+	 * @var	int		reason			Reason for changing user type, can be: INACTIVE_REGISTER|INACTIVE_PROFILE|INACTIVE_MANUAL|INACTIVE_REMIND
+	 * @var	int		activated		The number of users to be activated
+	 * @var	int		deactivated		The number of users to be deactivated
+	 * @var	array	user_id_ary		Array with user ids to change user type
+	 * @var	array	sql_statements	Array with users data to submit to the database, keys: user ids, values: arrays with user data
+	 * @since 3.1.4-RC1
+	 */
+	public function set_no_digest_subscription($event)
+	{
+		// Ensure whether the user is activated, deactivated or flipped (deactivated is the typical case) they don't have
+		// a digests subscription by default.
+		$sql_statements = $event['sql_statements'];
+		foreach ($sql_statements as $key => $user_id_sql_ary)
+		{
+			$user_id_sql_ary['user_digest_type'] = constants::DIGESTS_NONE_VALUE;
+			$sql_statements[$key] = $user_id_sql_ary;
+			$event['sql_statements'][$key] = $sql_statements;
+		}
+		$event['sql_statements'] = $sql_statements;
 	}
 }

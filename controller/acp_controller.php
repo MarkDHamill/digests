@@ -821,7 +821,7 @@ class acp_controller
 						USERS_TABLE		=> 'u',
 					),
 
-					'WHERE'		=> "user_digest_type <> '" . constants::DIGESTS_NONE_VALUE . "' AND user_type <> " . USER_IGNORE,
+					'WHERE'		=> "user_digest_type <> '" . constants::DIGESTS_NONE_VALUE . "' AND " . $this->db->sql_in_set('user_type', array(USER_NORMAL, USER_FOUNDER)),
 
 					'GROUP_BY'	=> 'user_digest_send_hour_gmt',
 

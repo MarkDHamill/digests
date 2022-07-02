@@ -162,15 +162,18 @@ class main_listener implements EventSubscriberInterface
 	 */
 	public function set_no_digest_subscription($event)
 	{
-		// Ensure whether the user is activated, deactivated or flipped (deactivated is the typical case) they don't have
-		// a digests subscription by default.
-		$sql_statements = $event['sql_statements'];
-		foreach ($sql_statements as $key => $user_id_sql_ary)
+		// Ensure that when a user is deactivated or flipped (deactivated is the typical case) they don't have
+		// a digests subscription by default. Digests has a feature that will force or let users subscribe to digests
+		// on registration if enabled, so we don't want to change this behavior.
+		if ($event['mode'] !== 'activate')
 		{
-			$user_id_sql_ary['user_digest_type'] = constants::DIGESTS_NONE_VALUE;
-			$sql_statements[$key] = $user_id_sql_ary;
-			$event['sql_statements'][$key] = $sql_statements;
+			$sql_statements = $event['sql_statements'];
+			foreach ($sql_statements as $key => $user_id_sql_ary)
+			{
+				$user_id_sql_ary['user_digest_type'] = constants::DIGESTS_NONE_VALUE;
+				$sql_statements[$key] = $user_id_sql_ary;
+			}
+			$event['sql_statements'] = $sql_statements;
 		}
-		$event['sql_statements'] = $sql_statements;
 	}
 }

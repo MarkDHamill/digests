@@ -296,6 +296,7 @@ class digests extends \phpbb\cron\task\base
 		}
 
 		// Process digests for each hour. For example, to do three hours, start with -2 hours from now and end after 0 hours from now (current hour).
+		$total_digests_processed = 0;
 		if ($hours_to_do >= 1)
 		{
 			for ($i=(1 - $hours_to_do); ($i <= 0); $i++)
@@ -309,6 +310,7 @@ class digests extends \phpbb\cron\task\base
 				$run_statistics['success'] = $hourly_report['success'];
 				$run_statistics['digests_mailed'] = $run_statistics['digests_mailed'] + $hourly_report['digests_mailed'];
 				$run_statistics['digests_skipped'] = $run_statistics['digests_skipped'] + $hourly_report['digests_skipped'];
+				$total_digests_processed += $hourly_report['digests_mailed'] + $hourly_report['digests_skipped'];
 
 				$end_time = microtime(true);
 				$execution_time = $end_time - $start_time;
@@ -316,6 +318,7 @@ class digests extends \phpbb\cron\task\base
 				$execution_time = number_format($execution_time, 2);
 
 				$memory_used_mb = number_format((memory_get_usage() / (1024 * 1024)), 2); // Memory used in MB to process digests for this hour
+				$utc_time = $this->time - (int) ($this->server_timezone * 60 * 60);	// Convert server time (or requested run date) into UTC
 
 				if ($run_statistics['success'] == false)
 				{
@@ -323,12 +326,12 @@ class digests extends \phpbb\cron\task\base
 					$this->config->set('phpbbservices_digests_cron_task_last_gc', $this->digests_last_run);
 
 					// Notify admins when mailing digests fails through an error log entry
-					$this->phpbb_log->add('critical', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_EMAILING_FAILURE', false, array(date('Y-m-d', $now), date('H', $now), $execution_time, $max_execution_time, $memory_used_mb, $hourly_report['digests_mailed'], $hourly_report['digests_skipped'], $hours_to_do));
+					$this->phpbb_log->add('critical', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_EMAILING_FAILURE', false, array(date('Y-m-d', $utc_time), date('H', $utc_time), $execution_time, $max_execution_time, $memory_used_mb, $hourly_report['digests_mailed'], $hourly_report['digests_skipped'], $hours_to_do));
 					return false;
 				}
 				else
 				{
-					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_EMAILING_SUCCESS', false, array(date('Y-m-d', $now), date('H', $now), $execution_time, $max_execution_time, $memory_used_mb, $hourly_report['digests_mailed'], $hourly_report['digests_skipped'], $hours_to_do));
+					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_EMAILING_SUCCESS', false, array(date('Y-m-d', $utc_time), date('H', $utc_time), $execution_time, $max_execution_time, $memory_used_mb, $hourly_report['digests_mailed'], $hourly_report['digests_skipped'], $hours_to_do));
 					if ($this->run_mode !== constants::DIGESTS_RUN_MANUAL)
 					{
 						$last_completion_time = $now + ($i * 60 * 60);
@@ -357,7 +360,7 @@ class digests extends \phpbb\cron\task\base
 			$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_LOG_END', false, array($run_statistics['digests_mailed'], $run_statistics['digests_skipped']));
 		}
 
-		return true;
+		return $total_digests_processed;
 			
 	}
 

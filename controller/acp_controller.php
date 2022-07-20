@@ -1805,9 +1805,9 @@ class acp_controller
 				{
 
 					// Call the mailer's run method. The logic for sending a digest is embedded in this method, which is normally run as a cron task.
-					$success = $this->mailer->run();
+					$processed_count = $this->mailer->run();
 
-					if (!$success)
+					if ($processed_count === false)
 					{
 						$message_type = E_USER_WARNING;
 						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_DIGESTS_MAILER_RAN_WITH_ERROR');
@@ -1932,10 +1932,12 @@ class acp_controller
 				$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_' . strtoupper($mode));
 			}
 
-			if ($mode == 'digests_test')
+			if ($mode == 'digests_test' && isset($processed_count) && $processed_count > 0)
 			{
 				// This code will place the module links in the ACP sidebar if they have disappeared. They can disappear
-				// when the digests mailer uses the templating system (any digests are processed for an hour).
+				// when the digests mailer uses the templating system (any digests are processed for an hour). It appears
+				// to occur only if one or more digests were processed (either mailed or run but filters prevented a digest
+				// from going out.)
 				if (!isset($module))
 				{
 					$module_id	= $this->request->variable('i', '');
@@ -1997,7 +1999,7 @@ class acp_controller
 				USERS_TABLE		=> 'u',
 			),
 
-			'WHERE' 	=> $this->db->sql_in_set('user_digest_send_hour_gmt', array($hour_utc)),
+			'WHERE' 	=> $this->db->sql_in_set('user_digest_send_hour_gmt', array($hour_utc)) . ' AND ' . $this->db->sql_in_set('user_digest_type', array(constants::DIGESTS_NONE_VALUE), true),
 
 			'ORDER_BY'	=> 'username'
 		);

@@ -122,8 +122,8 @@ class digests extends \phpbb\cron\task\base
 		}
 
 		// Get date and hour digests were last run, as a Unix timestamp
-		$top_of_hour_ts = $this->top_of_hour_timestamp($this->config['phpbbservices_digests_cron_task_last_gc']);
-		$should_run = (bool) ($top_of_hour_ts + $this->config['phpbbservices_digests_cron_task_gc'] <= time());
+		$top_of_hour_ts = (int) $this->top_of_hour_timestamp($this->config['phpbbservices_digests_cron_task_last_gc']);
+		$should_run = $top_of_hour_ts + (int) $this->config['phpbbservices_digests_cron_task_gc'] <= time();
 
 		if ($this->debug)
 		{

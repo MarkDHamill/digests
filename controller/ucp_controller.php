@@ -733,7 +733,7 @@ class ucp_controller
 
 		}
 
-		// Identify the language translator, if one exists and they choose to identify his/herself
+		// Identify the language translator, if one exists and they choose to identify him/herself
 		if (trim($this->language->lang('DIGESTS_TRANSLATOR_NAME') == ''))
 		{
 			$translator = '';

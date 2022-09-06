@@ -81,7 +81,7 @@ If you have questions or feedback on your digests, please send them to the webma
 	'DIGESTS_FREQUENCY_EXPLAIN'			=> 'Weekly digests are sent on %s. Monthly digests are sent on the first of the month. Coordinated Universal Time (UTC) is used for determining the day of the week.',
 	'DIGESTS_FREQUENCY_SHORT'			=> 'Digest type',
 	'DIGESTS_HOURS_ABBREVIATION' 		=> ' h',	// see: http://www.scienceeditingexperts.com/which-is-the-correct-abbreviation-for-hours-2h-2-h-2hs-2-hs-2hrs-or-2-hrs, DIGESTS_AM and DIGESTS_PM are used instead if specified in user_dateformat
-	'DIGESTS_INSTALL_REQUIREMENTS'		=> 'Your version of PHP must be &gt; 3.3.0 and &lt; 4.0 to install this extension. Please address this issue, then try enabling the extension again.',
+	'DIGESTS_INSTALL_REQUIREMENTS'		=> 'Your version of phpBB must be &gt; 3.3.0 and &lt; 4.0 to install this extension. Please address this issue, then try enabling the extension again.',
 	'DIGESTS_INTRODUCTION' 				=> 'Here is the latest digest of posts from %s forums. Do <em>not</em> reply to this email to reply to topics, posts or private messages. But please <em>do</em> visit the board and join the discussion! (If the format of the digest looks off, make sure to download all remote content.)',
 	'DIGESTS_JUMP_TO_MSG'				=> 'Msg ID',
 	'DIGESTS_JUMP_TO_POST'				=> 'Post ID',

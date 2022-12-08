@@ -289,7 +289,7 @@ class common
 				$messenger->to($row['user_email']);
 
 				$from_addr = ($this->config['phpbbservices_digests_from_email_address'] == '') ? $this->config['board_email'] : $this->config['phpbbservices_digests_from_email_address'];
-				$from_name = ($this->config['phpbbservices_digests_from_email_name'] == '') ? $this->config['board_contact'] : $this->config['phpbbservices_digests_from_email_name'];
+				$from_name = ($this->config['phpbbservices_digests_from_email_name'] == '') ? $this->config['board_contact_name'] : $this->config['phpbbservices_digests_from_email_name'];
 
 				// SMTP delivery must strip text names due to likely bug in messenger class
 				if ($this->config['smtp_delivery'])
@@ -298,7 +298,7 @@ class common
 				}
 				else
 				{
-					$messenger->from($from_addr . ' <' . $from_name . '>');
+					$messenger->from($from_name . ' <' . $from_addr . '>');
 				}
 
 				$messenger->replyto($from_addr);

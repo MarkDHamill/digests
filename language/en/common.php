@@ -166,7 +166,7 @@ If you have questions or feedback on your digests, please send them to the webma
 	'DIGESTS_TITLE'						=> 'Digests',
 	'DIGESTS_TRANSLATED_BY'				=> 'translated by',
 	'DIGESTS_TRANSLATOR_NAME'			=> '',	// Leave null string to suppress translator name
-	'DIGESTS_TRANSLATOR_CONTACT'		=> '',	// Leave null string to suppress contact info, if used use: mailto:name@emailaddress.com or a URL if you have a website.
+	'DIGESTS_TRANSLATOR_CONTACT'		=> '',	// Leave null string to suppress contact info, if used, use: mailto:name@emailaddress.com or a URL if you have a website.
 	'DIGESTS_TOC'						=> 'Table of contents',
 	'DIGESTS_TOC_EXPLAIN'				=> 'If the board is active, you might want to include a table of contents in your digest. In styled digests, the table of contents includes links that let you jump to a particular post or private message in the digest.',
 	'DIGESTS_UNKNOWN'					=> 'Unknown',

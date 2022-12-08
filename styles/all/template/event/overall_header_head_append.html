@@ -1,8 +1,8 @@
 {% if S_INCLUDE_DIGESTS_CSS %}
 	{# Includes ACP - CSS #}
 	{% if not definition.INCLUDED_DIGESTSCSS %}
-		{% INCLUDECSS '@phpbbservices_digests/../theme/jquery-ui-1.12.1.min.css' %}
-		{% INCLUDECSS '@phpbbservices_digests/../theme/digests.css' %}
+		{% INCLUDECSS '@phpbbservices_digests/jquery-ui-1.12.1.min.css' %}
+		{% INCLUDECSS '@phpbbservices_digests/digests.css' %}
 		{% DEFINE INCLUDED_DIGESTSCSS = true %}
 	{% endif %}
 {% endif %}

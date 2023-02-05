@@ -234,8 +234,8 @@ class common
 
 					default:
 						// Mass subscribe/unsubscribe
-						$digest_notify_template = ($this->config['phpbbservices_digests_subscribe_all']) ? 'digests_subscribe' : 'digests_unsubscribe';
-						$digest_email_subject = ($this->config['phpbbservices_digests_subscribe_all']) ? $this->language->lang('DIGESTS_SUBSCRIBE_SUBJECT') : $this->language->lang('DIGESTS_UNSUBSCRIBE_SUBJECT');
+						$digest_notify_template = ($this->config->offsetGet('phpbbservices_digests_subscribe_all')) ? 'digests_subscribe' : 'digests_unsubscribe';
+						$digest_email_subject = ($this->config->offsetGet('phpbbservices_digests_subscribe_all')) ? $this->language->lang('DIGESTS_SUBSCRIBE_SUBJECT') : $this->language->lang('DIGESTS_UNSUBSCRIBE_SUBJECT');
 					break;
 				}
 
@@ -288,11 +288,12 @@ class common
 				$messenger->template('@phpbbservices_digests/' . $digest_notify_template, $row['user_lang']);
 				$messenger->to($row['user_email']);
 
-				$from_addr = ($this->config['phpbbservices_digests_from_email_address'] == '') ? $this->config['board_email'] : $this->config['phpbbservices_digests_from_email_address'];
-				$from_name = ($this->config['phpbbservices_digests_from_email_name'] == '') ? $this->config['board_contact_name'] : $this->config['phpbbservices_digests_from_email_name'];
+				$from_addr = trim(($this->config->offsetGet('phpbbservices_digests_from_email_address') == '') ? $this->config->offsetGet('board_email') : $this->config->offsetGet('phpbbservices_digests_from_email_address'));
+				$from_name = trim(($this->config->offsetGet('phpbbservices_digests_from_email_name') == '') ? $this->config->offsetGet('board_contact_name') : $this->config->offsetGet('phpbbservices_digests_from_email_name'));
+				$from_name_exists = (bool) $from_name != '';
 
 				// SMTP delivery must strip text names due to likely bug in messenger class
-				if ($this->config['smtp_delivery'])
+				if ($this->config->offsetGet('smtp_delivery') || !$from_name_exists)
 				{
 					$messenger->from($from_addr);
 				}
@@ -308,7 +309,7 @@ class common
 						'DIGESTS_FORMAT'		=> $digest_format_text,
 						'DIGESTS_TYPE'			=> $digest_type_text,
 						'DIGESTS_UCP_LINK'		=> generate_board_url() . '/' . 'ucp.' . $this->phpEx,
-						'FORUM_NAME'			=> $this->config['sitename'],
+						'FORUM_NAME'			=> $this->config->offsetGet('sitename'),
 						'USERNAME'				=> $row['username'],
 					)
 				);

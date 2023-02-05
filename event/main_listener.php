@@ -78,30 +78,30 @@ class main_listener implements EventSubscriberInterface
 		$subscribe_on_registration = $this->request->variable('digest', '0') == '1';	// Test if user wanted to subscribe to digests on registration
 
 		$is_human = ($event['sql_ary']['user_type'] == USER_IGNORE) ? false : true;
-		if ($is_human && ($this->config['phpbbservices_digests_enable_auto_subscriptions'] == 1 || $subscribe_on_registration))
+		if ($is_human && ($this->config->offsetGet('phpbbservices_digests_enable_auto_subscriptions') == 1 || $subscribe_on_registration))
 		{
 			// Subscribe user with digest defaults
-			$sql_ary['user_digest_attachments'] 		= $this->config['phpbbservices_digests_user_digest_attachments'];
-			$sql_ary['user_digest_block_images'] 		= $this->config['phpbbservices_digests_user_digest_block_images'];
-			$sql_ary['user_digest_filter_type'] 		= $this->config['phpbbservices_digests_user_digest_filter_type'];
-			$sql_ary['user_digest_format'] 				= $this->config['phpbbservices_digests_user_digest_format'];
-			$sql_ary['user_digest_max_display_words'] 	= $this->config['phpbbservices_digests_user_digest_max_display_words'];
-			$sql_ary['user_digest_max_posts'] 			= $this->config['phpbbservices_digests_user_digest_max_posts'];
-			$sql_ary['user_digest_min_words'] 			= $this->config['phpbbservices_digests_user_digest_min_words'];
-			$sql_ary['user_digest_new_posts_only'] 		= $this->config['phpbbservices_digests_user_digest_new_posts_only'];
-			$sql_ary['user_digest_no_post_text'] 		= $this->config['phpbbservices_digests_user_digest_no_post_text'];
-			$sql_ary['user_digest_pm_mark_read'] 		= $this->config['phpbbservices_digests_user_digest_pm_mark_read'];
-			$sql_ary['user_digest_popular'] 			= $this->config['phpbbservices_digests_user_digest_popular'];
-			$sql_ary['user_digest_popularity_size'] 	= $this->config['phpbbservices_digests_user_digest_popularity_size'];
-			$sql_ary['user_digest_remove_foes'] 		= $this->config['phpbbservices_digests_user_digest_remove_foes'];
-			$sql_ary['user_digest_reset_lastvisit'] 	= $this->config['phpbbservices_digests_user_digest_reset_lastvisit'];
-			$sql_ary['user_digest_send_hour_gmt'] 		= ($this->config['phpbbservices_digests_user_digest_send_hour_gmt'] == -1) ? rand(0,23) : $this->config['phpbbservices_digests_user_digest_send_hour_gmt'];
-			$sql_ary['user_digest_send_on_no_posts'] 	= $this->config['phpbbservices_digests_user_digest_send_on_no_posts'];
-			$sql_ary['user_digest_show_mine'] 			= ($this->config['phpbbservices_digests_user_digest_show_mine'] == 1) ? 0 : 1;
-			$sql_ary['user_digest_show_pms'] 			= $this->config['phpbbservices_digests_user_digest_show_pms'];
-			$sql_ary['user_digest_sortby'] 				= $this->config['phpbbservices_digests_user_digest_sortby'];
-			$sql_ary['user_digest_toc'] 				= $this->config['phpbbservices_digests_user_digest_toc'];
-			$sql_ary['user_digest_type'] 				= $this->config['phpbbservices_digests_user_digest_type'];
+			$sql_ary['user_digest_attachments'] 		= $this->config->offsetGet('phpbbservices_digests_user_digest_attachments');
+			$sql_ary['user_digest_block_images'] 		= $this->config->offsetGet('phpbbservices_digests_user_digest_block_images');
+			$sql_ary['user_digest_filter_type'] 		= $this->config->offsetGet('phpbbservices_digests_user_digest_filter_type');
+			$sql_ary['user_digest_format'] 				= $this->config->offsetGet('phpbbservices_digests_user_digest_format');
+			$sql_ary['user_digest_max_display_words'] 	= $this->config->offsetGet('phpbbservices_digests_user_digest_max_display_words');
+			$sql_ary['user_digest_max_posts'] 			= $this->config->offsetGet('phpbbservices_digests_user_digest_max_posts');
+			$sql_ary['user_digest_min_words'] 			= $this->config->offsetGet('phpbbservices_digests_user_digest_min_words');
+			$sql_ary['user_digest_new_posts_only'] 		= $this->config->offsetGet('phpbbservices_digests_user_digest_new_posts_only');
+			$sql_ary['user_digest_no_post_text'] 		= $this->config->offsetGet('phpbbservices_digests_user_digest_no_post_text');
+			$sql_ary['user_digest_pm_mark_read'] 		= $this->config->offsetGet('phpbbservices_digests_user_digest_pm_mark_read');
+			$sql_ary['user_digest_popular'] 			= $this->config->offsetGet('phpbbservices_digests_user_digest_popular');
+			$sql_ary['user_digest_popularity_size'] 	= $this->config->offsetGet('phpbbservices_digests_user_digest_popularity_size');
+			$sql_ary['user_digest_remove_foes'] 		= $this->config->offsetGet('phpbbservices_digests_user_digest_remove_foes');
+			$sql_ary['user_digest_reset_lastvisit'] 	= $this->config->offsetGet('phpbbservices_digests_user_digest_reset_lastvisit');
+			$sql_ary['user_digest_send_hour_gmt'] 		= ($this->config->offsetGet('phpbbservices_digests_user_digest_send_hour_gmt') == -1) ? rand(0,23) : $this->config->offsetGet('phpbbservices_digests_user_digest_send_hour_gmt');
+			$sql_ary['user_digest_send_on_no_posts'] 	= $this->config->offsetGet('phpbbservices_digests_user_digest_send_on_no_posts');
+			$sql_ary['user_digest_show_mine'] 			= ($this->config->offsetGet('phpbbservices_digests_user_digest_show_mine') == 1) ? 0 : 1;
+			$sql_ary['user_digest_show_pms'] 			= $this->config->offsetGet('phpbbservices_digests_user_digest_show_pms');
+			$sql_ary['user_digest_sortby'] 				= $this->config->offsetGet('phpbbservices_digests_user_digest_sortby');
+			$sql_ary['user_digest_toc'] 				= $this->config->offsetGet('phpbbservices_digests_user_digest_toc');
+			$sql_ary['user_digest_type'] 				= $this->config->offsetGet('phpbbservices_digests_user_digest_type');
 
 			$event['sql_ary'] = array_merge($event['sql_ary'], $sql_ary);
 		}
@@ -113,9 +113,9 @@ class main_listener implements EventSubscriberInterface
 
 		// Fields on registration form that allow a user to subscribe to digests, if this feature is enabled.
 		$this->template->assign_vars(array(
-			'S_DIGESTS'							=> !$this->config['phpbbservices_digests_enable_auto_subscriptions'] && $this->config['phpbbservices_digests_registration_field'],
-			'S_DIGESTS_REGISTER_CHECKED_YES' 	=> ($this->config['phpbbservices_digests_user_digest_registration']) ? true : false,
-			'S_DIGESTS_REGISTER_CHECKED_NO' 	=> ($this->config['phpbbservices_digests_user_digest_registration']) ? false : true,
+			'S_DIGESTS'							=> !$this->config->offsetGet('phpbbservices_digests_enable_auto_subscriptions') && $this->config->offsetGet('phpbbservices_digests_registration_field'),
+			'S_DIGESTS_REGISTER_CHECKED_YES' 	=> ($this->config->offsetGet('phpbbservices_digests_user_digest_registration')) ? true : false,
+			'S_DIGESTS_REGISTER_CHECKED_NO' 	=> ($this->config->offsetGet('phpbbservices_digests_user_digest_registration')) ? false : true,
 			)
 		);
 		

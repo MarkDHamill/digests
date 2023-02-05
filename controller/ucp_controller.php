@@ -116,40 +116,40 @@ class ucp_controller
 					if (($this->user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE) && ($this->request->variable('digest_type', $this->user->data['user_digest_type'] !== constants::DIGESTS_NONE_VALUE)))
 					{
 						// Determine values for maximum display words and no post text
-						if ($this->config['phpbbservices_digests_user_digest_max_display_words'] == -1)
+						if ($this->config->offsetGet('phpbbservices_digests_user_digest_max_display_words') == -1)
 						{
 							$max_display_words = 0;
 							$no_post_text = 0;
 						}
-						else if ($this->config['phpbbservices_digests_user_digest_max_display_words'] == 0)
+						else if ($this->config->offsetGet('phpbbservices_digests_user_digest_max_display_words') == 0)
 						{
 							$max_display_words = 0;
 							$no_post_text = 1;
 						}
 						else
 						{
-							$max_display_words = $this->config['phpbbservices_digests_user_digest_max_display_words'];
+							$max_display_words = $this->config->offsetGet('phpbbservices_digests_user_digest_max_display_words');
 							$no_post_text = 0;
 						}
 
 						$sql_ary = array(
-							'user_digest_attachments'		=> $this->config['phpbbservices_digests_user_digest_attachments'],
-							'user_digest_block_images'		=> $this->config['phpbbservices_digests_user_digest_block_images'],
-							'user_digest_filter_type'		=> $this->config['phpbbservices_digests_user_digest_filter_type'],
+							'user_digest_attachments'		=> $this->config->offsetGet('phpbbservices_digests_user_digest_attachments'),
+							'user_digest_block_images'		=> $this->config->offsetGet('phpbbservices_digests_user_digest_block_images'),
+							'user_digest_filter_type'		=> $this->config->offsetGet('phpbbservices_digests_user_digest_filter_type'),
 							'user_digest_max_display_words'	=> $max_display_words,
-							'user_digest_max_posts'			=> $this->config['phpbbservices_digests_user_digest_max_posts'],
-							'user_digest_min_words'			=> $this->config['phpbbservices_digests_user_digest_min_words'],
-							'user_digest_new_posts_only'	=> $this->config['phpbbservices_digests_user_digest_new_posts_only'],
+							'user_digest_max_posts'			=> $this->config->offsetGet('phpbbservices_digests_user_digest_max_posts'),
+							'user_digest_min_words'			=> $this->config->offsetGet('phpbbservices_digests_user_digest_min_words'),
+							'user_digest_new_posts_only'	=> $this->config->offsetGet('phpbbservices_digests_user_digest_new_posts_only'),
 							'user_digest_no_post_text'		=> $no_post_text,
-							'user_digest_popular'			=> $this->config['phpbbservices_digests_user_digest_popular'],
-							'user_digest_popularity_size'	=> $this->config['phpbbservices_digests_user_digest_popularity_size'],
-							'user_digest_reset_lastvisit'	=> $this->config['phpbbservices_digests_user_digest_reset_lastvisit'],
-							'user_digest_remove_foes'		=> $this->config['phpbbservices_digests_user_digest_remove_foes'],
-							'user_digest_send_on_no_posts'	=> $this->config['phpbbservices_digests_user_digest_send_on_no_posts'],
-							'user_digest_show_mine'			=> !$this->config['phpbbservices_digests_user_digest_show_mine'],
-							'user_digest_show_pms'			=> $this->config['phpbbservices_digests_user_digest_show_pms'],
-							'user_digest_sortby'			=> $this->config['phpbbservices_digests_user_digest_sortby'],
-							'user_digest_toc'				=> $this->config['phpbbservices_digests_user_digest_toc'],
+							'user_digest_popular'			=> $this->config->offsetGet('phpbbservices_digests_user_digest_popular'),
+							'user_digest_popularity_size'	=> $this->config->offsetGet('phpbbservices_digests_user_digest_popularity_size'),
+							'user_digest_reset_lastvisit'	=> $this->config->offsetGet('phpbbservices_digests_user_digest_reset_lastvisit'),
+							'user_digest_remove_foes'		=> $this->config->offsetGet('phpbbservices_digests_user_digest_remove_foes'),
+							'user_digest_send_on_no_posts'	=> $this->config->offsetGet('phpbbservices_digests_user_digest_send_on_no_posts'),
+							'user_digest_show_mine'			=> !$this->config->offsetGet('phpbbservices_digests_user_digest_show_mine'),
+							'user_digest_show_pms'			=> $this->config->offsetGet('phpbbservices_digests_user_digest_show_pms'),
+							'user_digest_sortby'			=> $this->config->offsetGet('phpbbservices_digests_user_digest_sortby'),
+							'user_digest_toc'				=> $this->config->offsetGet('phpbbservices_digests_user_digest_toc'),
 						);
 					}
 
@@ -201,7 +201,7 @@ class ucp_controller
 						'user_digest_new_posts_only'	=> $this->request->variable('new_posts', (int) $this->user->data['user_digest_new_posts_only']),
 						'user_digest_pm_mark_read'		=> $mark_read,
 						'user_digest_popular'			=> $this->request->variable('popular', (int) $this->user->data['user_digest_popular']),
-						'user_digest_popularity_size' 	=> $this->request->variable('popularity_size', (int) $this->config['phpbbservices_digests_min_popularity_size']),
+						'user_digest_popularity_size' 	=> $this->request->variable('popularity_size', (int) $this->config->offsetGet('phpbbservices_digests_min_popularity_size')),
 						'user_digest_remove_foes'		=> $this->request->variable('filter_foes', (int) $this->user->data['user_digest_remove_foes']),
 						'user_digest_show_mine'			=> $this->request->variable('show_mine', (int) $this->user->data['user_digest_show_mine']),
 						'user_digest_show_pms'			=> $this->request->variable('pms', (int) $this->user->data['user_digest_show_pms']));
@@ -284,14 +284,14 @@ class ucp_controller
 
 					if ($this->user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE)
 					{
-						if ($this->config['phpbbservices_digests_user_digest_send_hour_gmt'] == -1)
+						if ($this->config->offsetGet('phpbbservices_digests_user_digest_send_hour_gmt') == -1)
 						{
 							// Pick a random hour, since this is a new digest and the administrator requested this to even out digest server processing
 							$local_send_hour = rand(0,23);
 						}
 						else
 						{
-							$local_send_hour = $this->config['phpbbservices_digests_user_digest_send_hour_gmt'] + (float) $this->helper->make_tz_offset($this->user->data['user_timezone']);
+							$local_send_hour = (float) $this->config->offsetGet('phpbbservices_digests_user_digest_send_hour_gmt') + (float) $this->helper->make_tz_offset($this->user->data['user_timezone']);
 						}
 					}
 					else
@@ -309,11 +309,11 @@ class ucp_controller
 
 					if ($this->user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE)
 					{
-						$styling_html = ($this->config['phpbbservices_digests_user_digest_format'] == constants::DIGESTS_HTML_VALUE);
-						$styling_html_classic = ($this->config['phpbbservices_digests_user_digest_format'] == constants::DIGESTS_HTML_CLASSIC_VALUE);
-						$styling_plain = ($this->config['phpbbservices_digests_user_digest_format'] == constants::DIGESTS_PLAIN_VALUE);
-						$styling_plain_classic = ($this->config['phpbbservices_digests_user_digest_format'] == constants::DIGESTS_PLAIN_CLASSIC_VALUE);
-						$styling_text = ($this->config['phpbbservices_digests_user_digest_format'] == constants::DIGESTS_TEXT_VALUE);
+						$styling_html = ($this->config->offsetGet('phpbbservices_digests_user_digest_format') == constants::DIGESTS_HTML_VALUE);
+						$styling_html_classic = ($this->config->offsetGet('phpbbservices_digests_user_digest_format') == constants::DIGESTS_HTML_CLASSIC_VALUE);
+						$styling_plain = ($this->config->offsetGet('phpbbservices_digests_user_digest_format') == constants::DIGESTS_PLAIN_VALUE);
+						$styling_plain_classic = ($this->config->offsetGet('phpbbservices_digests_user_digest_format') == constants::DIGESTS_PLAIN_CLASSIC_VALUE);
+						$styling_text = ($this->config->offsetGet('phpbbservices_digests_user_digest_format') == constants::DIGESTS_TEXT_VALUE);
 					}
 					else
 					{
@@ -336,7 +336,7 @@ class ucp_controller
 
 					$weekdays = explode(',', $this->language->lang('DIGESTS_WEEKDAY'));
 					$this->template->assign_vars(array(
-							'L_DIGESTS_FREQUENCY_EXPLAIN'		=> $this->language->lang('DIGESTS_FREQUENCY_EXPLAIN', $weekdays[$this->config['phpbbservices_digests_weekly_digest_day']]),
+							'L_DIGESTS_FREQUENCY_EXPLAIN'		=> $this->language->lang('DIGESTS_FREQUENCY_EXPLAIN', $weekdays[$this->config->offsetGet('phpbbservices_digests_weekly_digest_day')]),
 							'L_DIGESTS_HTML_CLASSIC_VALUE'		=> constants::DIGESTS_HTML_CLASSIC_VALUE,
 							'L_DIGESTS_HTML_VALUE'				=> constants::DIGESTS_HTML_VALUE,
 							'L_DIGESTS_PLAIN_CLASSIC_VALUE'		=> constants::DIGESTS_PLAIN_CLASSIC_VALUE,
@@ -362,8 +362,8 @@ class ucp_controller
 			case constants::DIGESTS_MODE_FORUMS_SELECTION:
 
 				// Create a list of required and excluded forum_ids
-				$required_forum_ids = isset($this->config['phpbbservices_digests_include_forums']) ? explode(',', $this->config['phpbbservices_digests_include_forums']) : array();
-				$excluded_forum_ids = isset($this->config['phpbbservices_digests_exclude_forums']) ? explode(',', $this->config['phpbbservices_digests_exclude_forums']) : array();
+				$required_forum_ids = $this->config->offsetGet('phpbbservices_digests_include_forums') !== null ? explode(',', $this->config->offsetGet('phpbbservices_digests_include_forums')) : array();
+				$excluded_forum_ids = $this->config->offsetGet('phpbbservices_digests_exclude_forums') !== null ? explode(',', $this->config->offsetGet('phpbbservices_digests_exclude_forums')) : array();
 
 				// Individual forum checkboxes should be disabled if no digest is wanted or if bookmarks are requested/expected
 				if ($this->user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE)
@@ -668,9 +668,9 @@ class ucp_controller
 
 			case constants::DIGESTS_MODE_POST_FILTERS:
 
-				if ($this->config['phpbbservices_digests_max_items'] > 0)
+				if ($this->config->offsetGet('phpbbservices_digests_max_items') > 0)
 				{
-					$max_posts = min((int) $this->user->data['user_digest_max_posts'], (int) $this->config['phpbbservices_digests_max_items']);
+					$max_posts = min((int) $this->user->data['user_digest_max_posts'], (int) $this->config->offsetGet('phpbbservices_digests_max_items'));
 				}
 				else
 				{
@@ -678,12 +678,12 @@ class ucp_controller
 				}
 
 				$this->template->assign_vars(array(
-						'L_DIGEST_COUNT_LIMIT_EXPLAIN'				=> $this->language->lang('DIGESTS_SIZE_ERROR', $this->config['phpbbservices_digests_max_items']),
-						'S_DIGESTS_CONFIG_POPULARITY_SIZE'			=> $this->config['phpbbservices_digests_min_popularity_size'],
+						'L_DIGEST_COUNT_LIMIT_EXPLAIN'				=> $this->language->lang('DIGESTS_SIZE_ERROR', $this->config->offsetGet('phpbbservices_digests_max_items')),
+						'S_DIGESTS_CONFIG_POPULARITY_SIZE'			=> $this->config->offsetGet('phpbbservices_digests_min_popularity_size'),
 						'S_DIGESTS_FILTER_FOES_CHECKED_NO' 			=> ($this->user->data['user_digest_remove_foes'] == 0),
 						'S_DIGESTS_FILTER_FOES_CHECKED_YES' 		=> ($this->user->data['user_digest_remove_foes'] == 1),
 						'S_DIGESTS_MARK_READ_CHECKED' 				=> ($this->user->data['user_digest_pm_mark_read'] == 1),
-						'S_DIGESTS_MAX_ADMIN_ITEMS' 				=> $this->config['phpbbservices_digests_max_items'],
+						'S_DIGESTS_MAX_ADMIN_ITEMS' 				=> $this->config->offsetGet('phpbbservices_digests_max_items'),
 						'S_DIGESTS_MAX_ITEMS' 						=> $max_posts,
 						'S_DIGESTS_MIN_SIZE' 						=> (int) $this->user->data['user_digest_min_words'],
 						'S_DIGESTS_NEW_POSTS_ONLY_CHECKED_NO' 		=> ($this->user->data['user_digest_new_posts_only'] == 0),
@@ -708,7 +708,7 @@ class ucp_controller
 						'S_DIGESTS_ADDITIONAL_CRITERIA'					=> true,
 						'S_DIGESTS_ATTACHMENTS_NO_CHECKED' 				=> ($this->user->data['user_digest_attachments'] == 0),
 						'S_DIGESTS_ATTACHMENTS_YES_CHECKED' 			=> ($this->user->data['user_digest_attachments'] == 1),
-						'S_DIGESTS_BLOCK_IMAGES' 						=> ($this->config['phpbbservices_digests_block_images'] == 1),
+						'S_DIGESTS_BLOCK_IMAGES' 						=> ($this->config->offsetGet('phpbbservices_digests_block_images') == 1),
 						'S_DIGESTS_BLOCK_IMAGES_NO_CHECKED' 			=> ($this->user->data['user_digest_block_images'] == 0),
 						'S_DIGESTS_BLOCK_IMAGES_YES_CHECKED' 			=> ($this->user->data['user_digest_block_images'] == 1),
 						'S_DIGESTS_BOARD_SELECTED' 						=> ($this->user->data['user_digest_sortby'] == constants::DIGESTS_SORTBY_BOARD),
@@ -749,7 +749,7 @@ class ucp_controller
 				'L_DIGESTS_DISABLED_MESSAGE' 	=> ($this->user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE) ? '<p><em>' . $this->language->lang('DIGESTS_DISABLED_MESSAGE') . '</em></p>' : '',
 				'L_DIGESTS_MODE'				=> $this->language->lang('UCP_DIGESTS_' . strtoupper($mode)),
 				'L_DIGESTS_TRANSLATOR'			=> $translator,
-				'L_POWERED_BY'					=> $this->language->lang('POWERED_BY', '<a href="' . $this->config['phpbbservices_digests_page_url'] . '" class="postlink" onclick="window.open(this.href);return false;">' . $this->language->lang('DIGESTS_POWERED_BY') . '</a>'),
+				'L_POWERED_BY'					=> $this->language->lang('POWERED_BY', '<a href="' . $this->config->offsetGet('phpbbservices_digests_page_url') . '" class="postlink" onclick="window.open(this.href);return false;">' . $this->language->lang('DIGESTS_POWERED_BY') . '</a>'),
 				'S_DIGESTS_CONTROL_DISABLED' 	=> ($this->user->data['user_digest_type'] == constants::DIGESTS_NONE_VALUE),
 				'S_DIGESTS_SHOW_BUTTONS'		=> $show_buttons,
 				'U_DIGESTS_ACTION'  			=> $u_action,

@@ -92,7 +92,7 @@ $lang = array_merge($lang, array(
 	),
 	'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_DISK'				=> '<strong>A digest was written to store/phpbbservices/digests/%s. The digest was NOT emailed, but was placed here for analysis.</strong>',
 	'LOG_CONFIG_DIGESTS_LOG_ENTRY_GOOD_NO_EMAIL'			=> array(
-		1 => '<strong>A %1$s digest was %2$s %3$s (%4$s)for date %5$s and hour %6$02d UTC containing %7$d post and %8$d private message</strong>',
+		1 => '<strong>A %1$s digest was %2$s %3$s for date %4$s and hour %5$02d UTC containing %6$d post and %7$d private message</strong>',
 		2 => '<strong>A %1$s digest was %2$s %3$s for date %4$s and hour %5$02d UTC containing %6$d posts and %7$d private messages</strong>',
 	),
 	'LOG_CONFIG_DIGESTS_LOG_ENTRY_NONE'						=> '<strong>A digest was NOT sent to %1$s (%2$s) because user filters and preferences meant there was nothing to send</strong>',

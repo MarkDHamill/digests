@@ -38,6 +38,7 @@
 		tr:nth-child(even), .post:nth-child(even) { background: #FFF; }
 		tr:nth-child(odd), .post:nth-child(odd) { background: #EBEADD; }
 		#wrap { padding-right: 5px; padding-left: 5px; }
+		img { max-width: 100%; max-height: auto; }
 	</style>
 
 </head>
